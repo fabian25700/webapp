@@ -6,67 +6,93 @@
     <title>Weltkarte</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; }
-        header { background: white; padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #ddd; }
-        #map { flex: 1; width: 100%; }
-        .back-link { text-decoration: none; margin-right: 15px; font-size: 1.2rem; }
+        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: -apple-system, sans-serif; background: #f8fafc; }
+        header { background: white; padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        #map { flex: 1; width: 100%; z-index: 1; }
+        .back-link { text-decoration: none; margin-right: 15px; font-size: 1.5rem; color: #2563eb; font-weight: bold; }
+        h1 { margin: 0; font-size: 1.1rem; color: #1e293b; }
     </style>
 </head>
 <body>
     <header>
         <a href="laender.html" class="back-link">←</a>
-        <h1 style="margin:0; font-size: 1.1rem;">Interaktive Karte</h1>
+        <h1>Interaktive Karte</h1>
     </header>
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // DEINE LISTE
         const besuchteLaender = ["Deutschland", "Spanien", "Frankreich", "Niederlande", "Schweiz", "Griechenland", "Italien", "Türkei", "England", "Schweden", "Vatikan", "Vereinigte Arabische Emirate", "Dänemark", "Luxemburg", "Österreich", "Belgien", "Malta", "Gibraltar", "Marokko", "Ungarn", "Portugal", "Norway", "Litauen", "USA", "Slowakei", "Mauritius", "Lettland", "Zypern"];
         
-        // Dolmetscher für die Karte (GeoJSON Namen zu deiner Liste)
+        // KOMPLETTES MAPPING (GeoJSON Name : Dein Name)
         const mapping = {
-            "United States of America": "USA",
-            "United Kingdom": "England",
-            "Vatican City": "Vatikan",
-            "Latvia": "Lettland",
-            "Cyprus": "Zypern",
-            "Norway": "Norway",
             "Germany": "Deutschland",
             "Spain": "Spanien",
             "France": "Frankreich",
             "Netherlands": "Niederlande",
             "Switzerland": "Schweiz",
-            "Italy": "Italien",
             "Greece": "Griechenland",
+            "Italy": "Italien",
             "Turkey": "Türkei",
+            "United Kingdom": "England",
+            "Sweden": "Schweden",
+            "Vatican City": "Vatikan",
             "United Arab Emirates": "Vereinigte Arabische Emirate",
+            "Denmark": "Dänemark",
+            "Luxembourg": "Luxemburg",
             "Austria": "Österreich",
             "Belgium": "Belgien",
+            "Malta": "Malta",
+            "Gibraltar": "Gibraltar",
+            "Morocco": "Marokko",
             "Hungary": "Ungarn",
+            "Portugal": "Portugal",
+            "Norway": "Norway",
             "Lithuania": "Litauen",
-            "Slovakia": "Slowakei"
+            "United States of America": "USA",
+            "Slovakia": "Slowakei",
+            "Mauritius": "Mauritius",
+            "Latvia": "Lettland",
+            "Cyprus": "Zypern"
         };
 
+        // Karte initialisieren
         const map = L.map('map').setView([30, 0], 2);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        
+        // Helleres Karten-Design
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap'
+        }).addTo(map);
 
         function style(feature) {
             const geoName = feature.properties.name;
+            
+            // Prüfung: Entweder der Name ist direkt in der Liste oder via Mapping
             const istBesucht = besuchteLaender.includes(geoName) || 
+                              Object.values(mapping).includes(geoName) && Object.keys(mapping).find(key => mapping[key] === geoName) === geoName ||
                               besuchteLaender.includes(mapping[geoName]);
 
             return {
-                fillColor: istBesucht ? '#2ecc71' : '#ff4d4d',
-                weight: 1, opacity: 1, color: 'white', fillOpacity: 0.6
+                fillColor: istBesucht ? '#2ecc71' : '#ff4d4d', // Grün für besucht, Rot für nicht besucht
+                weight: 1,
+                opacity: 1,
+                color: 'white',
+                fillOpacity: 0.6
             };
         }
 
+        // Ländergrenzen laden
         fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
             .then(res => res.json())
             .then(data => {
                 L.geoJSON(data, {
                     style: style,
-                    onEachFeature: (f, l) => l.bindPopup(f.properties.name)
+                    onEachFeature: (f, l) => {
+                        // Popup mit deutschem Namen falls vorhanden, sonst GeoName
+                        const anzeigename = mapping[f.properties.name] || f.properties.name;
+                        l.bindPopup(`<b>${anzeigename}</b>`);
+                    }
                 }).addTo(map);
             });
     </script>
