@@ -17,37 +17,60 @@
 <body>
     <header>
         <a href="index.html" class="back-link">←</a>
-        <h1>Reisekarte (Live-Check)</h1>
+        <h1>Meine Reisekarte 🌍</h1>
     </header>
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Daten aus daten.js laden
-        const besuchteIDs = MEINE_REISEN.map(r => r.id.toUpperCase());
-        const besuchteNamen = MEINE_REISEN.map(r => r.Land.toLowerCase());
-
         const map = L.map('map').setView([30, 10], 2); 
-        
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+
+        // Such-Logik: Findet den Eintrag in deiner daten.js
+        function findeInfo(feature) {
+            const p = feature.properties;
+            
+            // 1. Suche über ISO-Code (Sicherste Methode)
+            // GeoJSON nutzt oft ISO_A2, ISO_A3 oder ADM0_A3
+            const geoID = (p.ISO_A2 || p.iso_a2 || p.ISO_A2_EH || "").toUpperCase();
+            
+            // 2. Suche über Name (Englisch vs Deutsch Mapping)
+            const geoName = (p.ADMIN || p.name || "").toLowerCase();
+
+            return MEINE_REISEN.find(r => {
+                const datenID = r.id.toUpperCase();
+                const datenLand = r.Land.toLowerCase();
+
+                return datenID === geoID || 
+                       datenLand === geoName ||
+                       // Manuelles Backup für häufige Abweichungen
+                       (geoName === "germany" && datenLand === "deutschland") ||
+                       (geoName === "spain" && datenLand === "spanien") ||
+                       (geoName === "switzerland" && datenLand === "schweiz") ||
+                       (geoName === "italy" && datenLand === "italien") ||
+                       (geoName === "france" && datenLand === "frankreich") ||
+                       (geoName === "united kingdom" && datenLand === "england") ||
+                       (geoName === "greece" && datenLand === "griechenland") ||
+                       (geoName === "turkey" && datenLand === "türkei") ||
+                       (geoName === "sweden" && datenLand === "schweden") ||
+                       (geoName === "denmark" && datenLand === "dänemark") ||
+                       (geoName === "norway" && datenLand === "norwegen") ||
+                       (geoName === "lithuania" && datenLand === "litauen") ||
+                       (geoName === "latvia" && datenLand === "lettland") ||
+                       (geoName === "austria" && datenLand === "österreich") ||
+                       (geoName === "belgium" && datenLand === "belgien") ||
+                       (geoName === "portugal" && datenLand === "portugal") ||
+                       (geoName === "united states of america" && datenLand === "usa") ||
+                       (geoName === "morocco" && datenLand === "marokko")
+            });
+        }
 
         function style(feature) {
-            // Wir prüfen alle möglichen Felder, in denen die ID stecken könnte
-            const p = feature.properties;
-            const iso = (p.ISO_A2 || p.iso_a2 || p.ISO_A2_EH || p.BRK_A2 || feature.id || "").toString().toUpperCase();
-            const name = (p.ADMIN || p.name || "").toLowerCase();
-
-            // Markieren, wenn ID passt ODER der Name in deiner Liste ist
-            const istBesucht = besuchteIDs.includes(iso) || besuchteNamen.includes(name);
-
+            const info = findeInfo(feature);
             return {
-                fillColor: istBesucht ? '#e67e22' : '#ffffff',
-                weight: 1,
-                opacity: 1,
-                color: '#bdc3c7',
-                fillOpacity: istBesucht ? 0.8 : 0.5
+                fillColor: info ? '#e67e22' : '#ffffff',
+                weight: 1, color: '#bdc3c7', opacity: 1,
+                fillOpacity: info ? 0.8 : 0.5
             };
         }
 
@@ -57,22 +80,14 @@
                 L.geoJSON(data, {
                     style: style,
                     onEachFeature: (f, l) => {
-                        const p = f.properties;
-                        const iso = (p.ISO_A2 || p.iso_a2 || p.ISO_A2_EH || "").toUpperCase();
-                        
-                        // Sucht die passenden Infos aus deiner daten.js für das Popup
-                        const info = MEINE_REISEN.find(r => r.id.toUpperCase() === iso);
-                        
+                        const info = findeInfo(f);
                         if (info) {
-                            l.bindPopup(`<b>${info.Land}</b><br>${info.Übernachtungen} Nächte<br>${info.km_gejoggt} km gelaufen`);
+                            l.bindPopup(`<b>${info.Land}</b><br>🏨 ${info.Übernachtungen} Nächte<br>🏃 ${info.km_gejoggt} km`);
                         } else {
-                            l.bindPopup(`<b>${p.ADMIN || p.name}</b><br>Noch kein Eintrag`);
+                            l.bindPopup(`<b>${f.properties.ADMIN || f.properties.name}</b><br>Noch nicht besucht`);
                         }
                     }
                 }).addTo(map);
-            })
-            .catch(err => {
-                alert("Fehler beim Laden der Länderdaten. Versuche es erneut.");
             });
     </script>
 </body>
