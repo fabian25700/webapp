@@ -3,163 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meine Weltkarte - Reise-App</title>
-    
+    <title>Weltkarte</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
     <style>
-        :root {
-            --bg-color: #f4f4f9;
-            --primary-color: #3498db;
-            --visited-color: #2ecc71; /* Grün für besucht */
-            --not-visited-color: #e74c3c; /* Rot für nicht besucht */
-            --text-color: #333;
-        }
-
-        body {
-            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-        }
-
-        header {
-            background-color: white;
-            padding: 15px;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            z-index: 1000;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 1.2rem;
-        }
-
-        /* Der Container für die Karte - muss eine Höhe haben */
-        #map {
-            flex: 1; /* Füllt den restlichen Platz aus */
-            width: 100%;
-            z-index: 1;
-        }
-
-        /* Einfache Navigation unten */
-        nav {
-            background-color: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
-            z-index: 1000;
-        }
-
-        nav a {
-            text-decoration: none;
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        nav a.active {
-            color: var(--primary-color);
-            font-weight: bold;
-        }
-        
-        .nav-icon {
-            font-size: 1.2rem;
-            margin-bottom: 2px;
-        }
+        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: sans-serif; }
+        header { background: white; padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #ddd; }
+        #map { flex: 1; width: 100%; }
+        .back-link { text-decoration: none; margin-right: 15px; font-size: 1.2rem; }
     </style>
 </head>
 <body>
+    <header>
+        <a href="laender.html" class="back-link">←</a>
+        <h1 style="margin:0; font-size: 1.1rem;">Interaktive Karte</h1>
+    </header>
+    <div id="map"></div>
 
-<header>
-    <h1>🌍 Meine Weltenbummler-Karte</h1>
-</header>
-
-<div id="map"></div>
-
-<nav>
-    <a href="index.html">
-        <span class="nav-icon">🏠</span>
-        Start
-    </a>
-    <a href="weltkarte.html" class="active">
-        <span class="nav-icon">🗺️</span>
-        Karte
-    </a>
-    <a href="laender.html">
-        <span class="nav-icon">📊</span>
-        Stats
-    </a>
-</nav>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
-    // 1. DEINE LÄNDERLISTE (exakt wie von dir angegeben)
-    const besuchteLaender = [
-        "Germany", "Spain", "France", "Netherlands", "Switzerland", "Greece", "Italy", "Turkey", 
-        "United Kingdom", "Sweden", "Vatican City", "United Arab Emirates", "Denmark", "Luxembourg", 
-        "Austria", "Belgium", "Malta", "Gibraltar", "Morocco", "Hungary", "Portugal", "Norway", 
-        "Lithuania", "United States of America", "Slovakia", "Mauritius", "Lettland", "Zypern"
-    ];
-    
-    // Hilfsfunktion: Lettland/Latvia und Zypern/Cyprus korrigieren, da GeoJSON oft englische Namen nutzt
-    const landNamenKorktur = {
-        "Lettland": "Latvia",
-        "Zypern": "Cyprus"
-    };
-    
-    // 2. KARTEN-SETUP
-    // Wir starten mit einer Weltansicht
-    const map = L.map('map').setView([20, 0], 2);
-
-    // "Klassische" Karte laden (OpenStreetMap)
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    // 3. STYLING-FUNKTION FÜR DIE LÄNDER
-    function style(feature) {
-        let landName = feature.properties.name;
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const besuchteLaender = ["Deutschland", "Spanien", "Frankreich", "Niederlande", "Schweiz", "Griechenland", "Italien", "Türkei", "England", "Schweden", "Vatikan", "Vereinigte Arabische Emirate", "Dänemark", "Luxemburg", "Österreich", "Belgien", "Malta", "Gibraltar", "Marokko", "Ungarn", "Portugal", "Norway", "Litauen", "USA", "Slowakei", "Mauritius", "Lettland", "Zypern"];
         
-        // Prüfen, ob das Land in deiner Liste ist (ggf. korrigiert)
-        const istBesucht = besuchteLaender.includes(landName) || 
-                          (landNamenKorktur[landName] && besuchteLaender.includes(landNamenKorktur[landName]));
-
-        return {
-            fillColor: istBesucht ? '#2ecc71' : '#e74c3c', // Grün oder Rot
-            weight: 1,
-            opacity: 1,
-            color: 'white', // Grenzen
-            fillOpacity: 0.7
+        // Dolmetscher für die Karte (GeoJSON Namen zu deiner Liste)
+        const mapping = {
+            "United States of America": "USA",
+            "United Kingdom": "England",
+            "Vatican City": "Vatikan",
+            "Latvia": "Lettland",
+            "Cyprus": "Zypern",
+            "Norway": "Norway",
+            "Germany": "Deutschland",
+            "Spain": "Spanien",
+            "France": "Frankreich",
+            "Netherlands": "Niederlande",
+            "Switzerland": "Schweiz",
+            "Italy": "Italien",
+            "Greece": "Griechenland",
+            "Turkey": "Türkei",
+            "United Arab Emirates": "Vereinigte Arabische Emirate",
+            "Austria": "Österreich",
+            "Belgium": "Belgien",
+            "Hungary": "Ungarn",
+            "Lithuania": "Litauen",
+            "Slovakia": "Slowakei"
         };
-    }
 
-    // 4. GEOJSON DATEN LADEN (Grenzen der Länder)
-    // Wir nutzen eine öffentliche GeoJSON-Quelle für Ländergrenzen
-    fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
-        .then(response => response.json())
-        .then(data => {
-            L.geoJSON(data, {
-                style: style,
-                onEachFeature: function (feature, layer) {
-                    // Optional: Zeige den Namen beim Klick an (auf Deutsch, falls verfügbar)
-                    if (feature.properties && feature.properties.name) {
-                        layer.bindPopup(feature.properties.name);
-                    }
-                }
-            }).addTo(map);
-        });
-        
-</script>
+        const map = L.map('map').setView([30, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
+        function style(feature) {
+            const geoName = feature.properties.name;
+            const istBesucht = besuchteLaender.includes(geoName) || 
+                              besuchteLaender.includes(mapping[geoName]);
+
+            return {
+                fillColor: istBesucht ? '#2ecc71' : '#ff4d4d',
+                weight: 1, opacity: 1, color: 'white', fillOpacity: 0.6
+            };
+        }
+
+        fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
+            .then(res => res.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: style,
+                    onEachFeature: (f, l) => l.bindPopup(f.properties.name)
+                }).addTo(map);
+            });
+    </script>
 </body>
 </html>
