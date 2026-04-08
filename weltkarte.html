@@ -2,68 +2,234 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Weltkarte</title>
     <script src="daten.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: -apple-system, sans-serif; background: #f8fafc; }
-        header { background: white; padding: 15px; border-bottom: 1px solid #e2e8f0; z-index: 1000; display: flex; align-items: center; }
-        #map { flex: 1; width: 100%; background: #aad3df; }
-        .back-link { text-decoration: none; font-size: 1.5rem; color: #2ecc71; font-weight: bold; margin-right: 15px; }
-        h1 { margin: 0; font-size: 1.1rem; color: #1e293b; }
+        :root {
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: #2d3f55;
+                --border-light: #253347;
+                --shadow: 0 2px 8px rgba(0,0,0,0.4);
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            height: -webkit-fill-available;
+            overflow: hidden;
+        }
+
+        /* ── Header ── */
+        header {
+            background: var(--surface);
+            padding: calc(env(safe-area-inset-top) + 14px) 16px 12px;
+            border-bottom: 1px solid var(--border-light);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+            box-shadow: var(--shadow);
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            text-decoration: none;
+            font-size: 1rem;
+            color: var(--text-primary);
+            box-shadow: var(--shadow);
+            flex-shrink: 0;
+            transition: all 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .back-btn:active { transform: scale(0.92); opacity: 0.7; }
+
+        .header-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        /* ── Legende ── */
+        .legend {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .legend-dot.visited  { background: #2ecc71; }
+        .legend-dot.not-visited { background: #e74c3c; opacity: 0.5; }
+
+        /* ── Karte ── */
+        #map {
+            flex: 1;
+            width: 100%;
+        }
+
+        /* Leaflet Popup Dark Mode */
+        @media (prefers-color-scheme: dark) {
+            .leaflet-popup-content-wrapper {
+                background: #1e293b;
+                color: #f1f5f9;
+                border: 1px solid #2d3f55;
+            }
+            .leaflet-popup-tip {
+                background: #1e293b;
+            }
+            .leaflet-popup-content b {
+                color: #f1f5f9;
+            }
+        }
     </style>
 </head>
 <body>
+
     <header>
-        <a href="index.html" class="back-link">←</a>
-        <h1>Reisekarte (Besucht vs. Offen)</h1>
+        <a href="reise_stats.html" class="back-btn">←</a>
+        <div class="header-title">Meine Weltkarte</div>
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-dot visited"></div>
+                <span>Besucht</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot not-visited"></div>
+                <span>Nicht besucht</span>
+            </div>
+        </div>
     </header>
+
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const map = L.map('map').setView([30, 10], 2); 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
+        // Tile-URL je nach Dark/Light Mode
+        var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var tileUrl = isDark
+            ? 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
+            : 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
+
+        var map = L.map('map', {
+            center: [25, 10],
+            zoom: 2,
+            zoomControl: true,
+            attributionControl: false
+        });
+
+        L.tileLayer(tileUrl, {
+            maxZoom: 10
+        }).addTo(map);
+
+        // Lookup-Map für schnellen Zugriff (ISO-Code → Reisedaten)
+        var reiseMap = {};
+        MEINE_REISEN.forEach(function(r) {
+            reiseMap[r.id.toUpperCase()] = r;
+        });
 
         function findeLand(feature) {
-            const p = feature.properties;
-            const geoID = (p.ISO_A2 || p.iso_a2 || p.ISO_A2_EH || feature.id || "").toString().toUpperCase().trim();
-            const geoName = (p.name || p.ADMIN || p.NAME || "").toString().toLowerCase().trim();
+            var p = feature.properties;
+            var geoID = (p.ISO_A2 || p.iso_a2 || p.ISO_A2_EH || feature.id || '')
+                .toString().toUpperCase().trim();
 
-            return MEINE_REISEN.find(r => {
-                const meinID = r.id.toUpperCase().trim();
-                const meinNameEn = r.name_en.toLowerCase().trim();
-                return meinID === geoID || meinNameEn === geoName;
-            });
+            if (reiseMap[geoID]) return reiseMap[geoID];
+
+            // Fallback: Name-Vergleich
+            var geoName = (p.name || p.ADMIN || p.NAME || '').toString().toLowerCase().trim();
+            return MEINE_REISEN.find(function(r) {
+                return r.name_en.toLowerCase().trim() === geoName;
+            }) || null;
         }
 
-        function style(feature) {
-            const gefunden = findeLand(feature);
+        function getStyle(feature) {
+            var gefunden = findeLand(feature);
             return {
-                fillColor: gefunden ? '#2ecc71' : '#ff4d4d',
-                weight: 1,
-                color: '#ffffff',
-                opacity: 1,
-                fillOpacity: gefunden ? 0.8 : 0.3
+                fillColor:   gefunden ? '#2ecc71' : '#e74c3c',
+                fillOpacity: gefunden ? 0.75 : 0.22,
+                weight:      0.8,
+                color:       isDark ? '#1e293b' : '#ffffff',
+                opacity:     1
             };
         }
 
         fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
-            .then(res => res.json())
-            .then(data => {
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
                 L.geoJSON(data, {
-                    style: style,
-                    onEachFeature: (f, l) => {
-                        const info = findeLand(f);
+                    style: getStyle,
+                    onEachFeature: function(feature, layer) {
+                        var info = findeLand(feature);
                         if (info) {
-                            l.bindPopup(`<b>${info.Land}</b><br>🏨 ${info.Übernachtungen} Nächte<br>🏃 ${info.km_gejoggt} km`);
+                            var flagge = info.flagge || info.id;
+                            var avgKm = info.Joggen > 0
+                                ? (info.km_gejoggt / info.Joggen).toFixed(1) + ' km/Lauf'
+                                : '–';
+                            layer.bindPopup(
+                                '<b>' + flagge + ' ' + info.Land + '</b><br>' +
+                                '🏨 ' + info.Übernachtungen + ' Nächte · ' + info.Unterkünfte + ' Unterkünfte<br>' +
+                                (info.FluegeAnkunft > 0 ? '✈️ ' + info.FluegeAnkunft + ' Flüge<br>' : '') +
+                                (info.Joggen > 0 ? '🏃 ' + info.km_gejoggt + ' km (' + avgKm + ')' : '')
+                            );
                         } else {
-                            const name = f.properties.name || f.properties.ADMIN || "Unbekannt";
-                            l.bindPopup(`<b>${name}</b><br>Noch nicht besucht`);
+                            var name = feature.properties.name
+                                    || feature.properties.ADMIN
+                                    || 'Unbekannt';
+                            layer.bindPopup('<b>' + name + '</b><br><span style="color:#94a3b8;">Noch nicht besucht</span>');
                         }
                     }
                 }).addTo(map);
+            })
+            .catch(function(err) {
+                console.error('GeoJSON Ladefehler:', err);
             });
     </script>
 </body>
