@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alltagswissen</title>
+    <style>
+        body { font-family: -apple-system, sans-serif; background: #f8fafc; margin: 0; padding: 20px; color: #1e293b; }
+        header { display: flex; align-items: center; margin-bottom: 20px; }
+        .back-link { text-decoration: none; font-size: 1.5rem; margin-right: 15px; }
+        
+        .category { background: white; border-radius: 15px; margin-bottom: 10px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        details summary { padding: 20px; font-weight: bold; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+        details summary::-webkit-details-marker { display: none; }
+        details summary::after { content: "＋"; color: #3498db; }
+        details[open] summary::after { content: "－"; }
+        
+        .content { padding: 0 20px 20px 20px; border-top: 1px solid #f1f5f9; font-size: 0.95rem; line-height: 1.5; color: #475569; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 8px; }
+        b { color: #1e293b; }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="back-link">←</a>
+        <h1>Hausarbeits-Wiki</h1>
+    </header>
+
+    <div class="category">
+        <details>
+            <summary>Waschmaschine & Wäsche</summary>
+            <div class="content">
+                <ul>
+                    <li><b>Sortieren:</b> Hell, Dunkel und Bunt getrennt waschen (verhindert Grauschleier).</li>
+                    <li><b>Temperatur:</b> Bettwäsche/Handtücher 60°C, Alltagskleidung 30-40°C.</li>
+                    <li><b>Pflege:</b> Alle 2 Monate einen Leerlauf bei 90°C mit Zitronensäure/Reiniger gegen Bakterien.</li>
+                    <li><b>Sieb:</b> Das Flusensieb (unten rechts) alle 6 Monate leeren.</li>
+                </ul>
+            </div>
+        </details>
+    </div>
+
+    <div class="category">
+        <details>
+            <summary>Spülmaschine</summary>
+            <div class="content">
+                <ul>
+                    <li><b>Salz & Klarspüler:</b> Immer auffüllen, wenn die Lampe leuchtet (verhindert Kalkflecken).</li>
+                    <li><b>Filter:</b> Das Sieb am Boden einmal pro Woche kurz unter Wasser abspülen.</li>
+                    <li><b>No-Go:</b> Holzbretter, scharfe Messer und beschichtete Pfannen gehören nicht rein.</li>
+                </ul>
+            </div>
+        </details>
+    </div>
+
+    <div class="category">
+        <details>
+            <summary>Kochen Basics</summary>
+            <div class="content">
+                <ul>
+                    <li><b>Nudeln:</b> Erst salzen, wenn das Wasser kocht (spart Energie).</li>
+                    <li><b>Pfannen:</b> Nie kaltes Wasser in eine heiße, fettige Pfanne gießen (Verbiegungsgefahr).</li>
+                    <li><b>Reis:</b> Verhältnis 1 Teil Reis zu 2 Teilen Wasser.</li>
+                </ul>
+            </div>
+        </details>
+    </div>
+
+    <div class="category">
+        <details>
+            <summary>Putzen & Haushalt</summary>
+            <div class="content">
+                <ul>
+                    <li><b>Kalk:</b> Essig oder Zitronensäure sind die besten Waffen gegen Kalk im Bad.</li>
+                    <li><b>Fenster:</b> Nie bei direkter Sonne putzen (gibt Streifen).</li>
+                    <li><b>Mikrowelle:</b> Schale Wasser mit Zitrone 2 Min. erhitzen, dann einfach auswischen.</li>
+                </ul>
+            </div>
+        </details>
+    </div>
+
+</body>
+</html>
