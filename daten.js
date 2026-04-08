@@ -12,7 +12,6 @@ const MEINE_REISEN = [
   { "id": "LT", "Land": "Litauen", "Wohnorte": 0, "Übernachtungen": 3, "Unterkünfte": 2, "FluegeAnkunft": 0, "Tagestrips": 0, "Joggen": 3, "km_gejoggt": 26 },
   { "id": "LV", "Land": "Lettland", "Wohnorte": 0, "Übernachtungen": 3, "Unterkünfte": 2, "FluegeAnkunft": 1, "Tagestrips": 0, "Joggen": 0, "km_gejoggt": 0 },
   { "id": "AT", "Land": "Österreich", "Wohnorte": 0, "Übernachtungen": 3, "Unterkünfte": 2, "FluegeAnkunft": 1, "Tagestrips": 0, "Joggen": 0, "km_gejoggt": 0 },
-  { "id": "ZZ", "Land": "Internationale Gewässer", "Wohnorte": 0, "Übernachtungen": 3, "Unterkünfte": 1, "FluegeAnkunft": 0, "Tagestrips": 0, "Joggen": 0, "km_gejoggt": 0 },
   { "id": "ES", "Land": "Spanien", "Wohnorte": 0, "Übernachtungen": 1, "Unterkünfte": 1, "FluegeAnkunft": 0, "Tagestrips": 0, "Joggen": 4, "km_gejoggt": 27 },
   { "id": "LU", "Land": "Luxemburg", "Wohnorte": 0, "Übernachtungen": 1, "Unterkünfte": 1, "FluegeAnkunft": 0, "Tagestrips": 0, "Joggen": 4, "km_gejoggt": 21 },
   { "id": "NL", "Land": "Niederlande", "Wohnorte": 0, "Übernachtungen": 1, "Unterkünfte": 1, "FluegeAnkunft": 0, "Tagestrips": 0, "Joggen": 2, "km_gejoggt": 10 },
