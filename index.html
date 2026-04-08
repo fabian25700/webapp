@@ -4,127 +4,114 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fabians WebApp</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2563eb">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2501/2501030.png">
+
     <style>
-        :root {
-            --primary: #2563eb;
-            --bg: #f8fafc;
-            --text: #1e293b;
-            --card-bg: #ffffff;
+        :root { --primary: #2563eb; --bg: #f8fafc; --text: #1e293b; --card: #ffffff; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
+        
+        /* Hero Section */
+        .hero { 
+            background: linear-gradient(135deg, #2563eb, #1d4ed8); 
+            color: white; 
+            padding: 40px 20px; 
+            text-align: center; 
+            border-bottom-left-radius: 30px; 
+            border-bottom-right-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
+        .hero h1 { margin: 0; font-size: 1.8rem; font-weight: 800; }
+        .hero p { opacity: 0.9; margin: 10px 0 0; font-size: 1rem; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
+        .container { padding: 20px; max-width: 500px; margin: auto; width: 100%; box-sizing: border-box; }
+
+        /* Quick Stats Card */
+        .quick-stats {
+            background: var(--card);
+            border-radius: 20px;
             padding: 20px;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        h1 {
-            font-size: 1.8rem;
-            font-weight: 800;
-            margin-bottom: 2.5rem;
-            letter-spacing: -0.025em;
-            color: var(--text);
-        }
-
-        .menu-stack {
+            margin-top: -30px; /* Schiebt die Karte in den Hero-Bereich */
             display: flex;
-            flex-direction: column;
-            gap: 16px;
+            justify-content: space-around;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
         }
+        .stat-item { text-align: center; }
+        .stat-value { display: block; font-size: 1.4rem; font-weight: bold; color: var(--primary); }
+        .stat-label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; }
 
-        .nav-button {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--card-bg);
-            padding: 20px 24px;
-            border-radius: 18px;
-            text-decoration: none;
-            color: var(--text);
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        /* Menu */
+        .menu-title { font-weight: 700; margin: 30px 0 15px; color: #64748b; font-size: 0.9rem; text-transform: uppercase; }
+        .menu-stack { display: flex; flex-direction: column; gap: 12px; }
+        .nav-button { 
+            display: flex; align-items: center; justify-content: space-between; 
+            background: var(--card); padding: 18px; border-radius: 16px; 
+            text-decoration: none; color: var(--text); font-weight: 600; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.2s;
             border: 1px solid rgba(0,0,0,0.05);
         }
-
-        /* Effekt beim Tippen am Handy */
-        .nav-button:active {
-            transform: scale(0.97);
-            background-color: #f1f5f9;
-        }
-
-        .icon-circle {
-            width: 40px;
-            height: 40px;
-            background: #eff6ff;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-        }
-
-        .arrow {
-            color: #cbd5e1;
-            font-size: 1.2rem;
-        }
-
-        footer {
-            margin-top: 3rem;
-            font-size: 0.8rem;
-            color: #94a3b8;
-        }
+        .nav-button:active { transform: scale(0.97); background: #f1f5f9; }
+        .icon-box { width: 40px; height: 40px; background: #eff6ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 1.2rem; }
+        
+        footer { text-align: center; margin-top: auto; padding: 20px; font-size: 0.75rem; color: #94a3b8; }
     </style>
 </head>
 <body>
 
+    <div class="hero">
+        <h1>Moin, Fabian! 👋</h1>
+        <p>Wo geht die nächste Reise hin?</p>
+    </div>
+
     <div class="container">
-        <h1>Fabians WebApp</h1>
-
-        <div class="menu-stack">
-            <a href="laender.html" class="nav-button">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div class="icon-circle">🗺️</div>
-                    <span>Besuchte Länder</span>
-                </div>
-                <div class="arrow">→</div>
-            </a>
-
-            <a href="#" class="nav-button">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div class="icon-circle">📊</div>
-                    <span>Statistiken</span>
-                </div>
-                <div class="arrow">→</div>
-            </a>
-
-            <a href="#" class="nav-button">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div class="icon-circle">👤</div>
-                    <span>Mein Profil</span>
-                </div>
-                <div class="arrow">→</div>
-            </a>
+        <div class="quick-stats">
+            <div class="stat-item">
+                <span class="stat-value">28</span>
+                <span class="stat-label">Länder</span>
+            </div>
+            <div class="stat-item" style="border-left: 1px solid #eee; border-right: 1px solid #eee; padding: 0 20px;">
+                <span class="stat-value">14%</span>
+                <span class="stat-label">Europa</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value">3</span>
+                <span class="stat-label">Kontinente</span>
+            </div>
         </div>
 
-        <footer>
-            Version 1.0 • Build 2026
-        </footer>
+        <p class="menu-title">Meine App-Bereiche</p>
+        
+        <div class="menu-stack">
+            <a href="laender.html" class="nav-button">
+                <div style="display: flex; align-items: center;">
+                    <div class="icon-box">🌍</div>
+                    <span>Meine besuchten Länder</span>
+                </div>
+                <span style="color: #cbd5e1;">→</span>
+            </a>
+
+            <a href="weltkarte.html" class="nav-button">
+                <div style="display: flex; align-items: center;">
+                    <div class="icon-box">🗺️</div>
+                    <span>Interaktive Weltkarte</span>
+                </div>
+                <span style="color: #cbd5e1;">→</span>
+            </a>
+
+            <a href="#" class="nav-button" style="opacity: 0.5;">
+                <div style="display: flex; align-items: center;">
+                    <div class="icon-box">📸</div>
+                    <span>Reise-Galerie</span>
+                </div>
+                <span style="color: #cbd5e1;">bald...</span>
+            </a>
+        </div>
     </div>
+
+    <footer>
+        Fabians Personal Hub • 2026
+    </footer>
 
 </body>
 </html>
