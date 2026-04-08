@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
@@ -10,7 +9,7 @@
     <style>
         body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: -apple-system, sans-serif; background: #f8fafc; }
         header { background: white; padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #e2e8f0; z-index: 1000; }
-        #map { flex: 1; width: 100%; z-index: 1; background: #aad3df; }
+        #map { flex: 1; width: 100%; background: #aad3df; }
         .back-link { text-decoration: none; margin-right: 15px; font-size: 1.5rem; color: #e67e22; font-weight: bold; }
         h1 { margin: 0; font-size: 1.1rem; color: #1e293b; }
     </style>
@@ -18,52 +17,62 @@
 <body>
     <header>
         <a href="index.html" class="back-link">←</a>
-        <h1>Meine Reisekarte 🌍</h1>
+        <h1>Reisekarte (Live-Check)</h1>
     </header>
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Wir holen uns alle besuchten IDs aus der daten.js
+        // Daten aus daten.js laden
         const besuchteIDs = MEINE_REISEN.map(r => r.id.toUpperCase());
+        const besuchteNamen = MEINE_REISEN.map(r => r.Land.toLowerCase());
 
-        // Karte initialisieren
         const map = L.map('map').setView([30, 10], 2); 
         
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        // Styling-Funktion: Prüft die ID des Landes auf der Karte
         function style(feature) {
-            // ISO_A2 ist der Standard-Code (DE, US, etc.) in der GeoJSON Datei
-            const iso = feature.properties.ISO_A2 || feature.properties.iso_a2 || feature.id;
-            const istBesucht = iso && besuchteIDs.includes(iso.toUpperCase());
+            // Wir prüfen alle möglichen Felder, in denen die ID stecken könnte
+            const p = feature.properties;
+            const iso = (p.ISO_A2 || p.iso_a2 || p.ISO_A2_EH || p.BRK_A2 || feature.id || "").toString().toUpperCase();
+            const name = (p.ADMIN || p.name || "").toLowerCase();
+
+            // Markieren, wenn ID passt ODER der Name in deiner Liste ist
+            const istBesucht = besuchteIDs.includes(iso) || besuchteNamen.includes(name);
 
             return {
-                fillColor: istBesucht ? '#e67e22' : '#ffffff', // Orange für besucht, Weiß für Rest
+                fillColor: istBesucht ? '#e67e22' : '#ffffff',
                 weight: 1,
                 opacity: 1,
                 color: '#bdc3c7',
-                fillOpacity: 0.8
+                fillOpacity: istBesucht ? 0.8 : 0.5
             };
         }
 
-        // Laden der Ländergrenzen
         fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
             .then(res => res.json())
             .then(data => {
                 L.geoJSON(data, {
                     style: style,
                     onEachFeature: (f, l) => {
-                        const landInfo = MEINE_REISEN.find(r => r.id.toUpperCase() === (f.properties.ISO_A2 || "").toUpperCase());
-                        if (landInfo) {
-                            l.bindPopup(`<b>${landInfo.Land}</b><br>${landInfo.Übernachtungen} Nächte<br>${landInfo.km_gejoggt} km gelaufen`);
+                        const p = f.properties;
+                        const iso = (p.ISO_A2 || p.iso_a2 || p.ISO_A2_EH || "").toUpperCase();
+                        
+                        // Sucht die passenden Infos aus deiner daten.js für das Popup
+                        const info = MEINE_REISEN.find(r => r.id.toUpperCase() === iso);
+                        
+                        if (info) {
+                            l.bindPopup(`<b>${info.Land}</b><br>${info.Übernachtungen} Nächte<br>${info.km_gejoggt} km gelaufen`);
                         } else {
-                            l.bindPopup(`<b>${f.properties.ADMIN}</b><br>Noch nicht besucht`);
+                            l.bindPopup(`<b>${p.ADMIN || p.name}</b><br>Noch kein Eintrag`);
                         }
                     }
                 }).addTo(map);
+            })
+            .catch(err => {
+                alert("Fehler beim Laden der Länderdaten. Versuche es erneut.");
             });
     </script>
 </body>
