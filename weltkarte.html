@@ -4,35 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Meine Weltkarte</title>
+    
     <script src="daten.js"></script>
+    
+    <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
+    <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+
     <style>
-        :root { --accent: #e67e22; --bg: #f0f2f5; --land-default: #d1d8e0; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 20px; text-align: center; }
+        :root { --accent: #e67e22; --bg: #f0f2f5; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 20px; }
         .header { display: flex; align-items: center; margin-bottom: 20px; }
         .back-btn { text-decoration: none; font-size: 1.5rem; color: var(--accent); margin-right: 15px; }
         
-        /* Karten-Container */
-        #map-container {
+        #chartdiv {
+            width: 100%;
+            height: 500px;
             background: white;
-            padding: 20px;
             border-radius: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            max-width: 1000px;
-            margin: 0 auto;
         }
-
-        /* SVG Styling */
-        svg { width: 100%; height: auto; border-radius: 20px; }
-        
-        /* Die Länder-Farben */
-        .land { fill: var(--land-default); transition: fill 0.3s; stroke: #fff; stroke-width: 0.5; }
-        .visited { fill: var(--accent) !important; } /* Farbe für besuchte Länder */
-
-        .info-box {
-            margin-top: 20px;
-            font-size: 0.9rem;
-            color: #7f8c8d;
-        }
+        .info { margin-top: 15px; color: #7f8c8d; text-align: center; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -42,52 +35,51 @@
         <h1>Meine Weltkarte 🌍</h1>
     </div>
 
-    <div id="map-container">
-        <div id="canvas">
-            </div>
-    </div>
-
-    <div class="info-box">
-        <p id="stats-text">Lade Karte...</p>
-    </div>
+    <div id="chartdiv"></div>
+    <div class="info" id="stats">Lade Karte...</div>
 
     <script>
-        // Diese Funktion färbt die Länder ein
-        function colorMap() {
-            // 1. Alle besuchten Ländernamen aus der daten.js holen
-            const besuchteLaender = MEINE_REISEN.map(trip => trip.Land);
+        // 1. Karte initialisieren
+        am5.ready(function() {
+            var root = am5.Root.new("chartdiv");
+            root.setThemes([am5themes_Animated.new(root)]);
+
+            var chart = root.container.children.push(am5map.MapChart.new(root, {
+                panX: "translateX",
+                panY: "translateY",
+                projection: am5map.geoMercator()
+            }));
+
+            var polygonSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
+                geoJSON: am5geodata_worldLow,
+                exclude: ["AQ"] // Antarktis ausblenden
+            }));
+
+            // 2. Deine besuchten Länder vorbereiten
+            // Wir müssen die Klarnamen aus daten.js in die Karte matchen
+            const besuchteNamen = MEINE_REISEN.map(t => t.Land);
             
-            // 2. Alle Pfade (Länder) im SVG suchen
-            // Hinweis: Dein SVG muss die Ländernamen als "id" oder "data-name" haben
-            const paths = document.querySelectorAll('path');
-            
-            let count = 0;
-            paths.forEach(path => {
-                const name = path.getAttribute('name') || path.getAttribute('id');
-                
-                if (besuchteLaender.includes(name)) {
-                    path.classList.add('visited');
-                    count++;
-                }
+            polygonSeries.mapPolygons.template.setAll({
+                tooltipText: "{name}",
+                templateField: "polygonSettings",
+                fill: am5.color(0xd1d8e0),
+                stroke: am5.color(0xffffff)
             });
 
-            document.getElementById('stats-text').innerText = 
-                `Du hast bereits ${besuchteLaender.length} Länder besucht und in der Karte markiert!`;
-        }
-
-        /* Da ein komplettes Weltkarten-SVG tausende Zeilen Code hat, 
-           empfehle ich, eine "simple-world.svg" Datei zu nutzen.
-           In diesem Beispiel laden wir eine Karte per Fetch:
-        */
-        fetch('https://raw.githubusercontent.com/djaiss/mapsicon/master/all/world/vector.svg')
-            .then(response => response.text())
-            .then(svgData => {
-                document.getElementById('canvas').innerHTML = svgData;
-                // Wichtig: In dieser SVG-Quelle heißen die IDs oft Kürzel (DE, US).
-                // Damit es klappt, müssen wir deine daten.js evtl. um ISO-Codes ergänzen
-                // ODER wir nutzen ein SVG, das Klarnamen verwendet.
-                colorMap();
+            // 3. Länder einfärben
+            polygonSeries.events.on("datavalidated", function() {
+                polygonSeries.mapPolygons.each(function(polygon) {
+                    var name = polygon.dataItem.get("name");
+                    // Checke ob der Name in deiner Liste ist
+                    if (besuchteNamen.includes(name)) {
+                        polygon.set("fill", am5.color(0xe67e22));
+                    }
+                });
+                document.getElementById('stats').innerText = 
+                    `Länder in deiner Liste: ${besuchteNamen.length}`;
             });
+
+        }); // Ende am5.ready
     </script>
 </body>
 </html>
