@@ -3,89 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weltkarte</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <title>Meine Weltkarte</title>
+    <script src="daten.js"></script>
     <style>
-        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: -apple-system, sans-serif; background: #f8fafc; }
-        header { background: white; padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #e2e8f0; }
-        #map { flex: 1; width: 100%; z-index: 1; background: #aad3df; }
-        .back-link { text-decoration: none; margin-right: 15px; font-size: 1.5rem; color: #2563eb; font-weight: bold; }
-        h1 { margin: 0; font-size: 1.1rem; color: #1e293b; }
+        :root { --accent: #e67e22; --bg: #f0f2f5; --land-default: #d1d8e0; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 20px; text-align: center; }
+        .header { display: flex; align-items: center; margin-bottom: 20px; }
+        .back-btn { text-decoration: none; font-size: 1.5rem; color: var(--accent); margin-right: 15px; }
+        
+        /* Karten-Container */
+        #map-container {
+            background: white;
+            padding: 20px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* SVG Styling */
+        svg { width: 100%; height: auto; border-radius: 20px; }
+        
+        /* Die Länder-Farben */
+        .land { fill: var(--land-default); transition: fill 0.3s; stroke: #fff; stroke-width: 0.5; }
+        .visited { fill: var(--accent) !important; } /* Farbe für besuchte Länder */
+
+        .info-box {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
     </style>
 </head>
 <body>
-    <header>
-        <a href="laender.html" class="back-link">←</a>
-        <h1>Interaktive Karte</h1>
-    </header>
-    <div id="map"></div>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <div class="header">
+        <a href="index.html" class="back-btn">←</a>
+        <h1>Meine Weltkarte 🌍</h1>
+    </div>
+
+    <div id="map-container">
+        <div id="canvas">
+            </div>
+    </div>
+
+    <div class="info-box">
+        <p id="stats-text">Lade Karte...</p>
+    </div>
+
     <script>
-        // Deine Liste
-        const besuchteLaender = ["Deutschland", "Germany", "Spanien", "Spain", "Frankreich", "France", "Niederlande", "Netherlands", "Schweiz", "Switzerland", "Griechenland", "Greece", "Italien", "Italy", "Türkei", "Turkey", "England", "United Kingdom", "Schweden", "Sweden", "Vatikan", "Vatican City", "Vereinigte Arabische Emirate", "United Arab Emirates", "Dänemark", "Denmark", "Luxemburg", "Luxembourg", "Österreich", "Austria", "Belgien", "Belgium", "Malta", "Gibraltar", "Marokko", "Morocco", "Ungarn", "Hungary", "Portugal", "Norway", "Norwegen", "Litauen", "Lithuania", "USA", "United States of America", "Slowakei", "Slovakia", "Mauritius", "Lettland", "Latvia", "Zypern", "Cyprus"];
-        
-        // Mapping für die Karte
-        const mapping = {
-            "Germany": "Deutschland",
-            "Spain": "Spanien",
-            "France": "Frankreich",
-            "Netherlands": "Niederlande",
-            "Switzerland": "Schweiz",
-            "Greece": "Griechenland",
-            "Italy": "Italien",
-            "Turkey": "Türkei",
-            "United Kingdom": "England",
-            "Sweden": "Schweden",
-            "Denmark": "Dänemark",
-            "Luxembourg": "Luxemburg",
-            "Austria": "Österreich",
-            "Belgium": "Belgien",
-            "Norway": "Norwegen",
-            "Lithuania": "Litauen",
-            "United States of America": "USA",
-            "Slovakia": "Slowakei",
-            "Latvia": "Lettland",
-            "Cyprus": "Zypern",
-            "Morocco": "Marokko",
-            "Hungary": "Ungarn"
-        };
-
-        const map = L.map('map').setView([45, 10], 3); // Fokus mehr auf Europa beim Start
-        
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
-
-        function style(feature) {
-            const geoName = feature.properties.name;
+        // Diese Funktion färbt die Länder ein
+        function colorMap() {
+            // 1. Alle besuchten Ländernamen aus der daten.js holen
+            const besuchteLaender = MEINE_REISEN.map(trip => trip.Land);
             
-            // Wir prüfen, ob der Name aus dem GeoJSON (z.B. "Sweden") in deiner Liste ist
-            // oder ob unsere deutsche Übersetzung (z.B. "Schweden") in deiner Liste ist
-            const istBesucht = besuchteLaender.some(land => 
-                land.toLowerCase() === geoName.toLowerCase() || 
-                (mapping[geoName] && mapping[geoName].toLowerCase() === land.toLowerCase())
-            );
+            // 2. Alle Pfade (Länder) im SVG suchen
+            // Hinweis: Dein SVG muss die Ländernamen als "id" oder "data-name" haben
+            const paths = document.querySelectorAll('path');
+            
+            let count = 0;
+            paths.forEach(path => {
+                const name = path.getAttribute('name') || path.getAttribute('id');
+                
+                if (besuchteLaender.includes(name)) {
+                    path.classList.add('visited');
+                    count++;
+                }
+            });
 
-            return {
-                fillColor: istBesucht ? '#2ecc71' : '#ff4d4d',
-                weight: 1,
-                opacity: 1,
-                color: 'white',
-                fillOpacity: 0.7
-            };
+            document.getElementById('stats-text').innerText = 
+                `Du hast bereits ${besuchteLaender.length} Länder besucht und in der Karte markiert!`;
         }
 
-        fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
-            .then(res => res.json())
-            .then(data => {
-                L.geoJSON(data, {
-                    style: style,
-                    onEachFeature: (f, l) => {
-                        const name = mapping[f.properties.name] || f.properties.name;
-                        l.bindPopup(`<b>${name}</b>`);
-                    }
-                }).addTo(map);
+        /* Da ein komplettes Weltkarten-SVG tausende Zeilen Code hat, 
+           empfehle ich, eine "simple-world.svg" Datei zu nutzen.
+           In diesem Beispiel laden wir eine Karte per Fetch:
+        */
+        fetch('https://raw.githubusercontent.com/djaiss/mapsicon/master/all/world/vector.svg')
+            .then(response => response.text())
+            .then(svgData => {
+                document.getElementById('canvas').innerHTML = svgData;
+                // Wichtig: In dieser SVG-Quelle heißen die IDs oft Kürzel (DE, US).
+                // Damit es klappt, müssen wir deine daten.js evtl. um ISO-Codes ergänzen
+                // ODER wir nutzen ein SVG, das Klarnamen verwendet.
+                colorMap();
             });
     </script>
 </body>
