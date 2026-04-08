@@ -3,181 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meine Reisestatistik</title>
+    <title>Reisestatistik</title>
     <script src="daten.js"></script>
     <style>
-        :root {
-            --primary: #e67e22;
-            --bg: #f4f7f6;
-            --card: #ffffff;
-            --text: #2c3e50;
-        }
+        :root { --accent: #e67e22; --bg: #f4f7f6; --card: #ffffff; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #2d3436; }
+        .header { display: flex; align-items: center; margin-bottom: 25px; }
+        .back-btn { text-decoration: none; font-size: 1.5rem; color: var(--accent); margin-right: 15px; }
+        
+        /* Dashboard */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--card); padding: 20px; border-radius: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .stat-val { display: block; font-size: 1.6rem; font-weight: 800; color: var(--accent); }
+        .stat-lbl { font-size: 0.7rem; color: #b2bec3; text-transform: uppercase; letter-spacing: 1px; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
-        }
-
-        .header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .back-btn {
-            text-decoration: none;
-            font-size: 1.5rem;
-            color: var(--primary);
-            margin-right: 20px;
-            font-weight: bold;
-        }
-
-        h1 { margin: 0; font-size: 1.5rem; }
-
-        /* Statistik-Kacheln */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: var(--card);
-            padding: 20px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        .stat-number {
-            display: block;
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--primary);
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: #7f8c8d;
-            text-transform: uppercase;
-            margin-top: 5px;
-        }
-
-        /* Liste der Länder */
-        .country-list {
-            display: grid;
-            gap: 15px;
-        }
-
-        .country-card {
-            background: var(--card);
-            padding: 20px;
-            border-radius: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            border-left: 5px solid var(--primary);
-        }
-
-        .country-info h2 {
-            margin: 0;
-            font-size: 1.1rem;
-        }
-
-        .country-details {
-            font-size: 0.85rem;
-            color: #7f8c8d;
-            margin-top: 5px;
-        }
-
-        .rank {
-            font-weight: 900;
-            font-size: 1.2rem;
-            color: #ecf0f1;
-        }
-
-        .jog-badge {
-            background: #fff3e0;
-            color: #e67e22;
-            padding: 4px 8px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            display: inline-block;
-            margin-top: 5px;
-        }
+        /* Liste */
+        .list { display: grid; gap: 12px; }
+        .item { background: var(--card); padding: 15px 20px; border-radius: 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
+        .item-info h2 { margin: 0; font-size: 1rem; }
+        .item-sub { font-size: 0.8rem; color: #636e72; }
+        .jog-info { color: var(--accent); font-weight: bold; font-size: 0.85rem; margin-top: 4px; }
+        .iso-code { font-weight: 900; color: #dfe6e9; font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <a href="index.html" class="back-btn">←</a>
-        <h1>Meine Reisestatistik 🦊</h1>
+        <h1>Statistiken</h1>
     </div>
 
     <div class="stats-grid">
         <div class="stat-card">
-            <span class="stat-number" id="count-laender">0</span>
-            <span class="stat-label">Länder</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-number" id="sum-naechte">0</span>
+            <span class="stat-val" id="total-n">0</span>
             <span class="stat-label">Nächte</span>
         </div>
         <div class="stat-card">
-            <span class="stat-number" id="sum-km">0</span>
-            <span class="stat-label">KM Joggen</span>
+            <span class="stat-val" id="total-k">0</span>
+            <span class="stat-label">Gesamt KM</span>
         </div>
     </div>
 
-    <div class="country-list" id="main-list">
-        </div>
+    <div class="list" id="main-list"></div>
 
     <script>
-        // Funktion zum Berechnen und Anzeigen
-        function displayStats() {
-            const listContainer = document.getElementById('main-list');
-            let totalNights = 0;
-            let totalKm = 0;
-            let totalLaender = MEINE_REISEN.length;
+        function render() {
+            const list = document.getElementById('main-list');
+            let sumN = 0; let sumK = 0;
 
-            // Liste leeren
-            listContainer.innerHTML = "";
-
-            // Durch jedes Land in der daten.js gehen
             MEINE_REISEN.forEach(trip => {
-                totalNights += trip.Übernachtungen;
-                totalKm += trip.km_gejoggt;
+                sumN += trip.Übernachtungen;
+                sumK += trip.km_gejoggt;
 
-                // Karte für jedes Land erstellen
-                const card = document.createElement('div');
-                card.className = 'country-card';
-                card.innerHTML = `
-                    <div class="country-info">
-                        <h2>${trip.Land}</h2>
-                        <div class="country-details">
-                            ${trip.Übernachtungen} Nächte • ${trip.Unterkünfte} Unterkünfte
+                list.innerHTML += `
+                    <div class="item">
+                        <div class="item-info">
+                            <h2>${trip.Land}</h2>
+                            <div class="item-sub">${trip.Übernachtungen} Nächte • ${trip.Unterkünfte} Unterkünfte</div>
+                            ${trip.km_gejoggt > 0 ? `<div class="jog-info">🏃 ${trip.km_gejoggt} km</div>` : ''}
                         </div>
-                        ${trip.km_gejoggt > 0 ? `<div class="jog-badge">🏃 ${trip.km_gejoggt} km gejoggt</div>` : ''}
+                        <div class="iso-code">${trip.id}</div>
                     </div>
-                    <div class="rank">#${trip.Platz}</div>
                 `;
-                listContainer.appendChild(card);
             });
-
-            // Statistik-Zahlen oben aktualisieren
-            document.getElementById('count-laender').innerText = totalLaender;
-            document.getElementById('sum-naechte').innerText = totalNights;
-            document.getElementById('sum-km').innerText = totalKm.toLocaleString('de-DE');
+            document.getElementById('total-n').innerText = sumN;
+            document.getElementById('total-k').innerText = sumK.toLocaleString('de-DE');
         }
-
-        // Starten, wenn Seite geladen ist
-        window.onload = displayStats;
+        window.onload = render;
     </script>
 </body>
 </html>
