@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Life Dashboard</title>
     <script src="daten.js"></script>
     <style>
@@ -13,17 +15,18 @@
         }
         
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, system-ui, sans-serif;
             background: var(--bg); 
             margin: 0; 
             height: 100vh; 
             overflow: hidden; 
             display: flex; 
             flex-direction: column;
+            -webkit-tap-highlight-color: transparent; /* Verhindert graue Kästen beim Tippen am Handy */
         }
 
         header {
-            padding: 15px 20px;
+            padding: env(safe-area-inset-top) 20px 15px 20px; /* Berücksichtigt die iPhone Notch */
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -34,76 +37,72 @@
             background: white;
             border: 1.5px solid #cbd5e1;
             color: #64748b;
-            padding: 6px 12px;
+            padding: 8px 16px;
             border-radius: 12px;
             font-size: 0.75rem;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s;
+            z-index: 110;
         }
 
-        /* Hauptmenü untereinander */
         .menu-container { 
             display: flex;
             flex-direction: column;
             gap: 15px; 
             width: 85%; 
-            max-width: 350px; /* Schön schmal für Handy */
+            max-width: 350px; 
             margin: auto;
             z-index: 10;
         }
         
         .menu-card { 
             background: rgba(255, 255, 255, 0.95);
-            padding: 15px 25px; 
-            border-radius: 18px; 
+            padding: 18px 25px; 
+            border-radius: 20px; 
             text-decoration: none; 
             display: flex;
-            align-items: center; /* Emoji und Text nebeneinander */
+            align-items: center;
             gap: 15px;
-            
-            /* Schatten-Effekt */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            backdrop-filter: blur(8px);
-            transition: all 0.1s ease-active;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+            transition: transform 0.1s;
             border: 1px solid rgba(255,255,255,0.3);
         }
 
-        /* Klick-Effekt: Button sinkt ein */
         .menu-card:active {
-            transform: scale(0.96) translateY(2px);
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-            background: rgba(248, 250, 252, 0.95);
+            transform: scale(0.96);
+            background: rgba(240, 240, 240, 0.95);
         }
 
-        /* Emojis proportional kleiner */
-        .icon { font-size: 1.5rem; }
+        .icon { font-size: 1.4rem; }
         .title { font-weight: 600; color: #1e293b; font-size: 1.1rem; flex-grow: 1; }
-        
-        .arrow { color: #cbd5e1; font-weight: bold; }
+        .arrow { color: #cbd5e1; }
 
         /* Snake Layer */
         #game-canvas {
             position: fixed; top: 0; left: 0;
             width: 100%; height: 100%;
             z-index: 1; display: none;
+            background: rgba(240, 242, 245, 0.6);
         }
 
         #score-display {
-            position: fixed; top: 60px; width: 100%;
-            text-align: center; font-weight: bold;
+            position: fixed; top: 80px; width: 100%;
+            text-align: center; font-weight: 900;
             color: var(--primary); display: none; z-index: 100;
+            font-size: 2rem; opacity: 0.5;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div style="font-weight: 800; color: #1e293b; letter-spacing: -0.5px;">LIFE HUB</div>
+        <div style="font-weight: 800; color: #1e293b;">LIFE HUB</div>
         <button id="snake-start" onclick="toggleGame()">SNAKE START</button>
     </header>
 
-    <div id="score-display">Länder gesammelt: <span id="current-score">0</span></div>
+    <div id="score-display"><span id="current-score">0</span></div>
 
     <div class="menu-container" id="main-menu">
         <a href="reise_stats.html" class="menu-card">
@@ -121,19 +120,18 @@
     <canvas id="game-canvas"></canvas>
 
     <script>
-        // Hier bleibt die Snake-Logik aus dem vorherigen Post identisch!
-        // (Wegen der Übersichtlichkeit hier nicht nochmal komplett eingefügt)
-        // Einfach den <script> Teil von oben übernehmen.
-        
         const canvas = document.getElementById("game-canvas");
         const ctx = canvas.getContext("2d");
         const scoreDisplay = document.getElementById("score-display");
         const scoreVal = document.getElementById("current-score");
         
         let gameActive = false;
-        let snake, direction, food, gameLoop;
-        const gridSize = 20;
-        const laender = (typeof MEINE_REISEN !== 'undefined') ? MEINE_REISEN.map(r => r.id) : ["??"];
+        let snake, direction, nextDirection, food, gameLoop;
+        let score = 0;
+        let currentSpeed = 160; // Startgeschwindigkeit (langsamer = einfacher)
+        
+        const gridSize = 25; // Größeres Grid = einfacheres Treffen am Handy
+        const laender = (typeof MEINE_REISEN !== 'undefined') ? MEINE_REISEN.map(r => r.id) : ["DE", "IT", "US", "FR", "ES"];
 
         function toggleGame() {
             if (!gameActive) startGame();
@@ -144,15 +142,33 @@
             gameActive = true;
             canvas.style.display = "block";
             scoreDisplay.style.display = "block";
-            document.getElementById("snake-start").innerText = "SNAKE STOP";
+            document.getElementById("snake-start").innerText = "STOP";
+            
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            snake = [{x: Math.floor(canvas.width/2/gridSize)*gridSize, y: Math.floor(canvas.height/2/gridSize)*gridSize}];
+
+            score = 0;
+            scoreVal.innerText = score;
+            currentSpeed = 160;
+            
+            // Startposition mittig ausgerichtet am Grid
+            const startX = Math.floor(canvas.width / 2 / gridSize) * gridSize;
+            const startY = Math.floor(canvas.height / 2 / gridSize) * gridSize;
+            snake = [{x: startX, y: startY}];
             direction = {x: gridSize, y: 0};
+            nextDirection = {x: gridSize, y: 0};
+            
             spawnFood();
-            scoreVal.innerText = "0";
-            if(gameLoop) clearInterval(gameLoop);
-            gameLoop = setInterval(draw, 130);
+            runLoop();
+        }
+
+        function runLoop() {
+            if (!gameActive) return;
+            draw();
+            // Dynamischer Speed: Wird bei jedem Punkt schneller
+            // Bei 0 Punkten: 160ms, bei 100 Punkten: ~60ms (sehr schwer)
+            let speed = Math.max(60, 160 - (score * 1)); 
+            setTimeout(runLoop, speed);
         }
 
         function stopGame() {
@@ -160,7 +176,6 @@
             canvas.style.display = "none";
             scoreDisplay.style.display = "none";
             document.getElementById("snake-start").innerText = "SNAKE START";
-            clearInterval(gameLoop);
         }
 
         function spawnFood() {
@@ -172,40 +187,73 @@
         }
 
         function draw() {
+            direction = nextDirection;
             const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
-            if (head.x < 0) head.x = canvas.width - gridSize;
+
+            // Wall Wrap (Man kann durch die Wand fliegen)
+            if (head.x < 0) head.x = Math.floor((canvas.width-1)/gridSize)*gridSize;
             if (head.x >= canvas.width) head.x = 0;
-            if (head.y < 0) head.y = canvas.height - gridSize;
+            if (head.y < 0) head.y = Math.floor((canvas.height-1)/gridSize)*gridSize;
             if (head.y >= canvas.height) head.y = 0;
-            if (snake.some(s => s.x === head.x && s.y === head.y)) { stopGame(); return; }
+
+            // Self Collision
+            if (snake.some(s => s.x === head.x && s.y === head.y)) {
+                stopGame();
+                return;
+            }
+
             snake.unshift(head);
+
+            // Food Collision (Großzügigerer Radius)
             if (Math.abs(head.x - food.x) < gridSize && Math.abs(head.y - food.y) < gridSize) {
-                scoreVal.innerText = parseInt(scoreVal.innerText) + 1;
+                score++;
+                scoreVal.innerText = score;
                 spawnFood();
-            } else { snake.pop(); }
+            } else {
+                snake.pop();
+            }
+
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Food
             ctx.fillStyle = "#e67e22";
-            ctx.font = "bold 14px sans-serif";
-            ctx.fillText(food.id, food.x, food.y + 15);
+            ctx.font = "bold 16px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText(food.id, food.x + gridSize/2, food.y + gridSize/1.5);
+
+            // Snake
             snake.forEach((s, i) => {
-                ctx.fillStyle = i === 0 ? "#2ecc71" : "rgba(46, 204, 113, 0.3)";
-                ctx.fillRect(s.x, s.y, gridSize - 2, gridSize - 2);
+                ctx.fillStyle = i === 0 ? "rgba(46, 204, 113, 1)" : "rgba(46, 204, 113, 0.3)";
+                ctx.beginPath();
+                ctx.roundRect(s.x + 2, s.y + 2, gridSize - 4, gridSize - 4, 5);
+                ctx.fill();
             });
         }
 
+        // Tastatur Steuerung (Laptop)
+        window.addEventListener("keydown", (e) => {
+            if (!gameActive) return;
+            if (e.key === "ArrowUp" && direction.y === 0) nextDirection = {x: 0, y: -gridSize};
+            if (e.key === "ArrowDown" && direction.y === 0) nextDirection = {x: 0, y: gridSize};
+            if (e.key === "ArrowLeft" && direction.x === 0) nextDirection = {x: -gridSize, y: 0};
+            if (e.key === "ArrowRight" && direction.x === 0) nextDirection = {x: gridSize, y: 0};
+        });
+
+        // Handy Steuerung (Links/Rechts Tap zum Drehen)
         window.addEventListener("touchstart", (e) => {
             if (!gameActive) return;
             const x = e.touches[0].clientX;
-            if (x < window.innerWidth / 2) {
-                if (direction.x === gridSize) direction = {x: 0, y: -gridSize};
-                else if (direction.x === -gridSize) direction = {x: 0, y: gridSize};
-                else if (direction.y === gridSize) direction = {x: gridSize, y: 0};
-                else if (direction.y === -gridSize) direction = {x: -gridSize, y: 0};
-            } else {
-                if (direction.x === gridSize) direction = {x: 0, y: gridSize};
-                else if (direction.x === -gridSize) direction = {x: 0, y: -gridSize};
-                else if (direction.y === gridSize) direction = {x: -gridSize, y: 0};
-                else if (direction.y === -gridSize) direction = {x: gridSize, y: 0};
+            // 90-Grad Drehung Logik
+            if (x < window.innerWidth / 2) { // Links abbiegen
+                if (direction.x === gridSize) nextDirection = {x: 0, y: -gridSize};
+                else if (direction.x === -gridSize) nextDirection = {x: 0, y: gridSize};
+                else if (direction.y === gridSize) nextDirection = {x: gridSize, y: 0};
+                else if (direction.y === -gridSize) nextDirection = {x: -gridSize, y: 0};
+            } else { // Rechts abbiegen
+                if (direction.x === gridSize) nextDirection = {x: 0, y: gridSize};
+                else if (direction.x === -gridSize) nextDirection = {x: 0, y: -gridSize};
+                else if (direction.y === gridSize) nextDirection = {x: -gridSize, y: 0};
+                else if (direction.y === -gridSize) nextDirection = {x: gridSize, y: 0};
             }
         });
     </script>
