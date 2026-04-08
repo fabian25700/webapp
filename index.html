@@ -2,168 +2,29 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Travel Log</title>
-    <script src="daten.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Dashboard</title>
     <style>
-        :root {
-            --accent: #e67e22;
-            --bg: #f8f9fa;
-            --text: #2d3436;
-        }
-
-        body {
-            font-family: -apple-system, system-ui, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        /* Begrüßung */
-        .welcome-section {
-            padding: 60px 20px 30px;
-            text-align: center;
-            width: 100%;
-        }
-
-        .welcome-section h1 {
-            font-size: 2rem;
-            margin: 0;
-            font-weight: 800;
-        }
-
-        .welcome-section p {
-            color: #636e72;
-            margin-top: 10px;
-        }
-
-        /* Dashboard-Karte (Zieht Daten aus daten.js) */
-        .dashboard {
-            width: 90%;
-            max-width: 400px;
-            background: white;
-            padding: 25px;
-            border-radius: 30px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-
-        .dash-item {
-            text-align: center;
-        }
-
-        .dash-val {
-            display: block;
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--accent);
-        }
-
-        .dash-label {
-            font-size: 0.75rem;
-            color: #b2bec3;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Navigation Buttons */
-        .nav-grid {
-            width: 90%;
-            max-width: 400px;
-            display: grid;
-            gap: 15px;
-        }
-
-        .nav-button {
-            background: white;
-            text-decoration: none;
-            color: var(--text);
-            padding: 20px;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            font-weight: 600;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
-            transition: transform 0.2s;
-        }
-
-        .nav-button:active {
-            transform: scale(0.98);
-        }
-
-        .nav-icon {
-            font-size: 1.5rem;
-            margin-right: 15px;
-            background: #fff3e0;
-            width: 45px;
-            height: 45px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-        }
-
-        .chevron {
-            margin-left: auto;
-            color: #dfe6e9;
-        }
+        body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .menu-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 90%; max-width: 600px; }
+        .menu-card { background: white; padding: 40px 20px; border-radius: 25px; text-align: center; text-decoration: none; box-shadow: 0 10px 20px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        .menu-card:active { transform: scale(0.95); }
+        .icon { font-size: 3rem; display: block; margin-bottom: 10px; }
+        .title { font-weight: bold; color: #1e293b; font-size: 1.2rem; }
+        .travel { border-bottom: 5px solid #2ecc71; }
+        .daily { border-bottom: 5px solid #3498db; }
     </style>
 </head>
 <body>
-
-    <section class="welcome-section">
-        <h1>Hallo, Fabian! 🦊</h1>
-        <p>Wo warst du schon überall?</p>
-    </section>
-
-    <div class="dashboard">
-        <div class="dash-item">
-            <span class="dash-val" id="total-countries">0</span>
-            <span class="dash-label">Länder</span>
-        </div>
-        <div class="dash-item">
-            <span class="dash-val" id="total-km">0</span>
-            <span class="dash-label">KM Joggen</span>
-        </div>
+    <div class="menu-container">
+        <a href="reise_stats.html" class="menu-card travel">
+            <span class="icon">🌍</span>
+            <span class="title">Reisen</span>
+        </a>
+        <a href="alltag.html" class="menu-card daily">
+            <span class="icon">🏠</span>
+            <span class="title">Alltag</span>
+        </a>
     </div>
-
-    <nav class="nav-grid">
-        <a href="weltkarte.html" class="nav-button">
-            <div class="nav-icon">🌍</div>
-            <span>Weltkarte</span>
-            <div class="chevron">→</div>
-        </a>
-        <a href="laender.html" class="nav-button">
-            <div class="nav-icon">📊</div>
-            <span>Statistiken & Länder</span>
-            <div class="chevron">→</div>
-        </a>
-    </nav>
-
-    <script>
-        // Daten aus daten.js verarbeiten
-        function loadDashboard() {
-            const totalCountries = MEINE_REISEN.length;
-            let totalKm = 0;
-
-            MEINE_REISEN.forEach(trip => {
-                totalKm += trip.km_gejoggt;
-            });
-
-            // Werte ins HTML schreiben
-            document.getElementById('total-countries').innerText = totalCountries;
-            document.getElementById('total-km').innerText = Math.round(totalKm).toLocaleString('de-DE');
-        }
-
-        // Starten
-        window.onload = loadDashboard;
-    </script>
 </body>
 </html>
