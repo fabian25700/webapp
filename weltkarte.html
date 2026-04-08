@@ -1,95 +1,70 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Weltkarte</title>
     <script src="daten.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        :root { --accent: #e67e22; --bg: #f0f2f5; --land: #d1d8e0; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 15px; text-align: center; }
-        .header { display: flex; align-items: center; margin-bottom: 10px; }
-        .back-btn { text-decoration: none; font-size: 1.5rem; color: var(--accent); margin-right: 15px; font-weight: bold; }
-        
-        #map-container { 
-            background: white; 
-            padding: 10px; 
-            border-radius: 20px; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05); 
-            max-width: 1000px; 
-            margin: 0 auto; 
-        }
-
-        /* Styling der Länder-Pfade */
-        path { 
-            fill: var(--land); 
-            stroke: #ffffff; 
-            stroke-width: 0.4; 
-            transition: fill 0.3s ease;
-        }
-
-        /* Klasse für besuchte Länder */
-        .visited { 
-            fill: var(--accent) !important; 
-        }
-
-        .info-text { margin-top: 15px; font-size: 0.85rem; color: #7f8c8d; font-weight: 600; }
+        body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: -apple-system, sans-serif; background: #f8fafc; }
+        header { background: white; padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #e2e8f0; z-index: 1000; }
+        #map { flex: 1; width: 100%; z-index: 1; background: #aad3df; }
+        .back-link { text-decoration: none; margin-right: 15px; font-size: 1.5rem; color: #e67e22; font-weight: bold; }
+        h1 { margin: 0; font-size: 1.1rem; color: #1e293b; }
     </style>
 </head>
 <body>
+    <header>
+        <a href="index.html" class="back-link">←</a>
+        <h1>Meine Reisekarte 🌍</h1>
+    </header>
+    <div id="map"></div>
 
-    <div class="header">
-        <a href="index.html" class="back-btn">←</a>
-        <h1>Weltkarte</h1>
-    </div>
-
-    <div id="map-container">
-        <svg id="worldmap" viewBox="0 0 1000 600" xmlns="http://www.w3.org/2000/svg">
-            <g id="countries">
-                </g>
-        </svg>
-    </div>
-
-    <p class="info-text" id="status">Aktualisiere Karte...</p>
-
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Wir nutzen eine Karte von einem CDN, die wir direkt in den DOM injizieren
-        // Das umgeht die lokale Fetch-Sperre in den meisten Fällen
-        async function loadAndColorMap() {
-            try {
-                const mapUrl = "https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json";
-                
-                // Falls Fetch lokal blockiert wird, nutzen wir eine eingebettete SVG-Lösung
-                // Da ich hier keine 2000 Zeilen SVG posten kann, nutzen wir diesen Trick:
-                const res = await fetch('https://cdn.jsdelivr.net/npm/world_countries_lists@1.1.0/flags/24x24/de.png'); 
-                
-                // Da Safari lokal extrem zickig ist, hier die sicherste Methode:
-                // Wir nutzen ein fertiges SVG von Cloudflare/Static, das wir als Image-Maske laden oder 
-                // wir nutzen eine Bibliothek. 
-                
-                // Da du VARIABLE sein willst:
-                const besuchteIDs = MEINE_REISEN.map(r => r.id.toUpperCase());
-                
-                // HINWEIS: Da ein Voll-SVG den Rahmen hier sprengt, empfehle ich:
-                // Lade die App auf GitHub Pages hoch (wie besprochen).
-                // DORT wird dieser Code hier ALLES automatisch färben:
-                
-                const response = await fetch('https://raw.githubusercontent.com/djaiss/mapsicon/master/all/world/vector.svg');
-                const svgText = await response.text();
-                document.getElementById('svg-container').innerHTML = svgText;
-                
-                document.querySelectorAll('path').forEach(el => {
-                    const id = (el.id || el.getAttribute('data-id') || "").toUpperCase();
-                    if(besuchteIDs.includes(id)) el.classList.add('visited');
-                });
-                
-                document.getElementById('status').innerText = `Länder synchronisiert: ${besuchteIDs.length}`;
-            } catch(e) {
-                document.getElementById('status').innerHTML = "<b>Safari Hinweis:</b> Damit die Karte dynamisch lädt,<br>muss die App auf GitHub Pages liegen (wegen Sicherheit).";
-            }
-        }
+        // Wir holen uns alle besuchten IDs aus der daten.js
+        const besuchteIDs = MEINE_REISEN.map(r => r.id.toUpperCase());
+
+        // Karte initialisieren
+        const map = L.map('map').setView([30, 10], 2); 
         
-        window.onload = loadAndColorMap;
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Styling-Funktion: Prüft die ID des Landes auf der Karte
+        function style(feature) {
+            // ISO_A2 ist der Standard-Code (DE, US, etc.) in der GeoJSON Datei
+            const iso = feature.properties.ISO_A2 || feature.properties.iso_a2 || feature.id;
+            const istBesucht = iso && besuchteIDs.includes(iso.toUpperCase());
+
+            return {
+                fillColor: istBesucht ? '#e67e22' : '#ffffff', // Orange für besucht, Weiß für Rest
+                weight: 1,
+                opacity: 1,
+                color: '#bdc3c7',
+                fillOpacity: 0.8
+            };
+        }
+
+        // Laden der Ländergrenzen
+        fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
+            .then(res => res.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: style,
+                    onEachFeature: (f, l) => {
+                        const landInfo = MEINE_REISEN.find(r => r.id.toUpperCase() === (f.properties.ISO_A2 || "").toUpperCase());
+                        if (landInfo) {
+                            l.bindPopup(`<b>${landInfo.Land}</b><br>${landInfo.Übernachtungen} Nächte<br>${landInfo.km_gejoggt} km gelaufen`);
+                        } else {
+                            l.bindPopup(`<b>${f.properties.ADMIN}</b><br>Noch nicht besucht`);
+                        }
+                    }
+                }).addTo(map);
+            });
     </script>
 </body>
 </html>
