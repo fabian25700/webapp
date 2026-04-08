@@ -3,119 +3,114 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weltkarte</title>
-    <script src="daten.js"></script>
+    <title>Meine Weltkarte</title>
     <style>
-        :root {
-            --accent: #e67e22;
-            --bg: #f0f2f5;
-            --land-default: #d1d8e0;
-        }
-
-        body {
-            font-family: -apple-system, sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            padding: 15px;
-            text-align: center;
-        }
-
-        .header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .back-btn {
-            text-decoration: none;
-            font-size: 1.5rem;
-            color: var(--accent);
-            margin-right: 15px;
-            font-weight: bold;
-        }
-
+        :root { --accent: #e67e22; --bg: #f0f2f5; --land-default: #d1d8e0; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; text-align: center; }
+        .header { display: flex; align-items: center; margin-bottom: 20px; }
+        .back-btn { text-decoration: none; font-size: 1.5rem; color: var(--accent); margin-right: 15px; font-weight: bold; }
+        
         #map-container {
             background: white;
-            padding: 15px;
-            border-radius: 25px;
+            padding: 20px;
+            border-radius: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            max-width: 1000px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
-        /* Styling der Länder-Pfade */
-        path {
-            fill: var(--land-default);
-            stroke: #ffffff;
-            stroke-width: 0.5;
-            transition: fill 0.3s ease;
-        }
-
+        /* SVG Styling */
+        svg { width: 100%; height: auto; display: block; }
+        path { fill: var(--land-default); stroke: #ffffff; stroke-width: 1; transition: fill 0.4s; }
+        
         /* Die Farbe für deine besuchten Länder */
-        .visited {
-            fill: var(--accent) !important;
-        }
+        .visited { fill: var(--accent) !important; }
 
-        .info-box {
-            margin-top: 15px;
-            font-size: 0.85rem;
-            color: #7f8c8d;
-            font-weight: 600;
-        }
+        .info-box { margin-top: 20px; font-size: 0.9rem; color: #7f8c8d; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <a href="index.html" class="back-btn">←</a>
-        <h1>Meine Weltkarte</h1>
+        <h1>Meine Weltkarte 🌍</h1>
     </div>
 
-    <div id="map-box">
-        <div id="svg-container">
-            <p>Karte wird geladen...</p>
-        </div>
+    <div id="map-container">
+        <svg viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg">
+            <path id="DE" title="Deutschland" d="M510,140 L530,140 L530,170 L510,170 Z" />
+            <path id="CH" title="Schweiz" d="M510,175 L525,175 L525,185 L510,185 Z" />
+            <path id="AT" title="Österreich" d="M530,175 L545,175 L545,185 L530,185 Z" />
+            <path id="FR" title="Frankreich" d="M480,160 L505,160 L505,190 L480,190 Z" />
+            <path id="ES" title="Spanien" d="M450,200 L475,200 L475,230 L450,230 Z" />
+            <path id="PT" title="Portugal" d="M435,205 L445,205 L445,225 L435,225 Z" />
+            <path id="IT" title="Italien" d="M515,190 L535,230 L520,240 L500,200 Z" />
+            <path id="GB" title="England" d="M475,110 L500,110 L500,140 L475,140 Z" />
+            <path id="GR" title="Griechenland" d="M560,210 L585,210 L585,230 L560,230 Z" />
+            <path id="TR" title="Türkei" d="M600,190 L670,190 L670,220 L600,220 Z" />
+            <path id="BE" title="Belgien" d="M495,145 L508,145 L508,158 L495,158 Z" />
+            <path id="NL" title="Niederlande" d="M500,130 L512,130 L512,142 L500,142 Z" />
+            
+            <path id="NO" title="Norwegen" d="M510,50 L525,50 L525,120 L510,120 Z" />
+            <path id="SE" title="Schweden" d="M530,60 L545,60 L545,130 L530,130 Z" />
+            <path id="DK" title="Dänemark" d="M515,125 L535,125 L535,135 L515,135 Z" />
+            
+            <path id="LT" title="Litauen" d="M560,135 L585,135 L585,150 L560,150 Z" />
+            <path id="LV" title="Lettland" d="M560,115 L585,115 L585,130 L560,130 Z" />
+            
+            <path id="US" title="USA" d="M100,120 L250,120 L250,220 L100,220 Z" />
+            <path id="AE" title="VAE" d="M700,280 L730,280 L730,300 L700,300 Z" />
+            <path id="MU" title="Mauritius" d="M720,430 L740,430 L740,450 L720,450 Z" />
+            <path id="MA" title="Marokko" d="M430,250 L470,250 L470,290 L430,290 Z" />
+        </svg>
     </div>
 
-    <div class="info-box" id="status">Suche Länder...</div>
+    <div class="info-box" id="stats-text">Initialisiere...</div>
 
     <script>
-        async function loadMap() {
-            try {
-                // Wir laden die Karte von einem zuverlässigen Ort
-                const response = await fetch('https://raw.githubusercontent.com/djaiss/mapsicon/master/all/world/vector.svg');
-                const svgText = await response.text();
-                
-                // SVG in die Seite einfügen
-                document.getElementById('svg-container').innerHTML = svgText;
+        // DIE DATEN DIREKT IM CODE (Wie früher)
+        const MEINE_REISEN = [
+            { id: "DE", land: "Deutschland", n: 45, km: 754 },
+            { id: "CH", land: "Schweiz", n: 15, km: 40 },
+            { id: "GR", land: "Griechenland", n: 7, km: 5 },
+            { id: "MU", land: "Mauritius", n: 6, km: 31 },
+            { id: "US", land: "USA", n: 6, km: 7 },
+            { id: "CY", land: "Zypern", n: 5, km: 35 },
+            { id: "TR", land: "Türkei", n: 5, km: 11 },
+            { id: "BE", land: "Belgien", n: 4, km: 0 },
+            { id: "DK", land: "Dänemark", n: 4, km: 19 },
+            { id: "SE", land: "Schweden", n: 4, km: 5 },
+            { id: "LT", land: "Litauen", n: 3, km: 26 },
+            { id: "LV", land: "Lettland", n: 3, km: 0 },
+            { id: "AT", land: "Österreich", n: 3, km: 0 },
+            { id: "ES", land: "Spanien", n: 1, km: 27 },
+            { id: "LU", land: "Luxemburg", n: 1, km: 21 },
+            { id: "NL", land: "Niederlande", n: 1, km: 10 },
+            { id: "NO", land: "Norwegen", n: 1, km: 10 },
+            { id: "FR", land: "Frankreich", n: 1, km: 0 },
+            { id: "IT", land: "Italien", n: 1, km: 0 },
+            { id: "GB", land: "England", n: 1, km: 0 },
+            { id: "AE", land: "VAE", n: 1, km: 0 },
+            { id: "MA", land: "Marokko", n: 1, km: 0 }
+        ];
 
-                // 1. Hol dir alle IDs aus deiner daten.js (z.B. ["DE", "CH", "ES"])
-                const besuchteIDs = MEINE_REISEN.map(reise => reise.id.toUpperCase());
+        function colorMap() {
+            let gefundene = 0;
+            
+            MEINE_REISEN.forEach(trip => {
+                const element = document.getElementById(trip.id);
+                if (element) {
+                    element.classList.add('visited');
+                    gefundene++;
+                }
+            });
 
-                // 2. Alle Länder-Pfade im SVG finden
-                const paths = document.querySelectorAll('path');
-                let count = 0;
-
-                paths.forEach(path => {
-                    // Die ID im SVG (meistens klein geschrieben, z.B. "de")
-                    const pathId = (path.id || path.getAttribute('data-id') || "").toUpperCase();
-                    
-                    if (besuchteIDs.includes(pathId)) {
-                        path.classList.add('visited');
-                        count++;
-                    }
-                });
-
-                document.getElementById('status').innerText = `Markierte Länder: ${count} von ${besuchteIDs.length}`;
-
-            } catch (error) {
-                console.error("Kartenfehler:", error);
-                document.getElementById('status').innerText = "Karte konnte nicht geladen werden (Internet prüfen).";
-            }
+            document.getElementById('stats-text').innerText = 
+                `Du hast ${MEINE_REISEN.length} Länder in deiner Liste und ${gefundene} davon sind auf der Karte markiert.`;
         }
 
-        // Starten, wenn die Seite bereit ist
-        window.onload = loadMap;
+        // Ausführen
+        window.onload = colorMap;
     </script>
 </body>
 </html>
