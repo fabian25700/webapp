@@ -3,101 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Besuchte Länder - Statistik</title>
+    <title>Meine Reisedaten</title>
     <style>
-        :root {
-            --primary: #2563eb;
-            --secondary: #10b981;
-            --bg: #f8fafc;
-            --card: #ffffff;
-        }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; }
-        .header { display: flex; align-items: center; margin-bottom: 25px; }
+        :root { --primary: #e67e22; --bg: #f8fafc; --card: #ffffff; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .header { display: flex; align-items: center; margin-bottom: 20px; }
         .back-btn { text-decoration: none; font-size: 1.5rem; margin-right: 15px; color: var(--primary); }
         
-        /* Statistik-Karten */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
-        .stat-card { background: var(--card); padding: 20px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
-        .stat-num { display: block; font-size: 1.8rem; font-weight: 800; color: var(--primary); }
-        .stat-label { font-size: 0.8rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
-
-        /* Große Aktions-Karte */
-        .map-card { 
-            background: linear-gradient(135deg, #2563eb, #3b82f6); 
-            color: white; padding: 25px; border-radius: 24px; 
-            margin-bottom: 25px; text-decoration: none; display: block;
-            box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
-        }
-        .map-card h2 { margin: 0 0 10px 0; font-size: 1.4rem; }
-
-        /* Länder-Liste */
-        .country-list { background: var(--card); border-radius: 20px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .country-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
-        .country-item:last-child { border: none; }
-        .tag { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: var(--card); padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .stat-num { display: block; font-size: 1.4rem; font-weight: bold; color: var(--primary); }
+        
+        .trip-card { background: white; border-radius: 18px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); }
+        .trip-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 8px; }
+        .trip-details { font-size: 0.85rem; color: #64748b; line-height: 1.5; }
+        .jogging-tag { display: inline-block; margin-top: 8px; background: #fff3e0; color: #e67e22; padding: 4px 8px; border-radius: 8px; font-weight: bold; font-size: 0.75rem; }
     </style>
 </head>
 <body>
-
     <div class="header">
         <a href="index.html" class="back-btn">←</a>
-        <h1 style="margin:0; font-size: 1.5rem;">Reise-Übersicht</h1>
+        <h1 style="margin:0; font-size: 1.3rem;">Reise-Logbuch</h1>
     </div>
-
-    <a href="weltkarte.html" class="map-card">
-        <h2>🗺️ Interaktive Weltkarte</h2>
-        <p style="margin:0; opacity: 0.9; font-size: 0.9rem;">Sieh dir deine Reisen visuell auf der Karte an.</p>
-    </a>
 
     <div class="stats-grid">
-        <div class="stat-card">
-            <span class="stat-num" id="count-total">0</span>
-            <span class="stat-label">Länder</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-num" id="count-percent">0%</span>
-            <span class="stat-label">der Welt</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-num">3</span>
-            <span class="stat-label">Kontinente</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-num">Top</span>
-            <span class="stat-label">Europa</span>
-        </div>
+        <div class="stat-card"><span class="stat-num" id="total-nights">0</span><span>Nächte</span></div>
+        <div class="stat-card"><span class="stat-num" id="total-km">0</span><span>km Joggen</span></div>
     </div>
 
-    <div class="country-list">
-        <h3 style="margin: 0 0 15px 10px;">Deine Liste</h3>
-        <div id="list-container">
-            </div>
-    </div>
+    <div id="reise-liste">Lade Daten aus Google Sheets...</div>
 
     <script>
-        const laender = [
-            "Deutschland", "Spanien", "Frankreich", "Niederlande", "Schweiz", 
-            "Griechenland", "Italien", "Türkei", "England", "Schweden", 
-            "Vatikan", "Vereinigte Arabische Emirate", "Dänemark", "Luxemburg", 
-            "Österreich", "Belgien", "Malta", "Gibraltar", "Marokko", 
-            "Ungarn", "Portugal", "Norway", "Litauen", "USA", "Slowakei", 
-            "Mauritius", "Lettland", "Zypern"
-        ];
+        // HIER DEINE APPS SCRIPT URL EINTRAGEN
+        const url = "https://script.google.com/macros/s/AKfycbwUO2O0WhjTQQdI8_23z1Bx77LMihNG-qCDG4VMxKyFo6NJxJwosOPrG-SjSSvE6JkJ/exec";
 
-        // Statistiken berechnen
-        document.getElementById('count-total').innerText = laender.length;
-        // Es gibt ca. 195 Länder auf der Welt
-        const prozent = ((laender.length / 195) * 100).toFixed(1);
-        document.getElementById('count-percent').innerText = prozent + "%";
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('reise-liste');
+                container.innerHTML = "";
+                let nights = 0;
+                let km = 0;
 
-        // Liste generieren
-        const container = document.getElementById('list-container');
-        laender.sort().forEach(land => {
-            const div = document.createElement('div');
-            div.className = 'country-item';
-            div.innerHTML = `<span>${land}</span> <span class="tag">Besucht</span>`;
-            container.appendChild(div);
-        });
+                data.forEach(trip => {
+                    nights += Number(trip.Übernachtungen || 0);
+                    km += Number(trip.km_gejoggt || 0);
+
+                    container.innerHTML += `
+                        <div class="trip-card">
+                            <div class="trip-header">
+                                <span>${trip.Land}</span>
+                                <span style="color:#94a3b8">#${trip.Platz}</span>
+                            </div>
+                            <div class="trip-details">
+                                📍 ${trip.Wohnorte}<br>
+                                🏨 ${trip.Unterkünfte} (${trip.Übernachtungen} Nächte)<br>
+                                📅 Ankunft: ${trip.Ankunft}
+                            </div>
+                            ${trip.km_gejoggt > 0 ? `<div class="jogging-tag">🏃 ${trip.km_gejoggt} km gelaufen</div>` : ''}
+                        </div>
+                    `;
+                });
+
+                document.getElementById('total-nights').innerText = nights;
+                document.getElementById('total-km').innerText = km.toFixed(1);
+            })
+            .catch(err => {
+                document.getElementById('reise-liste').innerText = "Fehler beim Laden der Daten.";
+                console.error(err);
+            });
     </script>
 </body>
 </html>
