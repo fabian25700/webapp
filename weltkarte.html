@@ -3,83 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meine Weltkarte</title>
-    
+    <title>Weltkarte</title>
     <script src="daten.js"></script>
-    
-    <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
-    <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
-
     <style>
-        :root { --accent: #e67e22; --bg: #f0f2f5; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        :root { --accent: #e67e22; --bg: #f0f2f5; --land-frei: #d1d8e0; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; text-align: center; }
         .header { display: flex; align-items: center; margin-bottom: 20px; }
         .back-btn { text-decoration: none; font-size: 1.5rem; color: var(--accent); margin-right: 15px; }
         
-        #chartdiv {
-            width: 100%;
-            height: 500px;
+        #map-wrapper {
             background: white;
+            padding: 20px;
             border-radius: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            max-width: 1000px;
+            margin: 0 auto;
         }
-        .info { margin-top: 15px; color: #7f8c8d; text-align: center; font-size: 0.9rem; }
+
+        /* Das ist wichtig für die Einfärbung */
+        path { 
+            fill: var(--land-frei); 
+            stroke: #ffffff; 
+            stroke-width: 0.5; 
+            transition: fill 0.4s; 
+        }
+
+        /* Die Klasse, die wir per Script vergeben */
+        .visited { 
+            fill: var(--accent) !important; 
+        }
+
+        .stats-info { margin-top: 20px; font-weight: bold; color: #7f8c8d; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <a href="index.html" class="back-btn">←</a>
-        <h1>Meine Weltkarte 🌍</h1>
+        <h1>Weltkarte</h1>
     </div>
 
-    <div id="chartdiv"></div>
-    <div class="info" id="stats">Lade Karte...</div>
+    <div id="map-wrapper">
+        <div id="svg-container">
+            </div>
+    </div>
+
+    <p class="stats-info" id="status">Lade Karte...</p>
 
     <script>
-        // 1. Karte initialisieren
-        am5.ready(function() {
-            var root = am5.Root.new("chartdiv");
-            root.setThemes([am5themes_Animated.new(root)]);
+        async function initMap() {
+            try {
+                // Wir laden eine zuverlässige Weltkarte
+                const response = await fetch('https://raw.githubusercontent.com/djaiss/mapsicon/master/all/world/vector.svg');
+                let svgText = await response.text();
+                
+                document.getElementById('svg-container').innerHTML = svgText;
+                
+                // Jetzt die Logik zum Einfärben
+                const besuchteLaender = MEINE_REISEN.map(r => r.Land);
+                const paths = document.querySelectorAll('path');
+                let gefundeneLaender = 0;
 
-            var chart = root.container.children.push(am5map.MapChart.new(root, {
-                panX: "translateX",
-                panY: "translateY",
-                projection: am5map.geoMercator()
-            }));
-
-            var polygonSeries = chart.series.push(am5map.MapPolygonSeries.new(root, {
-                geoJSON: am5geodata_worldLow,
-                exclude: ["AQ"] // Antarktis ausblenden
-            }));
-
-            // 2. Deine besuchten Länder vorbereiten
-            // Wir müssen die Klarnamen aus daten.js in die Karte matchen
-            const besuchteNamen = MEINE_REISEN.map(t => t.Land);
-            
-            polygonSeries.mapPolygons.template.setAll({
-                tooltipText: "{name}",
-                templateField: "polygonSettings",
-                fill: am5.color(0xd1d8e0),
-                stroke: am5.color(0xffffff)
-            });
-
-            // 3. Länder einfärben
-            polygonSeries.events.on("datavalidated", function() {
-                polygonSeries.mapPolygons.each(function(polygon) {
-                    var name = polygon.dataItem.get("name");
-                    // Checke ob der Name in deiner Liste ist
-                    if (besuchteNamen.includes(name)) {
-                        polygon.set("fill", am5.color(0xe67e22));
+                paths.forEach(path => {
+                    // Wir prüfen 'id', 'name' und 'data-name' (Safari Support)
+                    const landName = path.getAttribute('name') || path.id;
+                    
+                    if (besuchteLaender.includes(landName)) {
+                        path.classList.add('visited');
+                        gefundeneLaender++;
                     }
                 });
-                document.getElementById('stats').innerText = 
-                    `Länder in deiner Liste: ${besuchteNamen.length}`;
-            });
 
-        }); // Ende am5.ready
+                document.getElementById('status').innerText = 
+                    `Länder besucht: ${besuchteLaender.length} | Auf Karte markiert: ${gefundeneLaender}`;
+
+            } catch (err) {
+                document.getElementById('status').innerText = "Karte konnte nicht geladen werden.";
+                console.error(err);
+            }
+        }
+
+        // Starten
+        window.onload = initMap;
     </script>
 </body>
 </html>
