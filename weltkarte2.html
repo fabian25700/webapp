@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weltkarte</title>
+    <script src="daten.js"></script>
+    <style>
+        :root {
+            --accent: #e67e22;
+            --bg: #f0f2f5;
+            --land-default: #d1d8e0;
+        }
+
+        body {
+            font-family: -apple-system, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin-right: 15px;
+            font-weight: bold;
+        }
+
+        #map-container {
+            background: white;
+            padding: 15px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Styling der Länder-Pfade */
+        path {
+            fill: var(--land-default);
+            stroke: #ffffff;
+            stroke-width: 0.5;
+            transition: fill 0.3s ease;
+        }
+
+        /* Die Farbe für deine besuchten Länder */
+        .visited {
+            fill: var(--accent) !important;
+        }
+
+        .info-box {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="index.html" class="back-btn">←</a>
+        <h1>Meine Weltkarte</h1>
+    </div>
+
+    <div id="map-box">
+        <div id="svg-container">
+            <p>Karte wird geladen...</p>
+        </div>
+    </div>
+
+    <div class="info-box" id="status">Suche Länder...</div>
+
+    <script>
+        async function loadMap() {
+            try {
+                // Wir laden die Karte von einem zuverlässigen Ort
+                const response = await fetch('https://raw.githubusercontent.com/djaiss/mapsicon/master/all/world/vector.svg');
+                const svgText = await response.text();
+                
+                // SVG in die Seite einfügen
+                document.getElementById('svg-container').innerHTML = svgText;
+
+                // 1. Hol dir alle IDs aus deiner daten.js (z.B. ["DE", "CH", "ES"])
+                const besuchteIDs = MEINE_REISEN.map(reise => reise.id.toUpperCase());
+
+                // 2. Alle Länder-Pfade im SVG finden
+                const paths = document.querySelectorAll('path');
+                let count = 0;
+
+                paths.forEach(path => {
+                    // Die ID im SVG (meistens klein geschrieben, z.B. "de")
+                    const pathId = (path.id || path.getAttribute('data-id') || "").toUpperCase();
+                    
+                    if (besuchteIDs.includes(pathId)) {
+                        path.classList.add('visited');
+                        count++;
+                    }
+                });
+
+                document.getElementById('status').innerText = `Markierte Länder: ${count} von ${besuchteIDs.length}`;
+
+            } catch (error) {
+                console.error("Kartenfehler:", error);
+                document.getElementById('status').innerText = "Karte konnte nicht geladen werden (Internet prüfen).";
+            }
+        }
+
+        // Starten, wenn die Seite bereit ist
+        window.onload = loadMap;
+    </script>
+</body>
+</html>
