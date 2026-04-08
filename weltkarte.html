@@ -8,17 +8,13 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         body { margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; font-family: -apple-system, sans-serif; background: #f8fafc; }
-        header { background: white; padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #e2e8f0; z-index: 1000; }
+        header { background: white; padding: 15px; border-bottom: 1px solid #e2e8f0; z-index: 1000; }
         #map { flex: 1; width: 100%; background: #aad3df; }
-        .back-link { text-decoration: none; margin-right: 15px; font-size: 1.5rem; color: #e67e22; font-weight: bold; }
-        h1 { margin: 0; font-size: 1.1rem; color: #1e293b; }
+        .back-link { text-decoration: none; font-size: 1.5rem; color: #e67e22; font-weight: bold; margin-right: 15px; }
     </style>
 </head>
 <body>
-    <header>
-        <a href="index.html" class="back-link">←</a>
-        <h1>Meine Reisekarte 🌍</h1>
-    </header>
+    <header><a href="index.html" class="back-link">←</a><h1>Reisekarte</h1></header>
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -26,51 +22,14 @@
         const map = L.map('map').setView([30, 10], 2); 
         L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(map);
 
-        // Such-Logik: Findet den Eintrag in deiner daten.js
-        function findeInfo(feature) {
-            const p = feature.properties;
-            
-            // 1. Suche über ISO-Code (Sicherste Methode)
-            // GeoJSON nutzt oft ISO_A2, ISO_A3 oder ADM0_A3
-            const geoID = (p.ISO_A2 || p.iso_a2 || p.ISO_A2_EH || "").toUpperCase();
-            
-            // 2. Suche über Name (Englisch vs Deutsch Mapping)
-            const geoName = (p.ADMIN || p.name || "").toLowerCase();
-
-            return MEINE_REISEN.find(r => {
-                const datenID = r.id.toUpperCase();
-                const datenLand = r.Land.toLowerCase();
-
-                return datenID === geoID || 
-                       datenLand === geoName ||
-                       // Manuelles Backup für häufige Abweichungen
-                       (geoName === "germany" && datenLand === "deutschland") ||
-                       (geoName === "spain" && datenLand === "spanien") ||
-                       (geoName === "switzerland" && datenLand === "schweiz") ||
-                       (geoName === "italy" && datenLand === "italien") ||
-                       (geoName === "france" && datenLand === "frankreich") ||
-                       (geoName === "united kingdom" && datenLand === "england") ||
-                       (geoName === "greece" && datenLand === "griechenland") ||
-                       (geoName === "turkey" && datenLand === "türkei") ||
-                       (geoName === "sweden" && datenLand === "schweden") ||
-                       (geoName === "denmark" && datenLand === "dänemark") ||
-                       (geoName === "norway" && datenLand === "norwegen") ||
-                       (geoName === "lithuania" && datenLand === "litauen") ||
-                       (geoName === "latvia" && datenLand === "lettland") ||
-                       (geoName === "austria" && datenLand === "österreich") ||
-                       (geoName === "belgium" && datenLand === "belgien") ||
-                       (geoName === "portugal" && datenLand === "portugal") ||
-                       (geoName === "united states of america" && datenLand === "usa") ||
-                       (geoName === "morocco" && datenLand === "marokko")
-            });
-        }
-
         function style(feature) {
-            const info = findeInfo(feature);
+            const geoName = feature.properties.name || feature.properties.ADMIN || "";
+            // Prüfen, ob dieser englische Name in unserer name_en Spalte existiert
+            const istBesucht = MEINE_REISEN.some(r => r.name_en.toLowerCase() === geoName.toLowerCase());
+
             return {
-                fillColor: info ? '#e67e22' : '#ffffff',
-                weight: 1, color: '#bdc3c7', opacity: 1,
-                fillOpacity: info ? 0.8 : 0.5
+                fillColor: istBesucht ? '#e67e22' : '#ffffff',
+                weight: 1, color: '#bdc3c7', fillOpacity: istBesucht ? 0.8 : 0.5
             };
         }
 
@@ -80,11 +39,10 @@
                 L.geoJSON(data, {
                     style: style,
                     onEachFeature: (f, l) => {
-                        const info = findeInfo(f);
+                        const geoName = f.properties.name || f.properties.ADMIN || "";
+                        const info = MEINE_REISEN.find(r => r.name_en.toLowerCase() === geoName.toLowerCase());
                         if (info) {
                             l.bindPopup(`<b>${info.Land}</b><br>🏨 ${info.Übernachtungen} Nächte<br>🏃 ${info.km_gejoggt} km`);
-                        } else {
-                            l.bindPopup(`<b>${f.properties.ADMIN || f.properties.name}</b><br>Noch nicht besucht`);
                         }
                     }
                 }).addTo(map);
