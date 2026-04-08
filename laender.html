@@ -3,74 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meine Reisedaten</title>
+    <title>Fabians Reiselog</title>
     <style>
-        :root { --primary: #e67e22; --bg: #f8fafc; --card: #ffffff; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-        .header { display: flex; align-items: center; margin-bottom: 20px; }
-        .back-btn { text-decoration: none; font-size: 1.5rem; margin-right: 15px; color: var(--primary); }
+        :root { --fox: #e67e22; --bg: #f4f7f6; --text: #2c3e50; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
+        .header { display: flex; align-items: center; margin-bottom: 20px; padding: 10px; }
+        .back-btn { text-decoration: none; font-size: 1.8rem; margin-right: 15px; color: var(--fox); }
         
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .stat-card { background: var(--card); padding: 15px; border-radius: 15px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .stat-num { display: block; font-size: 1.4rem; font-weight: bold; color: var(--primary); }
+        .stats-container { display: flex; gap: 10px; margin-bottom: 20px; }
+        .stat-card { flex: 1; background: white; padding: 15px; border-radius: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .stat-val { display: block; font-size: 1.5rem; font-weight: 800; color: var(--fox); }
+        .stat-lbl { font-size: 0.7rem; color: #95a5a6; text-transform: uppercase; }
+
+        .trip-card { background: white; border-radius: 25px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.03); position: relative; overflow: hidden; }
+        .trip-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--fox); }
         
-        .trip-card { background: white; border-radius: 18px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); }
-        .trip-header { display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 8px; }
-        .trip-details { font-size: 0.85rem; color: #64748b; line-height: 1.5; }
-        .jogging-tag { display: inline-block; margin-top: 8px; background: #fff3e0; color: #e67e22; padding: 4px 8px; border-radius: 8px; font-weight: bold; font-size: 0.75rem; }
+        .trip-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .country-name { font-size: 1.3rem; font-weight: 800; margin: 0; }
+        .arrival-date { font-size: 0.8rem; color: #7f8c8d; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 0.9rem; }
+        .info-item { display: flex; align-items: flex-start; gap: 10px; }
+        .icon { width: 20px; text-align: center; }
+
+        .badges { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
+        .badge { padding: 6px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; }
+        .badge-jog { background: #fff3e0; color: #e67e22; }
+        .badge-flight { background: #e1f5fe; color: #0288d1; }
     </style>
 </head>
 <body>
+
     <div class="header">
         <a href="index.html" class="back-btn">←</a>
-        <h1 style="margin:0; font-size: 1.3rem;">Reise-Logbuch</h1>
+        <h1 style="margin:0; font-size: 1.5rem;">Reisetagebuch 🦊</h1>
     </div>
 
-    <div class="stats-grid">
-        <div class="stat-card"><span class="stat-num" id="total-nights">0</span><span>Nächte</span></div>
-        <div class="stat-card"><span class="stat-num" id="total-km">0</span><span>km Joggen</span></div>
+    <div class="stats-container">
+        <div class="stat-card"><span class="stat-val" id="total-nights">0</span><span class="stat-lbl">Nächte</span></div>
+        <div class="stat-card"><span class="stat-val" id="total-km">0</span><span class="stat-lbl">KM Joggen</span></div>
     </div>
 
-    <div id="reise-liste">Lade deine Daten aus Google Sheets...</div>
+    <div id="logbook">Lade deine Reisen...</div>
 
     <script>
-        // HIER DEINE APPS SCRIPT URL EINTRAGEN
-        const url = "https://script.google.com/macros/s/AKfycbwUO2O0WhjTQQdI8_23z1Bx77LMihNG-qCDG4VMxKyFo6NJxJwosOPrG-SjSSvE6JkJ/exec";
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbwUO2O0WhjTQQdI8_23z1Bx77LMihNG-qCDG4VMxKyFo6NJxJwosOPrG-SjSSvE6JkJ/exec";
 
-        fetch(url)
+        fetch(scriptUrl)
             .then(res => res.json())
             .then(data => {
-                const container = document.getElementById('reise-liste');
+                const container = document.getElementById('logbook');
                 container.innerHTML = "";
-                let nights = 0;
-                let km = 0;
+                let sumNights = 0;
+                let sumKm = 0;
 
                 data.forEach(trip => {
-                    nights += Number(trip.Übernachtungen || 0);
-                    km += Number(trip.km_gejoggt || 0);
+                    sumNights += Number(trip.übernachtungen || 0);
+                    sumKm += Number(trip.kmgejoggt || 0);
 
                     container.innerHTML += `
                         <div class="trip-card">
                             <div class="trip-header">
-                                <span>${trip.Land}</span>
-                                <span style="color:#94a3b8">#${trip.Platz}</span>
+                                <div>
+                                    <p class="arrival-date">${trip.ankunft || 'Datum unbekannt'}</p>
+                                    <h2 class="country-name">${trip.land}</h2>
+                                </div>
+                                <span style="font-weight:900; color:#eee; font-size:1.5rem;">#${trip.platz}</span>
                             </div>
-                            <div class="trip-details">
-                                📍 ${trip.Wohnorte}<br>
-                                🏨 ${trip.Unterkünfte} (${trip.Übernachtungen} Nächte)<br>
-                                📅 Ankunft: ${trip.Ankunft}
+                            
+                            <div class="info-grid">
+                                <div class="info-item"><span class="icon">📍</span> <span>${trip.wohnorte}</span></div>
+                                <div class="info-item"><span class="icon">🏨</span> <span>${trip.unterkünfte} (${trip.übernachtungen} Nächte)</span></div>
+                                ${trip.flüge ? `<div class="info-item"><span class="icon">✈️</span> <span>${trip.flüge}</span></div>` : ''}
                             </div>
-                            ${trip.km_gejoggt > 0 ? `<div class="jogging-tag">🏃 ${trip.km_gejoggt} km gelaufen</div>` : ''}
+
+                            <div class="badges">
+                                ${trip.kmgejoggt > 0 ? `<div class="badge badge-jog">🏃 ${trip.kmgejoggt} km gejoggt</div>` : ''}
+                                ${trip.flüge ? `<div class="badge badge-badge-flight">✈️ Flugreise</div>` : ''}
+                            </div>
                         </div>
                     `;
                 });
 
-                document.getElementById('total-nights').innerText = nights;
-                document.getElementById('total-km').innerText = km.toFixed(1);
+                document.getElementById('total-nights').innerText = sumNights;
+                document.getElementById('total-km').innerText = sumKm.toFixed(1);
             })
             .catch(err => {
-                document.getElementById('reise-liste').innerText = "Fehler beim Laden der Daten.";
-                console.error(err);
+                document.getElementById('logbook').innerHTML = "<p>Fehler beim Laden. Prüfe die URL und die Berechtigungen.</p>";
             });
     </script>
 </body>
