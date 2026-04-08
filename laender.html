@@ -3,73 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reisestatistik</title>
+    <title>Statistiken</title>
     <script src="daten.js"></script>
     <style>
-        :root { --accent: #e67e22; --bg: #f4f7f6; --card: #ffffff; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #2d3436; }
-        .header { display: flex; align-items: center; margin-bottom: 25px; }
-        .back-btn { text-decoration: none; font-size: 1.5rem; color: var(--accent); margin-right: 15px; }
-        
-        /* Dashboard */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }
-        .stat-card { background: var(--card); padding: 20px; border-radius: 20px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .stat-val { display: block; font-size: 1.6rem; font-weight: 800; color: var(--accent); }
-        .stat-lbl { font-size: 0.7rem; color: #b2bec3; text-transform: uppercase; letter-spacing: 1px; }
+        :root { --accent: #e67e22; --bg: #f4f7f6; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #2d3436; }
+        .header { display: flex; align-items: center; margin-bottom: 15px; }
+        .back-btn { text-decoration: none; font-size: 1.2rem; color: var(--accent); margin-right: 10px; }
+        h1 { font-size: 1.2rem; margin: 0; }
 
-        /* Liste */
-        .list { display: grid; gap: 12px; }
-        .item { background: var(--card); padding: 15px 20px; border-radius: 18px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.02); }
-        .item-info h2 { margin: 0; font-size: 1rem; }
-        .item-sub { font-size: 0.8rem; color: #636e72; }
-        .jog-info { color: var(--accent); font-weight: bold; font-size: 0.85rem; margin-top: 4px; }
-        .iso-code { font-weight: 900; color: #dfe6e9; font-size: 1.2rem; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-card { background: white; padding: 12px; border-radius: 15px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .stat-val { display: block; font-size: 1.3rem; font-weight: 800; color: var(--accent); }
+        .stat-lbl { font-size: 0.6rem; color: #b2bec3; text-transform: uppercase; }
+
+        .list { display: grid; gap: 8px; }
+        .item { 
+            background: white; 
+            padding: 10px 15px; 
+            border-radius: 12px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            box-shadow: 0 1px 4px rgba(0,0,0,0.03); 
+        }
+        .item-info h2 { margin: 0; font-size: 0.95rem; }
+        .item-sub { font-size: 0.75rem; color: #636e72; }
+        .jog-info { color: var(--accent); font-weight: bold; font-size: 0.75rem; }
+        .iso-code { font-weight: 800; color: #dfe6e9; font-size: 0.9rem; width: 30px; text-align: right; }
     </style>
 </head>
 <body>
-
-    <div class="header">
-        <a href="index.html" class="back-btn">←</a>
-        <h1>Statistiken</h1>
-    </div>
-
+    <div class="header"><a href="index.html" class="back-btn">←</a><h1>Statistiken</h1></div>
     <div class="stats-grid">
-        <div class="stat-card">
-            <span class="stat-val" id="total-n">0</span>
-            <span class="stat-label">Nächte</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-val" id="total-k">0</span>
-            <span class="stat-label">Gesamt KM</span>
-        </div>
+        <div class="stat-card"><span class="stat-val" id="total-n">0</span><span class="stat-lbl">Nächte</span></div>
+        <div class="stat-card"><span class="stat-val" id="total-k">0</span><span class="stat-lbl">KM Joggen</span></div>
     </div>
-
     <div class="list" id="main-list"></div>
 
     <script>
-        function render() {
+        window.onload = function() {
             const list = document.getElementById('main-list');
-            let sumN = 0; let sumK = 0;
-
+            let sumN = 0, sumK = 0;
             MEINE_REISEN.forEach(trip => {
-                sumN += trip.Übernachtungen;
-                sumK += trip.km_gejoggt;
-
+                sumN += trip.Übernachtungen; sumK += trip.km_gejoggt;
                 list.innerHTML += `
                     <div class="item">
                         <div class="item-info">
                             <h2>${trip.Land}</h2>
-                            <div class="item-sub">${trip.Übernachtungen} Nächte • ${trip.Unterkünfte} Unterkünfte</div>
-                            ${trip.km_gejoggt > 0 ? `<div class="jog-info">🏃 ${trip.km_gejoggt} km</div>` : ''}
+                            <div class="item-sub">${trip.Übernachtungen} Nächte • ${trip.km_gejoggt} km</div>
                         </div>
                         <div class="iso-code">${trip.id}</div>
-                    </div>
-                `;
+                    </div>`;
             });
             document.getElementById('total-n').innerText = sumN;
             document.getElementById('total-k').innerText = sumK.toLocaleString('de-DE');
-        }
-        window.onload = render;
+        };
     </script>
 </body>
 </html>
