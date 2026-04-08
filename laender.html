@@ -2,95 +2,89 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fabians Reiselog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Fabians Reisen</title>
     <style>
-        :root { --fox: #e67e22; --bg: #f4f7f6; --text: #2c3e50; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
-        .header { display: flex; align-items: center; margin-bottom: 20px; padding: 10px; }
-        .back-btn { text-decoration: none; font-size: 1.8rem; margin-right: 15px; color: var(--fox); }
+        :root { --accent: #e67e22; --bg: #f0f2f5; --card: #ffffff; --text: #1c1e21; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
         
-        .stats-container { display: flex; gap: 10px; margin-bottom: 20px; }
-        .stat-card { flex: 1; background: white; padding: 15px; border-radius: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .stat-val { display: block; font-size: 1.5rem; font-weight: 800; color: var(--fox); }
-        .stat-lbl { font-size: 0.7rem; color: #95a5a6; text-transform: uppercase; }
+        /* Header */
+        .header { background: white; padding: 50px 20px 20px; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .nav-top { display: flex; align-items: center; margin-bottom: 20px; }
+        .back-btn { text-decoration: none; font-size: 1.5rem; color: var(--accent); margin-right: 15px; font-weight: bold; }
+        h1 { margin: 0; font-size: 1.6rem; font-weight: 800; }
 
-        .trip-card { background: white; border-radius: 25px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.03); position: relative; overflow: hidden; }
-        .trip-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--fox); }
+        /* Stats Bar */
+        .stats-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .stat-item { background: #fff5ed; padding: 15px; border-radius: 20px; text-align: center; }
+        .stat-val { display: block; font-size: 1.4rem; font-weight: 800; color: var(--accent); }
+        .stat-lbl { font-size: 0.7rem; color: #6e767d; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Trip List */
+        .container { padding: 20px; }
+        .trip-card { background: var(--card); border-radius: 25px; padding: 20px; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.05); }
+        .trip-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .place-tag { font-size: 0.75rem; background: #eee; padding: 4px 10px; border-radius: 10px; color: #666; font-weight: bold; }
         
-        .trip-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-        .country-name { font-size: 1.3rem; font-weight: 800; margin: 0; }
-        .arrival-date { font-size: 0.8rem; color: #7f8c8d; }
+        .country { font-size: 1.4rem; font-weight: 800; margin: 5px 0; color: var(--accent); }
+        .date { font-size: 0.85rem; color: #999; }
 
-        .info-grid { display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 0.9rem; }
-        .info-item { display: flex; align-items: flex-start; gap: 10px; }
-        .icon { width: 20px; text-align: center; }
+        .details { display: grid; gap: 10px; margin-top: 15px; font-size: 0.95rem; }
+        .detail-row { display: flex; align-items: center; gap: 12px; }
+        .icon { font-size: 1.2rem; width: 25px; }
 
-        .badges { display: flex; gap: 8px; margin-top: 15px; flex-wrap: wrap; }
-        .badge { padding: 6px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; }
-        .badge-jog { background: #fff3e0; color: #e67e22; }
-        .badge-flight { background: #e1f5fe; color: #0288d1; }
+        .badge-row { display: flex; gap: 10px; margin-top: 20px; }
+        .badge { font-size: 0.75rem; font-weight: bold; padding: 8px 12px; border-radius: 12px; }
+        .jog-badge { background: #e67e22; color: white; }
+        .flight-badge { background: #007aff; color: white; }
+
+        #loader { text-align: center; padding: 50px; color: #999; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <a href="index.html" class="back-btn">←</a>
-        <h1 style="margin:0; font-size: 1.5rem;">Reisetagebuch 🦊</h1>
+        <div class="nav-top">
+            <a href="index.html" class="back-btn">←</a>
+            <h1>Reiselog 🦊</h1>
+        </div>
+        <div class="stats-bar">
+            <div class="stat-item"><span class="stat-val" id="total-naechte">0</span><span class="stat-lbl">Nächte</span></div>
+            <div class="stat-item"><span class="stat-val" id="total-km">0</span><span class="stat-lbl">km Joggen</span></div>
+        </div>
     </div>
 
-    <div class="stats-container">
-        <div class="stat-card"><span class="stat-val" id="total-nights">0</span><span class="stat-lbl">Nächte</span></div>
-        <div class="stat-card"><span class="stat-val" id="total-km">0</span><span class="stat-lbl">KM Joggen</span></div>
+    <div class="container" id="trip-list">
+        <div id="loader">Lade deine Abenteuer...</div>
     </div>
-
-    <div id="logbook">Lade deine Reisen...</div>
 
     <script>
-        const scriptUrl = "https://script.google.com/macros/s/AKfycbwUO2O0WhjTQQdI8_23z1Bx77LMihNG-qCDG4VMxKyFo6NJxJwosOPrG-SjSSvE6JkJ/exec";
+        // DEINE URL HIER EINSETZEN
+        const sheetURL = "https://script.google.com/macros/s/AKfycbwUO2O0WhjTQQdI8_23z1Bx77LMihNG-qCDG4VMxKyFo6NJxJwosOPrG-SjSSvE6JkJ/exec";
 
-        fetch(scriptUrl)
-            .then(res => res.json())
-            .then(data => {
-                const container = document.getElementById('logbook');
-                container.innerHTML = "";
+        async function loadTrips() {
+            try {
+                const response = await fetch(sheetURL);
+                const data = await response.json();
+                
+                const list = document.getElementById('trip-list');
+                list.innerHTML = "";
+                
                 let sumNights = 0;
                 let sumKm = 0;
 
                 data.forEach(trip => {
-                    sumNights += Number(trip.übernachtungen || 0);
-                    sumKm += Number(trip.kmgejoggt || 0);
+                    // Hier nutzen wir die EXAKTEN Namen aus deinem Excel
+                    const land = trip['Land'] || 'Unbekannt';
+                    const platz = trip['Platz'] || '';
+                    const wohnorte = trip['Wohnorte'] || '-';
+                    const naechte = Number(trip['Übernachtungen'] || 0);
+                    const unterkunft = trip['Unterkünfte'] || '-';
+                    const fluege = trip['Flüge'];
+                    const ankunft = trip['Ankunft'] || '';
+                    const km = Number(trip['"km gejoggt"'] || 0);
 
-                    container.innerHTML += `
-                        <div class="trip-card">
-                            <div class="trip-header">
-                                <div>
-                                    <p class="arrival-date">${trip.ankunft || 'Datum unbekannt'}</p>
-                                    <h2 class="country-name">${trip.land}</h2>
-                                </div>
-                                <span style="font-weight:900; color:#eee; font-size:1.5rem;">#${trip.platz}</span>
-                            </div>
-                            
-                            <div class="info-grid">
-                                <div class="info-item"><span class="icon">📍</span> <span>${trip.wohnorte}</span></div>
-                                <div class="info-item"><span class="icon">🏨</span> <span>${trip.unterkünfte} (${trip.übernachtungen} Nächte)</span></div>
-                                ${trip.flüge ? `<div class="info-item"><span class="icon">✈️</span> <span>${trip.flüge}</span></div>` : ''}
-                            </div>
+                    sumNights += naechte;
+                    sumKm += km;
 
-                            <div class="badges">
-                                ${trip.kmgejoggt > 0 ? `<div class="badge badge-jog">🏃 ${trip.kmgejoggt} km gejoggt</div>` : ''}
-                                ${trip.flüge ? `<div class="badge badge-badge-flight">✈️ Flugreise</div>` : ''}
-                            </div>
-                        </div>
-                    `;
-                });
-
-                document.getElementById('total-nights').innerText = sumNights;
-                document.getElementById('total-km').innerText = sumKm.toFixed(1);
-            })
-            .catch(err => {
-                document.getElementById('logbook').innerHTML = "<p>Fehler beim Laden. Prüfe die URL und die Berechtigungen.</p>";
-            });
-    </script>
-</body>
-</html>
+                    list
