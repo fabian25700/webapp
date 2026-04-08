@@ -2,29 +2,212 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Life Dashboard</title>
+    <script src="daten.js"></script>
     <style>
-        body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; }
-        .menu-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 90%; max-width: 600px; }
-        .menu-card { background: white; padding: 40px 20px; border-radius: 25px; text-align: center; text-decoration: none; box-shadow: 0 10px 20px rgba(0,0,0,0.05); transition: transform 0.2s; }
-        .menu-card:active { transform: scale(0.95); }
-        .icon { font-size: 3rem; display: block; margin-bottom: 10px; }
-        .title { font-weight: bold; color: #1e293b; font-size: 1.2rem; }
-        .travel { border-bottom: 5px solid #2ecc71; }
-        .daily { border-bottom: 5px solid #3498db; }
+        :root { 
+            --primary: #2ecc71; 
+            --secondary: #3498db;
+            --bg: #f0f2f5;
+        }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg); 
+            margin: 0; 
+            height: 100vh; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column;
+        }
+
+        header {
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        #snake-start {
+            background: white;
+            border: 1.5px solid #cbd5e1;
+            color: #64748b;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        /* Hauptmenü untereinander */
+        .menu-container { 
+            display: flex;
+            flex-direction: column;
+            gap: 15px; 
+            width: 85%; 
+            max-width: 350px; /* Schön schmal für Handy */
+            margin: auto;
+            z-index: 10;
+        }
+        
+        .menu-card { 
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 25px; 
+            border-radius: 18px; 
+            text-decoration: none; 
+            display: flex;
+            align-items: center; /* Emoji und Text nebeneinander */
+            gap: 15px;
+            
+            /* Schatten-Effekt */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            backdrop-filter: blur(8px);
+            transition: all 0.1s ease-active;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        /* Klick-Effekt: Button sinkt ein */
+        .menu-card:active {
+            transform: scale(0.96) translateY(2px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            background: rgba(248, 250, 252, 0.95);
+        }
+
+        /* Emojis proportional kleiner */
+        .icon { font-size: 1.5rem; }
+        .title { font-weight: 600; color: #1e293b; font-size: 1.1rem; flex-grow: 1; }
+        
+        .arrow { color: #cbd5e1; font-weight: bold; }
+
+        /* Snake Layer */
+        #game-canvas {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1; display: none;
+        }
+
+        #score-display {
+            position: fixed; top: 60px; width: 100%;
+            text-align: center; font-weight: bold;
+            color: var(--primary); display: none; z-index: 100;
+        }
     </style>
 </head>
 <body>
-    <div class="menu-container">
-        <a href="reise_stats.html" class="menu-card travel">
+
+    <header>
+        <div style="font-weight: 800; color: #1e293b; letter-spacing: -0.5px;">LIFE HUB</div>
+        <button id="snake-start" onclick="toggleGame()">SNAKE START</button>
+    </header>
+
+    <div id="score-display">Länder gesammelt: <span id="current-score">0</span></div>
+
+    <div class="menu-container" id="main-menu">
+        <a href="reise_stats.html" class="menu-card">
             <span class="icon">🌍</span>
             <span class="title">Reisen</span>
+            <span class="arrow">→</span>
         </a>
-        <a href="alltag.html" class="menu-card daily">
+        <a href="alltag.html" class="menu-card">
             <span class="icon">🏠</span>
             <span class="title">Alltag</span>
+            <span class="arrow">→</span>
         </a>
     </div>
+
+    <canvas id="game-canvas"></canvas>
+
+    <script>
+        // Hier bleibt die Snake-Logik aus dem vorherigen Post identisch!
+        // (Wegen der Übersichtlichkeit hier nicht nochmal komplett eingefügt)
+        // Einfach den <script> Teil von oben übernehmen.
+        
+        const canvas = document.getElementById("game-canvas");
+        const ctx = canvas.getContext("2d");
+        const scoreDisplay = document.getElementById("score-display");
+        const scoreVal = document.getElementById("current-score");
+        
+        let gameActive = false;
+        let snake, direction, food, gameLoop;
+        const gridSize = 20;
+        const laender = (typeof MEINE_REISEN !== 'undefined') ? MEINE_REISEN.map(r => r.id) : ["??"];
+
+        function toggleGame() {
+            if (!gameActive) startGame();
+            else stopGame();
+        }
+
+        function startGame() {
+            gameActive = true;
+            canvas.style.display = "block";
+            scoreDisplay.style.display = "block";
+            document.getElementById("snake-start").innerText = "SNAKE STOP";
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            snake = [{x: Math.floor(canvas.width/2/gridSize)*gridSize, y: Math.floor(canvas.height/2/gridSize)*gridSize}];
+            direction = {x: gridSize, y: 0};
+            spawnFood();
+            scoreVal.innerText = "0";
+            if(gameLoop) clearInterval(gameLoop);
+            gameLoop = setInterval(draw, 130);
+        }
+
+        function stopGame() {
+            gameActive = false;
+            canvas.style.display = "none";
+            scoreDisplay.style.display = "none";
+            document.getElementById("snake-start").innerText = "SNAKE START";
+            clearInterval(gameLoop);
+        }
+
+        function spawnFood() {
+            food = {
+                x: Math.floor(Math.random() * (canvas.width / gridSize)) * gridSize,
+                y: Math.floor(Math.random() * (canvas.height / gridSize)) * gridSize,
+                id: laender[Math.floor(Math.random() * laender.length)]
+            };
+        }
+
+        function draw() {
+            const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
+            if (head.x < 0) head.x = canvas.width - gridSize;
+            if (head.x >= canvas.width) head.x = 0;
+            if (head.y < 0) head.y = canvas.height - gridSize;
+            if (head.y >= canvas.height) head.y = 0;
+            if (snake.some(s => s.x === head.x && s.y === head.y)) { stopGame(); return; }
+            snake.unshift(head);
+            if (Math.abs(head.x - food.x) < gridSize && Math.abs(head.y - food.y) < gridSize) {
+                scoreVal.innerText = parseInt(scoreVal.innerText) + 1;
+                spawnFood();
+            } else { snake.pop(); }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#e67e22";
+            ctx.font = "bold 14px sans-serif";
+            ctx.fillText(food.id, food.x, food.y + 15);
+            snake.forEach((s, i) => {
+                ctx.fillStyle = i === 0 ? "#2ecc71" : "rgba(46, 204, 113, 0.3)";
+                ctx.fillRect(s.x, s.y, gridSize - 2, gridSize - 2);
+            });
+        }
+
+        window.addEventListener("touchstart", (e) => {
+            if (!gameActive) return;
+            const x = e.touches[0].clientX;
+            if (x < window.innerWidth / 2) {
+                if (direction.x === gridSize) direction = {x: 0, y: -gridSize};
+                else if (direction.x === -gridSize) direction = {x: 0, y: gridSize};
+                else if (direction.y === gridSize) direction = {x: gridSize, y: 0};
+                else if (direction.y === -gridSize) direction = {x: -gridSize, y: 0};
+            } else {
+                if (direction.x === gridSize) direction = {x: 0, y: gridSize};
+                else if (direction.x === -gridSize) direction = {x: 0, y: -gridSize};
+                else if (direction.y === gridSize) direction = {x: -gridSize, y: 0};
+                else if (direction.y === -gridSize) direction = {x: gridSize, y: 0};
+            }
+        });
+    </script>
 </body>
 </html>
