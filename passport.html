@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Digital Passport</title>
+    <script src="daten.js"></script>
+    <style>
+        :root {
+            --passport-cover: #8b0000;
+            --page-bg: #f4e4bc; /* Vergilbtes Passport-Papier */
+            --ink-blue: #1a4a7a;
+            --ink-red: #a32a2a;
+            --ink-green: #1e5a32;
+            --ink-purple: #5a2a8a;
+            --border-page: #d4c49c;
+        }
+
+        body {
+            background: #2c3e50;
+            font-family: "Courier New", Courier, monospace;
+            display: flex; justify-content: center; align-items: flex-start;
+            min-height: 100vh; margin: 0; padding: 20px;
+            color: #333;
+        }
+
+        /* Passport Container */
+        .passport {
+            width: 100%; max-width: 400px;
+            perspective: 1500px;
+        }
+
+        /* Einzelne Passseite */
+        .page {
+            background: var(--page-bg);
+            background-image: 
+                radial-gradient(circle, rgba(0,0,0,0.02) 1px, transparent 1px);
+            background-size: 20px 20px;
+            border-radius: 10px;
+            min-height: 550px;
+            margin-bottom: 30px;
+            padding: 30px 20px;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+            border: 1px solid var(--border-page);
+            overflow: hidden;
+        }
+
+        .page-header {
+            text-align: center; border-bottom: 1px solid var(--border-page);
+            padding-bottom: 10px; margin-bottom: 20px;
+            text-transform: uppercase; font-weight: bold; font-size: 0.8rem;
+            color: var(--text-secondary); letter-spacing: 2px;
+        }
+
+        /* Stempel Styling */
+        .stamp {
+            position: absolute;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0.85; mix-blend-mode: multiply; /* Macht es realistisch auf Papier */
+            user-select: none; transition: transform 0.3s ease;
+        }
+
+        /* Verschiedene Stempelformen */
+        .stamp-circle { border: 3px solid; border-radius: 50%; width: 90px; height: 90px; }
+        .stamp-rect { border: 3px solid; border-radius: 8px; width: 100px; height: 65px; }
+        .stamp-hex { border: 3px solid; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; }
+
+        .stamp .land { font-weight: 900; font-size: 0.75rem; text-transform: uppercase; text-align: center; }
+        .stamp .jahr { font-size: 1.1rem; font-weight: 800; border-top: 1px solid; border-bottom: 1px solid; margin: 2px 0; }
+        .stamp .type { font-size: 0.5rem; letter-spacing: 1px; }
+
+        .back-btn {
+            position: fixed; bottom: 20px; left: 20px;
+            background: #fff; border: none; padding: 12px 20px;
+            border-radius: 50px; text-decoration: none; color: #333;
+            font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <a href="reise_stats.html" class="back-btn">← Zurück</a>
+
+    <div class="passport" id="passport-container">
+        </div>
+
+    <script>
+        const colors = ['#1a4a7a', '#a32a2a', '#1e5a32', '#5a2a8a', '#e67e22'];
+        const shapes = ['circle', 'rect', 'hex'];
+
+        function renderPassport() {
+            const container = document.getElementById('passport-container');
+            const reisenFiltered = MEINE_REISEN.filter(r => r.Land !== "Deutschland");
+            
+            // Sortierung nach Jahr (falls vorhanden, sonst Index)
+            reisenFiltered.sort((a, b) => a.Jahr - b.Jahr);
+
+            let currentPage = null;
+            let stampsOnCurrentPage = 0;
+            const maxStampsPerPage = 4; // Realistisch: 4-5 Stempel pro Seite
+
+            reisenFiltered.forEach((reise, index) => {
+                // Neue Seite anlegen, wenn nötig
+                if (stampsOnCurrentPage % maxStampsPerPage === 0) {
+                    currentPage = document.createElement('div');
+                    currentPage.className = 'page';
+                    currentPage.innerHTML = `<div class="page-header">Visas / VISIONS - Page ${Math.floor(stampsOnCurrentPage/maxStampsPerPage) + 1}</div>`;
+                    container.appendChild(currentPage);
+                }
+
+                // Für jeden Aufenthalt einen Stempel erstellen
+                const anzahl = reise.Aufenthalte || 1;
+                for(let i = 0; i < anzahl; i++) {
+                    // Falls die Seite durch mehrere Aufenthalte voll wird
+                    if (stampsOnCurrentPage > 0 && stampsOnCurrentPage % maxStampsPerPage === 0) {
+                        currentPage = document.createElement('div');
+                        currentPage.className = 'page';
+                        currentPage.innerHTML = `<div class="page-header">Visas - Page ${Math.floor(stampsOnCurrentPage/maxStampsPerPage) + 1}</div>`;
+                        container.appendChild(currentPage);
+                    }
+
+                    const stamp = createStamp(reise);
+                    currentPage.appendChild(stamp);
+                    stampsOnCurrentPage++;
+                }
+            });
+        }
+
+        function createStamp(reise) {
+            const stampDiv = document.createElement('div');
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const shape = shapes[Math.floor(Math.random() * shapes.length)];
+            
+            stampDiv.className = `stamp stamp-${shape}`;
+            stampDiv.style.color = color;
+            stampDiv.style.borderColor = color;
+
+            // Zufällige Positionierung auf der Seite (nicht zu nah am Rand)
+            const top = Math.floor(Math.random() * 60) + 15; // 15% - 75%
+            const left = Math.floor(Math.random() * 50) + 10; // 10% - 60%
+            const rotation = Math.floor(Math.random() * 60) - 30; // -30deg bis 30deg
+
+            stampDiv.style.top = `${top}%`;
+            stampDiv.style.left = `${left}%`;
+            stampDiv.style.transform = `rotate(${rotation}deg)`;
+
+            stampDiv.innerHTML = `
+                <div class="type">ENTRY</div>
+                <div class="land">${reise.Land}</div>
+                <div class="jahr">${reise.Jahr || '2026'}</div>
+                <div class="type">IMMIGRATION</div>
+            `;
+
+            return stampDiv;
+        }
+
+        window.onload = renderPassport;
+    </script>
+</body>
+</html>
