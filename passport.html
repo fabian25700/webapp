@@ -117,7 +117,7 @@
 
         .stamp {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            mix-blend-mode: multiply; opacity: 0.85;
+            mix-blend-mode: multiply;
         }
 
         .stamp-circle { border: 2.5px solid; border-radius: 50%; width: 100px; height: 100px; }
@@ -192,9 +192,19 @@
             const color = colors[Math.floor(Math.random() * colors.length)];
             const shape = shapes[Math.floor(Math.random() * shapes.length)];
             
+            const aktuellesJahr = new Date().getFullYear();
+            const reiseJahr = reise["erste Einreise"] || aktuellesJahr;
+            const alter = aktuellesJahr - reiseJahr;
+
+            // Abnutzungs-Berechnung
+            const opacity = Math.max(0.3, 0.9 - (alter * 0.12)); 
+            const blur = Math.min(1.2, alter * 0.15); 
+
             stampDiv.className = `stamp stamp-${shape}`;
             stampDiv.style.color = color;
             stampDiv.style.borderColor = color;
+            stampDiv.style.opacity = opacity;
+            stampDiv.style.filter = `blur(${blur}px)`;
 
             const rotation = Math.floor(Math.random() * 20) - 10; 
             const jitterX = Math.floor(Math.random() * 10) - 5;
@@ -205,7 +215,7 @@
             stampDiv.innerHTML = `
                 <div class="type">VISA</div>
                 <div class="land">${reise.Land}</div>
-                <div class="jahr">${reise["erste Einreise"] || '2026'}</div>
+                <div class="jahr">${reiseJahr}</div>
                 <div class="type">IMMIGRATION</div>
             `;
 
