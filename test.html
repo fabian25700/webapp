@@ -3,195 +3,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fabian's Chaos Lab 2.0</title>
+    <title>Fabian | Performance Dashboard</title>
     <script src="daten.js"></script>
     <style>
         :root {
-            --neon-green: #00ff88;
-            --neon-red: #ff3366;
-            --neon-blue: #00e5ff;
-            --bg: #050509;
-            --surface: #11111d;
-            --text: #ffffff;
+            --bg: #f5f5f7;
+            --card: #ffffff;
+            --text-main: #1d1d1f;
+            --text-sub: #86868b;
+            --accent: #0071e3;
+            --border: rgba(0,0,0,0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #000000;
+                --card: #1c1c1e;
+                --text-main: #f5f5f7;
+                --text-sub: #8e8e93;
+                --border: rgba(255,255,255,0.1);
+            }
         }
 
         body {
-            font-family: "SF Mono", "Fira Code", monospace;
-            background: var(--bg); color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
             margin: 0; padding: 20px;
-            padding-top: calc(env(safe-area-inset-top) + 20px);
-            overflow-y: auto;
+            display: flex; flex-direction: column; align-items: center;
         }
 
-        h1 { font-size: 1.4rem; text-align: center; text-transform: uppercase; color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); margin-bottom: 25px; }
+        .dashboard { width: 100%; max-width: 400px; display: grid; gap: 20px; }
 
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        header { width: 100%; margin-bottom: 10px; }
+        h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin: 0; }
+        .date { font-size: 14px; color: var(--text-sub); }
 
         .card {
-            background: var(--surface);
-            border-radius: 16px;
-            padding: 18px;
-            border: 1px solid rgba(255,255,255,0.08);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            position: relative; overflow: hidden;
+            background: var(--card);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
         }
 
-        h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: #888; margin-bottom: 15px; text-align: center; }
+        .metric-label { font-size: 12px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
+        .metric-value { font-size: 28px; font-weight: 700; margin: 5px 0; }
+        .metric-sub { font-size: 13px; color: var(--accent); font-weight: 500; }
 
-        /* ── Gimmick 1: Jetlag-Barometer ── */
-        .bar-container { height: 12px; background: #222; border-radius: 6px; overflow: hidden; position: relative; }
-        .bar-fill { height: 100%; background: linear-gradient(90deg, #00ff00, #ffff00, #ff0000); width: 0%; transition: width 1s ease; }
-        .bar-label { font-size: 0.7rem; text-align: center; margin-top: 6px; color: var(--neon-red); }
+        /* Diversifikations-Graph */
+        .chart-container { height: 6px; background: var(--bg); border-radius: 3px; margin: 15px 0; overflow: hidden; display: flex; }
+        .chart-segment { height: 100%; transition: width 0.5s ease; }
 
-        /* ── Gimmick 2: VWL-Crash-Alarm ── */
-        .alarm-card { background: rgba(255, 51, 102, 0.1); border: 2px solid var(--neon-red); animation: pulse-red 1s infinite; }
-        @keyframes pulse-red { 0% { box-shadow: 0 0 0 rgba(255,51,102,0.4); } 70% { box-shadow: 0 0 15px rgba(255,51,102,0.8); } 100% { box-shadow: 0 0 0 rgba(255,51,102,0.4); } }
-        .bip-val { font-size: 1.8rem; font-weight: 900; text-align: center; color: var(--neon-red); }
+        /* Listen-Stil für Makro-Stats */
+        .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 0.5px solid var(--border); font-size: 14px; }
+        .stat-row:last-child { border: none; }
 
-        /* ── Gimmick 3: 1-rein-2-raus Inventar ── */
-        #minimal-counter { font-size: 2.5rem; font-weight: 900; text-align: center; color: var(--neon-green); }
-
-        /* ── Gimmick 4: Global Run Matrix ── */
-        .matrix-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
-        .matrix-cell { width: 100%; padding-bottom: 100%; background: #222; border-radius: 2px; }
-        .matrix-cell.active { background: var(--neon-blue); box-shadow: 0 0 8px var(--neon-blue); animation: matrix-blink 2s infinite alternate; }
-        @keyframes matrix-blink { from { opacity: 0.2; } to { opacity: 1; } }
-
-        /* ── Button ── */
-        .control-btn { 
-            grid-column: span 2; background: #222; border: 1px solid #444; color: #fff;
-            padding: 12px; border-radius: 10px; font-weight: bold; font-family: monospace;
-            cursor: pointer; transition: all 0.2s;
-        }
-        .control-btn:active { background: #333; transform: scale(0.98); }
-
+        /* Badge-System */
+        .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .badge { background: var(--bg); border-radius: 10px; padding: 10px; text-align: center; font-size: 11px; font-weight: 600; }
     </style>
 </head>
 <body>
 
-    <h1>PERFORMANCE DASHBOARD</h1>
+    <div class="dashboard">
+        <header>
+            <h1>Status Quo</h1>
+            <div class="date" id="current-date">Aachen, NRW</div>
+        </header>
 
-    <div class="menu-container" id="main-menu">
-        <a href="reise_stats.html" class="menu-card">
-            <span class="icon">🌍</span>
-            <span class="title">Reisen</span>
-            <span class="arrow">→</span>
-        </a>
-        <a href="alltag.html" class="menu-card">
-            <span class="icon">🏠</span>
-            <span class="title">Alltag</span>
-            <span class="arrow">→</span>
-        </a>
-        <a href="passport.html" class="menu-card">
-            <span class="icon">🛂</span>
-            <span class="title">Passport</span>
-            <span class="arrow">→</span>
-        </a>
-    </div>
-
-    <div class="grid">
-        
         <div class="card">
-            <h2>Hormon-Status</h2>
-            <div class="bar-container">
-                <div id="jetlag-bar" class="bar-fill"></div>
+            <div class="metric-label">Global Exposure Index</div>
+            <div class="metric-value" id="exposure-val">0.0%</div>
+            <div class="metric-sub" id="exposure-count">0 Länder besiedelt</div>
+            
+            <div class="chart-container" id="exposure-chart">
+                </div>
+            
+            <div style="font-size: 11px; color: var(--text-sub);">
+                Basierend auf der UN-Länderliste (195). Ziel: Strategische Diversifikation.
             </div>
-            <p class="bar-label" id="jetlag-status">Loading...</p>
-        </div>
-
-        <div id="vpw-card" class="card">
-            <h2>VWL-Index</h2>
-            <div id="bip-value" class="bip-val">404</div>
-            <p style="font-size: 0.6rem; text-align: center; color: #999;">Markteintritts-Score</p>
         </div>
 
         <div class="card">
-            <h2>Minimalismus</h2>
-            <div id="minimal-counter">-000</div>
-            <p style="font-size: 0.6rem; text-align: center; color: #999;">Digitale Assets verbleibend</p>
+            <div class="metric-label">Operational Stats</div>
+            <div class="stat-row">
+                <span>Einreise-Rate (p.a.)</span>
+                <span id="stat-rate" style="font-weight: 600;">-</span>
+            </div>
+            <div class="stat-row">
+                <span>First-Entry Peak</span>
+                <span id="stat-peak" style="font-weight: 600;">-</span>
+            </div>
+            <div class="stat-row">
+                <span>Asset-Minimalismus</span>
+                <span style="font-weight: 600;">1:2 Ratio</span>
+            </div>
         </div>
 
         <div class="card">
-            <h2>Run Matrix</h2>
-            <div class="matrix-grid" id="matrix-grid"></div>
+            <div class="metric-label">Recent Acquisitions</div>
+            <div class="badge-grid" id="badge-grid">
+                </div>
         </div>
 
-        <button class="control-btn" onclick="simulateNewAsset()">Neues Asset gekauft (CRASH RISIKO)</button>
-        <button class="control-btn" onclick="simulateRun()">Lauf absolvieren (Pace-Boost)</button>
-        <button class="control-btn" style="background: var(--neon-red);" onclick="resetLab()">System-Reset</button>
-
+        <div class="card" style="background: var(--accent); color: white;">
+            <div class="metric-label" style="color: rgba(255,255,255,0.7);">Athletic Capacity</div>
+            <div class="metric-value">5.0 km/Run</div>
+            <div style="font-size: 13px; opacity: 0.9;">Nike Run Club: Fokus-Pace 4:45</div>
+        </div>
     </div>
 
     <script>
-        // Daten laden (Fallbacks, falls daten.js fehlt)
         const reisen = typeof MEINE_REISEN !== 'undefined' ? MEINE_REISEN : [];
-        let itemsCount = -reisen.length * 2; // Simulierter Minimalismus-Start
 
-        function initChaosLab() {
-            // 1. Jetlag (je mehr Länder, desto roter)
-            const jetlagFill = document.getElementById('jetlag-bar');
-            const jetlagStatus = document.getElementById('jetlag-status');
-            const percent = Math.min(100, reisen.length * 5);
-            jetlagFill.style.width = percent + '%';
-            jetlagStatus.innerText = percent > 80 ? 'CRITICAL - CORTISOL SPIKE' : 'STABLE';
+        function renderDashboard() {
+            // 1. Exposure Index
+            const count = reisen.length;
+            const percent = ((count / 195) * 100).toFixed(1);
+            document.getElementById('exposure-val').innerText = percent + '%';
+            document.getElementById('exposure-count').innerText = `${count} Länder besiedelt`;
 
-            // 2. VWL-Index
-            updateVWL();
+            const chart = document.getElementById('exposure-chart');
+            chart.innerHTML = `<div class="chart-segment" style="width: ${percent}%; background: var(--accent);"></div>`;
 
-            // 3. Minimalismus
-            updateMinimal();
-
-            // 4. Matrix Grid
-            const grid = document.getElementById('matrix-grid');
-            grid.innerHTML = '';
-            for(let i=0; i<35; i++) {
-                const cell = document.createElement('div');
-                cell.className = i < reisen.length ? 'matrix-cell active' : 'matrix-cell';
-                grid.appendChild(cell);
+            // 2. Operational Stats
+            if (count > 0) {
+                const years = reisen.map(r => r["erste Einreise"] || 2024);
+                const peakYear = [...new Set(years)].sort((a,b) => years.filter(v => v===b).length - years.filter(v => v===a).length)[0];
+                document.getElementById('stat-peak').innerText = peakYear;
+                
+                const minYear = Math.min(...years);
+                const maxYear = 2026;
+                const rate = (count / (maxYear - minYear + 1)).toFixed(1);
+                document.getElementById('stat-rate').innerText = `${rate} / Jahr`;
             }
+
+            // 3. Badges
+            const badgeGrid = document.getElementById('badge-grid');
+            reisen.slice(0, 6).forEach(r => {
+                const b = document.createElement('div');
+                b.className = 'badge';
+                b.innerHTML = `<div style="font-size: 16px;">${r.flagge || '📍'}</div><div>${r.Land}</div>`;
+                badgeGrid.appendChild(b);
+            });
         }
 
-        // --- Logik-Funktionen ---
-        function updateVWL() {
-            const bip = document.getElementById('bip-value');
-            const card = document.getElementById('vpw-card');
-            const score = Math.round((reisen.length / 50) * 100);
-            bip.innerText = `${score}%`;
-            if(score < 30) {
-                card.classList.add('alarm-card'); bip.style.color = 'var(--neon-red)';
-            } else {
-                card.classList.remove('alarm-card'); bip.style.color = 'var(--neon-green)';
-            }
-        }
-
-        function updateMinimal() {
-            document.getElementById('minimal-counter').innerText = itemsCount;
-        }
-
-        // --- Interaktive Aktionen ---
-        function simulateNewAsset() {
-            // 1 rein = Items steigen, VWL-Score sinkt leicht (wegen Schulden)
-            itemsCount++;
-            updateMinimal();
-            if(window.navigator.vibrate) window.navigator.vibrate(200); // Haptik
-            alert("⚠️ 1 NEUES ASSET ERKANNT. 2 ENTSORGUNGEN ERFORDERLICH.");
-        }
-
-        function simulateRun() {
-            // Ein Lauf = 2 Items runter (Minimalismus-Sieg)
-            itemsCount -= 2;
-            updateMinimal();
-            if(window.navigator.vibrate) window.navigator.vibrate([30, 30, 30]); // Haptik
-            document.getElementById('matrix-grid').querySelector('.matrix-cell:not(.active)').classList.add('active');
-        }
-
-        function resetLab() {
-            if(confirm("SYSTEM-RESET STARTEN? ALLE LEISTUNGEN VERLOREN.")) {
-                location.reload();
-            }
-        }
-
-        window.onload = initChaosLab;
+        window.onload = renderDashboard;
     </script>
 </body>
 </html>
