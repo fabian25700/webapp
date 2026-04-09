@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Bucketlist</title>
+    <style>
+        :root {
+            --accent: #e67e22;
+            --accent-soft: rgba(230, 126, 34, 0.1);
+            --success: #27ae60;
+            --success-soft: rgba(39, 174, 96, 0.1);
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: #2d3f55;
+                --border-light: #253347;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        header {
+            position: sticky; top: 0; z-index: 50;
+            background: var(--bg);
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        }
+
+        .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+        
+        .back-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 12px;
+            background: var(--surface); border: 1px solid var(--border);
+            text-decoration: none; color: var(--text-primary); box-shadow: var(--shadow);
+        }
+
+        header h1 { font-size: 1.15rem; font-weight: 800; flex: 1; }
+
+        /* Progress Bar */
+        .progress-container { background: var(--border-light); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
+        .progress-bar { background: var(--success); height: 100%; transition: width 0.5s ease; }
+
+        /* Filter Chips */
+        .filter-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .filter-chip {
+            padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+            background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary);
+            white-space: nowrap; cursor: pointer;
+        }
+        .filter-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+
+        /* Bucket Card */
+        .bucket-card {
+            background: var(--surface); border-radius: 18px; border: 1px solid var(--border);
+            padding: 14px 16px; display: flex; align-items: center; gap: 15px;
+            box-shadow: var(--shadow); transition: all 0.2s;
+        }
+        
+        .bucket-card.done { opacity: 0.6; background: var(--border-light); }
+
+        .status-circle {
+            width: 24px; height: 24px; border-radius: 50%;
+            border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .done .status-circle { background: var(--success); border-color: var(--success); }
+        .status-circle::after { content: '✓'; color: white; font-size: 14px; display: none; }
+        .done .status-circle::after { display: block; }
+
+        .location-name { font-weight: 700; font-size: 1rem; flex: 1; }
+        
+        .status-tag {
+            font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+            padding: 4px 8px; border-radius: 6px; letter-spacing: 0.02em;
+        }
+        .tag-ja { background: var(--success-soft); color: var(--success); }
+        .tag-nein { background: var(--accent-soft); color: var(--accent); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <a href="reise_stats.html" class="back-btn">←</a>
+        <h1>Bucketlist</h1>
+        <div id="stats-summary" class="filter-chip active">0%</div>
+    </div>
+    <div class="progress-container"><div class="progress-bar" id="progress-bar" style="width: 0%"></div></div>
+    <div class="filter-row">
+        <div class="filter-chip active" onclick="filterList('all', this)">Alle</div>
+        <div class="filter-chip" onclick="filterList('ja', this)">Erledigt</div>
+        <div class="filter-chip" onclick="filterList('nein', this)">Offen</div>
+    </div>
+</header>
+
+<main id="bucket-list"></main>
+
+<script>
+    const BUCKET_DATA = [
+        { ort: "New York", status: "ja" },
+        { ort: "Malediven", status: "nein" },
+        { ort: "Wien", status: "ja" },
+        { ort: "Monaco", status: "nein" },
+        { ort: "Oxford", status: "nein" },
+        { ort: "Dubai", status: "ja" },
+        { ort: "Schweiz", status: "ja" },
+        { ort: "Sylt", status: "nein" },
+        { ort: "Karibik", status: "nein" },
+        { ort: "Venedig", status: "nein" },
+        { ort: "Stockholm", status: "ja" },
+        { ort: "Prag", status: "nein" },
+        { ort: "Athen", status: "nein" },
+        { ort: "Las Vegas", status: "nein" },
+        { ort: "Washington DC", status: "ja" },
+        { ort: "Miami", status: "nein" },
+        { ort: "Hawaii", status: "nein" },
+        { ort: "Mykonos", status: "nein" }
+    ];
+
+    function renderList(filter = 'all') {
+        const list = document.getElementById('bucket-list');
+        list.innerHTML = '';
+        
+        const filtered = BUCKET_DATA.filter(item => filter === 'all' || item.status === filter);
+        
+        filtered.forEach(item => {
+            const card = document.createElement('div');
+            card.className = `bucket-card ${item.status === 'ja' ? 'done' : ''}`;
+            card.innerHTML = `
+                <div class="status-circle"></div>
+                <div class="location-name">${item.ort}</div>
+                <div class="status-tag tag-${item.status}">${item.status === 'ja' ? 'Erledigt' : 'Offen'}</div>
+            `;
+            list.appendChild(card);
+        });
+
+        updateProgress();
+    }
+
+    function updateProgress() {
+        const total = BUCKET_DATA.length;
+        const done = BUCKET_DATA.filter(i => i.status === 'ja').length;
+        const percent = Math.round((done / total) * 100);
+        
+        document.getElementById('progress-bar').style.width = percent + '%';
+        document.getElementById('stats-summary').textContent = `${done} / ${total} Ziele`;
+    }
+
+    function filterList(status, el) {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        renderList(status);
+    }
+
+    window.onload = () => renderList();
+</script>
+
+</body>
+</html>
