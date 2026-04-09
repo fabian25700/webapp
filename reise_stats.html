@@ -44,10 +44,8 @@
             color: var(--text-primary);
             min-height: 100vh;
             padding-bottom: calc(env(safe-area-inset-bottom) + 32px);
-            transition: background 0.3s;
         }
 
-        /* ── Header ── */
         header {
             position: sticky; top: 0; z-index: 50;
             background: var(--bg);
@@ -68,7 +66,6 @@
 
         header h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; }
 
-        /* ── Inhalt ── */
         main { padding: 20px 16px 0; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 
         .section-label {
@@ -76,7 +73,7 @@
             letter-spacing: 0.07em; color: var(--text-tertiary); padding: 0 4px;
         }
 
-        /* ── Stats-Grid ── */
+        /* Stats-Grid */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .stats-grid.three { grid-template-columns: 1fr 1fr 1fr; }
 
@@ -88,7 +85,7 @@
         .stat-val { display: block; font-size: 1.5rem; font-weight: 800; color: var(--accent); }
         .stat-label { font-size: 0.62rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-top: 4px; }
 
-        /* ── Nav-Karten & Stempel ── */
+        /* Nav-Karten & Passstempel */
         .nav-card {
             background: var(--surface); border: 1px solid var(--border);
             border-radius: 18px; box-shadow: var(--shadow);
@@ -97,7 +94,7 @@
             transition: transform 0.12s ease; -webkit-tap-highlight-color: transparent;
         }
 
-        .nav-card:active { transform: scale(0.97); background: var(--surface-2); }
+        .nav-card:active { transform: scale(0.97); }
 
         .nav-icon {
             font-size: 1.25rem; width: 42px; height: 42px;
@@ -110,24 +107,30 @@
         .nav-sub { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
         .nav-arrow { color: var(--text-tertiary); font-size: 1rem; }
 
-        /* Stempel Animation */
-        .stamp-effect {
-            position: absolute; width: 100px; height: 100px;
-            border: 4px solid var(--accent); border-radius: 50%;
-            color: var(--accent); font-weight: 900; font-size: 0.8rem;
-            display: flex; align-items: center; justify-content: center;
+        /* Passport Stamp Animation */
+        .passport-stamp {
+            position: absolute; width: 130px; height: 70px;
+            border: 3px solid #1a4a7a; border-radius: 10px;
+            color: #1a4a7a; font-weight: 700; font-size: 0.6rem;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             text-transform: uppercase; opacity: 0; pointer-events: none;
-            left: 50%; top: 50%; margin-left: -50px; margin-top: -50px;
+            left: 50%; top: 50%; margin-left: -65px; margin-top: -35px;
+            background: rgba(26, 74, 122, 0.05);
+            filter: blur(0.4px) contrast(1.2); /* Verwaschener Look */
         }
+
+        .passport-stamp .date { font-size: 1rem; font-weight: 900; margin: 2px 0; border-top: 1px solid #1a4a7a; border-bottom: 1px solid #1a4a7a; padding: 0 10px; }
+        .passport-stamp .loc { letter-spacing: 2px; }
 
         .animate-stamp {
-            animation: stamp-drop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            animation: stamp-impact 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
-        @keyframes stamp-drop {
-            0% { transform: scale(4) rotate(-25deg); opacity: 0; }
-            50% { transform: scale(1) rotate(-15deg); opacity: 0.8; }
-            100% { transform: scale(1.1) rotate(-15deg); opacity: 0; }
+        @keyframes stamp-impact {
+            0% { transform: scale(5) rotate(-20deg); opacity: 0; filter: blur(5px); }
+            30% { transform: scale(1) rotate(-8deg); opacity: 0.8; filter: blur(0.4px); }
+            80% { transform: scale(1.05) rotate(-8deg); opacity: 0.8; }
+            100% { transform: scale(1.1) rotate(-8deg); opacity: 0; }
         }
     </style>
 </head>
@@ -140,39 +143,17 @@
 
     <main>
         <div class="section-label">Überblick</div>
-
         <div class="stats-grid">
-            <div class="stat-card">
-                <span class="stat-val" id="val-laender">–</span>
-                <span class="stat-label">Länder</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-val" id="val-naechte">–</span>
-                <span class="stat-label">Nächte</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-val" id="val-km">–</span>
-                <span class="stat-label">km gejoggt</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-val" id="val-fluege">–</span>
-                <span class="stat-label">Flüge</span>
-            </div>
+            <div class="stat-card"><span class="stat-val" id="val-laender">–</span><span class="stat-label">Länder</span></div>
+            <div class="stat-card"><span class="stat-val" id="val-naechte">–</span><span class="stat-label">Nächte</span></div>
+            <div class="stat-card"><span class="stat-val" id="val-km">–</span><span class="stat-label">km gejoggt</span></div>
+            <div class="stat-card"><span class="stat-val" id="val-fluege">–</span><span class="stat-label">Flüge</span></div>
         </div>
 
         <div class="stats-grid three">
-            <div class="stat-card">
-                <span class="stat-val" id="val-unterkuenfte">–</span>
-                <span class="stat-label">Unterkünfte</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-val" id="val-laeufe">–</span>
-                <span class="stat-label">Läufe</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-val" id="val-avg-km">–</span>
-                <span class="stat-label">ø km</span>
-            </div>
+            <div class="stat-card"><span class="stat-val" id="val-unterkuenfte">–</span><span class="stat-label">Häuser</span></div>
+            <div class="stat-card"><span class="stat-val" id="val-laeufe">–</span><span class="stat-label">Läufe</span></div>
+            <div class="stat-card"><span class="stat-val" id="val-avg-km">–</span><span class="stat-label">ø km</span></div>
         </div>
 
         <div class="section-label" style="margin-top:8px;">Erkunden</div>
@@ -193,7 +174,11 @@
                 <div class="nav-sub">Ziele & Träume</div>
             </div>
             <div class="nav-arrow">→</div>
-            <div class="stamp-effect" id="stamp">Approved</div>
+            <div class="passport-stamp" id="stamp">
+                <div class="loc">Departure</div>
+                <div class="date">09 APR 2026</div>
+                <div class="loc">✈ JELLO AIR</div>
+            </div>
         </a>
 
         <a href="laender.html" class="nav-card">
@@ -210,10 +195,8 @@
         window.onload = function () {
             let naechte = 0, km = 0, fluege = 0, unterkuenfte = 0, laeufe = 0;
             MEINE_REISEN.forEach(t => {
-                naechte += t.Übernachtungen;
-                km += t.km_gejoggt;
-                fluege += t.FluegeAnkunft;
-                unterkuenfte += t.Unterkünfte;
+                naechte += t.Übernachtungen; km += t.km_gejoggt;
+                fluege += t.FluegeAnkunft; unterkuenfte += t.Unterkünfte;
                 laeufe += t.Joggen;
             });
             document.getElementById('val-laender').textContent = MEINE_REISEN.length;
@@ -229,9 +212,17 @@
             event.preventDefault();
             const targetUrl = element.getAttribute('href');
             const stamp = element.querySelector('#stamp');
-            if (window.navigator.vibrate) window.navigator.vibrate(50);
+            
+            // Haptik
+            if (window.navigator.vibrate) window.navigator.vibrate([40, 30, 10]);
+
+            // Animation
             stamp.classList.add('animate-stamp');
-            setTimeout(() => { window.location.href = targetUrl; }, 400);
+
+            // Verlängerter Delay auf 800ms
+            setTimeout(() => {
+                window.location.href = targetUrl;
+            }, 800);
         }
     </script>
 </body>
