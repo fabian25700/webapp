@@ -3,166 +3,195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fabian's Lab - Overloaded</title>
+    <title>Fabian's Chaos Lab 2.0</title>
     <script src="daten.js"></script>
     <style>
         :root {
-            --accent: #3498db;
-            --bg: #0f172a;
-            --surface: #1e293b;
-            --text: #f1f5f9;
+            --neon-green: #00ff88;
+            --neon-red: #ff3366;
+            --neon-blue: #00e5ff;
+            --bg: #050509;
+            --surface: #11111d;
+            --text: #ffffff;
         }
 
         body {
-            font-family: -apple-system, system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
+            font-family: "SF Mono", "Fira Code", monospace;
+            background: var(--bg); color: var(--text);
+            margin: 0; padding: 20px;
             padding-top: calc(env(safe-area-inset-top) + 20px);
             overflow-y: auto;
         }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 15px;
-        }
+        h1 { font-size: 1.4rem; text-align: center; text-transform: uppercase; color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); margin-bottom: 25px; }
+
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
 
         .card {
             background: var(--surface);
-            border-radius: 18px;
-            padding: 15px;
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            border-radius: 16px;
+            padding: 18px;
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            position: relative; overflow: hidden;
         }
 
-        h2 { font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; color: var(--accent); }
+        h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: #888; margin-bottom: 15px; text-align: center; }
 
-        /* 1. Weltreise-Fortschritt */
-        .progress-circle {
-            width: 80px; height: 80px;
-            border-radius: 50%;
-            background: conic-gradient(var(--accent) var(--p), #334155 0);
-            display: flex; align-items: center; justify-content: center;
-            margin: 0 auto;
-            position: relative;
+        /* ── Gimmick 1: Jetlag-Barometer ── */
+        .bar-container { height: 12px; background: #222; border-radius: 6px; overflow: hidden; position: relative; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, #00ff00, #ffff00, #ff0000); width: 0%; transition: width 1s ease; }
+        .bar-label { font-size: 0.7rem; text-align: center; margin-top: 6px; color: var(--neon-red); }
+
+        /* ── Gimmick 2: VWL-Crash-Alarm ── */
+        .alarm-card { background: rgba(255, 51, 102, 0.1); border: 2px solid var(--neon-red); animation: pulse-red 1s infinite; }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 rgba(255,51,102,0.4); } 70% { box-shadow: 0 0 15px rgba(255,51,102,0.8); } 100% { box-shadow: 0 0 0 rgba(255,51,102,0.4); } }
+        .bip-val { font-size: 1.8rem; font-weight: 900; text-align: center; color: var(--neon-red); }
+
+        /* ── Gimmick 3: 1-rein-2-raus Inventar ── */
+        #minimal-counter { font-size: 2.5rem; font-weight: 900; text-align: center; color: var(--neon-green); }
+
+        /* ── Gimmick 4: Global Run Matrix ── */
+        .matrix-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+        .matrix-cell { width: 100%; padding-bottom: 100%; background: #222; border-radius: 2px; }
+        .matrix-cell.active { background: var(--neon-blue); box-shadow: 0 0 8px var(--neon-blue); animation: matrix-blink 2s infinite alternate; }
+        @keyframes matrix-blink { from { opacity: 0.2; } to { opacity: 1; } }
+
+        /* ── Button ── */
+        .control-btn { 
+            grid-column: span 2; background: #222; border: 1px solid #444; color: #fff;
+            padding: 12px; border-radius: 10px; font-weight: bold; font-family: monospace;
+            cursor: pointer; transition: all 0.2s;
         }
-        .progress-circle::after {
-            content: attr(data-label);
-            position: absolute; width: 65px; height: 65px;
-            background: var(--surface); border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold;
-        }
+        .control-btn:active { background: #333; transform: scale(0.98); }
 
-        /* 2. Slot Machine */
-        #slot-result { font-size: 1.5rem; text-align: center; margin: 10px 0; min-height: 40px;}
-        button { 
-            width: 100%; padding: 8px; border-radius: 10px; border: none; 
-            background: var(--accent); color: white; font-weight: bold; cursor: pointer;
-        }
-
-        /* 3. VWL-Ticker */
-        .ticker { overflow: hidden; white-space: nowrap; background: #000; padding: 5px; border-radius: 5px; font-family: monospace; color: #00ff00; }
-        .ticker-inner { display: inline-block; animation: ticker 15s linear infinite; }
-        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-
-        /* 4. Mini Map Dots */
-        .dot-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
-        .dot { width: 12px; height: 12px; background: #334155; border-radius: 2px; }
-        .dot.active { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
-
-        /* 5. Mood Scanner */
-        .scanner { height: 4px; background: var(--accent); width: 100%; position: relative; animation: scan 2s infinite alternate; }
-        @keyframes scan { from { top: 0; } to { top: 40px; } }
     </style>
 </head>
 <body>
 
-    <h1 style="font-size: 1.5rem; margin-bottom: 25px;">Experimental Lab</h1>
+    <h1>PERFORMANCE DASHBOARD</h1>
+
+    <div class="menu-container" id="main-menu">
+        <a href="reise_stats.html" class="menu-card">
+            <span class="icon">🌍</span>
+            <span class="title">Reisen</span>
+            <span class="arrow">→</span>
+        </a>
+        <a href="alltag.html" class="menu-card">
+            <span class="icon">🏠</span>
+            <span class="title">Alltag</span>
+            <span class="arrow">→</span>
+        </a>
+        <a href="passport.html" class="menu-card">
+            <span class="icon">🛂</span>
+            <span class="title">Passport</span>
+            <span class="arrow">→</span>
+        </a>
+    </div>
 
     <div class="grid">
         
         <div class="card">
-            <h2>World Conquest</h2>
-            <div id="world-progress" class="progress-circle" style="--p: 0%" data-label="0%"></div>
-            <p style="font-size: 0.7rem; text-align: center; margin-top: 10px;">Länder von 195 besucht</p>
-        </div>
-
-        <div class="card">
-            <h2>Next Target?</h2>
-            <div id="slot-result">🎰</div>
-            <button onclick="spinSlot()">SPIN</button>
-        </div>
-
-        <div class="card" style="grid-column: span 2;">
-            <h2>Macro Ticker</h2>
-            <div class="ticker">
-                <div class="ticker-inner" id="eco-ticker">Lade Marktdaten...</div>
+            <h2>Hormon-Status</h2>
+            <div class="bar-container">
+                <div id="jetlag-bar" class="bar-fill"></div>
             </div>
+            <p class="bar-label" id="jetlag-status">Loading...</p>
+        </div>
+
+        <div id="vpw-card" class="card">
+            <h2>VWL-Index</h2>
+            <div id="bip-value" class="bip-val">404</div>
+            <p style="font-size: 0.6rem; text-align: center; color: #999;">Markteintritts-Score</p>
         </div>
 
         <div class="card">
-            <h2>Travel Density</h2>
-            <div class="dot-grid" id="dot-grid"></div>
+            <h2>Minimalismus</h2>
+            <div id="minimal-counter">-000</div>
+            <p style="font-size: 0.6rem; text-align: center; color: #999;">Digitale Assets verbleibend</p>
         </div>
 
         <div class="card">
-            <h2>Mönch-Modus</h2>
-            <div style="height: 50px; border: 1px solid #334155; border-radius: 8px; overflow: hidden;">
-                <div class="scanner"></div>
-            </div>
-            <p style="font-size: 0.7rem; margin-top: 10px; color: #94a3b8;">Scanning Focus Levels...</p>
+            <h2>Run Matrix</h2>
+            <div class="matrix-grid" id="matrix-grid"></div>
         </div>
 
-        <div class="card">
-            <h2>Top Region</h2>
-            <div id="top-region" style="font-size: 1.2rem; font-weight: bold; text-align: center;">-</div>
-        </div>
+        <button class="control-btn" onclick="simulateNewAsset()">Neues Asset gekauft (CRASH RISIKO)</button>
+        <button class="control-btn" onclick="simulateRun()">Lauf absolvieren (Pace-Boost)</button>
+        <button class="control-btn" style="background: var(--neon-red);" onclick="resetLab()">System-Reset</button>
 
     </div>
 
     <script>
-        // Daten laden & Berechnungen
+        // Daten laden (Fallbacks, falls daten.js fehlt)
         const reisen = typeof MEINE_REISEN !== 'undefined' ? MEINE_REISEN : [];
-        
-        function initLab() {
-            // 1. Progress
-            const percent = Math.round((reisen.length / 195) * 100);
-            const circle = document.getElementById('world-progress');
-            circle.style.setProperty('--p', percent + '%');
-            circle.setAttribute('data-label', percent + '%');
+        let itemsCount = -reisen.length * 2; // Simulierter Minimalismus-Start
 
-            // 3. Ticker
-            const ticker = document.getElementById('eco-ticker');
-            const tickerText = reisen.map(r => `+++ ${r.Land.toUpperCase()}: EINREISE ${r["erste Einreise"] || 2026} `).join(' ');
-            ticker.innerText = tickerText + " +++ PERFORMANCE STATUS: OPTIMAL +++ ";
+        function initChaosLab() {
+            // 1. Jetlag (je mehr Länder, desto roter)
+            const jetlagFill = document.getElementById('jetlag-bar');
+            const jetlagStatus = document.getElementById('jetlag-status');
+            const percent = Math.min(100, reisen.length * 5);
+            jetlagFill.style.width = percent + '%';
+            jetlagStatus.innerText = percent > 80 ? 'CRITICAL - CORTISOL SPIKE' : 'STABLE';
 
-            // 4. Dot Grid (für jedes Land ein aktiver Punkt)
-            const grid = document.getElementById('dot-grid');
-            for(let i=0; i<32; i++) {
-                const dot = document.createElement('div');
-                dot.className = i < reisen.length ? 'dot active' : 'dot';
-                grid.appendChild(dot);
-            }
+            // 2. VWL-Index
+            updateVWL();
 
-            // 6. Top Region (Simpel aus dem ersten Land extrahiert)
-            if(reisen.length > 0) {
-                document.getElementById('top-region').innerText = "Europa"; // Platzhalter
+            // 3. Minimalismus
+            updateMinimal();
+
+            // 4. Matrix Grid
+            const grid = document.getElementById('matrix-grid');
+            grid.innerHTML = '';
+            for(let i=0; i<35; i++) {
+                const cell = document.createElement('div');
+                cell.className = i < reisen.length ? 'matrix-cell active' : 'matrix-cell';
+                grid.appendChild(cell);
             }
         }
 
-        // Slot Machine Logik
-        function spinSlot() {
-            const result = document.getElementById('slot-result');
-            result.innerText = "⏳";
-            setTimeout(() => {
-                const r = reisen[Math.floor(Math.random() * reisen.length)];
-                result.innerText = r ? r.flagge : "📍";
-            }, 600);
+        // --- Logik-Funktionen ---
+        function updateVWL() {
+            const bip = document.getElementById('bip-value');
+            const card = document.getElementById('vpw-card');
+            const score = Math.round((reisen.length / 50) * 100);
+            bip.innerText = `${score}%`;
+            if(score < 30) {
+                card.classList.add('alarm-card'); bip.style.color = 'var(--neon-red)';
+            } else {
+                card.classList.remove('alarm-card'); bip.style.color = 'var(--neon-green)';
+            }
         }
 
-        window.onload = initLab;
+        function updateMinimal() {
+            document.getElementById('minimal-counter').innerText = itemsCount;
+        }
+
+        // --- Interaktive Aktionen ---
+        function simulateNewAsset() {
+            // 1 rein = Items steigen, VWL-Score sinkt leicht (wegen Schulden)
+            itemsCount++;
+            updateMinimal();
+            if(window.navigator.vibrate) window.navigator.vibrate(200); // Haptik
+            alert("⚠️ 1 NEUES ASSET ERKANNT. 2 ENTSORGUNGEN ERFORDERLICH.");
+        }
+
+        function simulateRun() {
+            // Ein Lauf = 2 Items runter (Minimalismus-Sieg)
+            itemsCount -= 2;
+            updateMinimal();
+            if(window.navigator.vibrate) window.navigator.vibrate([30, 30, 30]); // Haptik
+            document.getElementById('matrix-grid').querySelector('.matrix-cell:not(.active)').classList.add('active');
+        }
+
+        function resetLab() {
+            if(confirm("SYSTEM-RESET STARTEN? ALLE LEISTUNGEN VERLOREN.")) {
+                location.reload();
+            }
+        }
+
+        window.onload = initChaosLab;
     </script>
 </body>
 </html>
