@@ -4,25 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Digitaler Reisepass</title>
+    <title>Passport</title>
     <script src="daten.js"></script>
     <style>
         :root {
-            /* Ein weiches, dezentes Grün für den Seitenhintergrund */
             --passport-green-soft: #e8f2e9; 
             --ink-dark: #1a3a16;
             --border-page: #d1ddd2;
             --text-secondary: #7a8c7b;
+            --bg-dark: #121212;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background: #121212;
+            background: var(--bg-dark);
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
             overflow: hidden;
         }
 
+        /* Konsistenter Header wie auf den anderen Seiten */
         header {
             position: fixed; top: 0; width: 100%; z-index: 100;
             padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
@@ -38,12 +39,15 @@
             text-decoration: none; color: white;
         }
 
+        header h1 { color: white; font-size: 1.15rem; font-weight: 800; }
+
+        /* Horizontales Wischen */
         .book-container {
             display: flex;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
             height: 100vh;
-            padding-top: 90px;
+            padding-top: 100px;
             scrollbar-width: none;
         }
         .book-container::-webkit-scrollbar { display: none; }
@@ -57,9 +61,9 @@
         .page-inner {
             width: 100%; max-width: 380px; height: 620px;
             background: var(--passport-green-soft);
-            border-radius: 12px; position: relative;
+            border-radius: 15px; position: relative;
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-            padding: 20px 15px;
+            padding: 25px 20px;
             border: 1px solid var(--border-page);
             display: flex; flex-direction: column;
         }
@@ -79,40 +83,40 @@
             text-align: center; font-size: 0.65rem; font-weight: 700;
             color: var(--text-secondary); text-transform: uppercase;
             letter-spacing: 2px; border-bottom: 1px solid var(--border-page);
-            padding-bottom: 10px; margin-bottom: 15px;
+            padding-bottom: 10px; margin-bottom: 20px;
         }
 
+        /* 2x3 Grid für größere Stempel */
         .stamp-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 10px; flex: 1;
-            align-content: center;
+            gap: 20px; flex: 1;
         }
 
         .stamp-slot {
             display: flex; align-items: center; justify-content: center;
-            min-height: 100px;
         }
 
         .stamp {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            mix-blend-mode: multiply; opacity: 0.8;
+            mix-blend-mode: multiply; opacity: 0.85;
         }
 
-        .stamp-circle { border: 2.2px solid; border-radius: 50%; width: 78px; height: 78px; }
-        .stamp-rect { border: 2.2px solid; border-radius: 5px; width: 88px; height: 58px; }
-        .stamp-hex { border: 2.2px solid; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); width: 78px; height: 78px; }
+        /* Stempel wieder vergrößert */
+        .stamp-circle { border: 2.5px solid; border-radius: 50%; width: 100px; height: 100px; }
+        .stamp-rect { border: 2.5px solid; border-radius: 6px; width: 110px; height: 75px; }
+        .stamp-hex { border: 2.5px solid; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); width: 100px; height: 100px; }
 
-        .stamp .land { font-weight: 800; font-size: 0.55rem; text-transform: uppercase; text-align: center; }
-        .stamp .jahr { font-size: 0.9rem; font-weight: 900; border-top: 1px solid; border-bottom: 1px solid; margin: 1px 0; }
-        .stamp .type { font-size: 0.4rem; letter-spacing: 1px; font-weight: 700; }
+        .stamp .land { font-weight: 900; font-size: 0.75rem; text-transform: uppercase; text-align: center; line-height: 1.1; }
+        .stamp .jahr { font-size: 1.1rem; font-weight: 900; border-top: 1.5px solid; border-bottom: 1.5px solid; margin: 3px 0; }
+        .stamp .type { font-size: 0.45rem; letter-spacing: 1.5px; font-weight: 800; }
 
         .page-footer {
-            text-align: center; font-size: 0.7rem; font-weight: 800;
+            text-align: center; font-size: 0.75rem; font-weight: 800;
             color: var(--ink-dark); text-transform: uppercase;
-            letter-spacing: 1.5px; margin-top: 15px;
-            padding-top: 10px; border-top: 1px solid var(--border-page);
+            letter-spacing: 1.5px; margin-top: 20px;
+            padding-top: 12px; border-top: 1px solid var(--border-page);
         }
     </style>
 </head>
@@ -120,7 +124,7 @@
 
     <header>
         <a href="reise_stats.html" class="back-btn">←</a>
-        <h1 style="color: white; font-size: 1.1rem; flex: 1; text-align: center; margin-right: 36px;">Reisepass</h1>
+        <h1>Passport</h1>
     </header>
 
     <div class="book-container" id="book-container"></div>
@@ -133,9 +137,10 @@
             const container = document.getElementById('book-container');
             const reisenFiltered = MEINE_REISEN.filter(r => r.Land !== "Deutschland");
             
+            // Sortierung chronologisch nach erster Einreise
             reisenFiltered.sort((a, b) => (a["erste Einreise"] || 2026) - (b["erste Einreise"] || 2026));
 
-            const stampsPerPage = 9;
+            const stampsPerPage = 6;
             const totalPages = Math.ceil(reisenFiltered.length / stampsPerPage);
 
             for (let p = 0; p < totalPages; p++) {
@@ -176,17 +181,17 @@
             stampDiv.style.color = color;
             stampDiv.style.borderColor = color;
 
-            const rotation = Math.floor(Math.random() * 24) - 12; 
-            const jitterX = Math.floor(Math.random() * 8) - 4;
-            const jitterY = Math.floor(Math.random() * 8) - 4;
+            const rotation = Math.floor(Math.random() * 20) - 10; 
+            const jitterX = Math.floor(Math.random() * 10) - 5;
+            const jitterY = Math.floor(Math.random() * 10) - 5;
             
             stampDiv.style.transform = `rotate(${rotation}deg) translate(${jitterX}px, ${jitterY}px)`;
 
             stampDiv.innerHTML = `
-                <div class="type">ENTRY</div>
+                <div class="type">OFFICIAL</div>
                 <div class="land">${reise.Land}</div>
                 <div class="jahr">${reise["erste Einreise"] || '2026'}</div>
-                <div class="type">DEPARTURE</div>
+                <div class="type">IMMIGRATION</div>
             `;
 
             return stampDiv;
