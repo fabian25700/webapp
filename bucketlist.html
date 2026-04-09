@@ -43,7 +43,7 @@
         }
 
         header {
-            position: sticky; top: 0; z-index: 50;
+            position: sticky; top: 0; z-index: 100;
             background: var(--bg);
             padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
             border-bottom: 1px solid var(--border-light);
@@ -61,44 +61,48 @@
 
         header h1 { font-size: 1.15rem; font-weight: 800; flex: 1; }
 
-        /* Progress Bar */
-        .progress-container { background: var(--border-light); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
+        .progress-container { background: var(--border-light); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 5px; }
         .progress-bar { background: var(--success); height: 100%; transition: width 0.5s ease; }
+        .stats-text { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
 
-        /* Filter Chips */
-        .filter-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
-        .filter-chip {
-            padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
-            background: var(--surface); border: 1px solid var(--border); color: var(--text-secondary);
-            white-space: nowrap; cursor: pointer;
+        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+        /* Category Toggle Section */
+        .category-group { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); }
+        
+        .category-header {
+            padding: 16px; display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; user-select: none; transition: background 0.2s;
         }
-        .filter-chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+        .category-header:active { background: var(--border-light); }
 
-        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+        .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; }
+        .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        
+        .arrow { font-size: 0.8rem; color: var(--text-tertiary); transition: transform 0.3s ease; }
+        .category-group.open .arrow { transform: rotate(180deg); }
+
+        .category-content { display: none; padding: 0 16px 16px; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 16px; }
+        .category-group.open .category-content { display: flex; }
 
         /* Bucket Card */
         .bucket-card {
-            background: var(--surface); border-radius: 18px; border: 1px solid var(--border);
-            padding: 14px 16px; display: flex; align-items: center; gap: 15px;
-            box-shadow: var(--shadow); transition: all 0.2s;
+            background: var(--bg); border-radius: 12px; border: 1px solid var(--border);
+            padding: 12px 14px; display: flex; align-items: center; gap: 12px;
         }
-        
-        .bucket-card.done { opacity: 0.6; background: var(--border-light); }
+        .bucket-card.done { opacity: 0.5; border-style: dashed; }
 
         .status-circle {
-            width: 24px; height: 24px; border-radius: 50%;
+            width: 20px; height: 20px; border-radius: 50%;
             border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
         .done .status-circle { background: var(--success); border-color: var(--success); }
-        .status-circle::after { content: '✓'; color: white; font-size: 14px; display: none; }
+        .status-circle::after { content: '✓'; color: white; font-size: 12px; display: none; }
         .done .status-circle::after { display: block; }
 
-        .location-name { font-weight: 700; font-size: 1rem; flex: 1; }
+        .location-name { font-weight: 600; font-size: 0.95rem; flex: 1; }
         
-        .status-tag {
-            font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
-            padding: 4px 8px; border-radius: 6px; letter-spacing: 0.02em;
-        }
+        .status-tag { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; }
         .tag-ja { background: var(--success-soft); color: var(--success); }
         .tag-nein { background: var(--accent-soft); color: var(--accent); }
     </style>
@@ -109,55 +113,94 @@
     <div class="header-top">
         <a href="reise_stats.html" class="back-btn">←</a>
         <h1>Bucketlist</h1>
-        <div id="stats-summary" class="filter-chip active">0%</div>
+        <div class="stats-text" id="stats-summary">0 / 0</div>
     </div>
     <div class="progress-container"><div class="progress-bar" id="progress-bar" style="width: 0%"></div></div>
-    <div class="filter-row">
-        <div class="filter-chip active" onclick="filterList('all', this)">Alle</div>
-        <div class="filter-chip" onclick="filterList('ja', this)">Erledigt</div>
-        <div class="filter-chip" onclick="filterList('nein', this)">Offen</div>
-    </div>
 </header>
 
-<main id="bucket-list"></main>
+<main id="category-container"></main>
 
 <script>
     const BUCKET_DATA = [
-        { ort: "New York", status: "ja" },
-        { ort: "Malediven", status: "nein" },
-        { ort: "Wien", status: "ja" },
-        { ort: "Monaco", status: "nein" },
-        { ort: "Oxford", status: "nein" },
-        { ort: "Dubai", status: "ja" },
-        { ort: "Schweiz", status: "ja" },
-        { ort: "Sylt", status: "nein" },
-        { ort: "Karibik", status: "nein" },
-        { ort: "Venedig", status: "nein" },
-        { ort: "Stockholm", status: "ja" },
-        { ort: "Prag", status: "nein" },
-        { ort: "Athen", status: "nein" },
-        { ort: "Las Vegas", status: "nein" },
-        { ort: "Washington DC", status: "ja" },
-        { ort: "Miami", status: "nein" },
-        { ort: "Hawaii", status: "nein" },
-        { ort: "Mykonos", status: "nein" }
+        // Länder
+        { ort: "Schweiz", status: "ja", cat: "Länder" },
+        { ort: "Malediven", status: "nein", cat: "Länder" },
+        { ort: "Monaco", status: "nein", cat: "Länder" },
+        { ort: "Karibik", status: "nein", cat: "Länder" },
+        
+        // Städte
+        { ort: "New York", status: "ja", cat: "Städte" },
+        { ort: "Wien", status: "ja", cat: "Städte" },
+        { ort: "Dubai", status: "ja", cat: "Städte" },
+        { ort: "Stockholm", status: "ja", cat: "Städte" },
+        { ort: "Washington DC", status: "ja", cat: "Städte" },
+        { ort: "Oxford", status: "nein", cat: "Städte" },
+        { ort: "Venedig", status: "nein", cat: "Städte" },
+        { ort: "Prag", status: "nein", cat: "Städte" },
+        { ort: "Athen", status: "nein", cat: "Städte" },
+        { ort: "Las Vegas", status: "nein", cat: "Städte" },
+        { ort: "Miami", status: "nein", cat: "Städte" },
+        { ort: "Hawaii", status: "nein", cat: "Städte" },
+        { ort: "Mykonos", status: "nein", cat: "Städte" },
+        { ort: "Sylt", status: "nein", cat: "Städte" },
+        { ort: "Eine Planstadt", status: "nein", cat: "Städte" },
+        { ort: "Eine Lagunenstadt", status: "nein", cat: "Städte" },
+        
+        // Hotels
+        { ort: "Vier Jahreszeiten Hamburg", status: "nein", cat: "Hotels" },
+        { ort: "Hotel Sacher", status: "nein", cat: "Hotels" },
+        { ort: "Burj Al Arab", status: "nein", cat: "Hotels" },
+        { ort: "Ceasars Palace", status: "nein", cat: "Hotels" },
+        
+        // Attraktionen
+        { ort: "Venice Orient Express", status: "nein", cat: "Attraktionen" },
+        { ort: "Ein Klischee Strand", status: "nein", cat: "Attraktionen" }
     ];
 
-    function renderList(filter = 'all') {
-        const list = document.getElementById('bucket-list');
-        list.innerHTML = '';
+    const icons = {
+        "Länder": "🌍",
+        "Städte": "🏙️",
+        "Hotels": "🏨",
+        "Attraktionen": "✨"
+    };
+
+    function renderCategories() {
+        const container = document.getElementById('category-container');
+        container.innerHTML = '';
         
-        const filtered = BUCKET_DATA.filter(item => filter === 'all' || item.status === filter);
-        
-        filtered.forEach(item => {
-            const card = document.createElement('div');
-            card.className = `bucket-card ${item.status === 'ja' ? 'done' : ''}`;
-            card.innerHTML = `
-                <div class="status-circle"></div>
-                <div class="location-name">${item.ort}</div>
-                <div class="status-tag tag-${item.status}">${item.status === 'ja' ? 'Erledigt' : 'Offen'}</div>
+        const categories = ["Länder", "Städte", "Hotels", "Attraktionen"];
+
+        categories.forEach(catName => {
+            const group = document.createElement('div');
+            group.className = 'category-group';
+            
+            // Filter data for this category and sort: 'nein' first
+            const catItems = BUCKET_DATA
+                .filter(i => i.cat === catName)
+                .sort((a, b) => (a.status === 'ja' ? 1 : -1));
+
+            const doneCount = catItems.filter(i => i.status === 'ja').length;
+
+            group.innerHTML = `
+                <div class="category-header" onclick="this.parentElement.classList.toggle('open')">
+                    <div class="category-title">
+                        <div class="category-icon">${icons[catName]}</div>
+                        ${catName}
+                        <span style="font-size: 0.65rem; color: var(--text-secondary); opacity: 0.7">(${doneCount}/${catItems.length})</span>
+                    </div>
+                    <div class="arrow">▼</div>
+                </div>
+                <div class="category-content">
+                    ${catItems.map(item => `
+                        <div class="bucket-card ${item.status === 'ja' ? 'done' : ''}">
+                            <div class="status-circle"></div>
+                            <div class="location-name">${item.ort}</div>
+                            <div class="status-tag tag-${item.status}">${item.status === 'ja' ? 'Done' : 'Open'}</div>
+                        </div>
+                    `).join('')}
+                </div>
             `;
-            list.appendChild(card);
+            container.appendChild(group);
         });
 
         updateProgress();
@@ -172,13 +215,7 @@
         document.getElementById('stats-summary').textContent = `${done} / ${total} Ziele`;
     }
 
-    function filterList(status, el) {
-        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-        el.classList.add('active');
-        renderList(status);
-    }
-
-    window.onload = () => renderList();
+    window.onload = renderCategories;
 </script>
 
 </body>
