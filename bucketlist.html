@@ -67,7 +67,6 @@
 
         main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 
-        /* Category Toggle Section */
         .category-group { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); }
         
         .category-header {
@@ -85,7 +84,6 @@
         .category-content { display: none; padding: 0 16px 16px; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 16px; }
         .category-group.open .category-content { display: flex; }
 
-        /* Bucket Card */
         .bucket-card {
             background: var(--bg); border-radius: 12px; border: 1px solid var(--border);
             padding: 12px 14px; display: flex; align-items: center; gap: 12px;
@@ -101,7 +99,6 @@
         .done .status-circle::after { display: block; }
 
         .location-name { font-weight: 600; font-size: 0.95rem; flex: 1; }
-        
         .status-tag { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; }
         .tag-ja { background: var(--success-soft); color: var(--success); }
         .tag-nein { background: var(--accent-soft); color: var(--accent); }
@@ -122,11 +119,15 @@
 
 <script>
     const BUCKET_DATA = [
-        // Länder
-        { ort: "Schweiz", status: "ja", cat: "Länder" },
-        { ort: "Malediven", status: "nein", cat: "Länder" },
-        { ort: "Monaco", status: "nein", cat: "Länder" },
-        { ort: "Karibik", status: "nein", cat: "Länder" },
+        // Orte (ehemals Länder)
+        { ort: "Schweiz", status: "ja", cat: "Orte" },
+        { ort: "Malediven", status: "nein", cat: "Orte" },
+        { ort: "Karibik", status: "nein", cat: "Orte" },
+        { ort: "Eine Lagunenstadt", status: "nein", cat: "Orte" },
+        { ort: "Eine Planstadt", status: "nein", cat: "Orte" },
+        { ort: "Sylt", status: "nein", cat: "Orte" },
+        { ort: "Mykonos", status: "nein", cat: "Orte" },
+        { ort: "Hawaii", status: "nein", cat: "Orte" },
         
         // Städte
         { ort: "New York", status: "ja", cat: "Städte" },
@@ -140,11 +141,7 @@
         { ort: "Athen", status: "nein", cat: "Städte" },
         { ort: "Las Vegas", status: "nein", cat: "Städte" },
         { ort: "Miami", status: "nein", cat: "Städte" },
-        { ort: "Hawaii", status: "nein", cat: "Städte" },
-        { ort: "Mykonos", status: "nein", cat: "Städte" },
-        { ort: "Sylt", status: "nein", cat: "Städte" },
-        { ort: "Eine Planstadt", status: "nein", cat: "Städte" },
-        { ort: "Eine Lagunenstadt", status: "nein", cat: "Städte" },
+        { ort: "Monaco", status: "nein", cat: "Städte" },
         
         // Hotels
         { ort: "Vier Jahreszeiten Hamburg", status: "nein", cat: "Hotels" },
@@ -157,27 +154,27 @@
         { ort: "Ein Klischee Strand", status: "nein", cat: "Attraktionen" }
     ];
 
-    const icons = {
-        "Länder": "🌍",
-        "Städte": "🏙️",
-        "Hotels": "🏨",
-        "Attraktionen": "✨"
-    };
+    const icons = { "Orte": "📍", "Städte": "🏙️", "Hotels": "🏨", "Attraktionen": "✨" };
 
     function renderCategories() {
         const container = document.getElementById('category-container');
         container.innerHTML = '';
-        
-        const categories = ["Länder", "Städte", "Hotels", "Attraktionen"];
+        const categories = ["Orte", "Städte", "Hotels", "Attraktionen"];
 
         categories.forEach(catName => {
             const group = document.createElement('div');
             group.className = 'category-group';
             
-            // Filter data for this category and sort: 'nein' first
             const catItems = BUCKET_DATA
                 .filter(i => i.cat === catName)
-                .sort((a, b) => (a.status === 'ja' ? 1 : -1));
+                .sort((a, b) => {
+                    // 1. Priorität: Status (nein vor ja)
+                    if (a.status !== b.status) {
+                        return a.status === 'nein' ? -1 : 1;
+                    }
+                    // 2. Priorität: Alphabetisch
+                    return a.ort.localeCompare(b.ort);
+                });
 
             const doneCount = catItems.filter(i => i.status === 'ja').length;
 
@@ -202,7 +199,6 @@
             `;
             container.appendChild(group);
         });
-
         updateProgress();
     }
 
@@ -210,13 +206,11 @@
         const total = BUCKET_DATA.length;
         const done = BUCKET_DATA.filter(i => i.status === 'ja').length;
         const percent = Math.round((done / total) * 100);
-        
         document.getElementById('progress-bar').style.width = percent + '%';
         document.getElementById('stats-summary').textContent = `${done} / ${total} Ziele`;
     }
 
     window.onload = renderCategories;
 </script>
-
 </body>
 </html>
