@@ -3,102 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Weltkarte</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Expansion Map | Analytics</title>
     <script src="daten.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
+            --apple-blue: #0071e3;
             --bg: #f0f2f5;
             --surface: #ffffff;
             --text-primary: #1e293b;
-            --border-light: #f1f5f9;
-            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --border: rgba(0,0,0,0.1);
+            --glass: rgba(255, 255, 255, 0.8);
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: #0f172a;
-                --surface: #1e293b;
-                --text-primary: #f1f5f9;
-                --border-light: #253347;
-                --shadow: 0 2px 8px rgba(0,0,0,0.4);
+                --bg: #000000;
+                --surface: #1c1c1e;
+                --text-primary: #f5f5f7;
+                --border: rgba(255,255,255,0.1);
+                --glass: rgba(28, 28, 30, 0.8);
             }
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-            background: var(--bg);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
+        /* Floating UI */
+        .ui-element {
+            position: fixed; z-index: 1000;
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            background: var(--glass); border: 1px solid var(--border);
+            border-radius: 18px; color: var(--text-primary);
         }
 
-        header {
-            background: var(--surface);
-            padding: calc(env(safe-area-inset-top) + 14px) 16px 12px;
-            border-bottom: 1px solid var(--border-light);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: var(--shadow);
+        .stats-card { bottom: 110px; left: 20px; padding: 12px 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .stats-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; }
+        .stats-val { font-size: 24px; font-weight: 800; color: var(--apple-blue); }
+
+        .slider-card { bottom: 30px; left: 20px; right: 20px; padding: 15px 25px; display: flex; align-items: center; gap: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+        header { background: var(--surface); padding: calc(env(safe-area-inset-top) + 12px) 16px 12px; border-bottom: 1px solid var(--border); display: flex; align-items: center; z-index: 1000; }
+        .back-btn { text-decoration: none; color: var(--text-primary); font-size: 1.2rem; margin-right: 15px; }
+        .header-title { font-weight: 800; flex: 1; }
+
+        #map { flex: 1; width: 100%; z-index: 1; }
+
+        /* Slider Logic */
+        input[type=range] { flex: 1; -webkit-appearance: none; background: rgba(120,120,120,0.2); height: 4px; border-radius: 2px; }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%;
+            background: var(--apple-blue); border: 3px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-
-        .back-btn {
-            text-decoration: none;
-            font-size: 1.2rem;
-            color: var(--text-primary);
-            padding: 5px 10px;
-        }
-
-        .header-title {
-            font-size: 1rem;
-            font-weight: 800;
-            color: var(--text-primary);
-            flex: 1;
-        }
-
-        #map {
-            flex: 1;
-            width: 100%;
-            z-index: 1;
-        }
-
-        /* Stats Overlay unten links */
-        .stats-box {
-            position: fixed;
-            bottom: 30px;
-            left: 20px;
-            background: var(--surface);
-            padding: 12px 18px;
-            border-radius: 15px;
-            z-index: 1000;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-light);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-
-        .stats-label { font-size: 10px; color: #888; text-transform: uppercase; font-weight: 700; }
-        .stats-val { font-size: 20px; font-weight: 800; color: #2ecc71; }
-
     </style>
 </head>
 <body>
 
     <header>
         <a href="reise_stats.html" class="back-btn">←</a>
-        <div class="header-title">Weltkarte</div>
+        <div class="header-title">Strategische Expansion</div>
+        <div id="year-label" style="font-weight: 800; color: var(--apple-blue);">2026</div>
     </header>
 
     <div id="map"></div>
 
-    <div class="stats-box">
-        <div class="stats-label">Erschließung</div>
+    <div class="stats-card ui-element">
+        <div class="stats-label">Erschließungsgrad</div>
         <div class="stats-val" id="global-percent">0.0%</div>
+    </div>
+
+    <div class="slider-card ui-element">
+        <span style="font-size: 12px; font-weight: 700;">2020</span>
+        <input type="range" id="year-slider" min="2020" max="2026" value="2026" step="1">
+        <span style="font-size: 12px; font-weight: 700;">AKTUELL</span>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -108,43 +86,73 @@
             ? 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
             : 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
 
-        const map = L.map('map', {
-            center: [25, 10],
-            zoom: 2.5,
-            zoomControl: false,
-            attributionControl: false
-        });
-
+        const map = L.map('map', { center: [30, 10], zoom: 2.5, zoomControl: false, attributionControl: false });
         L.tileLayer(tileUrl).addTo(map);
 
-        // Stats berechnen
-        const count = MEINE_REISEN.length;
-        document.getElementById('global-percent').innerText = ((count / 195) * 100).toFixed(1) + '%';
+        let geoLayer;
+        let currentYear = 2026;
 
-        // Länder laden und stabil färben
+        // --- Choroplethen-Skalierung (Top 20% Logik) ---
+        const nights = MEINE_REISEN.map(r => r.Übernachtungen);
+        const maxN = Math.max(...nights);
+        const minN = Math.min(...nights);
+        const range = maxN - minN;
+
+        function getChoroplethColor(n) {
+            if (!n) return 'transparent';
+            const step = range / 5;
+            if (n >= minN + step * 4) return '#1a7a3a'; // Top 20% (Sattes Grün)
+            if (n >= minN + step * 3) return '#2ecc71'; // 60-80%
+            if (n >= minN + step * 2) return '#58d68d'; // 40-60%
+            if (n >= minN + step * 1) return '#82e0aa'; // 20-40%
+            return '#abebc6'; // Least 20%
+        }
+
+        function getCountryStyle(feature) {
+            const iso = (feature.properties.ISO_A2 || "").toUpperCase();
+            const info = MEINE_REISEN.find(r => r.id.toUpperCase() === iso);
+            const isVisible = info && (info["erste Einreise"] || 2020) <= currentYear;
+
+            return {
+                fillColor: isVisible ? getChoroplethColor(info.Übernachtungen) : (isDark ? '#1a1a1a' : '#e5e7eb'),
+                fillOpacity: isVisible ? 0.9 : 0.3,
+                weight: 0.5,
+                color: isDark ? '#000' : '#fff'
+            };
+        }
+
+        function updateUI() {
+            const visible = MEINE_REISEN.filter(r => (r["erste Einreise"] || 2020) <= currentYear);
+            document.getElementById('global-percent').innerText = ((visible.length / 195) * 100).toFixed(1) + '%';
+            document.getElementById('year-label').innerText = currentYear;
+            if (geoLayer) geoLayer.setStyle(getCountryStyle);
+        }
+
+        // --- Daten laden & Event Handling ---
         fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
             .then(res => res.json())
             .then(data => {
-                L.geoJSON(data, {
-                    style: function(feature) {
-                        const iso = (feature.properties.ISO_A2 || "").toUpperCase();
-                        const besucht = MEINE_REISEN.some(r => r.id.toUpperCase() === iso);
-                        return {
-                            fillColor: besucht ? '#2ecc71' : (isDark ? '#222' : '#ddd'),
-                            fillOpacity: besucht ? 0.7 : 0.2,
-                            weight: 1,
-                            color: isDark ? '#000' : '#fff'
-                        };
-                    },
-                    onEachFeature: function(feature, layer) {
-                        const iso = (feature.properties.ISO_A2 || "").toUpperCase();
-                        const info = MEINE_REISEN.find(r => r.id.toUpperCase() === iso);
-                        if (info) {
-                            layer.bindPopup(`<b>${info.flagge} ${info.Land}</b><br>${info.Übernachtungen} Nächte`);
-                        }
+                geoLayer = L.geoJSON(data, {
+                    style: getCountryStyle,
+                    onEachFeature: (feature, layer) => {
+                        layer.on('click', (e) => {
+                            const iso = (feature.properties.ISO_A2 || "").toUpperCase();
+                            const info = MEINE_REISEN.find(r => r.id.toUpperCase() === iso);
+                            if (info && (info["erste Einreise"] || 2020) <= currentYear) {
+                                L.popup().setLatLng(e.latlng)
+                                    .setContent(`<b>${info.flagge} ${info.Land}</b><br>${info.Übernachtungen} Nächte`)
+                                    .openOn(map);
+                            }
+                        });
                     }
                 }).addTo(map);
+                updateUI();
             });
+
+        document.getElementById('year-slider').addEventListener('input', (e) => {
+            currentYear = parseInt(e.target.value);
+            updateUI();
+        });
     </script>
 </body>
 </html>
