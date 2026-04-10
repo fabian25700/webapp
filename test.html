@@ -39,7 +39,6 @@
             background: var(--bg-color);
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
             overflow: hidden;
-            transition: background 0.3s ease;
         }
 
         header {
@@ -55,7 +54,6 @@
             width: 36px; height: 36px; border-radius: 12px;
             background: var(--btn-bg); border: 1px solid var(--btn-border);
             text-decoration: none; color: var(--btn-text);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
 
         header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
@@ -86,16 +84,6 @@
             display: flex; flex-direction: column;
         }
 
-        .page-inner::before {
-            content: ' ';
-            position: absolute; top: 50%; left: 50%;
-            width: 220px; height: 220px;
-            transform: translate(-50%, -50%);
-            background: url('https://upload.wikimedia.org/wikipedia/commons/d/da/Coat_of_arms_of_Germany.svg') no-repeat center;
-            background-size: contain;
-            opacity: 0.04; pointer-events: none;
-        }
-
         .page-header {
             text-align: center; font-size: 0.65rem; font-weight: 700;
             color: var(--text-secondary); text-transform: uppercase;
@@ -107,44 +95,61 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 20px; flex: 1;
+            gap: 15px; flex: 1;
         }
 
-        .stamp-slot { display: flex; align-items: center; justify-content: center; }
+        .stamp-slot { display: flex; align-items: center; justify-content: center; overflow: visible; }
 
+        /* Stamp Base */
         .stamp {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             mix-blend-mode: multiply;
-            padding: 10px;
+            padding: 12px;
             text-align: center;
+            border: 2.5px solid;
+            min-width: 110px;
         }
 
-        .stamp-circle { border: 3px solid; border-radius: 50%; width: 100px; height: 100px; }
-        .stamp-rect { border: 3px solid; border-radius: 4px; width: 115px; height: 80px; }
-        .stamp-hex { border: 3px solid; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); width: 100px; height: 100px; }
+        /* Shape Varianten ohne festes Clipping für bessere Lesbarkeit */
+        .stamp-circle { border-radius: 50%; aspect-ratio: 1/1; width: 110px; }
+        .stamp-rect { border-radius: 4px; width: 125px; min-height: 85px; }
+        .stamp-hex { 
+            border-radius: 10px; 
+            transform: skewX(-5deg); /* Leichter visueller Twist statt hartem Hexagon-Clip */
+            width: 120px; 
+        }
 
-        .stamp .land { font-weight: 900; font-size: 0.8rem; text-transform: uppercase; line-height: 1; margin-bottom: 2px; }
-        .stamp .jahr { font-size: 1.2rem; font-weight: 900; border-top: 2px solid; border-bottom: 2px solid; margin: 4px 0; padding: 0 5px; }
-        .stamp .type { font-size: 0.5rem; letter-spacing: 1.5px; font-weight: 800; opacity: 0.8; }
+        .stamp .land { 
+            font-weight: 900; 
+            font-size: 0.7rem; 
+            text-transform: uppercase; 
+            line-height: 1.1; 
+            max-width: 90px;
+            word-wrap: break-word;
+        }
+        .stamp .jahr { 
+            font-size: 1.2rem; 
+            font-weight: 900; 
+            border-top: 2px solid; 
+            border-bottom: 2px solid; 
+            margin: 4px 0; 
+            padding: 0 8px; 
+        }
+        .stamp .type { font-size: 0.45rem; letter-spacing: 1.2px; font-weight: 800; opacity: 0.8; }
 
         .page-footer {
-            text-align: center; font-size: 0.75rem; font-weight: 800;
+            text-align: center; font-size: 0.7rem; font-weight: 800;
             color: var(--ink-dark); text-transform: uppercase;
-            letter-spacing: 1.5px; margin-top: 20px;
-            padding-top: 12px; border-top: 1px solid var(--border-page);
+            margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border-page);
         }
     </style>
 </head>
 <body>
 
     <svg style="display: none;">
-        <filter id="ink-bleed">
-            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" />
-        </filter>
-        <filter id="heavy-bleed">
-            <feTurbulence type="fractalNoise" baseFrequency="0.1" numOctaves="3" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" />
+        <filter id="soft-bleed">
+            <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="1" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.5" />
         </filter>
     </svg>
 
@@ -163,7 +168,6 @@
             const container = document.getElementById('book-container');
             const reisenFiltered = MEINE_REISEN.filter(r => r.Land !== "Deutschland");
             
-            // 1. Sortierung: Neueste zuerst (b - a)
             reisenFiltered.sort((a, b) => (b["erste Einreise"] || 2000) - (a["erste Einreise"] || 2000));
 
             const stampsPerPage = 6;
@@ -172,7 +176,6 @@
             for (let p = 0; p < totalPages; p++) {
                 const page = document.createElement('div');
                 page.className = 'page';
-                
                 const pageInner = document.createElement('div');
                 pageInner.className = 'page-inner';
                 
@@ -203,24 +206,16 @@
             const color = colors[Math.floor(Math.random() * colors.length)];
             const shape = shapes[Math.floor(Math.random() * shapes.length)];
             
-            const aktuellesJahr = new Date().getFullYear();
+            const aktuellesJahr = 2026;
             const reiseJahr = reise["erste Einreise"] || 2026;
             const alter = aktuellesJahr - reiseJahr;
 
-            // 2. Optimierte Abnutzung
-            // Opacity: Sinkt erst nach ca. 5 Jahren spürbar, Minimum bei 0.5
-            const opacity = Math.max(0.5, 0.95 - (Math.max(0, alter - 5) * 0.03)); 
+            // Opacity Bodenwert auf 0.6 erhöht für bessere Lesbarkeit
+            const opacity = Math.max(0.6, 0.95 - (alter * 0.015)); 
             
-            // Unsauberkeit: SVG Filter wird stärker, je älter der Stempel ist
-            let inkFilter = 'none';
-            if (alter > 15) {
-                inkFilter = 'url(#heavy-bleed)';
-            } else if (alter > 5) {
-                inkFilter = 'url(#ink-bleed)';
-            }
-
-            // Minimaler Blur erst bei sehr alten Stempeln
-            const blur = alter > 10 ? Math.min(0.8, (alter - 10) * 0.05) : 0;
+            // Filter nur sehr dezent einsetzen
+            let inkFilter = alter > 8 ? 'url(#soft-bleed)' : 'none';
+            const blur = alter > 15 ? 0.4 : 0;
 
             stampDiv.className = `stamp stamp-${shape}`;
             stampDiv.style.color = color;
@@ -228,11 +223,8 @@
             stampDiv.style.opacity = opacity;
             stampDiv.style.filter = `${inkFilter} blur(${blur}px)`;
 
-            const rotation = Math.floor(Math.random() * 16) - 8; 
-            const jitterX = Math.floor(Math.random() * 8) - 4;
-            const jitterY = Math.floor(Math.random() * 8) - 4;
-            
-            stampDiv.style.transform = `rotate(${rotation}deg) translate(${jitterX}px, ${jitterY}px)`;
+            const rotation = Math.floor(Math.random() * 12) - 6; 
+            stampDiv.style.transform = `rotate(${rotation}deg)`;
 
             stampDiv.innerHTML = `
                 <div class="type">ENTRY</div>
