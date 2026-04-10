@@ -4,244 +4,247 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Länder</title>
+    <title>Passport</title>
     <script src="daten.js"></script>
     <style>
         :root {
-            --accent: #e67e22;
-            --accent-soft: rgba(230, 126, 34, 0.1);
-            --bg: #f0f2f5;
-            --surface: #ffffff;
-            --surface-2: #f8fafc;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --text-tertiary: #94a3b8;
-            --border: #e2e8f0;
-            --border-light: #f1f5f9;
-            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --bg-color: #f0f2f5; 
+            --header-bg: rgba(240, 242, 245, 0.9);
+            --header-text: #1e293b;
+            --header-border: #e2e8f0;
+            --btn-bg: #ffffff;
+            --btn-border: #e2e8f0;
+            --btn-text: #1e293b;
+            --passport-green-soft: #e8f2e9; 
+            --ink-dark: #1a3a16;
+            --border-page: #d1ddd2;
+            --text-secondary: #7a8c7b;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: #0f172a;
-                --surface: #1e293b;
-                --surface-2: #162032;
-                --text-primary: #f1f5f9;
-                --text-secondary: #94a3b8;
-                --text-tertiary: #64748b;
-                --border: #2d3f55;
-                --border-light: #253347;
-                --shadow: 0 2px 8px rgba(0,0,0,0.3);
+                --bg-color: #0f172a;
+                --header-bg: rgba(15, 23, 42, 0.9);
+                --header-text: #f1f5f9;
+                --header-border: #1e293b;
+                --btn-bg: #1e293b;
+                --btn-border: #2d3f55;
+                --btn-text: #f1f5f9;
             }
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text-primary);
-            min-height: 100vh;
-            padding-bottom: calc(env(safe-area-inset-bottom) + 32px);
+            background: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            overflow: hidden;
+            transition: background 0.3s ease;
         }
 
         header {
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            background: var(--bg);
+            position: fixed; top: 0; width: 100%; z-index: 100;
             padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid var(--border-light);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            display: flex; align-items: center; gap: 12px;
+            background: var(--header-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--header-border);
         }
 
         .back-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 12px;
+            background: var(--btn-bg); border: 1px solid var(--btn-border);
+            text-decoration: none; color: var(--btn-text);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
+
+        .book-container {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            border-radius: 12px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            text-decoration: none;
-            color: var(--text-primary);
-            box-shadow: var(--shadow);
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            height: 100vh;
+            padding-top: 100px;
+            scrollbar-width: none;
+        }
+        .book-container::-webkit-scrollbar { display: none; }
+
+        .page {
+            flex: 0 0 100vw;
+            scroll-snap-align: start;
+            display: flex; justify-content: center; padding: 10px;
         }
 
-        header h1 { font-size: 1.15rem; font-weight: 800; flex: 1; }
-
-        .country-count {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--accent);
-            background: var(--accent-soft);
-            padding: 4px 10px;
-            border-radius: 20px;
+        .page-inner {
+            width: 100%; max-width: 380px; height: 620px;
+            background: var(--passport-green-soft);
+            border-radius: 15px; position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            padding: 25px 20px;
+            border: 1px solid var(--border-page);
+            display: flex; flex-direction: column;
         }
 
-        main { padding: 16px 16px 0; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
-
-        .country-card {
-            background: var(--surface);
-            border-radius: 18px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow);
-            overflow: hidden;
+        .page-inner::before {
+            content: ' ';
+            position: absolute; top: 50%; left: 50%;
+            width: 220px; height: 220px;
+            transform: translate(-50%, -50%);
+            background: url('https://upload.wikimedia.org/wikipedia/commons/d/da/Coat_of_arms_of_Germany.svg') no-repeat center;
+            background-size: contain;
+            opacity: 0.04; pointer-events: none;
         }
 
-        .country-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 14px 16px;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
+        .page-header {
+            text-align: center; font-size: 0.65rem; font-weight: 700;
+            color: var(--text-secondary); text-transform: uppercase;
+            letter-spacing: 2px; border-bottom: 1px solid var(--border-page);
+            padding-bottom: 10px; margin-bottom: 20px;
         }
 
-        .country-flag { font-size: 1.9rem; line-height: 1; flex-shrink: 0; }
-        .country-header-info { flex: 1; min-width: 0; }
-        .country-name { font-weight: 700; font-size: 1rem; color: var(--text-primary); }
-        .country-meta { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
+        .stamp-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 20px; flex: 1;
+        }
 
-        .header-right { display: flex; align-items: center; gap: 10px; text-align: right; }
-        .football-main { font-size: 1rem; opacity: 0.15; filter: grayscale(1); transition: all 0.3s; }
-        .football-main.active { opacity: 1; filter: grayscale(0); }
+        .stamp-slot { display: flex; align-items: center; justify-content: center; }
 
-        .country-nights { font-weight: 800; font-size: 1.05rem; color: var(--accent); }
-        .country-nights-label { font-size: 0.65rem; color: var(--text-tertiary); font-weight: 500; text-transform: uppercase; }
-
-        .expand-icon { color: var(--text-tertiary); font-size: 0.8rem; margin-left: 4px; transition: transform 0.2s; }
-        .country-card.open .expand-icon { transform: rotate(90deg); }
-
-        .country-detail { display: none; border-top: 1px solid var(--border-light); padding: 12px 16px 14px; background: var(--surface-2); }
-        .country-card.open .country-detail { display: block; }
-
-        .stat-chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
-
-        .stat-chip {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 9px 10px;
+        .stamp {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            mix-blend-mode: multiply;
+            padding: 10px;
             text-align: center;
-            position: relative;
-            overflow: hidden;
         }
 
-        .chip-val { font-size: 1.05rem; font-weight: 800; color: var(--accent); display: block; position: relative; z-index: 2; }
-        .chip-label { font-size: 0.62rem; color: var(--text-tertiary); text-transform: uppercase; font-weight: 600; margin-top: 2px; display: block; position: relative; z-index: 2; }
+        .stamp-circle { border: 3px solid; border-radius: 50%; width: 100px; height: 100px; }
+        .stamp-rect { border: 3px solid; border-radius: 4px; width: 115px; height: 80px; }
+        .stamp-hex { border: 3px solid; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); width: 100px; height: 100px; }
 
-        .progress-bar { position: absolute; left: 0; top: 0; height: 100%; background-color: rgba(46, 204, 113, 0.2); z-index: 1; transition: width 0.3s ease; }
+        .stamp .land { font-weight: 900; font-size: 0.8rem; text-transform: uppercase; line-height: 1; margin-bottom: 2px; }
+        .stamp .jahr { font-size: 1.2rem; font-weight: 900; border-top: 2px solid; border-bottom: 2px solid; margin: 4px 0; padding: 0 5px; }
+        .stamp .type { font-size: 0.5rem; letter-spacing: 1.5px; font-weight: 800; opacity: 0.8; }
 
-        .jog-row {
-            margin-top: 8px;
-            padding: 9px 12px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 11px;
-            font-size: 0.82rem;
-            color: var(--text-secondary);
+        .page-footer {
+            text-align: center; font-size: 0.75rem; font-weight: 800;
+            color: var(--ink-dark); text-transform: uppercase;
+            letter-spacing: 1.5px; margin-top: 20px;
+            padding-top: 12px; border-top: 1px solid var(--border-page);
         }
-
-        .jog-row strong { color: var(--text-primary); font-weight: 700; }
-
     </style>
 </head>
 <body>
 
+    <svg style="display: none;">
+        <filter id="ink-bleed">
+            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" />
+        </filter>
+        <filter id="heavy-bleed">
+            <feTurbulence type="fractalNoise" baseFrequency="0.1" numOctaves="3" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="4" />
+        </filter>
+    </svg>
+
     <header>
         <a href="reise_stats.html" class="back-btn">←</a>
-        <h1>Länder</h1>
-        <div class="country-count" id="country-count"></div>
+        <h1>Passport</h1>
     </header>
 
-    <main id="main-list"></main>
+    <div class="book-container" id="book-container"></div>
 
     <script>
-        window.onload = function () {
-            const list = document.getElementById('main-list');
-            const countEl = document.getElementById('country-count');
-            countEl.textContent = MEINE_REISEN.length + ' Länder';
+        const colors = ['#1e3a8a', '#991b1b', '#064e3b', '#581c87', '#78350f'];
+        const shapes = ['circle', 'rect', 'hex'];
 
-            const sorted = [...MEINE_REISEN].sort((a, b) => b.Übernachtungen - a.Übernachtungen);
+        function renderPassport() {
+            const container = document.getElementById('book-container');
+            const reisenFiltered = MEINE_REISEN.filter(r => r.Land !== "Deutschland");
+            
+            // 1. Sortierung: Neueste zuerst (b - a)
+            reisenFiltered.sort((a, b) => (b["erste Einreise"] || 2000) - (a["erste Einreise"] || 2000));
 
-            sorted.forEach((trip) => {
-                const hasJog = trip.Joggen > 0;
+            const stampsPerPage = 6;
+            const totalPages = Math.ceil(reisenFiltered.length / stampsPerPage);
+
+            for (let p = 0; p < totalPages; p++) {
+                const page = document.createElement('div');
+                page.className = 'page';
                 
-                // Exakte Zuordnung laut deiner JSON-Struktur
-                const rawEntry = trip["erste Einreise"];
-                let displayYear = 'n.a.';
+                const pageInner = document.createElement('div');
+                pageInner.className = 'page-inner';
                 
-                if (rawEntry) {
-                    const strEntry = rawEntry.toString().trim();
-                    displayYear = strEntry.includes('.') ? strEntry.split('.').pop() : strEntry;
-                }
-                
-                // Fußball Check
-                const hasFootball = trip.Fussball && trip.Fussball.toLowerCase() === "ja";
+                const start = p * stampsPerPage;
+                const pageItems = reisenFiltered.slice(start, start + stampsPerPage);
 
-                // UNESCO Progress
-                let progressPercent = 0;
-                if (trip["UNESCO Welterbe"] && trip["UNESCO Welterbe"] !== "0/0") {
-                    const parts = trip["UNESCO Welterbe"].split('/');
-                    const current = parseInt(parts[0]);
-                    const total = parseInt(parts[1]);
-                    if (total > 0) progressPercent = (current / total) * 100;
-                }
-
-                const card = document.createElement('div');
-                card.className = 'country-card';
-                card.innerHTML = `
-                    <div class="country-header" onclick="toggleCard(this.parentElement)">
-                        <div class="country-flag">${trip.flagge || trip.id}</div>
-                        <div class="country-header-info">
-                            <div class="country-name">${trip.Land}</div>
-                            <div class="country-meta">${trip.kontinent} · ${trip.id} · ${displayYear}</div>
-                        </div>
-                        <div class="header-right">
-                            <div class="football-main ${hasFootball ? 'active' : ''}">⚽️</div>
-                            <div>
-                                <div class="country-nights">${trip.Übernachtungen}</div>
-                                <div class="country-nights-label">Nächte</div>
-                            </div>
-                        </div>
-                        <div class="expand-icon">›</div>
-                    </div>
-                    <div class="country-detail">
-                        <div class="stat-chips">
-                            <div class="stat-chip">
-                                <span class="chip-val">${trip.Unterkünfte}</span>
-                                <span class="chip-label">Unterkünfte</span>
-                            </div>
-                            <div class="stat-chip">
-                                <span class="chip-val">${trip.FluegeAnkunft}</span>
-                                <span class="chip-label">Flüge</span>
-                            </div>
-                            <div class="stat-chip">
-                                ${progressPercent > 0 ? `<div class="progress-bar" style="width: ${progressPercent}%"></div>` : ''}
-                                <span class="chip-val">${trip["UNESCO Welterbe"]}</span>
-                                <span class="chip-label">UNESCO</span>
-                            </div>
-                        </div>
-
-                        <div class="jog-row">
-                            ${hasJog ? `<strong>${trip.Joggen}×</strong> gejoggt · <strong>${trip.km_gejoggt} km</strong> gesamt` : 'Keine Läufe'}
-                        </div>
-                    </div>
+                pageInner.innerHTML = `
+                    <div class="page-header">Visa - Seite ${p + 1}</div>
+                    <div class="stamp-grid" id="grid-${p}"></div>
+                    <div class="page-footer">Fabian Geisbüsch</div>
                 `;
-                list.appendChild(card);
-            });
-        };
+                
+                page.appendChild(pageInner);
+                container.appendChild(page);
 
-        function toggleCard(card) {
-            card.classList.toggle('open');
+                const grid = pageInner.querySelector(`#grid-${p}`);
+                pageItems.forEach(reise => {
+                    const slot = document.createElement('div');
+                    slot.className = 'stamp-slot';
+                    slot.appendChild(createStamp(reise));
+                    grid.appendChild(slot);
+                });
+            }
         }
+
+        function createStamp(reise) {
+            const stampDiv = document.createElement('div');
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            const shape = shapes[Math.floor(Math.random() * shapes.length)];
+            
+            const aktuellesJahr = new Date().getFullYear();
+            const reiseJahr = reise["erste Einreise"] || 2026;
+            const alter = aktuellesJahr - reiseJahr;
+
+            // 2. Optimierte Abnutzung
+            // Opacity: Sinkt erst nach ca. 5 Jahren spürbar, Minimum bei 0.5
+            const opacity = Math.max(0.5, 0.95 - (Math.max(0, alter - 5) * 0.03)); 
+            
+            // Unsauberkeit: SVG Filter wird stärker, je älter der Stempel ist
+            let inkFilter = 'none';
+            if (alter > 15) {
+                inkFilter = 'url(#heavy-bleed)';
+            } else if (alter > 5) {
+                inkFilter = 'url(#ink-bleed)';
+            }
+
+            // Minimaler Blur erst bei sehr alten Stempeln
+            const blur = alter > 10 ? Math.min(0.8, (alter - 10) * 0.05) : 0;
+
+            stampDiv.className = `stamp stamp-${shape}`;
+            stampDiv.style.color = color;
+            stampDiv.style.borderColor = color;
+            stampDiv.style.opacity = opacity;
+            stampDiv.style.filter = `${inkFilter} blur(${blur}px)`;
+
+            const rotation = Math.floor(Math.random() * 16) - 8; 
+            const jitterX = Math.floor(Math.random() * 8) - 4;
+            const jitterY = Math.floor(Math.random() * 8) - 4;
+            
+            stampDiv.style.transform = `rotate(${rotation}deg) translate(${jitterX}px, ${jitterY}px)`;
+
+            stampDiv.innerHTML = `
+                <div class="type">ENTRY</div>
+                <div class="land">${reise.Land}</div>
+                <div class="jahr">${reiseJahr}</div>
+                <div class="type">IMMIGRATION</div>
+            `;
+
+            return stampDiv;
+        }
+
+        window.onload = renderPassport;
     </script>
 </body>
 </html>
