@@ -5,210 +5,795 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Reisen</title>
-    <script src="daten.js"></script>
+    <title>Reisekoffer</title>
     <style>
         :root {
-            --accent: #e67e22;
-            --accent-soft: rgba(230, 126, 34, 0.1);
-            --bg: #f0f2f5;
-            --surface: #ffffff;
-            --surface-2: #f8fafc;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --text-tertiary: #94a3b8;
-            --border: #e2e8f0;
-            --border-light: #f1f5f9;
-            --shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #0f172a;
-                --surface: #1e293b;
-                --surface-2: #162032;
-                --text-primary: #f1f5f9;
-                --text-secondary: #94a3b8;
-                --text-tertiary: #64748b;
-                --border: #2d3f55;
-                --border-light: #253347;
-                --shadow: 0 2px 8px rgba(0,0,0,0.3);
-            }
+            --bg: #1a1a1a;
+            --alu-light: #d8dde3;
+            --alu-mid: #b8bfc8;
+            --alu-dark: #8e9399;
+            --alu-shine: #eef0f3;
+            --alu-shadow: #6b7177;
+            --rivet: #7a8088;
+            --handle-dark: #2a2d30;
+            --wheel: #1e2124;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --card-bg: rgba(255,255,255,0.97);
+            --card-text: #1e293b;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
             background: var(--bg);
-            color: var(--text-primary);
             min-height: 100vh;
-            padding-bottom: calc(env(safe-area-inset-bottom) + 32px);
-            -webkit-font-smoothing: antialiased;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
         }
 
+        /* ── Header ── */
         header {
-            position: sticky; top: 0; z-index: 50;
-            background: var(--bg);
-            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
-            display: flex; align-items: center; gap: 12px;
-            border-bottom: 1px solid var(--border-light);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 200;
+            padding: calc(env(safe-area-inset-top) + 14px) 20px 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(26,26,26,0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
         }
 
         .back-btn {
             display: flex; align-items: center; justify-content: center;
             width: 36px; height: 36px; border-radius: 12px;
-            background: var(--surface); border: 1px solid var(--border);
-            text-decoration: none; color: var(--text-primary);
-            box-shadow: var(--shadow); transition: all 0.15s;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.12);
+            text-decoration: none;
+            font-size: 1rem; color: #f1f5f9;
+            -webkit-tap-highlight-color: transparent;
+            transition: all 0.15s;
+            flex-shrink: 0;
         }
         .back-btn:active { transform: scale(0.92); opacity: 0.7; }
 
-        header h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; }
+        header h1 {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: 0.04em;
+        }
 
-        main { padding: 20px 16px 0; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+        .header-count {
+            margin-left: auto;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            background: rgba(255,255,255,0.07);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
 
-        .section-label {
-            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 0.07em; color: var(--text-tertiary); padding: 0 4px;
+        /* ── Hauptbereich ── */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: calc(env(safe-area-inset-top) + 80px) 16px calc(env(safe-area-inset-bottom) + 24px);
+            min-height: 100vh;
+        }
+
+        /* ── Koffer-Wrapper ── */
+        .koffer-wrapper {
+            position: relative;
+            width: min(90vw, 680px);
+        }
+
+        /* Teleskopgriff oben */
+        .teleskop {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 0;
+            position: relative;
+            height: 48px;
+        }
+
+        .teleskop-outer {
+            width: 110px;
+            height: 48px;
+            background: linear-gradient(180deg, #3a3d42 0%, #2a2d30 60%, #1e2124 100%);
+            border-radius: 12px 12px 0 0;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 -2px 8px rgba(0,0,0,0.4);
+        }
+
+        .teleskop-inner {
+            width: 60px;
+            height: 100%;
+            background: linear-gradient(180deg, #4a4d52 0%, #3a3d42 100%);
+            border-radius: 10px 10px 0 0;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .teleskop-bar {
+            position: absolute;
+            bottom: -3px;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(180deg, #3a3d42, #2a2d30);
+            border-radius: 0 0 3px 3px;
+        }
+
+        /* Haupt-Koffer-Body */
+        .koffer-body {
+            position: relative;
+            background: linear-gradient(160deg,
+                var(--alu-shine) 0%,
+                var(--alu-light) 20%,
+                var(--alu-mid) 50%,
+                var(--alu-light) 80%,
+                var(--alu-shine) 100%
+            );
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow:
+                0 0 0 1.5px var(--alu-dark),
+                0 20px 60px rgba(0,0,0,0.6),
+                inset 0 1px 0 rgba(255,255,255,0.8),
+                inset 0 -1px 0 rgba(0,0,0,0.2);
+            cursor: default;
+            /* Seitenverhältnis Koffer: liegend */
+            aspect-ratio: 16 / 9;
+        }
+
+        /* Rillen-Overlay */
+        .rillen {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .rille {
+            position: absolute;
+            left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(255,255,255,0.6) 15%,
+                rgba(255,255,255,0.9) 50%,
+                rgba(255,255,255,0.6) 85%,
+                transparent 100%
+            );
+        }
+
+        .rille.dark {
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(0,0,0,0.08) 15%,
+                rgba(0,0,0,0.12) 50%,
+                rgba(0,0,0,0.08) 85%,
+                transparent 100%
+            );
+            top: 1px;
+        }
+
+        /* Nieten-Rahmen */
+        .nieten-rahmen {
+            position: absolute;
+            inset: 8px;
+            border: none;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .niet {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #c8cdd4, #7a8088);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.4);
+        }
+
+        /* Sticker-Fläche */
+        .sticker-area {
+            position: absolute;
+            inset: 14px;
+            z-index: 3;
+        }
+
+        /* Schloss in der Mitte */
+        .schloss {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .schloss-body {
+            width: 28px;
+            height: 22px;
+            background: linear-gradient(180deg, #c8a84b, #a07830);
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .schloss-loch {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #3a2010;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+        }
+
+        /* Tragegriff links */
+        .tragegriff {
+            position: absolute;
+            left: -6px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .griff-body {
+            width: 14px;
+            height: 50px;
+            background: linear-gradient(90deg, #2a2d30, #3a3d42, #2a2d30);
+            border-radius: 7px;
+            box-shadow: -2px 0 8px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .griff-text {
+            font-size: 4px;
+            font-weight: 900;
+            color: rgba(255,255,255,0.25);
+            writing-mode: vertical-rl;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        /* Rollen unten */
+        .rollen {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 28px;
+            margin-top: 0;
+        }
+
+        .rolle {
+            width: 36px;
+            height: 16px;
+            background: linear-gradient(180deg, #2a2d30 0%, #1a1c1e 100%);
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .rolle::after {
+            content: '';
+            position: absolute;
+            top: 3px; left: 50%;
+            transform: translateX(-50%);
+            width: 20px; height: 4px;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.08);
+        }
+
+        /* Info-Card */
+        .info-card {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.85);
+            z-index: 50;
+            width: min(240px, 55%);
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 14px 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.06);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .info-card.visible {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .card-city {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--card-text);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-nights {
+            font-size: 0.78rem;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .card-nights strong {
+            color: var(--card-text);
+            font-weight: 700;
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid #f1f5f9;
         }
 
-        /* Stats-Grid-System */
-        .stats-group { display: flex; flex-direction: column; gap: 10px; }
-        .stats-grid { display: grid; gap: 10px; }
-        .stats-grid.two { grid-template-columns: 1fr 1fr; }
-        .stats-grid.three { grid-template-columns: 1fr 1fr 1fr; }
-
-        .stat-card {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 18px; padding: 16px 14px; text-align: center; box-shadow: var(--shadow);
+        .card-football {
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
-        .stat-val { display: block; font-size: 1.5rem; font-weight: 800; color: var(--accent); }
-        .stat-label { font-size: 0.62rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-top: 4px; }
-
-        /* Nav-Karten */
-        .nav-card {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 18px; box-shadow: var(--shadow);
-            text-decoration: none; display: flex; align-items: center;
-            gap: 14px; padding: 16px 18px; position: relative; overflow: hidden;
-            transition: transform 0.12s ease; -webkit-tap-highlight-color: transparent;
+        .card-football .ball {
+            font-size: 0.9rem;
         }
 
-        .nav-card:active { transform: scale(0.97); }
+        .ball-yes { filter: none; }
+        .ball-no  { filter: grayscale(1) opacity(0.35); }
 
-        .nav-icon {
-            font-size: 1.25rem; width: 42px; height: 42px;
-            display: flex; align-items: center; justify-content: center;
-            background: var(--accent-soft); border-radius: 12px;
+        .card-notiz {
+            font-size: 0.72rem;
+            color: #64748b;
+            margin-top: 6px;
+            font-style: italic;
+            line-height: 1.4;
         }
 
-        .nav-text { flex: 1; }
-        .nav-title { font-weight: 700; font-size: 1rem; color: var(--text-primary); }
-        .nav-sub { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
-        .nav-arrow { color: var(--text-tertiary); font-size: 1rem; }
+        .card-close {
+            position: absolute;
+            top: 8px; right: 10px;
+            font-size: 1rem;
+            color: #94a3b8;
+            cursor: pointer;
+            line-height: 1;
+            -webkit-tap-highlight-color: transparent;
+        }
 
+        /* ── STICKER STYLES ── */
+        .sticker {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), z-index 0s;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            line-height: 1.2;
+        }
+
+        .sticker:hover, .sticker.active {
+            z-index: 20 !important;
+            transform: var(--base-transform) scale(1.12) !important;
+        }
+
+        .sticker-name {
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            line-height: 1.15;
+        }
+
+        .sticker-nights-badge {
+            font-weight: 700;
+            opacity: 0.7;
+            margin-top: 2px;
+        }
+
+        /* Key-City Spezial-Sticker */
+        /* Kopenhagen – rund, minimalistisch */
+        .sticker-kopenhagen {
+            border-radius: 50%;
+            border: 3px solid currentColor;
+        }
+
+        /* New York – Skyline-Form via clip-path */
+        .sticker-newyork {
+            clip-path: polygon(0% 100%, 0% 60%, 8% 60%, 8% 40%, 16% 40%, 16% 20%, 24% 20%, 24% 0%, 32% 0%, 32% 30%, 40% 30%, 40% 10%, 48% 10%, 48% 30%, 56% 30%, 56% 0%, 64% 0%, 64% 20%, 72% 20%, 72% 40%, 80% 40%, 80% 60%, 92% 60%, 92% 100%);
+            border-radius: 0;
+        }
+
+        /* AIDA – Rettungsring */
+        .sticker-aida {
+            border-radius: 50%;
+            border: 5px solid currentColor;
+            outline: 3px solid currentColor;
+            outline-offset: 3px;
+        }
+
+        /* Standard Formen */
+        .sticker-rect   { border-radius: 6px; }
+        .sticker-badge  { border-radius: 12px; }
+        .sticker-pill   { border-radius: 999px; }
+        .sticker-diamond {
+            border-radius: 6px;
+            transform-origin: center;
+        }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="index.html" class="back-btn">←</a>
-        <h1>Reisen</h1>
+        <a href="reise_stats.html" class="back-btn">&#8592;</a>
+        <h1>REISEKOFFER</h1>
+        <div class="header-count" id="header-count"></div>
     </header>
 
     <main>
-        <div class="section-label">Überblick</div>
-        
-        <div class="stats-group">
-            <div class="stats-grid two">
-                <div class="stat-card"><span class="stat-val" id="val-laender">–</span><span class="stat-label">Länder</span></div>
-                <div class="stat-card"><span class="stat-val" id="val-fluege">–</span><span class="stat-label">Flüge</span></div>
+        <div class="koffer-wrapper" id="koffer-wrapper">
+
+            <!-- Teleskopgriff -->
+            <div class="teleskop">
+                <div class="teleskop-outer">
+                    <div class="teleskop-inner"></div>
+                    <div class="teleskop-bar"></div>
+                </div>
             </div>
 
-            <div class="stats-grid two">
-                <div class="stat-card"><span class="stat-val" id="val-unterkuenfte">–</span><span class="stat-label">Unterkünfte</span></div>
-                <div class="stat-card"><span class="stat-val" id="val-naechte">–</span><span class="stat-label">Nächte</span></div>
+            <!-- Koffer Body -->
+            <div class="koffer-body" id="koffer-body">
+
+                <!-- Tragegriff links -->
+                <div class="tragegriff">
+                    <div class="griff-body">
+                        <div class="griff-text">RIMOWA KÖLN</div>
+                    </div>
+                </div>
+
+                <!-- Rillen (werden per JS generiert) -->
+                <div class="rillen" id="rillen"></div>
+
+                <!-- Nieten-Rahmen (werden per JS generiert) -->
+                <div class="nieten-rahmen" id="nieten"></div>
+
+                <!-- Sticker-Fläche -->
+                <div class="sticker-area" id="sticker-area"></div>
+
+                <!-- Schloss -->
+                <div class="schloss">
+                    <div class="schloss-body">
+                        <div class="schloss-loch"></div>
+                    </div>
+                </div>
+
+                <!-- Info-Card -->
+                <div class="info-card" id="info-card">
+                    <span class="card-close" id="card-close">&#215;</span>
+                    <div class="card-city" id="card-city"></div>
+                    <div class="card-nights" id="card-nights"></div>
+                    <div class="card-meta">
+                        <div class="card-football" id="card-football"></div>
+                    </div>
+                    <div class="card-notiz" id="card-notiz"></div>
+                </div>
+
+            </div><!-- end koffer-body -->
+
+            <!-- Rollen -->
+            <div class="rollen">
+                <div class="rolle"></div>
+                <div class="rolle"></div>
             </div>
 
-            <div class="stats-grid three">
-                <div class="stat-card"><span class="stat-val" id="val-km">–</span><span class="stat-label">gelaufene KM</span></div>
-                <div class="stat-card"><span class="stat-val" id="val-laeufe">–</span><span class="stat-label">Läufe</span></div>
-                <div class="stat-card"><span class="stat-val" id="val-avg-km">–</span><span class="stat-label">ø km</span></div>
-            </div>
         </div>
-
-        <div class="section-label">Erkunden</div>
-
-        <a href="weltkarte.html" class="nav-card">
-            <div class="nav-icon">🗺️</div>
-            <div class="nav-text">
-                <div class="nav-title">Weltkarte</div>
-                <div class="nav-sub">Visualisierung deiner Reisen</div>
-            </div>
-            <div class="nav-arrow">→</div>
-        </a>
-
-        <a href="laender.html" class="nav-card">
-            <div class="nav-icon">📋</div>
-            <div class="nav-text">
-                <div class="nav-title">Länderliste</div>
-                <div class="nav-sub">Alle Details im Überblick</div>
-            </div>
-            <div class="nav-arrow">→</div>
-        </a>
-
-        <a href="passport.html" class="nav-card">
-            <div class="nav-icon">📖</div>
-            <div class="nav-text">
-                <div class="nav-title">Virtueller Passport</div>
-                <div class="nav-sub">Deine gesammelten Visa</div>
-            </div>
-            <div class="nav-arrow">→</div>
-        </a>
-
-        <a href="reisekoffer.html" class="nav-card">
-            <div class="nav-icon">🧳</div>
-            <div class="nav-text">
-                <div class="nav-title">Reisekoffer</div>
-                <div class="nav-sub">Visuelles Travel-Log & Sticker</div>
-            </div>
-            <div class="nav-arrow">→</div>
-        </a>
-
-        <a href="bucketlist.html" class="nav-card">
-            <div class="nav-icon">🎯</div>
-            <div class="nav-text">
-                <div class="nav-title">Bucketlist</div>
-                <div class="nav-sub">Ziele & Träume</div>
-            </div>
-            <div class="nav-arrow">→</div>
-        </a>
     </main>
 
     <script>
-        window.onload = function () {
-            let naechte = 0, km = 0, fluege = 0, unterkuenfte = 0, laeufe = 0;
-            if (typeof MEINE_REISEN !== 'undefined') {
-                MEINE_REISEN.forEach(t => {
-                    naechte += t.Übernachtungen || 0; 
-                    km += t.km_gejoggt || 0;
-                    fluege += t.FluegeAnkunft || 0; 
-                    unterkuenfte += t.Unterkünfte || 0;
-                    laeufe += t.Joggen || 0;
-                });
-                document.getElementById('val-laender').textContent = MEINE_REISEN.length;
-                document.getElementById('val-naechte').textContent = naechte;
-                document.getElementById('val-km').textContent = km.toLocaleString('de-DE');
-                document.getElementById('val-fluege').textContent = fluege;
-                document.getElementById('val-unterkuenfte').textContent = unterkuenfte;
-                document.getElementById('val-laeufe').textContent = laeufe;
-                document.getElementById('val-avg-km').textContent = laeufe > 0 ? (km/laeufe).toFixed(1) : '–';
+    // ─────────────────────────────────────────────
+    // DATEN – einfach hier erweitern
+    // ─────────────────────────────────────────────
+    var STAEDTE = [
+        {
+            stadt:    'Kopenhagen',
+            land:     'DK',
+            flagge:   '🇩🇰',
+            naechte:  4,
+            fussball: true,
+            notiz:    "Papa's 60. Geburtstag",
+            keycity:  'kopenhagen'
+        },
+        {
+            stadt:    'New York',
+            land:     'US',
+            flagge:   '🇺🇸',
+            naechte:  4,
+            fussball: false,
+            notiz:    'Januar 2024',
+            keycity:  'newyork'
+        },
+        {
+            stadt:    'Mainz',
+            land:     'DE',
+            flagge:   '🇩🇪',
+            naechte:  1,
+            fussball: true,
+            notiz:    'Feueralarm in der Nacht',
+            keycity:  null
+        },
+        {
+            stadt:    'AIDA',
+            land:     '🚢',
+            flagge:   '⚓',
+            naechte:  10,
+            fussball: false,
+            notiz:    'Kreuzfahrt – mehrfach',
+            keycity:  'aida'
+        },
+        // Weitere Städte hier einfach ergänzen:
+        // { stadt: 'Barcelona', land: 'ES', flagge: '🇪🇸', naechte: 5, fussball: true, notiz: 'Camp Nou', keycity: null },
+    ];
+
+    // ─────────────────────────────────────────────
+    // FARBEN & MUSTER-SYSTEM (10 × 10)
+    // ─────────────────────────────────────────────
+    var FARBEN = [
+        { bg: '#c9d4dc', fg: '#2d4a5e' },
+        { bg: '#d4c5b8', fg: '#5c3d2e' },
+        { bg: '#c8d4c0', fg: '#2e4a30' },
+        { bg: '#d4c8c0', fg: '#5e3d30' },
+        { bg: '#c0c8d4', fg: '#2e3d5e' },
+        { bg: '#d4d0c0', fg: '#5e5230' },
+        { bg: '#d0c0d4', fg: '#4a305e' },
+        { bg: '#c0d4d0', fg: '#2e5e52' },
+        { bg: '#d4c0c4', fg: '#5e2e38' },
+        { bg: '#ccd4c0', fg: '#3a5e2e' },
+    ];
+
+    var MUSTER = [
+        '',  // kein Muster
+        'repeating-linear-gradient(45deg, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 2px, transparent 2px, transparent 8px)',
+        'repeating-linear-gradient(0deg, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 7px)',
+        'radial-gradient(circle, rgba(0,0,0,0.08) 1.5px, transparent 1.5px)',
+        'repeating-linear-gradient(-45deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.05) 2px, transparent 2px, transparent 8px)',
+        'repeating-linear-gradient(90deg, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 1px, transparent 1px, transparent 10px)',
+        'repeating-linear-gradient(0deg, rgba(255,255,255,0.15) 0px, rgba(255,255,255,0.15) 1px, transparent 1px, transparent 6px)',
+        'repeating-linear-gradient(45deg, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 3px, transparent 3px, transparent 9px)',
+        'radial-gradient(circle, rgba(0,0,0,0.05) 2px, transparent 2px)',
+        'repeating-linear-gradient(135deg, rgba(0,0,0,0.04) 0px, rgba(0,0,0,0.04) 2px, transparent 2px, transparent 7px)',
+    ];
+
+    var FORMEN = ['rect', 'badge', 'pill', 'badge', 'rect'];
+
+    // ─────────────────────────────────────────────
+    // HASH (deterministisch)
+    // ─────────────────────────────────────────────
+    function hash(str) {
+        var h = 0;
+        for (var i = 0; i < str.length; i++) {
+            h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+        }
+        return Math.abs(h);
+    }
+
+    // ─────────────────────────────────────────────
+    // RILLEN generieren
+    // ─────────────────────────────────────────────
+    function genRillen() {
+        var el = document.getElementById('rillen');
+        var body = document.getElementById('koffer-body');
+        var h = body.offsetHeight;
+        var count = Math.floor(h / 18);
+        var html = '';
+        for (var i = 1; i < count; i++) {
+            var top = (i / count * 100).toFixed(1);
+            html += '<div class="rille" style="top:' + top + '%"></div>';
+            html += '<div class="rille dark" style="top:calc(' + top + '% + 1px)"></div>';
+        }
+        el.innerHTML = html;
+    }
+
+    // ─────────────────────────────────────────────
+    // NIETEN generieren
+    // ─────────────────────────────────────────────
+    function genNieten() {
+        var el = document.getElementById('nieten');
+        var body = document.getElementById('koffer-body');
+        var w = body.offsetWidth - 16;
+        var h = body.offsetHeight - 16;
+        var html = '';
+        var spacingH = 28, spacingV = 22;
+        var colsH = Math.floor(w / spacingH);
+        var colsV = Math.floor(h / spacingV);
+
+        // oben & unten
+        for (var i = 0; i <= colsH; i++) {
+            var x = (i / colsH * 100).toFixed(1);
+            html += '<div class="niet" style="top:4px;left:' + x + '%"></div>';
+            html += '<div class="niet" style="bottom:4px;left:' + x + '%"></div>';
+        }
+        // links & rechts
+        for (var j = 1; j < colsV; j++) {
+            var y = (j / colsV * 100).toFixed(1);
+            html += '<div class="niet" style="top:' + y + '%;left:4px"></div>';
+            html += '<div class="niet" style="top:' + y + '%;right:4px"></div>';
+        }
+        el.innerHTML = html;
+    }
+
+    // ─────────────────────────────────────────────
+    // STICKER platzieren
+    // ─────────────────────────────────────────────
+    function platziere(stadtObj, area) {
+        var aw = area.offsetWidth;
+        var ah = area.offsetHeight;
+
+        var h = hash(stadtObj.stadt);
+
+        // Größe basierend auf Nächten (min 60px, max 130px)
+        var baseSize = Math.min(130, Math.max(60, 55 + stadtObj.naechte * 7));
+        var fontSize = Math.min(13, Math.max(8, 7 + stadtObj.naechte * 0.6));
+
+        // Farbe & Muster deterministisch
+        var farbe = FARBEN[h % FARBEN.length];
+        var musterIdx = (h >> 4) % MUSTER.length;
+        var muster = MUSTER[musterIdx];
+
+        // Rotation deterministisch (-18 bis +18 Grad)
+        var rot = ((h % 36) - 18);
+
+        // Position: zufällig aber seeded
+        var maxX = aw - baseSize - 10;
+        var maxY = ah - baseSize - 10;
+        var px = 8 + ((h * 1637) % Math.max(1, maxX));
+        var py = 8 + ((h * 2311) % Math.max(1, maxY));
+
+        // Form
+        var formClass;
+        if (stadtObj.keycity) {
+            formClass = 'sticker-' + stadtObj.keycity;
+        } else {
+            formClass = 'sticker-' + FORMEN[h % FORMEN.length];
+        }
+
+        var el = document.createElement('div');
+        el.className = 'sticker ' + formClass;
+
+        var bgStyle = 'background-color:' + farbe.bg + ';';
+        if (muster) {
+            bgStyle += 'background-image:' + muster + ';';
+            if (musterIdx === 3 || musterIdx === 8) {
+                bgStyle += 'background-size:8px 8px;';
             }
-        };
+        }
+
+        var baseTransform = 'rotate(' + rot + 'deg)';
+        el.style.cssText = [
+            bgStyle,
+            'color:' + farbe.fg + ';',
+            'width:' + baseSize + 'px;',
+            'height:' + (stadtObj.keycity === 'kopenhagen' || stadtObj.keycity === 'aida' ? baseSize : 'auto') + 'px;',
+            'left:' + px + 'px;',
+            'top:' + py + 'px;',
+            'transform:' + baseTransform + ';',
+            '--base-transform:' + baseTransform + ';',
+            'z-index:' + (4 + (h % 8)) + ';',
+            'padding:' + Math.round(baseSize * 0.12) + 'px ' + Math.round(baseSize * 0.14) + 'px;',
+            'box-shadow: 0 3px 10px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.4);',
+        ].join('');
+
+        // AIDA: nautische Farben überschreiben
+        if (stadtObj.keycity === 'aida') {
+            el.style.backgroundColor = '#e8e8e8';
+            el.style.color = '#c0392b';
+            el.style.borderColor = '#c0392b';
+            el.style.outlineColor = '#c0392b';
+        }
+
+        // New York: dunkle Skyline
+        if (stadtObj.keycity === 'newyork') {
+            el.style.backgroundColor = '#1a2a4a';
+            el.style.color = '#f0c040';
+            el.style.height = Math.round(baseSize * 0.7) + 'px';
+        }
+
+        el.innerHTML =
+            '<div class="sticker-name" style="font-size:' + fontSize + 'px">' + stadtObj.stadt + '</div>' +
+            '<div class="sticker-nights-badge" style="font-size:' + (fontSize - 1) + 'px">' + stadtObj.naechte + 'N</div>';
+
+        // Event: Info-Card öffnen
+        el.addEventListener('click', function(e) {
+            e.stopPropagation();
+            zeigeCard(stadtObj, el);
+        });
+        el.addEventListener('mouseenter', function() {
+            el.classList.add('active');
+        });
+        el.addEventListener('mouseleave', function() {
+            el.classList.remove('active');
+        });
+
+        area.appendChild(el);
+    }
+
+    // ─────────────────────────────────────────────
+    // INFO-CARD
+    // ─────────────────────────────────────────────
+    function zeigeCard(stadtObj, stickerEl) {
+        var card = document.getElementById('info-card');
+
+        document.getElementById('card-city').innerHTML =
+            stadtObj.flagge + ' ' + stadtObj.stadt;
+
+        document.getElementById('card-nights').innerHTML =
+            '<strong>' + stadtObj.naechte + '</strong> Nacht' + (stadtObj.naechte !== 1 ? 'e' : '');
+
+        document.getElementById('card-football').innerHTML =
+            '<span class="ball ' + (stadtObj.fussball ? 'ball-yes' : 'ball-no') + '">&#9917;</span>' +
+            '<span style="font-size:0.72rem;color:' + (stadtObj.fussball ? '#16a34a' : '#94a3b8') + '">' +
+            (stadtObj.fussball ? 'Fussball gesehen' : 'Kein Fussball') + '</span>';
+
+        document.getElementById('card-notiz').textContent =
+            stadtObj.notiz ? '"' + stadtObj.notiz + '"' : '';
+
+        card.classList.add('visible');
+    }
+
+    function schliesseCard() {
+        document.getElementById('info-card').classList.remove('visible');
+    }
+
+    // ─────────────────────────────────────────────
+    // INIT
+    // ─────────────────────────────────────────────
+    function init() {
+        genRillen();
+        genNieten();
+
+        var area = document.getElementById('sticker-area');
+        STAEDTE.forEach(function(s) { platziere(s, area); });
+
+        document.getElementById('header-count').textContent =
+            STAEDTE.length + ' Städte';
+
+        // Klick ins Leere schliesst Card
+        document.getElementById('koffer-body').addEventListener('click', schliesseCard);
+        document.getElementById('card-close').addEventListener('click', function(e) {
+            e.stopPropagation();
+            schliesseCard();
+        });
+    }
+
+    // Nach Layout-Berechnung starten
+    requestAnimationFrame(function() {
+        requestAnimationFrame(init);
+    });
     </script>
 </body>
 </html>
