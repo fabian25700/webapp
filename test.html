@@ -173,17 +173,20 @@
 
             sorted.forEach((trip) => {
                 const hasJog = trip.Joggen > 0;
-                const avgKmPerRun = hasJog ? (trip.km_gejoggt / trip.Joggen).toFixed(1) : null;
                 
-                // Ersteinreise Logik: Nimmt das Jahr, egal ob "2000" oder "01.01.2000"
+                // Exakte Zuordnung laut deiner JSON-Struktur
+                const rawEntry = trip["erste Einreise"];
                 let displayYear = 'n.a.';
-                if (trip.Ersteinreise) {
-                    const strYear = trip.Ersteinreise.toString();
-                    displayYear = strYear.includes('.') ? strYear.split('.').pop() : strYear;
+                
+                if (rawEntry) {
+                    const strEntry = rawEntry.toString().trim();
+                    displayYear = strEntry.includes('.') ? strEntry.split('.').pop() : strEntry;
                 }
                 
+                // Fußball Check
                 const hasFootball = trip.Fussball && trip.Fussball.toLowerCase() === "ja";
 
+                // UNESCO Progress
                 let progressPercent = 0;
                 if (trip["UNESCO Welterbe"] && trip["UNESCO Welterbe"] !== "0/0") {
                     const parts = trip["UNESCO Welterbe"].split('/');
