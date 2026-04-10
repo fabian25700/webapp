@@ -37,9 +37,10 @@
         body {
             background: var(--bg-color);
             font-family: -apple-system, sans-serif;
-            height: 100vh;
+            height: 100dvh; /* Dynamic Viewport Height */
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         header {
@@ -57,29 +58,30 @@
             font-weight: bold; border: 1px solid #ddd; text-decoration: none; color: black;
         }
 
-        /* Viewport zentriert den Inhalt nun absolut mittig */
         .viewport {
             flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
             perspective: 1200px;
-            padding: 20px;
-            overflow: hidden; /* Verhindert Scrollbars durch Rotation */
+            width: 100%;
         }
 
+        /* Container Zentrierung */
         .suitcase-container {
             position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 40px; /* Ausgleich für Header-Höhe im Desktop */
+            transform-origin: center center;
         }
 
+        /* Mobile Optimierung: Drehung + Skalierung um Abschneiden zu verhindern */
         @media (max-width: 600px) {
             .suitcase-container { 
-                transform: rotate(-90deg) scale(0.65); 
-                margin-top: 0; /* Entfernt Desktop-Abstand für saubere Zentrierung */
+                /* Skalierung auf 0.45 reduziert, damit 820px Breite in 100vh Höhe passt */
+                transform: rotate(-90deg) scale(0.45) translateY(0); 
+                margin-top: 20px;
             }
         }
 
