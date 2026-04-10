@@ -68,6 +68,7 @@
             .suitcase-container { transform: rotate(-90deg) scale(0.65); margin-top: 130px; }
         }
 
+        /* 3D-Koffer Body */
         .suitcase-body {
             width: 100%; height: 100%;
             background: var(--alu-base);
@@ -83,35 +84,42 @@
                 radial-gradient(circle at 50% 50%, var(--alu-bright), var(--alu-base));
         }
 
-        /* Griff oben an der langen Seite */
+        /* Ergonomischer Griff oben an der langen Seite */
         .handle-top-system {
-            position: absolute; top: -28px; left: 50%;
+            position: absolute; top: -35px; left: 50%;
             transform: translateX(-50%); display: flex; flex-direction: column; align-items: center;
             z-index: 10;
         }
+        
+        /* Montageplatte */
         .handle-mount {
-            width: 140px; height: 12px; background: #222;
-            border-radius: 6px 6px 0 0; border: 1px solid #000;
+            width: 160px; height: 14px; background: #1a1a1a;
+            border-radius: 8px 8px 0 0; border: 1px solid #000;
         }
-        .handle-side {
-            width: 180px; height: 40px;
-            background: linear-gradient(to bottom, #111, #333, #111);
-            border-radius: 14px; border: 2px solid #000;
+
+        /* Der gewölbte Griff */
+        .handle-bar {
+            width: 200px; height: 45px;
+            background: linear-gradient(to bottom, #2c2c2c, #0a0a0a, #000);
+            border-radius: 15px; border: 2px solid #111;
             display: flex; align-items: center; justify-content: center;
-            margin-top: -5px; box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+            margin-top: -6px; 
+            box-shadow: 0 12px 25px rgba(0,0,0,0.5);
         }
         
-        .handle-side::after {
+        /* RIMOWA Text auf dem Griff */
+        .handle-bar::after {
             content: "RIMOWA"; 
-            font-size: 12px; font-weight: 900; letter-spacing: 4px;
+            font-size: 13px; font-weight: 900; letter-spacing: 5px;
             white-space: nowrap;
             background: linear-gradient(135deg, #fff 0%, #eee 40%, #ccc 50%, #eee 60%, #fff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 0 2px rgba(255,255,255,0.5));
+            filter: drop-shadow(0 0 2px rgba(255,255,255,0.4));
         }
 
+        /* Nieten-Styling */
         .niete {
             position: absolute; width: 8px; height: 8px;
             background: radial-gradient(circle at 3px 3px, var(--alu-bright), #7f8c8d);
@@ -132,7 +140,7 @@
             
             <div class="handle-top-system">
                 <div class="handle-mount"></div>
-                <div class="handle-side"></div>
+                <div class="handle-bar"></div>
             </div>
 
             <div class="suitcase-body">
@@ -146,13 +154,15 @@
         const rivetsCountVer = 8;
 
         function createRivets() {
+            // Horizontale Reihen (oben und unten)
             for(let i = 0; i < rivetsCountHor; i++) {
-                addRivet(60 + (i * 65), 25);      // Oben
-                addRivet(60 + (i * 65), 485);     // Unten
+                addRivet(65 + (i * 63), 25);      // Oben
+                addRivet(65 + (i * 63), 485);     // Unten
             }
+            // Vertikale Reihen (links und rechts)
             for(let i = 0; i < rivetsCountVer; i++) {
-                addRivet(25, 60 + (i * 60));      // Links
-                addRivet(785, 60 + (i * 60));     // Rechts
+                addRivet(25, 65 + (i * 55));      // Links
+                addRivet(785, 65 + (i * 55));     // Rechts
             }
         }
 
