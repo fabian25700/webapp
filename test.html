@@ -12,6 +12,7 @@
             --header-border: #e2e8f0;
             --alu: #bdc3c7;
             --alu-dark: #95a5a6;
+            --alu-bright: #ecf0f1;
             --card-bg: #ffffff;
         }
 
@@ -54,6 +55,9 @@
             .suitcase-scene { transform: rotate(-90deg) scale(0.65); margin-top: 180px; }
         }
 
+        /* Nieten */
+        .niete { position: absolute; width: 6px; height: 6px; background: #7f8c8d; border-radius: 50%; box-shadow: inset 1px 1px 1px #000; z-index: 5; }
+
         .suitcase-body {
             width: 850px; height: 550px;
             background: var(--alu);
@@ -61,19 +65,23 @@
             position: relative;
             background-image: repeating-linear-gradient(90deg, transparent 0, transparent 40px, rgba(0,0,0,0.04) 40px, rgba(0,0,0,0.04) 42px);
             box-shadow: 0 40px 80px rgba(0,0,0,0.25);
+            overflow: hidden;
         }
 
-        /* Griff & Rollen */
-        .handle-top { width: 150px; height: 35px; background: #333; border-radius: 10px 10px 0 0; position: relative; display: flex; align-items: center; justify-content: center; color: #666; font-size: 9px; font-weight: 900; letter-spacing: 2px; }
+        /* Griffe & Rollen */
+        .handle-main { width: 150px; height: 35px; background: #333; border-radius: 10px 10px 0 0; position: relative; display: flex; align-items: center; justify-content: center; color: #666; font-size: 9px; font-weight: 900; letter-spacing: 2px; }
         
+        /* Teleskopgriff oben (kurze Seite) */
+        .handle-telescope { position: absolute; left: 50%; top: -20px; transform: translateX(-50%); width: 120px; height: 25px; background: #222; border-radius: 5px 5px 0 0; z-index: -1; }
+
         .wheel-area { position: absolute; left: -35px; top: 60px; bottom: 60px; display: flex; flex-direction: column; justify-content: space-between; }
         .wheel { width: 40px; height: 70px; background: #111; border-radius: 12px 0 0 12px; border-left: 12px solid #000; }
 
         /* Dossier (Info-Tafel) */
         #central-info {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 280px; background: var(--card-bg); border-radius: 20px; padding: 25px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            width: 300px; background: var(--card-bg); border-radius: 20px; padding: 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
             z-index: 1500; opacity: 0; pointer-events: none; transition: 0.3s;
             border: 1px solid var(--header-border);
         }
@@ -88,46 +96,74 @@
         /* Sticker Styles */
         .sticker {
             position: absolute;
-            padding: 8px 14px;
+            padding: 5px 8px;
             font-weight: 900;
             text-transform: uppercase;
             border: 3px solid white;
-            box-shadow: 2px 4px 10px rgba(0,0,0,0.2);
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.3);
             cursor: pointer;
-            transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: flex; flex-direction: column; align-items: center;
+            transition: 0.2s;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
             user-select: none;
+            word-wrap: break-word; text-align: center;
+            color: #1e293b; line-height: 1.1;
         }
         .sticker:hover { transform: scale(1.1) z-index: 1000 !important; }
 
-        /* Formen */
-        .shape-rect { border-radius: 4px; }
-        .shape-round { border-radius: 50px; padding: 10px 20px; }
-        .shape-badge { border-radius: 15px 0 15px 0; }
+        /* Formen & Key Cities */
+        .shape-rect { border-radius: 2px; }
+        .shape-round { border-radius: 50px; padding: 8px 15px; }
+        .shape-badge { border-radius: 10px 0 10px 0; }
+        
+        .st-key { transform: scale(1.3); z-index: 50; border-width: 4px; box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+        
+        .key-cph { border-radius: 50%; aspect-ratio: 1/1; width: 80px; }
+        .key-ny  { clip-path: polygon(0 20%, 20% 20%, 20% 0, 80% 0, 80% 20%, 100% 20%, 100% 100%, 0 100%); width: 90px; height: 100px; padding-top: 25px; }
+        .key-aida { border-radius: 50%; aspect-ratio: 1/1; width: 100px; border: 15px solid red; border-style: double; background: white; color: red !important; }
 
-        .fb-icon { font-size: 14px; filter: grayscale(1); opacity: 0.2; }
-        .fb-active { filter: grayscale(0); opacity: 1; }
+        /* MUSTER (10 Varianten) */
+        .pat-0 { background-image: none; }
+        .pat-1 { background-image: radial-gradient(#ffffff 10%, transparent 10%); background-size: 5px 5px; }
+        .pat-2 { background-image: linear-gradient(45deg, #ffffff 25%, transparent 25%); background-size: 10px 10px; }
+        .pat-3 { background-image: linear-gradient(to right, #ffffff 1px, transparent 1px); background-size: 6px 6px; }
+        .pat-4 { background-image: repeating-linear-gradient(0deg, #ffffff, #ffffff 1px, transparent 1px, transparent 4px); }
+        .pat-5 { background-image: repeating-linear-gradient(45deg, #ffffff, #ffffff 1px, transparent 1px, transparent 4px); }
+        .pat-6 { background-image: repeating-radial-gradient(circle, #ffffff, #ffffff 1px, transparent 1px, transparent 4px); }
+        .pat-7 { background-image: linear-gradient(#ffffff 1px, transparent 1px), linear-gradient(90deg, #ffffff 1px, transparent 1px); background-size: 8px 8px; }
+        .pat-8 { background-image: radial-gradient(transparent 20%, #ffffff 20%); background-size: 10px 10px; }
+        .pat-9 { background-image: repeating-linear-gradient(135deg, #ffffff, #ffffff 2px, transparent 2px, transparent 6px); }
+
+        .football-icon { font-size: 14px; filter: grayscale(1); opacity: 0.3; }
+        .football-active { filter: grayscale(0); opacity: 1; color: green; }
     </style>
 </head>
-<body onclick="hideInfo(event)">
+<body>
 
     <header>
-        <h1>Passport & Luggage</h1>
+        <div style="width: 36px; height: 36px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold;">←</div>
+        <h1>Reisekoffer</h1>
     </header>
 
     <div class="suitcase-scene">
-        <div class="handle-top">RIMOWA KÖLN</div>
+        <div class="handle-main">RIMOWA KÖLN</div>
         <div class="suitcase-body" id="canvas">
+            <div class="handle-telescope"></div>
+            
             <div class="wheel-area">
                 <div class="wheel"></div>
                 <div class="wheel"></div>
             </div>
             
-            <div id="central-info" onclick="event.stopPropagation()">
+            <div class="niete" style="top:20px; left:20px;"></div><div class="niete" style="top:20px; left:50px;"></div><div class="niete" style="top:20px; left:80px;"></div>
+            <div class="niete" style="top:20px; right:20px;"></div><div class="niete" style="top:20px; right:50px;"></div><div class="niete" style="top:20px; right:80px;"></div>
+            <div class="niete" style="bottom:20px; left:20px;"></div><div class="niete" style="bottom:20px; left:50px;"></div><div class="niete" style="bottom:20px; left:80px;"></div>
+            <div class="niete" style="bottom:20px; right:20px;"></div><div class="niete" style="bottom:20px; right:50px;"></div><div class="niete" style="bottom:20px; right:80px;"></div>
+            
+            <div id="central-info">
                 <div class="info-header"><h3 id="info-city">-</h3></div>
                 <div class="info-row"><span>Land:</span> <strong id="info-country">-</strong></div>
                 <div class="info-row"><span>Aufenthalt:</span> <strong id="info-nights">-</strong></div>
-                <div class="info-row"><span>Fußball:</span> <span id="info-fb">⚽</span></div>
+                <div class="info-row"><span>Fußball:</span> <span id="info-fb">⚪</span></div>
                 <p class="info-desc" id="info-desc">-</p>
             </div>
         </div>
@@ -138,74 +174,73 @@
         const infoBox = document.getElementById('central-info');
 
         const DATA = [
-            { n: "Kopenhagen", nights: 4, flag: "🇩🇰", fb: true, desc: "Minimalistisches Design & Kanäle.", icon: "🚲", shape: "shape-round" },
-            { n: "New York", nights: 4, flag: "🇺🇸", fb: false, desc: "Energie pur in Manhattan.", icon: "🗽", shape: "shape-rect" },
-            { n: "Mainz", nights: 1, flag: "🇩🇪", fb: true, desc: "Fastnacht & Weinkultur.", icon: "🍇", shape: "shape-badge" },
-            { n: "AIDA", nights: 10, flag: "🚢", fb: false, desc: "Zwei Wochen auf dem Ozean.", icon: "⚓", shape: "shape-round" }
+            { n: "Kopenhagen", nights: 4, flag: "🇩🇰", fb: true, desc: "Minimalistisches Design & Kanäle.", type: "key-cph" },
+            { n: "New York", nights: 4, flag: "🇺🇸", fb: false, desc: "Energie pur in Manhattan.", type: "key-ny" },
+            { n: "Mainz", nights: 1, flag: "🇩🇪", fb: true, desc: "Fastnacht & Weinkultur.", type: "shape-badge" },
+            { n: "AIDA", nights: 10, flag: "🚢", fb: false, desc: "Zwei Wochen auf dem Ozean.", type: "key-aida" }
         ];
 
-        // Sanfte Farbpalette
-        const COLORS = ['#D4E6B5', '#B5D8E6', '#E6B5B5', '#D1B5E6', '#E6D9B5', '#B5E6D2'];
+        // 10 Muted Farben
+        const COLORS = ['#D4E6B5', '#B5D8E6', '#E6B5B5', '#D1B5E6', '#E6D9B5', '#B5E6D2', '#C6E6B5', '#E6C9B5', '#F5F5DC', '#A8DADC'];
 
         for(let i=4; i<80; i++) {
             DATA.push({
                 n: "Stadt "+i, nights: Math.floor(Math.random()*4)+1,
                 flag: "🇪🇺", fb: Math.random()>0.7, desc: "Ein weiterer Meilenstein.",
-                icon: "📍", shape: ['shape-rect', 'shape-round', 'shape-badge'][i%3]
+                type: ['shape-rect', 'shape-round', 'shape-badge'][i%3]
             });
         }
 
         function build() {
-            // Wir nutzen ein einfaches Grid-System im Hintergrund, um Überlappungen zu minimieren
-            const cols = 9;
-            const rows = 9;
-            
             DATA.forEach((city, i) => {
                 const s = document.createElement('div');
-                s.className = `sticker ${city.shape}`;
                 
+                // Muster-Index (0-9)
+                const patIdx = Math.floor(Math.random() * 10);
                 const color = COLORS[i % COLORS.length];
-                const fontSize = 9 + (city.nights * 1.5);
-                const rot = (Math.random() * 8) - 4;
                 
-                // Gitter-basierte Position mit leichtem Random-Offset gegen Überlappung
-                const gridX = (i % cols);
-                const gridY = Math.floor(i / cols);
-                const left = (gridX * 10) + 5 + (Math.random() * 3);
-                const top = (gridY * 10) + 5 + (Math.random() * 3);
+                // Klassen für Form, Key-City Status und Muster
+                const isKey = city.type.startsWith('key');
+                s.className = `sticker ${city.type} ${isKey ? 'st-key' : ''} pat-${patIdx}`;
+                
+                // Grundgröße (kleiner als vorher) + Nächte-Skalierung
+                const fontSize = 8 + (city.nights * 1.2);
+                const rot = (Math.random() * 20) - 10;
+                
+                // Absolute Willkür-Positionierung (X: 10-85%, Y: 10-80%)
+                const top = Math.random() * 70 + 10;
+                const left = Math.random() * 75 + 10;
 
                 s.style.cssText = `
-                    background: ${color}; 
-                    color: #1e293b;
+                    background-color: ${color}; 
                     top: ${top}%; left: ${left}%;
                     transform: rotate(${rot}deg);
                     font-size: ${fontSize}px;
-                    z-index: ${i};
+                    z-index: ${i + (city.nights * 10)}; /* Größere Sticker tendenziell weiter oben */
                 `;
 
                 s.innerHTML = `<span>${city.n}</span>`;
                 
-                const showInfo = (e) => {
-                    e.stopPropagation();
+                // Interaction: Hover öffnet Info
+                const showInfo = () => {
                     document.getElementById('info-city').innerText = city.flag + " " + city.n;
                     document.getElementById('info-country').innerText = city.flag + " " + (city.n === 'AIDA' ? 'International' : 'Europa');
                     document.getElementById('info-nights').innerText = city.nights + " Nächte";
                     const fb = document.getElementById('info-fb');
-                    fb.className = city.fb ? 'fb-active' : 'fb-icon';
+                    fb.innerHTML = city.fb ? '⚽ Ja' : '<span class="football-icon">⚪</span> Nein';
                     document.getElementById('info-desc').innerText = city.desc;
                     infoBox.classList.add('active');
                 };
 
-                s.addEventListener('click', showInfo);
+                s.addEventListener('mouseenter', showInfo);
                 canvas.appendChild(s);
             });
         }
 
-        function hideInfo(e) {
-            if (!infoBox.contains(e.target)) {
-                infoBox.classList.remove('active');
-            }
-        }
+        // Info schließen, wenn Maus den Koffer verlässt
+        canvas.addEventListener('mouseleave', () => {
+            infoBox.classList.remove('active');
+        });
 
         build();
     </script>
