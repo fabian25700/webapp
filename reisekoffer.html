@@ -5,9 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Life-Log | Fabian Geisbüsch</title>
+    <title>Reisekoffer | Fabian Geisbüsch</title>
     <style>
-        /* Konsistente Variablen aus deinem Tech-Stack */
         :root {
             --bg-color: #f0f2f5;
             --header-bg: rgba(240, 242, 245, 0.9);
@@ -15,6 +14,11 @@
             --header-border: #e2e8f0;
             --card-bg: #ffffff;
             --text-secondary: #64748b;
+            
+            /* Koffer Metall-Farben */
+            --alu-base: #bdc3c7;
+            --alu-dark: #9da4a7;
+            --alu-bright: #e1e4e6;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -24,6 +28,9 @@
                 --header-text: #f1f5f9;
                 --header-border: #1e293b;
                 --card-bg: #1e293b;
+                --alu-base: #7f8c8d;
+                --alu-dark: #2c3e50;
+                --alu-bright: #bdc3c7;
             }
         }
 
@@ -31,7 +38,7 @@
         
         body {
             background: var(--bg-color);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            font-family: -apple-system, sans-serif;
             height: 100vh; overflow: hidden;
             display: flex; flex-direction: column; align-items: center;
         }
@@ -41,39 +48,120 @@
             position: fixed; top: 0; width: 100%; z-index: 2000;
             padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
             display: flex; align-items: center; gap: 12px;
-            background: var(--header-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            background: var(--header-bg); backdrop-filter: blur(15px);
             border-bottom: 1px solid var(--header-border);
         }
         header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
 
-        /* Die Koffer-Szene */
-        .suitcase-scene {
-            margin-top: 100px; /* Platz für Header */
-            flex: 1; display: flex; justify-content: center; align-items: center; perspective: 1000px;
+        /* Koffer-Szene */
+        .viewport {
+            flex: 1; display: flex; justify-content: center; align-items: center;
+            perspective: 1200px; padding: 20px; margin-top: 120px;
         }
 
-        /* Container für das Bild und die zukünftigen Sticker */
         .suitcase-container {
             position: relative;
-            /* Seitenverhältnis des Originalbildes beibehalten */
-            width: 80vh; /* Skaliert mit der Bildschirmhöhe */
-            max-width: 600px; /* Begrenzung auf großen Screens */
-            aspect-ratio: 1 / 1.4; /* Hochformat-Koffer */
-            
-            /* Das Originalbild als perfekter fotorealistischer Hintergrund */
-            background-image: url('image_0.png');
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            
-            /* Subtiler Schatten für Tiefenwirkung auf der Seite */
-            filter: drop-shadow(0 30px 60px rgba(0,0,0,0.3));
+            display: flex; flex-direction: column; align-items: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Zentrales Dossier (optisch angepasst an deine Länder-Toggles) */
+        /* Mobile Drehung (Standsäule) */
+        @media (max-width: 600px) {
+            .suitcase-container { transform: rotate(-90deg) scale(0.65); margin-top: 150px; }
+        }
+
+        /* HARDWARE DETAILS */
+        
+        /* 1. Teleskopgriff (oben/kurze Seite) */
+        .telescope-system {
+            width: 160px; height: 50px; position: relative; margin-bottom: -15px; z-index: 0;
+        }
+        .rail {
+            position: absolute; width: 16px; height: 100%;
+            background: linear-gradient(to right, #333, #555, #333);
+            border-radius: 4px 4px 0 0; border: 1px solid #1a1a1a;
+        }
+        .rail.left { left: 25px; }
+        .rail.right { right: 25px; }
+        .handle-bar {
+            position: absolute; top: 0; left: 10px; right: 10px; height: 22px;
+            background: linear-gradient(to bottom, #2a2a2a, #0a0a0a, #000);
+            border-radius: 8px; border: 1px solid #111;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+
+        /* 2. Koffer-Korpus */
+        .suitcase-body {
+            width: 820px; height: 520px;
+            background: var(--alu-base);
+            border-radius: 54px; border: 14px solid var(--alu-dark);
+            position: relative; z-index: 1;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.3);
+            overflow: hidden;
+            
+            /* Plastische 3D-Rillen */
+            background-image: 
+                repeating-linear-gradient(90deg, 
+                    rgba(255,255,255,0.08) 0, rgba(255,255,255,0.08) 38px, 
+                    rgba(0,0,0,0.08) 38px, rgba(0,0,0,0.08) 42px
+                ),
+                radial-gradient(circle at 50% 50%, var(--alu-bright), var(--alu-base));
+        }
+
+        /* 3. Seitengriff (Längsseite) */
+        .handle-side-system {
+            position: absolute; right: -28px; top: 50%;
+            transform: translateY(-50%); display: flex; align-items: center;
+        }
+        .handle-mount {
+            width: 12px; height: 140px; background: #222;
+            border-radius: 0 6px 6px 0; border: 1px solid #000;
+        }
+        .handle-side {
+            width: 40px; height: 180px;
+            background: linear-gradient(to right, #111, #333, #111);
+            border-radius: 14px; border: 2px solid #000;
+            display: flex; align-items: center; justify-content: center;
+            margin-left: -5px; box-shadow: 10px 0 20px rgba(0,0,0,0.4);
+        }
+        .handle-side::after {
+            content: "RIMOWA KÖLN"; color: rgba(255,255,255,0.25);
+            font-size: 10px; font-weight: 900; letter-spacing: 3px;
+            transform: rotate(90deg); white-space: nowrap;
+        }
+
+        /* 4. Doppelrollen (unten/kurze Seite) */
+        .wheel-area {
+            position: absolute; left: -30px; top: 80px; bottom: 80px;
+            display: flex; flex-direction: column; justify-content: space-between;
+            z-index: 10;
+        }
+        .wheel-housing {
+            width: 50px; height: 110px; background: #1a1a1a;
+            border-radius: 20px 0 0 20px; border: 1px solid #000;
+            display: flex; flex-direction: column; justify-content: space-around;
+            align-items: center; padding: 10px 0;
+            box-shadow: -5px 5px 15px rgba(0,0,0,0.3);
+        }
+        .wheel-tire {
+            width: 38px; height: 38px;
+            background: linear-gradient(to bottom, #000, #222, #000);
+            border-radius: 50%; border-left: 12px solid #000;
+            margin-left: -15px; box-shadow: inset 4px 0 6px rgba(255,255,255,0.1);
+        }
+
+        /* 5. Nieten */
+        .niete {
+            position: absolute; width: 8px; height: 8px;
+            background: radial-gradient(circle at 3px 3px, var(--alu-bright), #7f8c8d);
+            border-radius: 50%; box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+            z-index: 5;
+        }
+
+        /* Zentrales Info-Dossier */
         #central-info {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 280px; background: var(--card-bg); border-radius: 20px; padding: 25px;
+            width: 300px; background: var(--card-bg); border-radius: 20px; padding: 25px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.4);
             z-index: 1500; opacity: 0; pointer-events: none; transition: 0.3s;
             border: 1px solid var(--header-border);
@@ -92,29 +180,82 @@
 <body>
 
     <header>
-        <div style="width: 36px; height: 36px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold;">←</div>
+        <div style="width: 36px; height: 36px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #ddd;">←</div>
         <h1>Reisekoffer</h1>
     </header>
 
-    <div class="suitcase-scene">
-        <div class="suitcase-container" id="canvas">
-            
-            <div id="central-info">
-                <div class="info-header"><h3 id="info-city">-</h3></div>
-                <div class="info-row"><span>Land:</span> <strong id="info-country">-</strong></div>
-                <div class="info-row"><span>Aufenthalt:</span> <strong id="info-nights">-</strong></div>
-                <div class="info-row"><span>Fußball:</span> <span id="info-fb">⚪</span></div>
-                <p class="info-desc" id="info-desc">-</p>
+    <div class="viewport">
+        <div class="suitcase-container">
+            <div class="telescope-system">
+                <div class="rail left"></div>
+                <div class="rail right"></div>
+                <div class="handle-bar"></div>
+            </div>
+
+            <div class="suitcase-body" id="canvas">
+                
+                <div class="wheel-area">
+                    <div class="wheel-housing">
+                        <div class="wheel-tire"></div>
+                        <div class="wheel-tire"></div>
+                    </div>
+                    <div class="wheel-housing">
+                        <div class="wheel-tire"></div>
+                        <div class="wheel-tire"></div>
+                    </div>
+                </div>
+
+                <div class="handle-side-system">
+                    <div class="handle-mount"></div>
+                    <div class="handle-side"></div>
+                </div>
+
+                <div id="central-info">
+                    <div class="info-header"><h3 id="info-city">-</h3></div>
+                    <div class="info-row"><span>Land:</span> <strong id="info-country">-</strong></div>
+                    <div class="info-row"><span>Aufenthalt:</span> <strong id="info-nights">-</strong></div>
+                    <div class="info-row"><span>Fußball:</span> <span id="info-fb">⚪</span></div>
+                    <p class="info-desc" id="info-desc">-</p>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Dieses Skript ist momentan leer, wird aber für die Sticker-Logik benötigt.
         const canvas = document.getElementById('canvas');
-        const infoBox = document.getElementById('central-info');
         
-        // Hier kommt später die Logik zum Generieren und Positionieren der Sticker hin.
+        function placeRivets() {
+            const w = 820;
+            const h = 520;
+            const step = 60; // Abstand zwischen Nieten
+
+            // Horizontale Reihen (oben und unten)
+            for(let x = step; x < w - step; x += step) {
+                addRivet(x, 15);      // Oben
+                addRivet(x, h - 45);  // Unten
+            }
+            // Vertikale Reihen (links und rechts)
+            for(let y = step; y < h - step; y += step) {
+                addRivet(15, y);      // Links
+                addRivet(w - 45, y);  // Rechts
+            }
+        }
+
+        function addRivet(x, y) {
+            const r = document.createElement('div');
+            r.className = 'niete';
+            r.style.left = x + 'px';
+            r.style.top = y + 'px';
+            canvas.appendChild(r);
+        }
+
+        // Starte Nieten-Generierung
+        placeRivets();
+        
+        // Platzhalter Funktion zum Öffnen des Dossiers (für spätere Sticker)
+        function showDossier() {
+            document.getElementById('central-info').classList.add('active');
+        }
     </script>
 </body>
 </html>
