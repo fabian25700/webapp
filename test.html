@@ -3,153 +3,165 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fabian | Performance Dashboard</title>
+    <title>Länder | Analytics</title>
     <script src="daten.js"></script>
     <style>
         :root {
-            --bg: #f5f5f7;
-            --card: #ffffff;
-            --text-main: #1d1d1f;
-            --text-sub: #86868b;
-            --accent: #0071e3;
-            --border: rgba(0,0,0,0.1);
+            --accent: #e67e22;
+            --bg: #f2f2f7;
+            --surface: #ffffff;
+            --text-primary: #1c1c1e;
+            --text-secondary: #8e8e93;
+            --border: #d1d1d6;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg: #000000;
-                --card: #1c1c1e;
-                --text-main: #f5f5f7;
-                --text-sub: #8e8e93;
-                --border: rgba(255,255,255,0.1);
+                --surface: #1c1c1e;
+                --text-primary: #ffffff;
+                --text-secondary: #8e8e93;
+                --border: #38383a;
             }
         }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
-            background-color: var(--bg);
-            color: var(--text-main);
-            margin: 0; padding: 20px;
-            display: flex; flex-direction: column; align-items: center;
+            font-family: -apple-system, system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            padding-bottom: 30px;
         }
 
-        .dashboard { width: 100%; max-width: 400px; display: grid; gap: 20px; }
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: calc(env(safe-area-inset-top) + 15px) 20px 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 0.5px solid var(--border);
+        }
 
-        header { width: 100%; margin-bottom: 10px; }
-        h1 { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; margin: 0; }
-        .date { font-size: 14px; color: var(--text-sub); }
+        .back-btn { text-decoration: none; color: var(--accent); font-weight: 500; }
+        h1 { font-size: 17px; font-weight: 600; }
+
+        main { padding: 12px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
 
         .card {
-            background: var(--card);
-            border-radius: 20px;
-            padding: 20px;
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            background: var(--surface);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 0.5px solid var(--border);
         }
 
-        .metric-label { font-size: 12px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; }
-        .metric-value { font-size: 28px; font-weight: 700; margin: 5px 0; }
-        .metric-sub { font-size: 13px; color: var(--accent); font-weight: 500; }
+        .card-header {
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
 
-        /* Diversifikations-Graph */
-        .chart-container { height: 6px; background: var(--bg); border-radius: 3px; margin: 15px 0; overflow: hidden; display: flex; }
-        .chart-segment { height: 100%; transition: width 0.5s ease; }
+        .flag { font-size: 24px; }
+        .name { flex: 1; font-size: 16px; font-weight: 600; }
 
-        /* Listen-Stil für Makro-Stats */
-        .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 0.5px solid var(--border); font-size: 14px; }
-        .stat-row:last-child { border: none; }
+        .main-stat { text-align: right; }
+        .stat-val { font-size: 18px; font-weight: 700; display: block; }
+        .stat-lbl { font-size: 9px; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; }
 
-        /* Badge-System */
-        .badge-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .badge { background: var(--bg); border-radius: 10px; padding: 10px; text-align: center; font-size: 11px; font-weight: 600; }
+        .details {
+            display: none;
+            padding: 12px 16px;
+            background: rgba(0,0,0,0.02);
+            border-top: 0.5px solid var(--border);
+        }
+
+        .card.open .details { display: block; }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .sub-stat {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sub-val { font-size: 15px; font-weight: 600; }
+        .sub-lbl { font-size: 9px; color: var(--text-secondary); text-transform: uppercase; }
+
+        .jog-line {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 0.5px solid var(--border);
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
     </style>
 </head>
 <body>
 
-    <div class="dashboard">
-        <header>
-            <h1>Status Quo</h1>
-            <div class="date" id="current-date">Aachen, NRW</div>
-        </header>
+    <header>
+        <a href="reise_stats.html" class="back-btn">Zurück</a>
+        <h1>Reise-Analytics</h1>
+        <div id="count" style="font-size: 13px; font-weight: 600; opacity: 0.6;"></div>
+    </header>
 
-        <div class="card">
-            <div class="metric-label">Global Exposure Index</div>
-            <div class="metric-value" id="exposure-val">0.0%</div>
-            <div class="metric-sub" id="exposure-count">0 Länder besiedelt</div>
-            
-            <div class="chart-container" id="exposure-chart">
-                </div>
-            
-            <div style="font-size: 11px; color: var(--text-sub);">
-                Basierend auf der UN-Länderliste (195). Ziel: Strategische Diversifikation.
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="metric-label">Operational Stats</div>
-            <div class="stat-row">
-                <span>Einreise-Rate (p.a.)</span>
-                <span id="stat-rate" style="font-weight: 600;">-</span>
-            </div>
-            <div class="stat-row">
-                <span>First-Entry Peak</span>
-                <span id="stat-peak" style="font-weight: 600;">-</span>
-            </div>
-            <div class="stat-row">
-                <span>Asset-Minimalismus</span>
-                <span style="font-weight: 600;">1:2 Ratio</span>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="metric-label">Recent Acquisitions</div>
-            <div class="badge-grid" id="badge-grid">
-                </div>
-        </div>
-
-        <div class="card" style="background: var(--accent); color: white;">
-            <div class="metric-label" style="color: rgba(255,255,255,0.7);">Athletic Capacity</div>
-            <div class="metric-value">5.0 km/Run</div>
-            <div style="font-size: 13px; opacity: 0.9;">Nike Run Club: Fokus-Pace 4:45</div>
-        </div>
-    </div>
+    <main id="list"></main>
 
     <script>
-        const reisen = typeof MEINE_REISEN !== 'undefined' ? MEINE_REISEN : [];
+        window.onload = function() {
+            const list = document.getElementById('list');
+            const data = [...MEINE_REISEN].sort((a, b) => b.Übernachtungen - a.Übernachtungen);
+            document.getElementById('count').textContent = data.length + ' LÄNDER';
 
-        function renderDashboard() {
-            // 1. Exposure Index
-            const count = reisen.length;
-            const percent = ((count / 195) * 100).toFixed(1);
-            document.getElementById('exposure-val').innerText = percent + '%';
-            document.getElementById('exposure-count').innerText = `${count} Länder besiedelt`;
-
-            const chart = document.getElementById('exposure-chart');
-            chart.innerHTML = `<div class="chart-segment" style="width: ${percent}%; background: var(--accent);"></div>`;
-
-            // 2. Operational Stats
-            if (count > 0) {
-                const years = reisen.map(r => r["erste Einreise"] || 2024);
-                const peakYear = [...new Set(years)].sort((a,b) => years.filter(v => v===b).length - years.filter(v => v===a).length)[0];
-                document.getElementById('stat-peak').innerText = peakYear;
-                
-                const minYear = Math.min(...years);
-                const maxYear = 2026;
-                const rate = (count / (maxYear - minYear + 1)).toFixed(1);
-                document.getElementById('stat-rate').innerText = `${rate} / Jahr`;
-            }
-
-            // 3. Badges
-            const badgeGrid = document.getElementById('badge-grid');
-            reisen.slice(0, 6).forEach(r => {
-                const b = document.createElement('div');
-                b.className = 'badge';
-                b.innerHTML = `<div style="font-size: 16px;">${r.flagge || '📍'}</div><div>${r.Land}</div>`;
-                badgeGrid.appendChild(b);
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
+                        <span class="flag">${item.flagge}</span>
+                        <span class="name">${item.Land}</span>
+                        <div class="main-stat">
+                            <span class="stat-val">${item.Übernachtungen}</span>
+                            <span class="stat-lbl">Nächte</span>
+                        </div>
+                    </div>
+                    <div class="details">
+                        <div class="stats-grid">
+                            <div class="sub-stat">
+                                <span class="sub-val">${item.Unterkünfte}</span>
+                                <span class="sub-lbl">Unterkünfte</span>
+                            </div>
+                            <div class="sub-stat">
+                                <span class="sub-val">${item.FluegeAnkunft}</span>
+                                <span class="sub-lbl">Flüge</span>
+                            </div>
+                            <div class="sub-stat">
+                                <span class="sub-val">${item["UNESCO Welterbe"]}</span>
+                                <span class="sub-lbl">UNESCO</span>
+                            </div>
+                        </div>
+                        ${item.km_gejoggt > 0 ? `
+                        <div class="jog-line">
+                            <span style="color: var(--text-secondary);">Absolute Laufleistung</span>
+                            <span style="font-weight: 700; color: var(--accent);">${item.km_gejoggt} KM</span>
+                        </div>` : ''}
+                    </div>
+                `;
+                list.appendChild(card);
             });
-        }
-
-        window.onload = renderDashboard;
+        };
     </script>
 </body>
 </html>
