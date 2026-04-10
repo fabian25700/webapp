@@ -8,15 +8,13 @@
     <title>Reisekoffer | Fabian Geisbüsch</title>
     <style>
         :root {
-            --accent: #e67e22;
             --bg: #f0f2f5;
             --surface: #ffffff;
             --text-primary: #1e293b;
             --border: #e2e8f0;
-            --border-light: #f1f5f9;
-            --alu-base: #bdc3c7;
-            --alu-dark: #7f8c8d;
-            --hardware-black: #1a1a1a;
+            --alu-gradient: linear-gradient(145deg, #e6e9ef, #bdc3c7);
+            --alu-metal: linear-gradient(to bottom, #bdc3c7, #95a5a6, #bdc3c7);
+            --rimowa-rille: rgba(0,0,0,0.08);
         }
 
         @media (prefers-color-scheme: dark) {
@@ -25,143 +23,111 @@
                 --surface: #1e293b;
                 --text-primary: #f1f5f9;
                 --border: #2d3f55;
-                --border-light: #253347;
-                --alu-base: #7f8c8d;
-                --alu-dark: #2c3e50;
+                --alu-gradient: linear-gradient(145deg, #34495e, #1e293b);
+                --alu-metal: linear-gradient(to bottom, #7f8c8d, #2c3e50, #7f8c8d);
             }
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            font-family: -apple-system, sans-serif;
             background: var(--bg); color: var(--text-primary);
-            height: 100vh; overflow: hidden;
-            display: flex; flex-direction: column;
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column;
         }
 
         header {
-            position: sticky; top: 0; z-index: 100;
-            background: var(--bg);
             padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
             display: flex; align-items: center; gap: 12px;
-            border-bottom: 1px solid var(--border-light);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg);
         }
 
         .back-btn {
-            display: flex; align-items: center; justify-content: center;
             width: 36px; height: 36px; border-radius: 12px;
             background: var(--surface); border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: center;
             text-decoration: none; color: var(--text-primary);
         }
 
-        header h1 { font-size: 1.15rem; font-weight: 800; }
+        .viewport { flex: 1; display: flex; justify-content: center; align-items: center; }
 
-        .viewport { flex: 1; display: flex; justify-content: center; align-items: center; padding: 20px; }
-
-        .suitcase-container { position: relative; display: flex; flex-direction: column; align-items: center; }
+        .suitcase-container { position: relative; width: 850px; height: 550px; }
 
         @media (max-width: 600px) {
             .suitcase-container { transform: rotate(-90deg) scale(0.6); }
         }
 
-        /* Teleskopgriff */
-        .telescope-system {
-            width: 160px; height: 60px;
-            position: relative; margin-bottom: -15px; /* Leicht hinter den Koffer schieben */
-            z-index: 0; /* Hinter den Koffer-Body */
+        /* 1. Teleskop-System (Oben) */
+        .telescope-unit {
+            position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
+            width: 180px; height: 50px; z-index: 1; display: flex; justify-content: space-around;
         }
         .rail {
-            position: absolute; width: 16px; height: 100%;
-            background: linear-gradient(to right, #333, #555, #333);
-            border-radius: 4px 4px 0 0; border: 1px solid #1a1a1a;
+            width: 18px; height: 60px;
+            background: linear-gradient(to right, #7f8c8d, #ecf0f1, #7f8c8d);
+            border: 1px solid rgba(0,0,0,0.2); border-radius: 4px;
         }
-        .rail.left { left: 25px; }
-        .rail.right { right: 25px; }
-        .handle-bar {
-            position: absolute; top: 0; left: 10px; right: 10px; height: 22px;
-            background: linear-gradient(to bottom, #2a2a2a, #0a0a0a, #000);
-            border-radius: 8px; border: 1px solid #111;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        .handle-top {
+            position: absolute; top: -10px; width: 100%; height: 26px;
+            background: linear-gradient(to bottom, #2c3e50, #000);
+            border-radius: 10px; border: 2px solid #1a1a1a;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
         }
 
-        /* Koffer Korpus */
+        /* 2. Koffer Body */
         .suitcase-body {
-            width: 820px; height: 520px;
-            background: var(--alu-base);
-            border: 14px solid var(--alu-dark);
-            border-radius: 54px;
-            position: relative;
-            z-index: 1; /* Vor dem Teleskopgriff */
-            box-shadow: 0 40px 100px rgba(0,0,0,0.3);
-            background-image: repeating-linear-gradient(90deg, transparent 0, transparent 40px, rgba(0,0,0,0.06) 40px, rgba(0,0,0,0.06) 42px);
+            width: 100%; height: 100%;
+            background: var(--alu-gradient);
+            border: 2px solid rgba(0,0,0,0.1);
+            border-radius: 60px;
+            position: relative; z-index: 5;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.2), inset 0 0 40px rgba(255,255,255,0.2);
+            overflow: hidden;
+            /* Rimowa Rillen */
+            background-image: repeating-linear-gradient(90deg, 
+                transparent 0, transparent 45px, 
+                var(--rimowa-rille) 45px, var(--rimowa-rille) 48px);
         }
 
-        /* Seitengriff Upgrade: Abgehoben */
-        .handle-side-system {
-            position: absolute; right: -35px; top: 50%;
-            transform: translateY(-50%);
-            display: flex; align-items: center;
-        }
-        /* Montageplatte auf dem Koffer */
-        .handle-mount {
-            width: 12px; height: 140px;
-            background: var(--hardware-black);
-            border-radius: 0 6px 6px 0;
-            border: 1px solid #000;
-        }
-        /* Der eigentliche Griff */
-        .handle-side {
-            width: 40px; height: 180px;
-            background: linear-gradient(to right, #111, #333, #111);
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            border: 2px solid #000;
-            margin-left: -5px; /* Leicht über die Montageplatte schieben */
-            box-shadow: 10px 0 20px rgba(0,0,0,0.4); /* Starker Schatten nach außen */
-        }
-        .handle-side::after {
-            content: "RIMOWA KÖLN";
-            color: rgba(255,255,255,0.25);
-            font-size: 10px; font-weight: 900; letter-spacing: 3px;
-            transform: rotate(90deg); white-space: nowrap;
-        }
-
-        /* Rollen Upgrade: Gehäuse auf dem Koffer */
-        .wheel-area {
-            position: absolute; left: -25px; top: 70px; bottom: 70px;
-            display: flex; flex-direction: column; justify-content: space-between;
-            z-index: 10; /* Vor dem Koffer-Rand */
-        }
-        /* Radkasten */
+        /* 3. Radkästen & Runde Rollen */
         .wheel-housing {
-            width: 45px; height: 110px;
-            background: var(--hardware-black);
-            border-radius: 20px 0 0 20px;
-            border: 1px solid #000;
-            display: flex; align-items: center; justify-content: flex-start;
-            box-shadow: -5px 5px 15px rgba(0,0,0,0.3);
+            position: absolute; left: 15px; width: 60px; height: 120px;
+            background: rgba(0,0,0,0.05); border-radius: 30px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            border: 1px solid rgba(0,0,0,0.1);
         }
-        /* Die Rolle selbst */
-        .wheel-tire {
-            width: 40px; height: 90px;
-            background: linear-gradient(to bottom, #000, #222, #000);
-            border-radius: 15px 0 0 15px;
-            border-left: 14px solid #000;
-            margin-left: -10px; /* Rolle aus dem Gehäuse schieben */
-            box-shadow: inset 4px 0 6px rgba(255,255,255,0.1);
+        .wh-top { top: 80px; } .wh-bottom { bottom: 80px; }
+
+        .tire {
+            width: 44px; height: 44px; background: #1a1a1a;
+            border-radius: 50%; border-left: 12px solid #000;
+            box-shadow: inset 0 0 10px rgba(255,255,255,0.1), 5px 0 10px rgba(0,0,0,0.3);
+            margin: 5px 0;
         }
 
-        /* Nieten */
+        /* 4. Seitengriff (Alu-Mount) */
+        .side-handle-unit {
+            position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
+            width: 50px; height: 200px;
+            background: var(--alu-metal);
+            border-radius: 15px; border: 1px solid rgba(0,0,0,0.2);
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .side-handle-unit::after {
+            content: "RIMOWA KÖLN";
+            font-size: 10px; font-weight: 900; letter-spacing: 2px;
+            color: rgba(0,0,0,0.4); transform: rotate(90deg); white-space: nowrap;
+        }
+
+        /* 5. Nieten (Gleichmäßig am Rand) */
         .niete {
-            position: absolute; width: 8px; height: 8px;
-            background: radial-gradient(circle at 3px 3px, #bdc3c7, #7f8c8d);
-            border-radius: 50%;
-            box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
-            z-index: 5;
+            position: absolute; width: 10px; height: 10px;
+            background: radial-gradient(circle at 30%, #ecf0f1, #7f8c8d);
+            border-radius: 50%; box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            z-index: 10;
         }
-
     </style>
 </head>
 <body>
@@ -173,28 +139,24 @@
 
     <div class="viewport">
         <div class="suitcase-container">
-            <div class="telescope-system">
-                <div class="rail left"></div>
-                <div class="rail right"></div>
-                <div class="handle-bar"></div>
+            <div class="telescope-unit">
+                <div class="handle-top"></div>
+                <div class="rail"></div>
+                <div class="rail"></div>
             </div>
 
             <div class="suitcase-body" id="canvas">
                 
-                <div class="wheel-area">
-                    <div class="wheel-housing">
-                        <div class="wheel-tire"></div>
-                    </div>
-                    <div class="wheel-housing">
-                        <div class="wheel-tire"></div>
-                    </div>
+                <div class="wheel-housing wh-top">
+                    <div class="tire"></div>
+                    <div class="tire"></div>
+                </div>
+                <div class="wheel-housing wh-bottom">
+                    <div class="tire"></div>
+                    <div class="tire"></div>
                 </div>
 
-                <div class="handle-side-system">
-                    <div class="handle-mount"></div>
-                    <div class="handle-side"></div>
-                </div>
-
+                <div class="side-handle-unit"></div>
             </div>
         </div>
     </div>
@@ -203,19 +165,19 @@
         const canvas = document.getElementById('canvas');
         
         function placeRivets() {
-            const w = 820;
-            const h = 520;
-            const step = 60; // Abstand zwischen Nieten
+            const w = 850;
+            const h = 550;
+            const offset = 22; 
+            const step = 65;
 
-            // Horizontale Reihen
-            for(let x = 60; x < w - 60; x += step) {
-                addRivet(x, 15);      // Oben
-                addRivet(x, h - 45);  // Unten
+            // Umlaufende Nieten-Logik
+            for(let x = step; x < w - step; x += step) {
+                addRivet(x, offset);          // Oben
+                addRivet(x, h - offset - 10); // Unten
             }
-            // Vertikale Reihen
-            for(let y = 60; y < h - 60; y += step) {
-                addRivet(15, y);      // Links
-                addRivet(w - 45, y);  // Rechts
+            for(let y = step; y < h - step; y += step) {
+                addRivet(offset, y);          // Links
+                addRivet(w - offset - 10, y); // Rechts
             }
         }
 
