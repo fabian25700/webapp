@@ -5,13 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Reisekoffer | Life-Log</title>
+    <title>Reisekoffer | Fabian Geisbüsch</title>
     <style>
         :root {
             --bg-color: #f0f2f5;
             --header-bg: rgba(240, 242, 245, 0.9);
             --header-text: #1e293b;
             --header-border: #e2e8f0;
+            --card-bg: #ffffff;
+            --text-secondary: #64748b;
             --alu-base: #bdc3c7;
             --alu-dark: #9da4a7;
             --alu-bright: #e1e4e6;
@@ -23,6 +25,7 @@
                 --header-bg: rgba(15, 23, 42, 0.9);
                 --header-text: #f1f5f9;
                 --header-border: #1e293b;
+                --card-bg: #1e293b;
                 --alu-base: #7f8c8d;
                 --alu-dark: #2c3e50;
                 --alu-bright: #bdc3c7;
@@ -55,26 +58,55 @@
 
         .viewport {
             flex: 1; display: flex; justify-content: center; align-items: center;
-            padding: 20px; margin-top: 100px;
+            perspective: 1200px; padding: 20px; margin-top: 120px;
         }
 
         .suitcase-container {
             position: relative;
             display: flex; flex-direction: column; align-items: center;
-            width: 820px; height: 520px;
         }
 
         @media (max-width: 600px) {
-            .suitcase-container { transform: rotate(-90deg) scale(0.65); margin-top: 130px; }
+            .suitcase-container { transform: rotate(-90deg) scale(0.65); margin-top: 150px; }
         }
 
-        /* 3D-Koffer Body */
+        /* 1. Teleskopgriff */
+        .telescope-system {
+            width: 160px; height: 50px; position: relative; margin-bottom: -15px; z-index: 0;
+        }
+        .rail {
+            position: absolute; width: 16px; height: 100%;
+            background: linear-gradient(to right, #333, #555, #333);
+            border-radius: 4px 4px 0 0; border: 1px solid #1a1a1a;
+        }
+        .rail.left { left: 25px; }
+        .rail.right { right: 25px; }
+        .handle-bar {
+            position: absolute; top: 0; left: 10px; right: 10px; height: 26px;
+            background: linear-gradient(to bottom, #2a2a2a, #0a0a0a, #000);
+            border-radius: 8px; border: 1px solid #111;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        /* Rimowa Schriftzug auf dem Teleskopgriff */
+        .handle-bar::after {
+            content: "RIMOWA";
+            font-size: 9px; font-weight: 900; letter-spacing: 3px;
+            background: linear-gradient(135deg, #fff 0%, #eee 40%, #ccc 50%, #eee 60%, #fff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 1px rgba(255,255,255,0.3));
+        }
+
+        /* 2. Koffer-Korpus */
         .suitcase-body {
-            width: 100%; height: 100%;
+            width: 820px; height: 520px;
             background: var(--alu-base);
             border-radius: 54px; border: 14px solid var(--alu-dark);
-            position: relative;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.25);
+            position: relative; z-index: 1;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.3);
             overflow: hidden;
             background-image: 
                 repeating-linear-gradient(90deg, 
@@ -84,85 +116,65 @@
                 radial-gradient(circle at 50% 50%, var(--alu-bright), var(--alu-base));
         }
 
-        /* Ergonomischer Griff oben an der langen Seite */
-        .handle-top-system {
-            position: absolute; top: -35px; left: 50%;
-            transform: translateX(-50%); display: flex; flex-direction: column; align-items: center;
-            z-index: 10;
-        }
-        
-        /* Montageplatte */
-        .handle-mount {
-            width: 160px; height: 14px; background: #1a1a1a;
-            border-radius: 8px 8px 0 0; border: 1px solid #000;
-        }
-
-        /* Der gewölbte Griff */
-        .handle-bar {
-            width: 200px; height: 45px;
-            background: linear-gradient(to bottom, #2c2c2c, #0a0a0a, #000);
-            border-radius: 15px; border: 2px solid #111;
-            display: flex; align-items: center; justify-content: center;
-            margin-top: -6px; 
-            box-shadow: 0 12px 25px rgba(0,0,0,0.5);
-        }
-        
-        /* RIMOWA Text auf dem Griff */
-        .handle-bar::after {
-            content: "RIMOWA"; 
-            font-size: 13px; font-weight: 900; letter-spacing: 5px;
-            white-space: nowrap;
-            background: linear-gradient(135deg, #fff 0%, #eee 40%, #ccc 50%, #eee 60%, #fff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: drop-shadow(0 0 2px rgba(255,255,255,0.4));
-        }
-
-        /* Nieten-Styling */
         .niete {
             position: absolute; width: 8px; height: 8px;
             background: radial-gradient(circle at 3px 3px, var(--alu-bright), #7f8c8d);
             border-radius: 50%; box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
             z-index: 5;
         }
+
+        #central-info {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 300px; background: var(--card-bg); border-radius: 20px; padding: 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            z-index: 1500; opacity: 0; pointer-events: none; transition: 0.3s;
+            border: 1px solid var(--header-border);
+            text-align: center;
+        }
+        #central-info.active { opacity: 1; pointer-events: auto; }
     </style>
 </head>
 <body>
 
     <header>
         <a href="reise_stats.html" class="back-btn">←</a>
-        <h1>Life-Log Suitcase</h1>
+        <h1>Reisekoffer</h1>
     </header>
 
     <div class="viewport">
-        <div class="suitcase-container" id="suitcase-canvas">
-            
-            <div class="handle-top-system">
-                <div class="handle-mount"></div>
+        <div class="suitcase-container">
+            <div class="telescope-system">
+                <div class="rail left"></div>
+                <div class="rail right"></div>
                 <div class="handle-bar"></div>
             </div>
 
-            <div class="suitcase-body">
+            <div class="suitcase-body" id="canvas">
+                <div id="central-info">
+                    <div class="info-header"><h3 id="info-city">-</h3></div>
+                    <div class="info-row"><span>Land:</span> <strong id="info-country">-</strong></div>
+                    <div class="info-row"><span>Aufenthalt:</span> <strong id="info-nights">-</strong></div>
+                    <div class="info-row"><span>Fußball:</span> <span id="info-fb">⚪</span></div>
+                    <p class="info-desc" id="info-desc">-</p>
                 </div>
+            </div>
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('suitcase-canvas');
-        const rivetsCountHor = 12;
-        const rivetsCountVer = 8;
-
-        function createRivets() {
-            // Horizontale Reihen (oben und unten)
-            for(let i = 0; i < rivetsCountHor; i++) {
-                addRivet(65 + (i * 63), 25);      // Oben
-                addRivet(65 + (i * 63), 485);     // Unten
+        const canvas = document.getElementById('canvas');
+        
+        function placeRivets() {
+            const w = 820;
+            const h = 520;
+            const step = 60;
+            for(let x = step; x < w - step; x += step) {
+                addRivet(x, 15);
+                addRivet(x, h - 45);
             }
-            // Vertikale Reihen (links und rechts)
-            for(let i = 0; i < rivetsCountVer; i++) {
-                addRivet(25, 65 + (i * 55));      // Links
-                addRivet(785, 65 + (i * 55));     // Rechts
+            for(let y = step; y < h - step; y += step) {
+                addRivet(15, y);
+                addRivet(w - 45, y);
             }
         }
 
@@ -174,7 +186,11 @@
             canvas.appendChild(r);
         }
 
-        createRivets();
+        placeRivets();
+        
+        function showDossier() {
+            document.getElementById('central-info').classList.add('active');
+        }
     </script>
 </body>
 </html>
