@@ -68,7 +68,6 @@
             height: 100vh;
             padding-top: 100px;
             scrollbar-width: none;
-            /* Eigener Compositing-Layer für smooth scrolling */
             will-change: scroll-position;
             -webkit-overflow-scrolling: touch;
         }
@@ -80,7 +79,6 @@
             display: flex;
             justify-content: center;
             padding: 10px;
-            /* Verhindert dass jede Page einen eigenen Layer bekommt */
             contain: layout style;
         }
 
@@ -92,9 +90,27 @@
             padding: 25px 20px;
             border: 1px solid var(--border-page);
             display: flex; flex-direction: column;
+            overflow: hidden; /* Wichtig für das Pseudo-Element */
+        }
+
+        /* Bundesadler Wasserzeichen wieder hinzugefügt */
+        .page-inner::before {
+            content: ' ';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 220px;
+            height: 220px;
+            transform: translate(-50%, -50%);
+            background: url('https://upload.wikimedia.org/wikipedia/commons/d/da/Coat_of_arms_of_Germany.svg') no-repeat center;
+            background-size: contain;
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 0;
         }
 
         .page-header {
+            position: relative; z-index: 1;
             text-align: center; font-size: 0.65rem; font-weight: 700;
             color: var(--text-secondary); text-transform: uppercase;
             letter-spacing: 2px; border-bottom: 1px solid var(--border-page);
@@ -102,6 +118,7 @@
         }
 
         .stamp-grid {
+            position: relative; z-index: 1;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             grid-template-rows: repeat(3, 1fr);
@@ -119,7 +136,7 @@
             align-items: center; justify-content: center;
             padding: 12px; text-align: center;
             border: 2.5px solid;
-            /* mix-blend-mode entfernt – war teuerster GPU-Kostenpunkt */
+            background: transparent; /* Verhindert das Überdecken des Adlers */
         }
 
         .stamp-circle { border-radius: 50%; width: 110px; height: 110px; }
@@ -141,10 +158,10 @@
             font-weight: 800; opacity: 0.8;
         }
 
-        /* Blur nur per CSS-Klasse statt inline filter pro Element */
         .stamp-aged { filter: blur(0.4px); }
 
         .page-footer {
+            position: relative; z-index: 1;
             text-align: center; font-size: 0.7rem; font-weight: 800;
             color: var(--ink-dark); text-transform: uppercase;
             margin-top: 15px; padding-top: 10px;
@@ -167,8 +184,6 @@
         const STAMPS_PER_PAGE = 6;
         const AKTUELLES_JAHR = 2026;
 
-        // Deterministischer Hash aus Länderstring
-        // → gleiche Farbe/Form bei jedem Reload, kein Random mehr
         function hashStr(str) {
             let h = 0;
             for (let i = 0; i < str.length; i++) {
@@ -187,8 +202,7 @@
             const opacity  = Math.max(0.6, 0.95 - alter * 0.015).toFixed(3);
             const agedClass = alter > 15 ? ' stamp-aged' : '';
 
-            // Inline-style nur für Werte die pro Stamp variieren
-            return `<div class="stamp stamp-${shape}${agedClass}"
+            return `<div class="stamp stamp-${shape}${agedClass}" 
                         style="color:${color};border-color:${color};opacity:${opacity};transform:rotate(${rotation}deg)">
                         <div class="type">ENTRY</div>
                         <div class="land">${reise.Land}</div>
@@ -205,8 +219,6 @@
                 .sort((a, b) => (b["erste Einreise"] || 2000) - (a["erste Einreise"] || 2000));
 
             const totalPages = Math.ceil(reisen.length / STAMPS_PER_PAGE);
-
-            // Einmal Fragment bauen → ein einziger DOM-Insert
             const fragment = document.createDocumentFragment();
 
             for (let p = 0; p < totalPages; p++) {
@@ -231,8 +243,6 @@
             container.appendChild(fragment);
         }
 
-        // requestAnimationFrame statt window.onload →
-        // Browser hat Layout fertig bevor wir DOM befüllen
         requestAnimationFrame(renderPassport);
     </script>
 </body>
