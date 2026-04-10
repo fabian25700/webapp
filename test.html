@@ -44,7 +44,6 @@
             color: var(--text-primary);
             min-height: 100vh;
             padding-bottom: calc(env(safe-area-inset-bottom) + 32px);
-            transition: background 0.3s, color 0.3s;
         }
 
         header {
@@ -59,7 +58,6 @@
             border-bottom: 1px solid var(--border-light);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            transition: background 0.3s;
         }
 
         .back-btn {
@@ -72,23 +70,11 @@
             background: var(--surface);
             border: 1px solid var(--border);
             text-decoration: none;
-            font-size: 1rem;
             color: var(--text-primary);
             box-shadow: var(--shadow);
-            flex-shrink: 0;
-            transition: all 0.15s;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        .back-btn:active { transform: scale(0.92); opacity: 0.7; }
-
-        header h1 {
-            font-size: 1.15rem;
-            font-weight: 800;
-            color: var(--text-primary);
-            letter-spacing: -0.01em;
-            flex: 1;
-        }
+        header h1 { font-size: 1.15rem; font-weight: 800; flex: 1; }
 
         .country-count {
             font-size: 0.75rem;
@@ -99,14 +85,7 @@
             border-radius: 20px;
         }
 
-        main {
-            padding: 16px 16px 0;
-            max-width: 600px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+        main { padding: 16px 16px 0; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
 
         .country-card {
             background: var(--surface);
@@ -114,7 +93,6 @@
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
             overflow: hidden;
-            transition: box-shadow 0.2s;
         }
 
         .country-header {
@@ -126,74 +104,21 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        .country-flag {
-            font-size: 1.9rem;
-            line-height: 1;
-            flex-shrink: 0;
-        }
+        .country-flag { font-size: 1.9rem; line-height: 1; flex-shrink: 0; }
+        .country-header-info { flex: 1; min-width: 0; }
+        .country-name { font-weight: 700; font-size: 1rem; color: var(--text-primary); }
+        .country-meta { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
 
-        .country-header-info {
-            flex: 1;
-            min-width: 0;
-        }
+        .country-nights { font-weight: 800; font-size: 1.05rem; color: var(--accent); text-align: right; }
+        .country-nights-label { font-size: 0.65rem; color: var(--text-tertiary); text-align: right; font-weight: 500; text-transform: uppercase; }
 
-        .country-name {
-            font-weight: 700;
-            font-size: 1rem;
-            color: var(--text-primary);
-        }
+        .expand-icon { color: var(--text-tertiary); font-size: 0.8rem; margin-left: 4px; transition: transform 0.2s; }
+        .country-card.open .expand-icon { transform: rotate(90deg); }
 
-        .country-meta {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-top: 2px;
-        }
+        .country-detail { display: none; border-top: 1px solid var(--border-light); padding: 12px 16px 14px; background: var(--surface-2); }
+        .country-card.open .country-detail { display: block; }
 
-        .country-nights {
-            font-weight: 800;
-            font-size: 1.05rem;
-            color: var(--accent);
-            white-space: nowrap;
-            text-align: right;
-        }
-
-        .country-nights-label {
-            font-size: 0.65rem;
-            color: var(--text-tertiary);
-            text-align: right;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.03em;
-        }
-
-        .expand-icon {
-            color: var(--text-tertiary);
-            font-size: 0.8rem;
-            margin-left: 4px;
-            transition: transform 0.2s;
-            flex-shrink: 0;
-        }
-
-        .country-card.open .expand-icon {
-            transform: rotate(90deg);
-        }
-
-        .country-detail {
-            display: none;
-            border-top: 1px solid var(--border-light);
-            padding: 12px 16px 14px;
-            background: var(--surface-2);
-        }
-
-        .country-card.open .country-detail {
-            display: block;
-        }
-
-        .stat-chips {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 7px;
-        }
+        .stat-chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
 
         .stat-chip {
             background: var(--surface);
@@ -205,41 +130,15 @@
             overflow: hidden;
         }
 
-        .chip-val {
-            font-size: 1.05rem;
-            font-weight: 800;
-            color: var(--accent);
-            display: block;
-            position: relative;
-            z-index: 2;
-        }
+        .chip-val { font-size: 1.05rem; font-weight: 800; color: var(--accent); display: block; position: relative; z-index: 2; }
+        .chip-label { font-size: 0.62rem; color: var(--text-tertiary); text-transform: uppercase; font-weight: 600; margin-top: 2px; display: block; position: relative; z-index: 2; }
 
-        .chip-label {
-            font-size: 0.62rem;
-            color: var(--text-tertiary);
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            font-weight: 600;
-            margin-top: 2px;
-            display: block;
-            position: relative;
-            z-index: 2;
-        }
+        .progress-bar { position: absolute; left: 0; top: 0; height: 100%; background-color: rgba(46, 204, 113, 0.2); z-index: 1; transition: width 0.3s ease; }
 
-        .progress-bar {
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            background-color: rgba(46, 204, 113, 0.2);
-            z-index: 1;
-            transition: width 0.3s ease;
-        }
-
-        .jog-row {
+        .info-row {
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
             margin-top: 8px;
             padding: 9px 12px;
             background: var(--surface);
@@ -247,17 +146,12 @@
             border-radius: 11px;
         }
 
-        .jog-icon { font-size: 1rem; flex-shrink: 0; }
+        .info-text { font-size: 0.82rem; color: var(--text-secondary); }
+        .info-text strong { color: var(--text-primary); font-weight: 700; }
+        
+        .football-icon { font-size: 1.1rem; filter: grayscale(1); opacity: 0.2; transition: all 0.3s; }
+        .football-icon.active { filter: grayscale(0); opacity: 1; }
 
-        .jog-text {
-            font-size: 0.82rem;
-            color: var(--text-secondary);
-        }
-
-        .jog-text strong {
-            color: var(--text-primary);
-            font-weight: 700;
-        }
     </style>
 </head>
 <body>
@@ -281,16 +175,17 @@
             sorted.forEach((trip) => {
                 const hasJog = trip.Joggen > 0;
                 const avgKmPerRun = hasJog ? (trip.km_gejoggt / trip.Joggen).toFixed(1) : null;
+                const firstEntryYear = trip.Ersteinreise ? trip.Ersteinreise.split('.').pop() : 'n.a.';
+                
+                // Fußball Check: String Vergleich "ja"
+                const hasFootball = trip.Fussball && trip.Fussball.toLowerCase() === "ja";
 
-                // UNESCO Progress Calculation
                 let progressPercent = 0;
                 if (trip["UNESCO Welterbe"] && trip["UNESCO Welterbe"] !== "0/0") {
                     const parts = trip["UNESCO Welterbe"].split('/');
                     const current = parseInt(parts[0]);
                     const total = parseInt(parts[1]);
-                    if (total > 0) {
-                        progressPercent = (current / total) * 100;
-                    }
+                    if (total > 0) progressPercent = (current / total) * 100;
                 }
 
                 const card = document.createElement('div');
@@ -300,7 +195,7 @@
                         <div class="country-flag">${trip.flagge || trip.id}</div>
                         <div class="country-header-info">
                             <div class="country-name">${trip.Land}</div>
-                            <div class="country-meta">${trip.kontinent || ''} · ${trip.id}</div>
+                            <div class="country-meta">${trip.kontinent} · ${trip.id} · ${firstEntryYear}</div>
                         </div>
                         <div>
                             <div class="country-nights">${trip.Übernachtungen}</div>
@@ -325,15 +220,12 @@
                             </div>
                         </div>
 
-                        ${hasJog ? `
-                        <div class="jog-row">
-                            <div class="jog-icon">🏃</div>
-                            <div class="jog-text">
-                                <strong>${trip.Joggen}×</strong> gejoggt ·
-                                <strong>${trip.km_gejoggt} km</strong> gesamt ·
-                                ø <strong>${avgKmPerRun} km</strong> pro Lauf
+                        <div class="info-row">
+                            <div class="info-text">
+                                ${hasJog ? `<strong>${trip.Joggen}×</strong> gejoggt · <strong>${trip.km_gejoggt} km</strong> gesamt` : 'Keine Läufe'}
                             </div>
-                        </div>` : ''}
+                            <div class="football-icon ${hasFootball ? 'active' : ''}">⚽️</div>
+                        </div>
                     </div>
                 `;
                 list.appendChild(card);
