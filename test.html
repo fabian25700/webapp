@@ -3,244 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Passport</title>
-    <script src="daten.js"></script>
+    <title>Luggage Canvas</title>
     <style>
         :root {
-            --bg-color: #f0f2f5;
-            --header-bg: rgba(240, 242, 245, 0.9);
-            --header-text: #1e293b;
-            --header-border: #e2e8f0;
-            --btn-bg: #ffffff;
-            --btn-border: #e2e8f0;
-            --btn-text: #1e293b;
-            --passport-green-soft: #e8f2e9;
-            --ink-dark: #1a3a16;
-            --border-page: #d1ddd2;
-            --text-secondary: #7a8c7b;
+            --alu-base: #b0b3b8;
+            --alu-bright: #e1e4e8;
+            --alu-shadow: #888a8d;
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #0f172a;
-                --header-bg: rgba(15, 23, 42, 0.9);
-                --header-text: #f1f5f9;
-                --header-border: #1e293b;
-                --btn-bg: #1e293b;
-                --btn-border: #2d3f55;
-                --btn-text: #f1f5f9;
-            }
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background: var(--bg-color);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            background: #1a1a1a;
             overflow: hidden;
-        }
-
-        header {
-            position: fixed; top: 0; width: 100%; z-index: 100;
-            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
-            display: flex; align-items: center; gap: 12px;
-            background: var(--header-bg);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border-bottom: 1px solid var(--header-border);
-        }
-
-        .back-btn {
+            font-family: -apple-system, sans-serif;
             display: flex; align-items: center; justify-content: center;
-            width: 36px; height: 36px; border-radius: 12px;
-            background: var(--btn-bg); border: 1px solid var(--btn-border);
-            text-decoration: none; color: var(--btn-text);
+            height: 100vh; width: 100vw;
         }
 
-        header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
-
-        .book-container {
-            display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
-            height: 100vh; padding-top: 100px; scrollbar-width: none;
-            -webkit-overflow-scrolling: touch;
-        }
-        .book-container::-webkit-scrollbar { display: none; }
-
-        .page {
-            flex: 0 0 100vw; scroll-snap-align: start;
-            display: flex; justify-content: center; padding: 10px;
+        /* Der Koffer-Container (Zoom- & Pan-Area) */
+        #viewport {
+            width: 100vw; height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            cursor: grab;
+            touch-action: none;
         }
 
-        .page-inner {
-            width: 100%; max-width: 380px; height: 620px;
-            background: var(--passport-green-soft);
-            border-radius: 15px; position: relative;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-            padding: 25px 20px; border: 1px solid var(--border-page);
-            display: flex; flex-direction: column; overflow: hidden;
+        #suitcase {
+            width: 900px; height: 600px;
+            background: var(--alu-base);
+            background-image: repeating-linear-gradient(
+                90deg,
+                var(--alu-shadow) 0px,
+                var(--alu-shadow) 2px,
+                transparent 2px,
+                transparent 40px,
+                var(--alu-bright) 42px,
+                var(--alu-bright) 44px
+            );
+            border-radius: 40px;
+            position: relative;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.5);
+            transition: transform 0.1s ease-out;
+            border: 8px solid #999;
+            flex-shrink: 0;
         }
 
-        .page-inner::before {
-            content: ' '; position: absolute; top: 50%; left: 50%;
-            width: 220px; height: 220px; transform: translate(-50%, -50%);
-            background: url('https://upload.wikimedia.org/wikipedia/commons/d/da/Coat_of_arms_of_Germany.svg') no-repeat center;
-            background-size: contain; opacity: 0.04; pointer-events: none; z-index: 0;
+        /* Die Sticker */
+        .sticker {
+            position: absolute;
+            padding: 8px 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-size: 12px;
+            box-shadow: 2px 3px 6px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column; align-items: center;
+            border: 2px solid rgba(255,255,255,0.2);
+            user-select: none;
+            cursor: pointer;
+            transition: transform 0.2s;
         }
 
-        .page-header {
-            position: relative; z-index: 1; text-align: center; font-size: 0.65rem; 
-            font-weight: 700; color: var(--text-secondary); text-transform: uppercase;
-            letter-spacing: 2px; border-bottom: 1px solid var(--border-page);
-            padding-bottom: 10px; margin-bottom: 20px;
-        }
+        .sticker:hover { transform: scale(1.1) !important; z-index: 100 !important; }
 
-        .stamp-grid {
-            position: relative; z-index: 1; display: grid;
-            grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr);
-            gap: 10px; flex: 1;
-        }
+        /* Sticker-Styles */
+        .st-round { border-radius: 50%; width: 70px; height: 70px; justify-content: center; }
+        .st-rect { border-radius: 4px; }
+        .st-badge { border-radius: 10px 0 10px 0; }
 
-        .stamp-slot { display: flex; align-items: center; justify-content: center; }
+        .icon { font-size: 20px; margin-bottom: 2px; }
 
-        .stamp {
-            display: inline-flex; flex-direction: column; align-items: center; 
-            justify-content: center; padding: 10px; text-align: center; border: 2.5px solid;
-            background: transparent;
-            white-space: pre-line; 
-            overflow-wrap: normal;
-        }
-
-        .stamp-circle { border-radius: 50%; aspect-ratio: 1/1; }
-        .stamp-rect   { border-radius: 4px; }
-        .stamp-hex    { border-radius: 10px; transform: skewX(-5deg); }
-
-        .stamp .land {
-            font-weight: 900; text-transform: uppercase; line-height: 1.1;
-        }
-
-        .stamp .jahr {
-            font-size: 1.1rem; font-weight: 900;
-            border-top: 2px solid; border-bottom: 2px solid;
-            margin: 4px 0; padding: 0 6px;
-        }
-
-        .stamp .type { font-size: 0.4rem; letter-spacing: 1px; font-weight: 800; opacity: 0.8; }
-        .stamp-aged { filter: blur(0.4px); }
-
-        .page-footer {
-            position: relative; z-index: 1; text-align: center; font-size: 0.7rem; 
-            font-weight: 800; color: var(--ink-dark); text-transform: uppercase;
-            margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border-page);
+        /* Media Query für vertikales Handy-Format */
+        @media (max-width: 600px) {
+            #suitcase { width: 90vw; height: 140vw; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <a href="reise_stats.html" class="back-btn">←</a>
-        <h1>Passport</h1>
-    </header>
-
-    <div class="book-container" id="book-container"></div>
+    <div id="viewport">
+        <div id="suitcase"></div>
+    </div>
 
     <script>
-        const COLORS = ['#1e3a8a', '#991b1b', '#064e3b', '#581c87', '#78350f'];
-        const SHAPES = ['circle', 'rect', 'hex'];
-        const STAMPS_PER_PAGE = 6;
-        const AKTUELLES_JAHR = 2026;
+        const suit = document.getElementById('suitcase');
+        const view = document.getElementById('viewport');
 
-        function hashStr(str) {
-            let h = 0;
-            for (let i = 0; i < str.length; i++) {
-                h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+        // Beispiel-Daten (später aus daten.js)
+        const CITIES = [
+            {n: "New York", i: "🗽", c: "#e63946"},
+            {n: "Berlin", i: "🏛️", c: "#f1faee"},
+            {n: "Köln", i: "⛪", c: "#a8dadc"},
+            {n: "München", i: "🥨", c: "#457b9d"},
+            {n: "Paris", i: "🗼", c: "#1d3557"},
+            {n: "Aachen", i: "🍰", c: "#f4a261"},
+            {n: "London", i: "🎡", c: "#e76f51"},
+            {n: "Tokyo", i: "🍣", c: "#2a9d8f"}
+        ];
+
+        // Zoom & Pan Logik
+        let scale = 0.8;
+        let posX = 0, posY = 0;
+
+        function updateTransform() {
+            suit.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+        }
+
+        view.addEventListener('wheel', e => {
+            scale += e.deltaY * -0.001;
+            scale = Math.min(Math.max(0.3, scale), 3);
+            updateTransform();
+        });
+
+        // Sticker generieren (Simulierte 80 Stück)
+        function createStickers() {
+            for (let i = 0; i < 85; i++) {
+                const city = CITIES[i % CITIES.length];
+                const sticker = document.createElement('div');
+                
+                const type = ['st-round', 'st-rect', 'st-badge'][i % 3];
+                sticker.className = `sticker ${type}`;
+                
+                // Zufällige Position (innerhalb des Koffers)
+                const top = Math.random() * 80 + 5;
+                const left = Math.random() * 80 + 5;
+                const rot = (Math.random() * 40) - 20;
+
+                sticker.style.top = `${top}%`;
+                sticker.style.left = `${left}%`;
+                sticker.style.background = city.c;
+                sticker.style.color = getContrastYIQ(city.c);
+                sticker.style.transform = `rotate(${rot}deg)`;
+                sticker.style.zIndex = i;
+
+                sticker.innerHTML = `<span class="icon">${city.i}</span><span>${city.n}</span>`;
+                suit.appendChild(sticker);
             }
-            return Math.abs(h);
         }
 
-        function formatLandName(name) {
-            const words = name.split(' ');
-            if (words.length <= 1) return name;
-
-            let result = [];
-            for (let i = 0; i < words.length; i++) {
-                const word = words[i];
-                // Wenn das Wort sehr kurz ist (<= 3 Zeichen) und nicht das erste Wort ist, 
-                // hänge es an das vorherige Wort an.
-                if (word.length <= 3 && result.length > 0) {
-                    result[result.length - 1] += ' ' + word;
-                } else {
-                    result.push(word);
-                }
-            }
-            return result.join('\n');
+        function getContrastYIQ(hexcolor){
+            hexcolor = hexcolor.replace("#", "");
+            var r = parseInt(hexcolor.substr(0,2),16);
+            var g = parseInt(hexcolor.substr(2,2),16);
+            var b = parseInt(hexcolor.substr(4,2),16);
+            var yiq = ((r*299)+(g*587)+(b*114))/1000;
+            return (yiq >= 128) ? 'black' : 'white';
         }
 
-        function buildStampHTML(reise) {
-            const h = hashStr(reise.Land);
-            const landName = reise.Land;
-            const formattedLand = formatLandName(landName);
-            
-            // Längstes Wort/Zeile für die Skalierung finden
-            const longestLine = formattedLand.split('\n').reduce((a, b) => a.length > b.length ? a : b);
+        // Einfaches Drag-to-Pan für Handy & Desktop
+        let isDragging = false;
+        let startX, startY;
 
-            const color = COLORS[h % COLORS.length];
-            const shape = SHAPES[(h >> 3) % SHAPES.length];
-            const rotation = ((h % 10) - 5);
-            const reiseJahr = reise["erste Einreise"] || AKTUELLES_JAHR;
-            const alter = AKTUELLES_JAHR - reiseJahr;
-            const opacity = Math.max(0.6, 0.95 - alter * 0.015).toFixed(3);
-            const agedClass = alter > 15 ? ' stamp-aged' : '';
+        view.addEventListener('mousedown', e => { isDragging = true; startX = e.clientX - posX; startY = e.clientY - posY; view.style.cursor = 'grabbing'; });
+        window.addEventListener('mouseup', () => { isDragging = false; view.style.cursor = 'grab'; });
+        window.addEventListener('mousemove', e => {
+            if (!isDragging) return;
+            posX = e.clientX - startX;
+            posY = e.clientY - startY;
+            updateTransform();
+        });
 
-            let fontSize = 0.75; 
-            let width = 110;
+        // Touch Support
+        view.addEventListener('touchstart', e => { 
+            isDragging = true; 
+            startX = e.touches[0].clientX - posX; 
+            startY = e.touches[0].clientY - posY; 
+        });
+        view.addEventListener('touchmove', e => {
+            if (!isDragging) return;
+            posX = e.touches[0].clientX - startX;
+            posY = e.touches[0].clientY - startY;
+            updateTransform();
+        });
+        view.addEventListener('touchend', () => isDragging = false);
 
-            if (longestLine.length > 9) { fontSize = 0.65; width = 125; }
-            if (longestLine.length > 13) { fontSize = 0.55; width = 140; }
-
-            const sizeStyle = (shape === 'circle') 
-                ? `width: ${width}px; height: ${width}px;` 
-                : `min-width: ${width}px; padding-left: 15px; padding-right: 15px;`;
-
-            return `<div class="stamp stamp-${shape}${agedClass}" 
-                        style="color:${color}; border-color:${color}; opacity:${opacity}; transform:rotate(${rotation}deg); ${sizeStyle}">
-                        <div class="type">ENTRY</div>
-                        <div class="land" style="font-size: ${fontSize}rem;">${formattedLand}</div>
-                        <div class="jahr">${reiseJahr}</div>
-                        <div class="type">IMMIGRATION</div>
-                    </div>`;
-        }
-
-        function renderPassport() {
-            const container = document.getElementById('book-container');
-            if (typeof MEINE_REISEN === 'undefined') return;
-
-            const reisen = MEINE_REISEN
-                .filter(r => r.Land !== 'Deutschland')
-                .sort((a, b) => (b["erste Einreise"] || 2000) - (a["erste Einreise"] || 2000));
-
-            const totalPages = Math.ceil(reisen.length / STAMPS_PER_PAGE);
-            const fragment = document.createDocumentFragment();
-
-            for (let p = 0; p < totalPages; p++) {
-                const pageItems = reisen.slice(p * STAMPS_PER_PAGE, (p + 1) * STAMPS_PER_PAGE);
-                const stampsHTML = pageItems.map(buildStampHTML)
-                    .map(s => `<div class="stamp-slot">${s}</div>`)
-                    .join('');
-
-                const page = document.createElement('div');
-                page.className = 'page';
-                page.innerHTML = `
-                    <div class="page-inner">
-                        <div class="page-header">Visa — Seite ${p + 1}</div>
-                        <div class="stamp-grid">${stampsHTML}</div>
-                        <div class="page-footer">Fabian Geisbüsch</div>
-                    </div>`;
-                fragment.appendChild(page);
-            }
-            container.appendChild(fragment);
-        }
-
-        requestAnimationFrame(renderPassport);
+        createStickers();
+        updateTransform();
     </script>
 </body>
 </html>
