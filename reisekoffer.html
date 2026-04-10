@@ -5,17 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Reisekoffer | Fabian Geisbüsch</title>
+    <title>Reisekoffer</title>
     <style>
         :root {
             --bg-color: #f0f2f5;
             --header-bg: rgba(240, 242, 245, 0.9);
             --header-text: #1e293b;
             --header-border: #e2e8f0;
-            --card-bg: #ffffff;
-            --text-secondary: #64748b;
-            
-            /* Koffer Metall-Farben */
             --alu-base: #bdc3c7;
             --alu-dark: #9da4a7;
             --alu-bright: #e1e4e6;
@@ -27,7 +23,6 @@
                 --header-bg: rgba(15, 23, 42, 0.9);
                 --header-text: #f1f5f9;
                 --header-border: #1e293b;
-                --card-bg: #1e293b;
                 --alu-base: #7f8c8d;
                 --alu-dark: #2c3e50;
                 --alu-bright: #bdc3c7;
@@ -53,50 +48,32 @@
         }
         header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
 
-        /* Koffer-Szene */
+        /* Koffer-Szene (starr, keine Perspective nötig) */
         .viewport {
             flex: 1; display: flex; justify-content: center; align-items: center;
-            perspective: 1200px; padding: 20px; margin-top: 120px;
+            padding: 20px; margin-top: 100px;
         }
 
+        /* Container für den Koffer (starr positioniert) */
         .suitcase-container {
             position: relative;
             display: flex; flex-direction: column; align-items: center;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Mobile Drehung (Standsäule) */
-        @media (max-width: 600px) {
-            .suitcase-container { transform: rotate(-90deg) scale(0.65); margin-top: 150px; }
-        }
-
-        /* HARDWARE DETAILS */
-        
-        /* 1. Teleskopgriff (oben/kurze Seite) */
-        .telescope-system {
-            width: 160px; height: 50px; position: relative; margin-bottom: -15px; z-index: 0;
-        }
-        .rail {
-            position: absolute; width: 16px; height: 100%;
-            background: linear-gradient(to right, #333, #555, #333);
-            border-radius: 4px 4px 0 0; border: 1px solid #1a1a1a;
-        }
-        .rail.left { left: 25px; }
-        .rail.right { right: 25px; }
-        .handle-bar {
-            position: absolute; top: 0; left: 10px; right: 10px; height: 22px;
-            background: linear-gradient(to bottom, #2a2a2a, #0a0a0a, #000);
-            border-radius: 8px; border: 1px solid #111;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-        }
-
-        /* 2. Koffer-Korpus */
-        .suitcase-body {
+            /* Starre Positionierung */
             width: 820px; height: 520px;
+        }
+
+        /* Mobile Drehung (Standsäule, starr) */
+        @media (max-width: 600px) {
+            .suitcase-container { transform: rotate(-90deg) scale(0.65); margin-top: 130px; }
+        }
+
+        /* Koffer-Korpus (Fotorealistisch) */
+        .suitcase-body {
+            width: 100%; height: 100%;
             background: var(--alu-base);
             border-radius: 54px; border: 14px solid var(--alu-dark);
-            position: relative; z-index: 1;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.3);
+            position: relative;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.25);
             overflow: hidden;
             
             /* Plastische 3D-Rillen */
@@ -108,7 +85,9 @@
                 radial-gradient(circle at 50% 50%, var(--alu-bright), var(--alu-base));
         }
 
-        /* 3. Seitengriff (Längsseite) */
+        /* HARDWARE DETAILS */
+        
+        /* 1. Verbleibender Griff (Längsseite) */
         .handle-side-system {
             position: absolute; right: -28px; top: 50%;
             transform: translateY(-50%); display: flex; align-items: center;
@@ -124,33 +103,25 @@
             display: flex; align-items: center; justify-content: center;
             margin-left: -5px; box-shadow: 10px 0 20px rgba(0,0,0,0.4);
         }
+        
+        /* Schimmernder Silber-Text */
         .handle-side::after {
-            content: "RIMOWA KÖLN"; color: rgba(255,255,255,0.25);
+            content: "RIMOWA"; 
             font-size: 10px; font-weight: 900; letter-spacing: 3px;
             transform: rotate(90deg); white-space: nowrap;
+            
+            /* Silber-Schimmer Effekt */
+            background: linear-gradient(135deg, #fff 0%, #eee 40%, #ccc 50%, #eee 60%, #fff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
+            
+            /* Subtile Helligkeit */
+            filter: drop-shadow(0 0 2px rgba(255,255,255,0.5));
         }
 
-        /* 4. Doppelrollen (unten/kurze Seite) */
-        .wheel-area {
-            position: absolute; left: -30px; top: 80px; bottom: 80px;
-            display: flex; flex-direction: column; justify-content: space-between;
-            z-index: 10;
-        }
-        .wheel-housing {
-            width: 50px; height: 110px; background: #1a1a1a;
-            border-radius: 20px 0 0 20px; border: 1px solid #000;
-            display: flex; flex-direction: column; justify-content: space-around;
-            align-items: center; padding: 10px 0;
-            box-shadow: -5px 5px 15px rgba(0,0,0,0.3);
-        }
-        .wheel-tire {
-            width: 38px; height: 38px;
-            background: linear-gradient(to bottom, #000, #222, #000);
-            border-radius: 50%; border-left: 12px solid #000;
-            margin-left: -15px; box-shadow: inset 4px 0 6px rgba(255,255,255,0.1);
-        }
-
-        /* 5. Nieten */
+        /* 2. Nieten */
         .niete {
             position: absolute; width: 8px; height: 8px;
             background: radial-gradient(circle at 3px 3px, var(--alu-bright), #7f8c8d);
@@ -158,86 +129,45 @@
             z-index: 5;
         }
 
-        /* Zentrales Info-Dossier */
-        #central-info {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 300px; background: var(--card-bg); border-radius: 20px; padding: 25px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-            z-index: 1500; opacity: 0; pointer-events: none; transition: 0.3s;
-            border: 1px solid var(--header-border);
-            text-align: center;
-        }
-        #central-info.active { opacity: 1; pointer-events: auto; }
-
-        .info-header { border-bottom: 1px solid var(--header-border); padding-bottom: 12px; margin-bottom: 15px; }
-        .info-header h3 { font-size: 1.2rem; font-weight: 800; color: var(--header-text); }
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: var(--text-secondary); }
-        .info-row strong { color: var(--header-text); }
-        .info-desc { font-size: 12px; margin-top: 15px; line-height: 1.5; color: var(--text-secondary); font-style: italic; }
-
     </style>
 </head>
 <body>
 
     <header>
         <div style="width: 36px; height: 36px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #ddd;">←</div>
-        <h1>Reisekoffer</h1>
+        <h1>Life-Log Suitcase</h1>
     </header>
 
     <div class="viewport">
-        <div class="suitcase-container">
-            <div class="telescope-system">
-                <div class="rail left"></div>
-                <div class="rail right"></div>
-                <div class="handle-bar"></div>
-            </div>
-
-            <div class="suitcase-body" id="canvas">
+        <div class="suitcase-container" id="suitcase-canvas">
+            
+            <div class="suitcase-body">
                 
-                <div class="wheel-area">
-                    <div class="wheel-housing">
-                        <div class="wheel-tire"></div>
-                        <div class="wheel-tire"></div>
-                    </div>
-                    <div class="wheel-housing">
-                        <div class="wheel-tire"></div>
-                        <div class="wheel-tire"></div>
-                    </div>
-                </div>
-
                 <div class="handle-side-system">
                     <div class="handle-mount"></div>
                     <div class="handle-side"></div>
                 </div>
 
-                <div id="central-info">
-                    <div class="info-header"><h3 id="info-city">-</h3></div>
-                    <div class="info-row"><span>Land:</span> <strong id="info-country">-</strong></div>
-                    <div class="info-row"><span>Aufenthalt:</span> <strong id="info-nights">-</strong></div>
-                    <div class="info-row"><span>Fußball:</span> <span id="info-fb">⚪</span></div>
-                    <p class="info-desc" id="info-desc">-</p>
                 </div>
-            </div>
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('canvas');
-        
-        function placeRivets() {
-            const w = 820;
-            const h = 520;
-            const step = 60; // Abstand zwischen Nieten
+        const canvas = document.getElementById('suitcase-canvas');
+        const rivetsCountHor = 12; // Nieten oben und unten
+        const rivetsCountVer = 8;  // Nieten links und rechts (neu hinzugefügt)
 
+        function createRivets() {
             // Horizontale Reihen (oben und unten)
-            for(let x = step; x < w - step; x += step) {
-                addRivet(x, 15);      // Oben
-                addRivet(x, h - 45);  // Unten
+            for(let i = 0; i < rivetsCountHor; i++) {
+                addRivet(60 + (i * 65), 25);      // Oben
+                addRivet(60 + (i * 65), 485);     // Unten
             }
-            // Vertikale Reihen (links und rechts)
-            for(let y = step; y < h - step; y += step) {
-                addRivet(15, y);      // Links
-                addRivet(w - 45, y);  // Rechts
+            
+            // Vertikale Reihen (links und rechts, da Reifen weg)
+            for(let i = 0; i < rivetsCountVer; i++) {
+                addRivet(25, 60 + (i * 60));      // Links
+                addRivet(785, 60 + (i * 60));     // Rechts
             }
         }
 
@@ -250,12 +180,7 @@
         }
 
         // Starte Nieten-Generierung
-        placeRivets();
-        
-        // Platzhalter Funktion zum Öffnen des Dossiers (für spätere Sticker)
-        function showDossier() {
-            document.getElementById('central-info').classList.add('active');
-        }
+        createRivets();
     </script>
 </body>
 </html>
