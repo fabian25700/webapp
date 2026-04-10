@@ -21,7 +21,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 2,
-    "km_gejoggt": 11
+    "km_gejoggt": 11,
+    "Fussball": "ja"
   },
   {
     "id": "CH",
@@ -37,7 +38,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 5,
-    "km_gejoggt": 40
+    "km_gejoggt": 40,
+    "Fussball": "ja"
   },
   {
     "id": "GR",
@@ -53,7 +55,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 1,
-    "km_gejoggt": 5
+    "km_gejoggt": 5,
+    "Fussball": "nein"
   },
   {
     "id": "MU",
@@ -69,7 +72,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 2,
-    "km_gejoggt": 31
+    "km_gejoggt": 31,
+    "Fussball": "nein"
   },
   {
     "id": "US",
@@ -85,7 +89,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 1,
-    "km_gejoggt": 7
+    "km_gejoggt": 7,
+    "Fussball": "nein"
   },
   {
     "id": "CY",
@@ -101,7 +106,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "1/3",
     "Joggen": 4,
-    "km_gejoggt": 35
+    "km_gejoggt": 35,
+    "Fussball": "ja"
   },
   {
     "id": "TR",
@@ -117,7 +123,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 2,
-    "km_gejoggt": 11
+    "km_gejoggt": 11,
+    "Fussball": "ja"
   },
   {
     "id": "DK",
@@ -133,7 +140,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 3,
-    "km_gejoggt": 19
+    "km_gejoggt": 19,
+    "Fussball": "ja"
   },
   {
     "id": "SE",
@@ -149,7 +157,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 1,
-    "km_gejoggt": 5
+    "km_gejoggt": 5,
+    "Fussball": "ja"
   },
   {
     "id": "LT",
@@ -165,7 +174,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 3,
-    "km_gejoggt": 26
+    "km_gejoggt": 26,
+    "Fussball": "ja"
   },
   {
     "id": "LV",
@@ -181,7 +191,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 0,
-    "km_gejoggt": 0
+    "km_gejoggt": 0,
+    "Fussball": "ja"
   },
   {
     "id": "AT",
@@ -197,7 +208,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 0,
-    "km_gejoggt": 0
+    "km_gejoggt": 0,
+    "Fussball": "nein"
   },
   {
     "id": "BE",
@@ -213,7 +225,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 0,
-    "km_gejoggt": 0
+    "km_gejoggt": 0,
+    "Fussball": "ja"
   },
   {
     "id": "XW",
@@ -229,7 +242,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 0,
-    "km_gejoggt": 0
+    "km_gejoggt": 0,
+    "Fussball": "nein"
   },
   {
     "id": "ES",
@@ -245,7 +259,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 4,
-    "km_gejoggt": 27
+    "km_gejoggt": 27,
+    "Fussball": "ja"
   },
   {
     "id": "LU",
@@ -261,7 +276,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 4,
-    "km_gejoggt": 21
+    "km_gejoggt": 21,
+    "Fussball": "ja"
   },
   {
     "id": "NL",
@@ -277,7 +293,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 2,
-    "km_gejoggt": 10
+    "km_gejoggt": 10,
+    "Fussball": "ja"
   },
   {
     "id": "NO",
@@ -293,7 +310,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 1,
-    "km_gejoggt": 10
+    "km_gejoggt": 10,
+    "Fussball": "nein"
   },
   {
     "id": "FR",
@@ -309,7 +327,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 0,
-    "km_gejoggt": 0
+    "km_gejoggt": 0,
+    "Fussball": "ja"
   },
   {
     "id": "IT",
@@ -325,7 +344,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 0,
-    "km_gejoggt": 0
+    "km_gejoggt": 0,
+    "Fussball": "ja"
   },
   {
     "id": "GB",
@@ -341,7 +361,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 0,
-    "km_gejoggt": 0
+    "km_gejoggt": 0,
+    "Fussball": "ja"
   },
   {
     "id": "VA",
@@ -357,7 +378,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 0,
-    "km_gejoggt": 0
+    "km_gejoggt": 0,
+    "Fussball": "nein"
   },
   {
     "id": "AE",
@@ -373,7 +395,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 0,
-    "km_gejoggt": 0
+    "km_gejoggt": 0,
+    "Fussball": "ja"
   },
   {
     "id": "MT",
@@ -389,7 +412,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 0,
-    "km_gejoggt": 0
+    "km_gejoggt": 0,
+    "Fussball": "nein"
   },
   {
     "id": "GI",
@@ -405,7 +429,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 0,
-    "km_gejoggt": 0
+    "km_gejoggt": 0,
+    "Fussball": "nein"
   },
   {
     "id": "MA",
@@ -421,7 +446,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 0,
-    "km_gejoggt": 0
+    "km_gejoggt": 0,
+    "Fussball": "nein"
   },
   {
     "id": "HU",
@@ -437,7 +463,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 0,
-    "km_gejoggt": 0
+    "km_gejoggt": 0,
+    "Fussball": "ja"
   },
   {
     "id": "PT",
@@ -453,7 +480,8 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 0,
-    "km_gejoggt": 0
+    "km_gejoggt": 0,
+    "Fussball": "nein"
   },
   {
     "id": "SK",
@@ -469,6 +497,7 @@ const MEINE_REISEN = [
     "Tagestrips": 0,
     "UNESCO Welterbe": "0/0",
     "Joggen": 0,
-    "km_gejoggt": 0
+    "km_gejoggt": 0,
+    "Fussball": "nein"
   }
 ];
