@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Länder | Analytics</title>
+    <title>Länder</title>
     <script src="daten.js"></script>
     <style>
         :root {
@@ -39,11 +39,12 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: -apple-system, system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
             background: var(--bg);
             color: var(--text-primary);
             min-height: 100vh;
-            padding-bottom: 40px;
+            padding-bottom: calc(env(safe-area-inset-bottom) + 32px);
+            transition: background 0.3s, color 0.3s;
         }
 
         header {
@@ -58,6 +59,7 @@
             border-bottom: 1px solid var(--border-light);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
+            transition: background 0.3s;
         }
 
         .back-btn {
@@ -70,48 +72,192 @@
             background: var(--surface);
             border: 1px solid var(--border);
             text-decoration: none;
+            font-size: 1rem;
             color: var(--text-primary);
             box-shadow: var(--shadow);
+            flex-shrink: 0;
+            transition: all 0.15s;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        header h1 { font-size: 1.15rem; font-weight: 800; flex: 1; }
+        .back-btn:active { transform: scale(0.92); opacity: 0.7; }
 
-        .country-count { font-size: 0.75rem; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: 20px; }
+        header h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+            flex: 1;
+        }
 
-        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+        .country-count {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--accent);
+            background: var(--accent-soft);
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
 
-        .country-card { background: var(--surface); border-radius: 18px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+        main {
+            padding: 16px 16px 0;
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
-        .country-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .country-card {
+            background: var(--surface);
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+        }
 
-        .country-flag { font-size: 1.9rem; line-height: 1; }
-        .country-header-info { flex: 1; }
-        .country-name { font-weight: 700; font-size: 1rem; }
-        .country-meta { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
+        .country-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-        .country-nights { font-weight: 800; font-size: 1.05rem; color: var(--accent); text-align: right; }
-        .country-nights-label { font-size: 0.65rem; color: var(--text-tertiary); text-align: right; font-weight: 500; text-transform: uppercase; }
+        .country-flag {
+            font-size: 1.9rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
 
-        .expand-icon { color: var(--text-tertiary); font-size: 0.8rem; transition: transform 0.2s; margin-left: 8px; }
-        .country-card.open .expand-icon { transform: rotate(90deg); }
+        .country-header-info {
+            flex: 1;
+            min-width: 0;
+        }
 
-        .country-detail { display: none; border-top: 1px solid var(--border-light); padding: 12px 16px 14px; background: var(--surface-2); }
-        .country-card.open .country-detail { display: block; }
+        .country-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
 
-        .stat-chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+        .country-meta {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
 
-        .stat-chip { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 9px 10px; text-align: center; position: relative; overflow: hidden; }
-        
-        /* Progress-Hintergrund für UNESCO */
-        .progress-bg { position: absolute; top: 0; left: 0; height: 100%; background: #2ecc7133; z-index: 0; transition: width 0.3s; }
-        .chip-content { position: relative; z-index: 1; }
+        .country-nights {
+            font-weight: 800;
+            font-size: 1.05rem;
+            color: var(--accent);
+            white-space: nowrap;
+            text-align: right;
+        }
 
-        .chip-val { font-size: 1.05rem; font-weight: 800; color: var(--text-primary); display: block; }
-        .chip-label { font-size: 0.62rem; color: var(--text-tertiary); text-transform: uppercase; font-weight: 600; margin-top: 2px; display: block; }
+        .country-nights-label {
+            font-size: 0.65rem;
+            color: var(--text-tertiary);
+            text-align: right;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
 
-        .jog-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 9px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 11px; }
-        .jog-text { font-size: 0.82rem; color: var(--text-secondary); }
-        .jog-text strong { color: var(--text-primary); font-weight: 700; }
+        .expand-icon {
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
+            margin-left: 4px;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .country-card.open .expand-icon {
+            transform: rotate(90deg);
+        }
+
+        .country-detail {
+            display: none;
+            border-top: 1px solid var(--border-light);
+            padding: 12px 16px 14px;
+            background: var(--surface-2);
+        }
+
+        .country-card.open .country-detail {
+            display: block;
+        }
+
+        .stat-chips {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 7px;
+        }
+
+        .stat-chip {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 9px 10px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chip-val {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--accent);
+            display: block;
+            position: relative;
+            z-index: 2;
+        }
+
+        .chip-label {
+            font-size: 0.62rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            font-weight: 600;
+            margin-top: 2px;
+            display: block;
+            position: relative;
+            z-index: 2;
+        }
+
+        .progress-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background-color: rgba(46, 204, 113, 0.2);
+            z-index: 1;
+            transition: width 0.3s ease;
+        }
+
+        .jog-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            padding: 9px 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 11px;
+        }
+
+        .jog-icon { font-size: 1rem; flex-shrink: 0; }
+
+        .jog-text {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+        }
+
+        .jog-text strong {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
@@ -127,22 +273,34 @@
     <script>
         window.onload = function () {
             const list = document.getElementById('main-list');
-            const sorted = [...MEINE_REISEN].sort((a, b) => b.Übernachtungen - a.Übernachtungen);
-            document.getElementById('country-count').textContent = sorted.length + ' Länder';
+            const countEl = document.getElementById('country-count');
+            countEl.textContent = MEINE_REISEN.length + ' Länder';
 
-            sorted.forEach(trip => {
-                // UNESCO Progress Logik
-                const [done, total] = trip["UNESCO Welterbe"].split('/').map(Number);
-                const progressWidth = total > 0 ? (done / total) * 100 : 0;
-                
+            const sorted = [...MEINE_REISEN].sort((a, b) => b.Übernachtungen - a.Übernachtungen);
+
+            sorted.forEach((trip) => {
+                const hasJog = trip.Joggen > 0;
+                const avgKmPerRun = hasJog ? (trip.km_gejoggt / trip.Joggen).toFixed(1) : null;
+
+                // UNESCO Progress Calculation
+                let progressPercent = 0;
+                if (trip["UNESCO Welterbe"] && trip["UNESCO Welterbe"] !== "0/0") {
+                    const parts = trip["UNESCO Welterbe"].split('/');
+                    const current = parseInt(parts[0]);
+                    const total = parseInt(parts[1]);
+                    if (total > 0) {
+                        progressPercent = (current / total) * 100;
+                    }
+                }
+
                 const card = document.createElement('div');
                 card.className = 'country-card';
                 card.innerHTML = `
-                    <div class="country-header" onclick="this.parentElement.classList.toggle('open')">
-                        <div class="country-flag">${trip.flagge}</div>
+                    <div class="country-header" onclick="toggleCard(this.parentElement)">
+                        <div class="country-flag">${trip.flagge || trip.id}</div>
                         <div class="country-header-info">
                             <div class="country-name">${trip.Land}</div>
-                            <div class="country-meta">${trip.kontinent} · ${trip.id}</div>
+                            <div class="country-meta">${trip.kontinent || ''} · ${trip.id}</div>
                         </div>
                         <div>
                             <div class="country-nights">${trip.Übernachtungen}</div>
@@ -154,25 +312,26 @@
                         <div class="stat-chips">
                             <div class="stat-chip">
                                 <span class="chip-val">${trip.Unterkünfte}</span>
-                                <span class="chip-label">Spots</span>
+                                <span class="chip-label">Unterkünfte</span>
                             </div>
                             <div class="stat-chip">
                                 <span class="chip-val">${trip.FluegeAnkunft}</span>
                                 <span class="chip-label">Flüge</span>
                             </div>
                             <div class="stat-chip">
-                                ${progressWidth > 0 ? `<div class="progress-bg" style="width: ${progressWidth}%"></div>` : ''}
-                                <div class="chip-content">
-                                    <span class="chip-val">${trip["UNESCO Welterbe"]}</span>
-                                    <span class="chip-label">UNESCO</span>
-                                </div>
+                                ${progressPercent > 0 ? `<div class="progress-bar" style="width: ${progressPercent}%"></div>` : ''}
+                                <span class="chip-val">${trip["UNESCO Welterbe"]}</span>
+                                <span class="chip-label">UNESCO</span>
                             </div>
                         </div>
-                        ${trip.km_gejoggt > 0 ? `
+
+                        ${hasJog ? `
                         <div class="jog-row">
                             <div class="jog-icon">🏃</div>
                             <div class="jog-text">
-                                <strong>${trip.km_gejoggt} km</strong> gesamt in <strong>${trip.Joggen}</strong> Einheiten
+                                <strong>${trip.Joggen}×</strong> gejoggt ·
+                                <strong>${trip.km_gejoggt} km</strong> gesamt ·
+                                ø <strong>${avgKmPerRun} km</strong> pro Lauf
                             </div>
                         </div>` : ''}
                     </div>
@@ -180,6 +339,10 @@
                 list.appendChild(card);
             });
         };
+
+        function toggleCard(card) {
+            card.classList.toggle('open');
+        }
     </script>
 </body>
 </html>
