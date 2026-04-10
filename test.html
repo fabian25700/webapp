@@ -39,7 +39,6 @@
             background: var(--bg-color);
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
             overflow: hidden;
-            -webkit-font-smoothing: antialiased;
         }
 
         header {
@@ -57,7 +56,6 @@
             width: 36px; height: 36px; border-radius: 12px;
             background: var(--btn-bg); border: 1px solid var(--btn-border);
             text-decoration: none; color: var(--btn-text);
-            -webkit-tap-highlight-color: transparent;
         }
 
         header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
@@ -69,7 +67,6 @@
             height: 100vh;
             padding-top: 100px;
             scrollbar-width: none;
-            will-change: scroll-position;
             -webkit-overflow-scrolling: touch;
         }
         .book-container::-webkit-scrollbar { display: none; }
@@ -83,37 +80,31 @@
         }
 
         .page-inner {
-            width: 100%; max-width: 360px; height: 580px;
+            width: 100%; max-width: 380px; height: 620px;
             background: var(--passport-green-soft);
             border-radius: 15px; position: relative;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
             padding: 25px 20px;
             border: 1px solid var(--border-page);
             display: flex; flex-direction: column;
             overflow: hidden;
-            z-index: 1;
         }
 
-        /* Adler Fix: Fixierte Positionierung und expliziter Content-Pfad */
         .page-inner::before {
-            content: "";
+            content: ' ';
             position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 200px;
-            height: 200px;
-            margin-top: -100px;
-            margin-left: -100px;
-            background-image: url('https://upload.wikimedia.org/wikipedia/commons/d/da/Coat_of_arms_of_Germany.svg');
-            background-repeat: no-repeat;
-            background-position: center;
+            top: 50%; left: 50%;
+            width: 220px; height: 220px;
+            transform: translate(-50%, -50%);
+            background: url('https://upload.wikimedia.org/wikipedia/commons/d/da/Coat_of_arms_of_Germany.svg') no-repeat center;
             background-size: contain;
-            opacity: 0.05;
+            opacity: 0.04;
             pointer-events: none;
-            z-index: -1;
+            z-index: 0;
         }
 
         .page-header {
+            position: relative; z-index: 1;
             text-align: center; font-size: 0.65rem; font-weight: 700;
             color: var(--text-secondary); text-transform: uppercase;
             letter-spacing: 2px; border-bottom: 1px solid var(--border-page);
@@ -121,10 +112,11 @@
         }
 
         .stamp-grid {
+            position: relative; z-index: 1;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 12px; flex: 1;
+            gap: 10px; flex: 1;
         }
 
         .stamp-slot {
@@ -133,35 +125,31 @@
             justify-content: center;
         }
 
+        /* Basis-Stempel Logik */
         .stamp {
-            display: flex; flex-direction: column;
+            display: inline-flex; flex-direction: column;
             align-items: center; justify-content: center;
-            padding: 8px; text-align: center;
+            padding: 10px 15px; text-align: center;
             border: 2.5px solid;
-            background: rgba(232, 242, 233, 0.1);
+            background: transparent;
+            white-space: nowrap; /* WICHTIG: Kein Zeilenumbruch */
         }
 
-        .stamp-circle { border-radius: 50%; width: 105px; height: 105px; }
-        .stamp-rect   { border-radius: 4px; width: 120px; min-height: 80px; }
-        .stamp-hex    { border-radius: 10px; transform: skewX(-4deg); width: 115px; min-height: 90px; }
+        .stamp-circle { border-radius: 50%; aspect-ratio: 1/1; min-width: 100px; }
+        .stamp-rect   { border-radius: 4px; min-width: 110px; }
+        .stamp-hex    { border-radius: 10px; transform: skewX(-5deg); min-width: 110px; }
 
         .stamp .land {
             font-weight: 900; 
-            font-size: 0.65rem; /* Etwas kleiner für Handy-Optimierung */
             text-transform: uppercase; 
-            line-height: 1.1;
-            max-width: 95px;
-            overflow-wrap: break-word; /* Bricht an sinnvollen Stellen */
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            line-height: 1;
+            margin-bottom: 2px;
         }
 
         .stamp .jahr {
             font-size: 1.1rem; font-weight: 900;
             border-top: 2px solid; border-bottom: 2px solid;
-            margin: 4px 0; padding: 0 6px;
+            margin: 3px 0; padding: 0 6px;
         }
 
         .stamp .type {
@@ -172,6 +160,7 @@
         .stamp-aged { filter: blur(0.4px); }
 
         .page-footer {
+            position: relative; z-index: 1;
             text-align: center; font-size: 0.7rem; font-weight: 800;
             color: var(--ink-dark); text-transform: uppercase;
             margin-top: 15px; padding-top: 10px;
@@ -203,19 +192,38 @@
         }
 
         function buildStampHTML(reise) {
-            const h        = hashStr(reise.Land);
-            const color    = COLORS[h % COLORS.length];
-            const shape    = SHAPES[(h >> 3) % SHAPES.length];
+            const h = hashStr(reise.Land);
+            const landName = reise.Land;
+            const color = COLORS[h % COLORS.length];
+            const shape = SHAPES[(h >> 3) % SHAPES.length];
             const rotation = ((h % 10) - 5);
             const reiseJahr = reise["erste Einreise"] || AKTUELLES_JAHR;
-            const alter    = AKTUELLES_JAHR - reiseJahr;
-            const opacity  = Math.max(0.6, 0.95 - alter * 0.015).toFixed(3);
+            const alter = AKTUELLES_JAHR - reiseJahr;
+            const opacity = Math.max(0.6, 0.95 - alter * 0.015).toFixed(3);
             const agedClass = alter > 15 ? ' stamp-aged' : '';
 
+            // Dynamische Größenlogik basierend auf Wortlänge
+            let fontSize = 0.75; // Standard
+            let width = 110;     // Standard
+            
+            if (landName.length > 10) {
+                fontSize = 0.65;
+                width = 130;
+            }
+            if (landName.length > 15) {
+                fontSize = 0.55;
+                width = 145;
+            }
+
+            // Kreis muss immer quadratisch bleiben
+            const sizeStyle = (shape === 'circle') 
+                ? `width: ${width}px; height: ${width}px;` 
+                : `min-width: ${width}px;`;
+
             return `<div class="stamp stamp-${shape}${agedClass}" 
-                        style="color:${color}; border-color:${color}; opacity:${opacity}; transform:rotate(${rotation}deg)">
+                        style="color:${color}; border-color:${color}; opacity:${opacity}; transform:rotate(${rotation}deg); ${sizeStyle}">
                         <div class="type">ENTRY</div>
-                        <div class="land">${reise.Land}</div>
+                        <div class="land" style="font-size: ${fontSize}rem;">${landName}</div>
                         <div class="jahr">${reiseJahr}</div>
                         <div class="type">IMMIGRATION</div>
                     </div>`;
@@ -223,7 +231,7 @@
 
         function renderPassport() {
             const container = document.getElementById('book-container');
-            if (!window.MEINE_REISEN) return;
+            if (typeof MEINE_REISEN === 'undefined') return;
 
             const reisen = MEINE_REISEN
                 .filter(r => r.Land !== 'Deutschland')
@@ -246,7 +254,6 @@
                         <div class="stamp-grid">${stampsHTML}</div>
                         <div class="page-footer">Fabian Geisbüsch</div>
                     </div>`;
-
                 fragment.appendChild(page);
             }
             container.appendChild(fragment);
