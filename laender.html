@@ -47,7 +47,6 @@
             transition: background 0.3s, color 0.3s;
         }
 
-        /* ── Header ── */
         header {
             position: sticky;
             top: 0;
@@ -100,7 +99,6 @@
             border-radius: 20px;
         }
 
-        /* ── Hauptinhalt ── */
         main {
             padding: 16px 16px 0;
             max-width: 600px;
@@ -110,7 +108,6 @@
             gap: 10px;
         }
 
-        /* ── Länderkarte ── */
         .country-card {
             background: var(--surface);
             border-radius: 18px;
@@ -120,7 +117,6 @@
             transition: box-shadow 0.2s;
         }
 
-        /* Kopfzeile der Karte */
         .country-header {
             display: flex;
             align-items: center;
@@ -182,7 +178,6 @@
             transform: rotate(90deg);
         }
 
-        /* Detail-Panel */
         .country-detail {
             display: none;
             border-top: 1px solid var(--border-light);
@@ -194,7 +189,6 @@
             display: block;
         }
 
-        /* Stat-Chips Grid */
         .stat-chips {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -207,6 +201,8 @@
             border-radius: 12px;
             padding: 9px 10px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
         }
 
         .chip-val {
@@ -214,6 +210,8 @@
             font-weight: 800;
             color: var(--accent);
             display: block;
+            position: relative;
+            z-index: 2;
         }
 
         .chip-label {
@@ -224,9 +222,20 @@
             font-weight: 600;
             margin-top: 2px;
             display: block;
+            position: relative;
+            z-index: 2;
         }
 
-        /* Joggen-Zeile */
+        .progress-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background-color: rgba(46, 204, 113, 0.2);
+            z-index: 1;
+            transition: width 0.3s ease;
+        }
+
         .jog-row {
             display: flex;
             align-items: center;
@@ -249,21 +258,6 @@
             color: var(--text-primary);
             font-weight: 700;
         }
-
-        /* Wohnorte-Badge */
-        .home-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            margin-top: 8px;
-            background: rgba(46, 204, 113, 0.12);
-            border: 1px solid rgba(46, 204, 113, 0.3);
-            border-radius: 20px;
-            padding: 4px 10px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #27ae60;
-        }
     </style>
 </head>
 <body>
@@ -282,13 +276,22 @@
             const countEl = document.getElementById('country-count');
             countEl.textContent = MEINE_REISEN.length + ' Länder';
 
-            // Sortiert nach Übernachtungen absteigend
             const sorted = [...MEINE_REISEN].sort((a, b) => b.Übernachtungen - a.Übernachtungen);
 
-            sorted.forEach((trip, idx) => {
+            sorted.forEach((trip) => {
                 const hasJog = trip.Joggen > 0;
-                const hasHome = trip.Wohnorte > 0;
                 const avgKmPerRun = hasJog ? (trip.km_gejoggt / trip.Joggen).toFixed(1) : null;
+
+                // UNESCO Progress Calculation
+                let progressPercent = 0;
+                if (trip["UNESCO Welterbe"] && trip["UNESCO Welterbe"] !== "0/0") {
+                    const parts = trip["UNESCO Welterbe"].split('/');
+                    const current = parseInt(parts[0]);
+                    const total = parseInt(parts[1]);
+                    if (total > 0) {
+                        progressPercent = (current / total) * 100;
+                    }
+                }
 
                 const card = document.createElement('div');
                 card.className = 'country-card';
@@ -316,8 +319,9 @@
                                 <span class="chip-label">Flüge</span>
                             </div>
                             <div class="stat-chip">
-                                <span class="chip-val">${trip.Tagestrips}</span>
-                                <span class="chip-label">Tagestrips</span>
+                                ${progressPercent > 0 ? `<div class="progress-bar" style="width: ${progressPercent}%"></div>` : ''}
+                                <span class="chip-val">${trip["UNESCO Welterbe"]}</span>
+                                <span class="chip-label">UNESCO</span>
                             </div>
                         </div>
 
@@ -329,11 +333,6 @@
                                 <strong>${trip.km_gejoggt} km</strong> gesamt ·
                                 ø <strong>${avgKmPerRun} km</strong> pro Lauf
                             </div>
-                        </div>` : ''}
-
-                        ${hasHome ? `
-                        <div class="home-badge">
-                            🏠 ${trip.Wohnorte} Wohnort${trip.Wohnorte > 1 ? 'e' : ''}
                         </div>` : ''}
                     </div>
                 `;
