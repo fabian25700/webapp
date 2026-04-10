@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Reisekoffer</title>
+    <title>Reisekoffer | Fabian Geisbüsch</title>
     <style>
         :root {
             --bg-color: #f0f2f5;
@@ -37,8 +37,9 @@
         body {
             background: var(--bg-color);
             font-family: -apple-system, sans-serif;
-            height: 100vh; overflow: hidden;
-            display: flex; flex-direction: column; align-items: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         header {
@@ -56,18 +57,30 @@
             font-weight: bold; border: 1px solid #ddd; text-decoration: none; color: black;
         }
 
+        /* Viewport zentriert den Inhalt nun absolut mittig */
         .viewport {
-            flex: 1; display: flex; justify-content: center; align-items: center;
-            perspective: 1200px; padding: 20px; margin-top: 120px;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1200px;
+            padding: 20px;
+            overflow: hidden; /* Verhindert Scrollbars durch Rotation */
         }
 
         .suitcase-container {
             position: relative;
-            display: flex; flex-direction: column; align-items: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 40px; /* Ausgleich für Header-Höhe im Desktop */
         }
 
         @media (max-width: 600px) {
-            .suitcase-container { transform: rotate(-90deg) scale(0.65); margin-top: 150px; }
+            .suitcase-container { 
+                transform: rotate(-90deg) scale(0.65); 
+                margin-top: 0; /* Entfernt Desktop-Abstand für saubere Zentrierung */
+            }
         }
 
         /* 1. Teleskopgriff */
@@ -89,7 +102,6 @@
             display: flex; align-items: center; justify-content: center;
         }
         
-        /* Rimowa Schriftzug auf dem Teleskopgriff */
         .handle-bar::after {
             content: "RIMOWA";
             font-size: 9px; font-weight: 900; letter-spacing: 3px;
