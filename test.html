@@ -3,182 +3,202 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Luggage Canvas</title>
+    <title>Luggage | Fabian Geisbüsch</title>
     <style>
         :root {
-            --alu-base: #b0b3b8;
-            --alu-bright: #e1e4e8;
-            --alu-shadow: #888a8d;
+            --bg-color: #f0f2f5;
+            --header-bg: rgba(240, 242, 245, 0.9);
+            --header-text: #1e293b;
+            --header-border: #e2e8f0;
+            --alu-base: #bdc3c7;
+            --alu-dark: #95a5a6;
+            --alu-bright: #ecf0f1;
+            --rimowa-rille: rgba(0,0,0,0.1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0f172a;
+                --header-bg: rgba(15, 23, 42, 0.9);
+                --header-text: #f1f5f9;
+                --header-border: #1e293b;
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
 
         body {
-            background: #1a1a1a;
-            overflow: hidden;
-            font-family: -apple-system, sans-serif;
-            display: flex; align-items: center; justify-content: center;
-            height: 100vh; width: 100vw;
-        }
-
-        /* Der Koffer-Container (Zoom- & Pan-Area) */
-        #viewport {
-            width: 100vw; height: 100vh;
-            display: flex; align-items: center; justify-content: center;
-            cursor: grab;
-            touch-action: none;
-        }
-
-        #suitcase {
-            width: 900px; height: 600px;
-            background: var(--alu-base);
-            background-image: repeating-linear-gradient(
-                90deg,
-                var(--alu-shadow) 0px,
-                var(--alu-shadow) 2px,
-                transparent 2px,
-                transparent 40px,
-                var(--alu-bright) 42px,
-                var(--alu-bright) 44px
-            );
-            border-radius: 40px;
-            position: relative;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.5);
-            transition: transform 0.1s ease-out;
-            border: 8px solid #999;
-            flex-shrink: 0;
-        }
-
-        /* Die Sticker */
-        .sticker {
-            position: absolute;
-            padding: 8px 12px;
-            font-weight: 900;
-            text-transform: uppercase;
-            font-size: 12px;
-            box-shadow: 2px 3px 6px rgba(0,0,0,0.3);
+            background: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            height: 100vh; overflow: hidden;
             display: flex; flex-direction: column; align-items: center;
-            border: 2px solid rgba(255,255,255,0.2);
-            user-select: none;
-            cursor: pointer;
-            transition: transform 0.2s;
         }
 
-        .sticker:hover { transform: scale(1.1) !important; z-index: 100 !important; }
-
-        /* Sticker-Styles */
-        .st-round { border-radius: 50%; width: 70px; height: 70px; justify-content: center; }
-        .st-rect { border-radius: 4px; }
-        .st-badge { border-radius: 10px 0 10px 0; }
-
-        .icon { font-size: 20px; margin-bottom: 2px; }
-
-        /* Media Query für vertikales Handy-Format */
-        @media (max-width: 600px) {
-            #suitcase { width: 90vw; height: 140vw; }
+        /* Header Style Konsistenz */
+        header {
+            position: fixed; top: 0; width: 100%; z-index: 100;
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            display: flex; align-items: center; gap: 12px;
+            background: var(--header-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--header-border);
         }
+
+        .back-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 12px;
+            background: white; border: 1px solid var(--header-border);
+            text-decoration: none; color: #1e293b; font-weight: bold;
+        }
+
+        header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
+
+        /* Koffer-Konstruktion */
+        .suitcase-wrapper {
+            margin-top: 120px; position: relative;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* Anbauteile */
+        .handle-top {
+            width: 140px; height: 30px; background: #333;
+            border-radius: 8px 8px 0 0; position: relative; margin-bottom: -5px;
+        }
+        
+        .suitcase-body {
+            width: 850px; height: 550px;
+            background: var(--alu-base);
+            border-radius: 45px; border: 12px solid var(--alu-dark);
+            position: relative; overflow: hidden;
+            display: flex; flex-wrap: wrap; align-content: flex-start;
+            padding: 40px; gap: 15px;
+            background-image: repeating-linear-gradient(90deg, transparent, transparent 40px, var(--rimowa-rille) 40px, var(--rimowa-rille) 42px);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.2);
+        }
+
+        /* Nieten & Griffe */
+        .niete { position: absolute; width: 8px; height: 8px; background: #7f8c8d; border-radius: 50%; box-shadow: inset 1px 1px 2px #000; }
+        .n1 { top: 20px; left: 20px; } .n2 { top: 20px; right: 20px; }
+        .n3 { bottom: 20px; left: 20px; } .n4 { bottom: 20px; right: 20px; }
+
+        .handle-side {
+            position: absolute; right: -18px; top: 50%; transform: translateY(-50%);
+            width: 25px; height: 120px; background: #333; border-radius: 0 8px 8px 0;
+        }
+
+        .wheels { width: 750px; display: flex; justify-content: space-between; margin-top: -10px; }
+        .wheel { width: 50px; height: 60px; background: #222; border-radius: 10px; border-bottom: 15px solid #000; }
+
+        /* Sticker & Hover Card */
+        .sticker-container { position: relative; display: inline-block; }
+
+        .sticker {
+            padding: 10px 15px; font-weight: 900; text-transform: uppercase;
+            box-shadow: 2px 3px 6px rgba(0,0,0,0.2); cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 11px; display: flex; align-items: center; gap: 5px;
+            border: 1px solid rgba(255,255,255,0.3);
+            white-space: nowrap;
+        }
+
+        .sticker:hover {
+            transform: scale(1.4) !important; z-index: 500;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+
+        /* Dossier / Info-Card */
+        .dossier {
+            position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
+            width: 200px; background: white; border-radius: 12px; padding: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            opacity: 0; pointer-events: none; transition: 0.3s;
+            z-index: 600; border: 1px solid #e2e8f0; text-transform: none;
+        }
+
+        .sticker-container:hover .dossier { opacity: 1; bottom: 130%; }
+
+        .dossier h4 { font-size: 14px; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 4px; color: #1e293b; }
+        .dossier-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; color: #64748b; }
+        .dossier-text { font-size: 10px; margin-top: 8px; font-style: italic; color: #94a3b8; line-height: 1.3; }
+        .football-icon { filter: grayscale(1); opacity: 0.3; }
+        .football-active { filter: grayscale(0); opacity: 1; }
+
     </style>
 </head>
 <body>
 
-    <div id="viewport">
-        <div id="suitcase"></div>
+    <header>
+        <a href="index.html" class="back-btn">←</a>
+        <h1>Life-Log Suitcase</h1>
+    </header>
+
+    <div class="suitcase-wrapper">
+        <div class="handle-top"></div>
+        <div class="suitcase-body" id="suitcase-body">
+            <div class="niete n1"></div><div class="niete n2"></div>
+            <div class="niete n3"></div><div class="niete n4"></div>
+            <div class="handle-side"></div>
+        </div>
+        <div class="wheels">
+            <div class="wheel"></div><div class="wheel"></div>
+        </div>
     </div>
 
     <script>
-        const suit = document.getElementById('suitcase');
-        const view = document.getElementById('viewport');
+        const body = document.getElementById('suitcase-body');
 
-        // Beispiel-Daten (später aus daten.js)
+        // Test-Daten
         const CITIES = [
-            {n: "New York", i: "🗽", c: "#e63946"},
-            {n: "Berlin", i: "🏛️", c: "#f1faee"},
-            {n: "Köln", i: "⛪", c: "#a8dadc"},
-            {n: "München", i: "🥨", c: "#457b9d"},
-            {n: "Paris", i: "🗼", c: "#1d3557"},
-            {n: "Aachen", i: "🍰", c: "#f4a261"},
-            {n: "London", i: "🎡", c: "#e76f51"},
-            {n: "Tokyo", i: "🍣", c: "#2a9d8f"}
+            { n: "Kopenhagen", key: true, nights: 4, country: "DK", flag: "🇩🇰", fb: true, desc: "Design & Hygge am Wasser." },
+            { n: "New York", key: true, nights: 4, country: "USA", flag: "🇺🇸", fb: false, desc: "Business & Skyline pur." },
+            { n: "Mainz", key: false, nights: 1, country: "DE", flag: "🇩🇪", fb: true, desc: "Kurzer Stop am Rhein." },
+            { n: "AIDA", key: true, nights: 10, country: "Meer", flag: "🚢", fb: false, desc: "Einfach mal abschalten." }
         ];
 
-        // Zoom & Pan Logik
-        let scale = 0.8;
-        let posX = 0, posY = 0;
-
-        function updateTransform() {
-            suit.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+        // Auffüllen auf 80 Stück
+        for(let i=4; i<80; i++) {
+            CITIES.push({
+                n: "City " + i, key: Math.random() > 0.8, nights: Math.floor(Math.random()*4)+1,
+                country: "EU", flag: "🇪🇺", fb: Math.random() > 0.5, desc: "Automatisch generierter Reise-Log."
+            });
         }
 
-        view.addEventListener('wheel', e => {
-            scale += e.deltaY * -0.001;
-            scale = Math.min(Math.max(0.3, scale), 3);
-            updateTransform();
-        });
+        const COLORS = ['#e63946', '#f1faee', '#a8dadc', '#457b9d', '#1d3557', '#ffb703', '#2a9d8f'];
 
-        // Sticker generieren (Simulierte 80 Stück)
-        function createStickers() {
-            for (let i = 0; i < 85; i++) {
-                const city = CITIES[i % CITIES.length];
-                const sticker = document.createElement('div');
+        function buildStickers() {
+            CITIES.forEach(city => {
+                const container = document.createElement('div');
+                container.className = 'sticker-container';
+
+                const rot = (Math.random() * 6) - 3;
+                const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+                const size = 10 + (city.nights * 2);
                 
-                const type = ['st-round', 'st-rect', 'st-badge'][i % 3];
-                sticker.className = `sticker ${type}`;
-                
-                // Zufällige Position (innerhalb des Koffers)
-                const top = Math.random() * 80 + 5;
-                const left = Math.random() * 80 + 5;
-                const rot = (Math.random() * 40) - 20;
-
-                sticker.style.top = `${top}%`;
-                sticker.style.left = `${left}%`;
-                sticker.style.background = city.c;
-                sticker.style.color = getContrastYIQ(city.c);
-                sticker.style.transform = `rotate(${rot}deg)`;
-                sticker.style.zIndex = i;
-
-                sticker.innerHTML = `<span class="icon">${city.i}</span><span>${city.n}</span>`;
-                suit.appendChild(sticker);
-            }
+                container.innerHTML = `
+                    <div class="sticker" style="background:${color}; color:${getContrastYIQ(color)}; transform: rotate(${rot}deg); font-size: ${size}px">
+                        ${city.key ? `<span>${city.flag}</span>` : ''}
+                        <span>${city.n}</span>
+                    </div>
+                    <div class="dossier">
+                        <h4>${city.flag} ${city.n}</h4>
+                        <div class="dossier-row"><span>Nächte:</span> <strong>${city.nights}</strong></div>
+                        <div class="dossier-row"><span>Fußball:</span> <span class="${city.fb ? 'football-active' : 'football-icon'}">⚽</span></div>
+                        <div class="dossier-text">${city.desc}</div>
+                    </div>
+                `;
+                body.appendChild(container);
+            });
         }
 
         function getContrastYIQ(hexcolor){
             hexcolor = hexcolor.replace("#", "");
-            var r = parseInt(hexcolor.substr(0,2),16);
-            var g = parseInt(hexcolor.substr(2,2),16);
-            var b = parseInt(hexcolor.substr(4,2),16);
-            var yiq = ((r*299)+(g*587)+(b*114))/1000;
-            return (yiq >= 128) ? 'black' : 'white';
+            if(hexcolor.length === 3) hexcolor = hexcolor.split('').map(c => c+c).join('');
+            const r = parseInt(hexcolor.substr(0,2),16);
+            const g = parseInt(hexcolor.substr(2,2),16);
+            const b = parseInt(hexcolor.substr(4,2),16);
+            return ((r*299)+(g*587)+(b*114))/1000 >= 128 ? 'black' : 'white';
         }
 
-        // Einfaches Drag-to-Pan für Handy & Desktop
-        let isDragging = false;
-        let startX, startY;
-
-        view.addEventListener('mousedown', e => { isDragging = true; startX = e.clientX - posX; startY = e.clientY - posY; view.style.cursor = 'grabbing'; });
-        window.addEventListener('mouseup', () => { isDragging = false; view.style.cursor = 'grab'; });
-        window.addEventListener('mousemove', e => {
-            if (!isDragging) return;
-            posX = e.clientX - startX;
-            posY = e.clientY - startY;
-            updateTransform();
-        });
-
-        // Touch Support
-        view.addEventListener('touchstart', e => { 
-            isDragging = true; 
-            startX = e.touches[0].clientX - posX; 
-            startY = e.touches[0].clientY - posY; 
-        });
-        view.addEventListener('touchmove', e => {
-            if (!isDragging) return;
-            posX = e.touches[0].clientX - startX;
-            posY = e.touches[0].clientY - startY;
-            updateTransform();
-        });
-        view.addEventListener('touchend', () => isDragging = false);
-
-        createStickers();
-        updateTransform();
+        buildStickers();
     </script>
 </body>
 </html>
