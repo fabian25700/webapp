@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Reisekoffer</title>
+    <title>Reisekoffer | Life-Log</title>
     <style>
         :root {
             --bg-color: #f0f2f5;
@@ -38,7 +38,6 @@
             display: flex; flex-direction: column; align-items: center;
         }
 
-        /* Header Style Konsistenz */
         header {
             position: fixed; top: 0; width: 100%; z-index: 2000;
             padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
@@ -48,26 +47,27 @@
         }
         header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
 
-        /* Koffer-Szene (starr, keine Perspective nötig) */
+        .back-btn {
+            width: 36px; height: 36px; background: white; border-radius: 10px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-weight: bold; border: 1px solid #ddd; text-decoration: none; color: black;
+        }
+
         .viewport {
             flex: 1; display: flex; justify-content: center; align-items: center;
             padding: 20px; margin-top: 100px;
         }
 
-        /* Container für den Koffer (starr positioniert) */
         .suitcase-container {
             position: relative;
             display: flex; flex-direction: column; align-items: center;
-            /* Starre Positionierung */
             width: 820px; height: 520px;
         }
 
-        /* Mobile Drehung (Standsäule, starr) */
         @media (max-width: 600px) {
             .suitcase-container { transform: rotate(-90deg) scale(0.65); margin-top: 130px; }
         }
 
-        /* Koffer-Korpus (Fotorealistisch) */
         .suitcase-body {
             width: 100%; height: 100%;
             background: var(--alu-base);
@@ -75,8 +75,6 @@
             position: relative;
             box-shadow: 0 40px 80px rgba(0,0,0,0.25);
             overflow: hidden;
-            
-            /* Plastische 3D-Rillen */
             background-image: 
                 repeating-linear-gradient(90deg, 
                     rgba(255,255,255,0.08) 0, rgba(255,255,255,0.08) 38px, 
@@ -85,86 +83,73 @@
                 radial-gradient(circle at 50% 50%, var(--alu-bright), var(--alu-base));
         }
 
-        /* HARDWARE DETAILS */
-        
-        /* 1. Verbleibender Griff (Längsseite) */
-        .handle-side-system {
-            position: absolute; right: -28px; top: 50%;
-            transform: translateY(-50%); display: flex; align-items: center;
+        /* Griff oben an der langen Seite */
+        .handle-top-system {
+            position: absolute; top: -28px; left: 50%;
+            transform: translateX(-50%); display: flex; flex-direction: column; align-items: center;
+            z-index: 10;
         }
         .handle-mount {
-            width: 12px; height: 140px; background: #222;
-            border-radius: 0 6px 6px 0; border: 1px solid #000;
+            width: 140px; height: 12px; background: #222;
+            border-radius: 6px 6px 0 0; border: 1px solid #000;
         }
         .handle-side {
-            width: 40px; height: 180px;
-            background: linear-gradient(to right, #111, #333, #111);
+            width: 180px; height: 40px;
+            background: linear-gradient(to bottom, #111, #333, #111);
             border-radius: 14px; border: 2px solid #000;
             display: flex; align-items: center; justify-content: center;
-            margin-left: -5px; box-shadow: 10px 0 20px rgba(0,0,0,0.4);
+            margin-top: -5px; box-shadow: 0 10px 20px rgba(0,0,0,0.4);
         }
         
-        /* Schimmernder Silber-Text */
         .handle-side::after {
             content: "RIMOWA"; 
-            font-size: 10px; font-weight: 900; letter-spacing: 3px;
-            transform: rotate(90deg); white-space: nowrap;
-            
-            /* Silber-Schimmer Effekt */
+            font-size: 12px; font-weight: 900; letter-spacing: 4px;
+            white-space: nowrap;
             background: linear-gradient(135deg, #fff 0%, #eee 40%, #ccc 50%, #eee 60%, #fff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            color: transparent;
-            
-            /* Subtile Helligkeit */
             filter: drop-shadow(0 0 2px rgba(255,255,255,0.5));
         }
 
-        /* 2. Nieten */
         .niete {
             position: absolute; width: 8px; height: 8px;
             background: radial-gradient(circle at 3px 3px, var(--alu-bright), #7f8c8d);
             border-radius: 50%; box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
             z-index: 5;
         }
-
     </style>
 </head>
 <body>
 
     <header>
-        <div style="width: 36px; height: 36px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #ddd;">←</div>
+        <a href="reise_stats.html" class="back-btn">←</a>
         <h1>Life-Log Suitcase</h1>
     </header>
 
     <div class="viewport">
         <div class="suitcase-container" id="suitcase-canvas">
             
-            <div class="suitcase-body">
-                
-                <div class="handle-side-system">
-                    <div class="handle-mount"></div>
-                    <div class="handle-side"></div>
-                </div>
+            <div class="handle-top-system">
+                <div class="handle-mount"></div>
+                <div class="handle-side"></div>
+            </div>
 
+            <div class="suitcase-body">
                 </div>
         </div>
     </div>
 
     <script>
         const canvas = document.getElementById('suitcase-canvas');
-        const rivetsCountHor = 12; // Nieten oben und unten
-        const rivetsCountVer = 8;  // Nieten links und rechts (neu hinzugefügt)
+        const rivetsCountHor = 12;
+        const rivetsCountVer = 8;
 
         function createRivets() {
-            // Horizontale Reihen (oben und unten)
             for(let i = 0; i < rivetsCountHor; i++) {
                 addRivet(60 + (i * 65), 25);      // Oben
                 addRivet(60 + (i * 65), 485);     // Unten
             }
-            
-            // Vertikale Reihen (links und rechts, da Reifen weg)
             for(let i = 0; i < rivetsCountVer; i++) {
                 addRivet(25, 60 + (i * 60));      // Links
                 addRivet(785, 60 + (i * 60));     // Rechts
@@ -179,7 +164,6 @@
             canvas.appendChild(r);
         }
 
-        // Starte Nieten-Generierung
         createRivets();
     </script>
 </body>
