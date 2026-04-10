@@ -39,6 +39,7 @@
             background: var(--bg-color);
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
             overflow: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
         header {
@@ -79,38 +80,40 @@
             display: flex;
             justify-content: center;
             padding: 10px;
-            contain: layout style;
         }
 
         .page-inner {
-            width: 100%; max-width: 380px; height: 620px;
+            width: 100%; max-width: 360px; height: 580px;
             background: var(--passport-green-soft);
             border-radius: 15px; position: relative;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
             padding: 25px 20px;
             border: 1px solid var(--border-page);
             display: flex; flex-direction: column;
-            overflow: hidden; /* Wichtig für das Pseudo-Element */
+            overflow: hidden;
+            z-index: 1;
         }
 
-        /* Bundesadler Wasserzeichen wieder hinzugefügt */
+        /* Adler Fix: Fixierte Positionierung und expliziter Content-Pfad */
         .page-inner::before {
-            content: ' ';
+            content: "";
             position: absolute;
             top: 50%;
             left: 50%;
-            width: 220px;
-            height: 220px;
-            transform: translate(-50%, -50%);
-            background: url('https://upload.wikimedia.org/wikipedia/commons/d/da/Coat_of_arms_of_Germany.svg') no-repeat center;
+            width: 200px;
+            height: 200px;
+            margin-top: -100px;
+            margin-left: -100px;
+            background-image: url('https://upload.wikimedia.org/wikipedia/commons/d/da/Coat_of_arms_of_Germany.svg');
+            background-repeat: no-repeat;
+            background-position: center;
             background-size: contain;
-            opacity: 0.04;
+            opacity: 0.05;
             pointer-events: none;
-            z-index: 0;
+            z-index: -1;
         }
 
         .page-header {
-            position: relative; z-index: 1;
             text-align: center; font-size: 0.65rem; font-weight: 700;
             color: var(--text-secondary); text-transform: uppercase;
             letter-spacing: 2px; border-bottom: 1px solid var(--border-page);
@@ -118,11 +121,10 @@
         }
 
         .stamp-grid {
-            position: relative; z-index: 1;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 15px; flex: 1;
+            gap: 12px; flex: 1;
         }
 
         .stamp-slot {
@@ -134,34 +136,42 @@
         .stamp {
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
-            padding: 12px; text-align: center;
+            padding: 8px; text-align: center;
             border: 2.5px solid;
-            background: transparent; /* Verhindert das Überdecken des Adlers */
+            background: rgba(232, 242, 233, 0.1);
         }
 
-        .stamp-circle { border-radius: 50%; width: 110px; height: 110px; }
-        .stamp-rect   { border-radius: 4px; width: 125px; min-height: 85px; }
-        .stamp-hex    { border-radius: 10px; transform: skewX(-5deg); width: 120px; }
+        .stamp-circle { border-radius: 50%; width: 105px; height: 105px; }
+        .stamp-rect   { border-radius: 4px; width: 120px; min-height: 80px; }
+        .stamp-hex    { border-radius: 10px; transform: skewX(-4deg); width: 115px; min-height: 90px; }
 
         .stamp .land {
-            font-weight: 900; font-size: 0.7rem;
-            text-transform: uppercase; line-height: 1.1;
-            max-width: 90px; word-wrap: break-word;
+            font-weight: 900; 
+            font-size: 0.65rem; /* Etwas kleiner für Handy-Optimierung */
+            text-transform: uppercase; 
+            line-height: 1.1;
+            max-width: 95px;
+            overflow-wrap: break-word; /* Bricht an sinnvollen Stellen */
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
+
         .stamp .jahr {
-            font-size: 1.2rem; font-weight: 900;
+            font-size: 1.1rem; font-weight: 900;
             border-top: 2px solid; border-bottom: 2px solid;
-            margin: 4px 0; padding: 0 8px;
+            margin: 4px 0; padding: 0 6px;
         }
+
         .stamp .type {
-            font-size: 0.45rem; letter-spacing: 1.2px;
+            font-size: 0.4rem; letter-spacing: 1px;
             font-weight: 800; opacity: 0.8;
         }
 
         .stamp-aged { filter: blur(0.4px); }
 
         .page-footer {
-            position: relative; z-index: 1;
             text-align: center; font-size: 0.7rem; font-weight: 800;
             color: var(--ink-dark); text-transform: uppercase;
             margin-top: 15px; padding-top: 10px;
@@ -196,14 +206,14 @@
             const h        = hashStr(reise.Land);
             const color    = COLORS[h % COLORS.length];
             const shape    = SHAPES[(h >> 3) % SHAPES.length];
-            const rotation = ((h % 12) - 6);
+            const rotation = ((h % 10) - 5);
             const reiseJahr = reise["erste Einreise"] || AKTUELLES_JAHR;
             const alter    = AKTUELLES_JAHR - reiseJahr;
             const opacity  = Math.max(0.6, 0.95 - alter * 0.015).toFixed(3);
             const agedClass = alter > 15 ? ' stamp-aged' : '';
 
             return `<div class="stamp stamp-${shape}${agedClass}" 
-                        style="color:${color};border-color:${color};opacity:${opacity};transform:rotate(${rotation}deg)">
+                        style="color:${color}; border-color:${color}; opacity:${opacity}; transform:rotate(${rotation}deg)">
                         <div class="type">ENTRY</div>
                         <div class="land">${reise.Land}</div>
                         <div class="jahr">${reiseJahr}</div>
@@ -213,6 +223,7 @@
 
         function renderPassport() {
             const container = document.getElementById('book-container');
+            if (!window.MEINE_REISEN) return;
 
             const reisen = MEINE_REISEN
                 .filter(r => r.Land !== 'Deutschland')
@@ -223,7 +234,6 @@
 
             for (let p = 0; p < totalPages; p++) {
                 const pageItems = reisen.slice(p * STAMPS_PER_PAGE, (p + 1) * STAMPS_PER_PAGE);
-
                 const stampsHTML = pageItems.map(buildStampHTML)
                     .map(s => `<div class="stamp-slot">${s}</div>`)
                     .join('');
@@ -239,7 +249,6 @@
 
                 fragment.appendChild(page);
             }
-
             container.appendChild(fragment);
         }
 
