@@ -72,10 +72,13 @@
         .section-label {
             font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
             letter-spacing: 0.07em; color: var(--text-tertiary); padding: 0 4px;
+            margin-top: 8px;
         }
 
-        /* Stats-Grid */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        /* Stats-Grid-System */
+        .stats-group { display: flex; flex-direction: column; gap: 10px; }
+        .stats-grid { display: grid; gap: 10px; }
+        .stats-grid.two { grid-template-columns: 1fr 1fr; }
         .stats-grid.three { grid-template-columns: 1fr 1fr 1fr; }
 
         .stat-card {
@@ -119,20 +122,26 @@
 
     <main>
         <div class="section-label">Überblick</div>
-        <div class="stats-grid">
-            <div class="stat-card"><span class="stat-val" id="val-laender">–</span><span class="stat-label">Länder</span></div>
-            <div class="stat-card"><span class="stat-val" id="val-naechte">–</span><span class="stat-label">Nächte</span></div>
-            <div class="stat-card"><span class="stat-val" id="val-km">–</span><span class="stat-label">km gejoggt</span></div>
-            <div class="stat-card"><span class="stat-val" id="val-fluege">–</span><span class="stat-label">Flüge</span></div>
+        
+        <div class="stats-group">
+            <div class="stats-grid two">
+                <div class="stat-card"><span class="stat-val" id="val-laender">–</span><span class="stat-label">Länder</span></div>
+                <div class="stat-card"><span class="stat-val" id="val-fluege">–</span><span class="stat-label">Flüge</span></div>
+            </div>
+
+            <div class="stats-grid two">
+                <div class="stat-card"><span class="stat-val" id="val-unterkuenfte">–</span><span class="stat-label">Unterkünfte</span></div>
+                <div class="stat-card"><span class="stat-val" id="val-naechte">–</span><span class="stat-label">Nächte</span></div>
+            </div>
+
+            <div class="stats-grid three">
+                <div class="stat-card"><span class="stat-val" id="val-km">–</span><span class="stat-label">gelaufene KM</span></div>
+                <div class="stat-card"><span class="stat-val" id="val-laeufe">–</span><span class="stat-label">Läufe</span></div>
+                <div class="stat-card"><span class="stat-val" id="val-avg-km">–</span><span class="stat-label">ø km</span></div>
+            </div>
         </div>
 
-        <div class="stats-grid three">
-            <div class="stat-card"><span class="stat-val" id="val-unterkuenfte">–</span><span class="stat-label">Unterkünfte</span></div>
-            <div class="stat-card"><span class="stat-val" id="val-laeufe">–</span><span class="stat-label">Läufe</span></div>
-            <div class="stat-card"><span class="stat-val" id="val-avg-km">–</span><span class="stat-label">ø km</span></div>
-        </div>
-
-        <div class="section-label" style="margin-top:8px;">Erkunden</div>
+        <div class="section-label">Erkunden</div>
 
         <a href="weltkarte.html" class="nav-card">
             <div class="nav-icon">🗺️</div>
@@ -157,6 +166,15 @@
             <div class="nav-text">
                 <div class="nav-title">Virtueller Passport</div>
                 <div class="nav-sub">Deine gesammelten Visa</div>
+            </div>
+            <div class="nav-arrow">→</div>
+        </a>
+
+        <a href="reisekoffer.html" class="nav-card">
+            <div class="nav-icon">🧳</div>
+            <div class="nav-text">
+                <div class="nav-title">Reisekoffer</div>
+                <div class="nav-sub">Deine Reisekoffer mit Aufklebern</div>
             </div>
             <div class="nav-arrow">→</div>
         </a>
