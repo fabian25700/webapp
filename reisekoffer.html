@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Reisekoffer | Fabian Geisbüsch</title>
+    <style>
+        :root {
+            --accent: #e67e22;
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 4px 20px rgba(0,0,0,0.08);
+            /* Koffer Farben */
+            --alu-base: #bdc3c7;
+            --alu-dark: #95a5a6;
+            --alu-bright: #ecf0f1;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: #2d3f55;
+                --border-light: #253347;
+                --shadow: 0 4px 20px rgba(0,0,0,0.3);
+                --alu-base: #7f8c8d;
+                --alu-dark: #34495e;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Konsistenz */
+        header {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--bg);
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            display: flex; align-items: center; gap: 12px;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        }
+
+        .back-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 12px;
+            background: var(--surface); border: 1px solid var(--border);
+            text-decoration: none; color: var(--text-primary);
+            box-shadow: var(--shadow);
+        }
+
+        header h1 { font-size: 1.15rem; font-weight: 800; }
+
+        /* Koffer Szene */
+        .viewport {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            perspective: 1000px;
+        }
+
+        .suitcase-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Mobile Rotation: Koffer steht auf der kurzen Seite (Rollen unten) */
+        @media (max-width: 600px) {
+            .suitcase-container { transform: rotate(-90deg) scale(0.65); }
+        }
+
+        /* Hardware: Teleskopgriff (Oben kurze Seite) */
+        .handle-telescope {
+            width: 140px; height: 40px;
+            border: 12px solid #222;
+            border-bottom: none;
+            border-radius: 12px 12px 0 0;
+            margin-bottom: -5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Koffer Korpus */
+        .suitcase-body {
+            width: 800px; height: 500px;
+            background: var(--alu-base);
+            border: 14px solid var(--alu-dark);
+            border-radius: 50px;
+            position: relative;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.25);
+            /* Rimowa Rillen */
+            background-image: repeating-linear-gradient(90deg, 
+                transparent 0, 
+                transparent 40px, 
+                rgba(0,0,0,0.05) 40px, 
+                rgba(0,0,0,0.05) 42px
+            );
+        }
+
+        /* Hardware: Seitengriff (Längsseite) */
+        .handle-side {
+            position: absolute;
+            right: -24px; top: 50%;
+            transform: translateY(-50%);
+            width: 32px; height: 160px;
+            background: #222;
+            border-radius: 0 12px 12px 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .handle-side::after {
+            content: "RIMOWA KÖLN";
+            color: #555;
+            font-size: 9px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            transform: rotate(90deg);
+            white-space: nowrap;
+        }
+
+        /* Hardware: Rollen (Kurze Seite links) */
+        .wheel-bracket {
+            position: absolute;
+            left: -40px; top: 80px; bottom: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .wheel {
+            width: 45px; height: 80px;
+            background: #111;
+            border-radius: 15px 0 0 15px;
+            border-left: 14px solid #000;
+        }
+
+        /* Details: Nieten umlaufend */
+        .niete {
+            position: absolute;
+            width: 8px; height: 8px;
+            background: #7f8c8d;
+            border-radius: 50%;
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* Dossier / Info-Card (Zentral) */
+        #central-card {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            background: var(--surface);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        #central-card.active { opacity: 1; transform: translate(-50%, -52%); }
+
+        .card-header { border-bottom: 1px solid var(--border-light); padding-bottom: 12px; margin-bottom: 16px; }
+        .card-header h2 { font-size: 1.2rem; font-weight: 800; }
+        .card-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .card-label { color: var(--text-secondary); font-weight: 500; }
+        .card-val { font-weight: 700; color: var(--text-primary); }
+        .card-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin-top: 12px; font-style: italic; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="reisen.html" class="back-btn">←</a>
+        <h1>Reisekoffer</h1>
+    </header>
+
+    <div class="viewport">
+        <div class="suitcase-container">
+            <div class="handle-telescope"></div>
+
+            <div class="suitcase-body" id="suitcase-canvas">
+                <div class="wheel-bracket">
+                    <div class="wheel"></div>
+                    <div class="wheel"></div>
+                </div>
+
+                <div class="handle-side"></div>
+
+                <div id="central-card">
+                    <div class="card-header">
+                        <h2 id="city-name">Stadt</h2>
+                    </div>
+                    <div class="card-row">
+                        <span class="card-label">Land:</span>
+                        <span class="card-val" id="city-country">-</span>
+                    </div>
+                    <div class="card-row">
+                        <span class="card-label">Nächte:</span>
+                        <span class="card-val" id="city-nights">0</span>
+                    </div>
+                    <div class="card-row">
+                        <span class="card-label">Fußball:</span>
+                        <span class="card-val" id="city-fb">⚪</span>
+                    </div>
+                    <p class="card-desc" id="city-desc"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Nieten automatisch an den Rändern platzieren
+        const canvas = document.getElementById('suitcase-canvas');
+        const rivetsCount = 12;
+
+        function createRivets() {
+            for(let i = 0; i < rivetsCount; i++) {
+                // Oben
+                addRivet(30 + (i * 70), 18);
+                // Unten
+                addRivet(30 + (i * 70), 474);
+            }
+        }
+
+        function addRivet(x, y) {
+            const r = document.createElement('div');
+            r.className = 'niete';
+            r.style.left = x + 'px';
+            r.style.top = y + 'px';
+            canvas.appendChild(r);
+        }
+
+        createRivets();
+
+        // Funktion zum Anzeigen der Card (wird später von den Stickern getriggert)
+        function showDossier(data) {
+            document.getElementById('city-name').innerText = data.flag + " " + data.n;
+            document.getElementById('city-country').innerText = data.land;
+            document.getElementById('city-nights').innerText = data.nights;
+            document.getElementById('city-fb').innerText = data.fb ? "⚽ Ja" : "⚪ Nein";
+            document.getElementById('city-desc').innerText = data.desc;
+            document.getElementById('central-card').classList.add('active');
+        }
+
+        function hideDossier() {
+            document.getElementById('central-card').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
