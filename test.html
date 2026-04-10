@@ -3,25 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Länder | Analytics</title>
     <script src="daten.js"></script>
     <style>
         :root {
             --accent: #e67e22;
-            --bg: #f2f2f7;
+            --accent-soft: rgba(230, 126, 34, 0.1);
+            --bg: #f0f2f5;
             --surface: #ffffff;
-            --text-primary: #1c1c1e;
-            --text-secondary: #8e8e93;
-            --border: #d1d1d6;
+            --surface-2: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: #000000;
-                --surface: #1c1c1e;
-                --text-primary: #ffffff;
-                --text-secondary: #8e8e93;
-                --border: #38383a;
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --surface-2: #162032;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --text-tertiary: #64748b;
+                --border: #2d3f55;
+                --border-light: #253347;
+                --shadow: 0 2px 8px rgba(0,0,0,0.3);
             }
         }
 
@@ -31,131 +42,138 @@
             font-family: -apple-system, system-ui, sans-serif;
             background: var(--bg);
             color: var(--text-primary);
-            padding-bottom: 30px;
+            min-height: 100vh;
+            padding-bottom: 40px;
         }
 
         header {
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 50;
             background: var(--bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: calc(env(safe-area-inset-top) + 15px) 20px 15px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 0.5px solid var(--border);
-        }
-
-        .back-btn { text-decoration: none; color: var(--accent); font-weight: 500; }
-        h1 { font-size: 17px; font-weight: 600; }
-
-        main { padding: 12px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
-
-        .card {
-            background: var(--surface);
-            border-radius: 12px;
-            overflow: hidden;
-            border: 0.5px solid var(--border);
-        }
-
-        .card-header {
-            padding: 14px 16px;
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
             display: flex;
             align-items: center;
             gap: 12px;
-            cursor: pointer;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
-        .flag { font-size: 24px; }
-        .name { flex: 1; font-size: 16px; font-weight: 600; }
-
-        .main-stat { text-align: right; }
-        .stat-val { font-size: 18px; font-weight: 700; display: block; }
-        .stat-lbl { font-size: 9px; text-transform: uppercase; color: var(--text-secondary); font-weight: 600; }
-
-        .details {
-            display: none;
-            padding: 12px 16px;
-            background: rgba(0,0,0,0.02);
-            border-top: 0.5px solid var(--border);
-        }
-
-        .card.open .details { display: block; }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        .sub-stat {
+        .back-btn {
             display: flex;
-            flex-direction: column;
-        }
-
-        .sub-val { font-size: 15px; font-weight: 600; }
-        .sub-lbl { font-size: 9px; color: var(--text-secondary); text-transform: uppercase; }
-
-        .jog-line {
-            margin-top: 10px;
-            padding-top: 8px;
-            border-top: 0.5px solid var(--border);
-            font-size: 13px;
-            display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            text-decoration: none;
+            color: var(--text-primary);
+            box-shadow: var(--shadow);
         }
+
+        header h1 { font-size: 1.15rem; font-weight: 800; flex: 1; }
+
+        .country-count { font-size: 0.75rem; font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 4px 10px; border-radius: 20px; }
+
+        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+
+        .country-card { background: var(--surface); border-radius: 18px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+
+        .country-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+        .country-flag { font-size: 1.9rem; line-height: 1; }
+        .country-header-info { flex: 1; }
+        .country-name { font-weight: 700; font-size: 1rem; }
+        .country-meta { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
+
+        .country-nights { font-weight: 800; font-size: 1.05rem; color: var(--accent); text-align: right; }
+        .country-nights-label { font-size: 0.65rem; color: var(--text-tertiary); text-align: right; font-weight: 500; text-transform: uppercase; }
+
+        .expand-icon { color: var(--text-tertiary); font-size: 0.8rem; transition: transform 0.2s; margin-left: 8px; }
+        .country-card.open .expand-icon { transform: rotate(90deg); }
+
+        .country-detail { display: none; border-top: 1px solid var(--border-light); padding: 12px 16px 14px; background: var(--surface-2); }
+        .country-card.open .country-detail { display: block; }
+
+        .stat-chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+
+        .stat-chip { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 9px 10px; text-align: center; position: relative; overflow: hidden; }
+        
+        /* Progress-Hintergrund für UNESCO */
+        .progress-bg { position: absolute; top: 0; left: 0; height: 100%; background: #2ecc7133; z-index: 0; transition: width 0.3s; }
+        .chip-content { position: relative; z-index: 1; }
+
+        .chip-val { font-size: 1.05rem; font-weight: 800; color: var(--text-primary); display: block; }
+        .chip-label { font-size: 0.62rem; color: var(--text-tertiary); text-transform: uppercase; font-weight: 600; margin-top: 2px; display: block; }
+
+        .jog-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; padding: 9px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 11px; }
+        .jog-text { font-size: 0.82rem; color: var(--text-secondary); }
+        .jog-text strong { color: var(--text-primary); font-weight: 700; }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="reise_stats.html" class="back-btn">Zurück</a>
-        <h1>Reise-Analytics</h1>
-        <div id="count" style="font-size: 13px; font-weight: 600; opacity: 0.6;"></div>
+        <a href="reise_stats.html" class="back-btn">←</a>
+        <h1>Länder</h1>
+        <div class="country-count" id="country-count"></div>
     </header>
 
-    <main id="list"></main>
+    <main id="main-list"></main>
 
     <script>
-        window.onload = function() {
-            const list = document.getElementById('list');
-            const data = [...MEINE_REISEN].sort((a, b) => b.Übernachtungen - a.Übernachtungen);
-            document.getElementById('count').textContent = data.length + ' LÄNDER';
+        window.onload = function () {
+            const list = document.getElementById('main-list');
+            const sorted = [...MEINE_REISEN].sort((a, b) => b.Übernachtungen - a.Übernachtungen);
+            document.getElementById('country-count').textContent = sorted.length + ' Länder';
 
-            data.forEach(item => {
+            sorted.forEach(trip => {
+                // UNESCO Progress Logik
+                const [done, total] = trip["UNESCO Welterbe"].split('/').map(Number);
+                const progressWidth = total > 0 ? (done / total) * 100 : 0;
+                
                 const card = document.createElement('div');
-                card.className = 'card';
+                card.className = 'country-card';
                 card.innerHTML = `
-                    <div class="card-header" onclick="this.parentElement.classList.toggle('open')">
-                        <span class="flag">${item.flagge}</span>
-                        <span class="name">${item.Land}</span>
-                        <div class="main-stat">
-                            <span class="stat-val">${item.Übernachtungen}</span>
-                            <span class="stat-lbl">Nächte</span>
+                    <div class="country-header" onclick="this.parentElement.classList.toggle('open')">
+                        <div class="country-flag">${trip.flagge}</div>
+                        <div class="country-header-info">
+                            <div class="country-name">${trip.Land}</div>
+                            <div class="country-meta">${trip.kontinent} · ${trip.id}</div>
                         </div>
+                        <div>
+                            <div class="country-nights">${trip.Übernachtungen}</div>
+                            <div class="country-nights-label">Nächte</div>
+                        </div>
+                        <div class="expand-icon">›</div>
                     </div>
-                    <div class="details">
-                        <div class="stats-grid">
-                            <div class="sub-stat">
-                                <span class="sub-val">${item.Unterkünfte}</span>
-                                <span class="sub-lbl">Unterkünfte</span>
+                    <div class="country-detail">
+                        <div class="stat-chips">
+                            <div class="stat-chip">
+                                <span class="chip-val">${trip.Unterkünfte}</span>
+                                <span class="chip-label">Spots</span>
                             </div>
-                            <div class="sub-stat">
-                                <span class="sub-val">${item.FluegeAnkunft}</span>
-                                <span class="sub-lbl">Flüge</span>
+                            <div class="stat-chip">
+                                <span class="chip-val">${trip.FluegeAnkunft}</span>
+                                <span class="chip-label">Flüge</span>
                             </div>
-                            <div class="sub-stat">
-                                <span class="sub-val">${item["UNESCO Welterbe"]}</span>
-                                <span class="sub-lbl">UNESCO</span>
+                            <div class="stat-chip">
+                                ${progressWidth > 0 ? `<div class="progress-bg" style="width: ${progressWidth}%"></div>` : ''}
+                                <div class="chip-content">
+                                    <span class="chip-val">${trip["UNESCO Welterbe"]}</span>
+                                    <span class="chip-label">UNESCO</span>
+                                </div>
                             </div>
                         </div>
-                        ${item.km_gejoggt > 0 ? `
-                        <div class="jog-line">
-                            <span style="color: var(--text-secondary);">Absolute Laufleistung</span>
-                            <span style="font-weight: 700; color: var(--accent);">${item.km_gejoggt} KM</span>
+                        ${trip.km_gejoggt > 0 ? `
+                        <div class="jog-row">
+                            <div class="jog-icon">🏃</div>
+                            <div class="jog-text">
+                                <strong>${trip.km_gejoggt} km</strong> gesamt in <strong>${trip.Joggen}</strong> Einheiten
+                            </div>
                         </div>` : ''}
                     </div>
                 `;
