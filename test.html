@@ -3,123 +3,132 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Life-Log | Rimowa Edition</title>
+    <title>Life-Log | Fabian Geisbüsch</title>
     <style>
         :root {
             --bg-color: #f0f2f5;
             --header-bg: rgba(240, 242, 245, 0.9);
             --header-text: #1e293b;
+            --header-border: #e2e8f0;
             --alu: #bdc3c7;
-            --alu-dark: #7f8c8d;
+            --alu-dark: #95a5a6;
+            --card-bg: #ffffff;
         }
+
         @media (prefers-color-scheme: dark) {
-            :root { --bg-color: #0f172a; --header-bg: rgba(15, 23, 42, 0.9); --header-text: #f1f5f9; }
+            :root {
+                --bg-color: #0f172a;
+                --header-bg: rgba(15, 23, 42, 0.9);
+                --header-text: #f1f5f9;
+                --header-border: #1e293b;
+                --card-bg: #1e293b;
+            }
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
         body {
             background: var(--bg-color);
-            font-family: -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
             height: 100vh; overflow: hidden;
             display: flex; flex-direction: column; align-items: center;
         }
 
         header {
-            position: fixed; top: 0; width: 100%; z-index: 1000;
-            padding: 20px; display: flex; align-items: center; gap: 15px;
-            background: var(--header-bg); backdrop-filter: blur(15px);
+            position: fixed; top: 0; width: 100%; z-index: 2000;
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            display: flex; align-items: center; gap: 12px;
+            background: var(--header-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--header-border);
         }
-        header h1 { font-size: 1.1rem; color: var(--header-text); font-weight: 800; }
 
-        /* Koffer-Konstruktion */
+        header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
+
+        /* Koffer-Szene */
         .suitcase-scene {
-            margin-top: 100px;
+            margin-top: 140px;
             display: flex; flex-direction: column; align-items: center;
-            perspective: 1000px;
+            transition: transform 0.5s ease;
         }
 
-        /* Mobile Drehung */
         @media (max-width: 600px) {
-            .suitcase-scene { transform: rotate(90deg) scale(0.6); margin-top: 150px; }
+            .suitcase-scene { transform: rotate(-90deg) scale(0.65); margin-top: 180px; }
         }
 
         .suitcase-body {
-            width: 800px; height: 500px;
+            width: 850px; height: 550px;
             background: var(--alu);
-            border-radius: 40px; border: 10px solid var(--alu-dark);
+            border-radius: 45px; border: 12px solid var(--alu-dark);
             position: relative;
-            background-image: repeating-linear-gradient(90deg, transparent 0, transparent 40px, rgba(0,0,0,0.05) 40px, rgba(0,0,0,0.05) 42px);
-            box-shadow: 0 50px 100px rgba(0,0,0,0.3);
+            background-image: repeating-linear-gradient(90deg, transparent 0, transparent 40px, rgba(0,0,0,0.04) 40px, rgba(0,0,0,0.04) 42px);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.25);
         }
 
-        /* Griffe & Rollen */
-        .handle-top { width: 120px; height: 25px; background: #333; border-radius: 5px; margin-bottom: -5px; }
-        .handle-side {
-            position: absolute; right: -22px; top: 50%; transform: translateY(-50%);
-            width: 30px; height: 140px; background: #222; border-radius: 0 10px 10px 0;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .handle-side span { 
-            color: #555; transform: rotate(90deg); font-size: 8px; 
-            font-weight: 900; white-space: nowrap; letter-spacing: 1px;
-        }
+        /* Griff & Rollen */
+        .handle-top { width: 150px; height: 35px; background: #333; border-radius: 10px 10px 0 0; position: relative; display: flex; align-items: center; justify-content: center; color: #666; font-size: 9px; font-weight: 900; letter-spacing: 2px; }
+        
+        .wheel-area { position: absolute; left: -35px; top: 60px; bottom: 60px; display: flex; flex-direction: column; justify-content: space-between; }
+        .wheel { width: 40px; height: 70px; background: #111; border-radius: 12px 0 0 12px; border-left: 12px solid #000; }
 
-        .wheel-area { position: absolute; left: -35px; top: 50px; bottom: 50px; display: flex; flex-direction: column; justify-content: space-between; }
-        .wheel { width: 40px; height: 60px; background: #111; border-radius: 8px 0 0 8px; border-left: 10px solid #000; }
-
-        /* Zentrales Dossier */
+        /* Dossier (Info-Tafel) */
         #central-info {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 240px; background: white; border-radius: 15px; padding: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
-            z-index: 1000; opacity: 0; pointer-events: none; transition: 0.3s;
-            border: 1px solid #ddd;
+            width: 280px; background: var(--card-bg); border-radius: 20px; padding: 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            z-index: 1500; opacity: 0; pointer-events: none; transition: 0.3s;
+            border: 1px solid var(--header-border);
         }
-        #central-info.active { opacity: 1; }
-        .dossier-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
+        #central-info.active { opacity: 1; pointer-events: auto; }
+
+        .info-header { border-bottom: 1px solid var(--header-border); padding-bottom: 12px; margin-bottom: 15px; text-align: center; }
+        .info-header h3 { font-size: 1.2rem; font-weight: 800; color: var(--header-text); }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: #64748b; }
+        .info-row strong { color: var(--header-text); }
+        .info-desc { font-size: 12px; margin-top: 15px; line-height: 1.5; color: #94a3b8; font-style: italic; }
 
         /* Sticker Styles */
         .sticker {
             position: absolute;
-            padding: 8px 12px;
+            padding: 8px 14px;
             font-weight: 900;
             text-transform: uppercase;
-            border: 3px solid white; /* Sticker Rand */
-            box-shadow: 2px 4px 8px rgba(0,0,0,0.3);
+            border: 3px solid white;
+            box-shadow: 2px 4px 10px rgba(0,0,0,0.2);
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex; flex-direction: column; align-items: center;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
         }
-        .sticker:active, .sticker:hover { transform: scale(1.15) !important; z-index: 900 !important; }
+        .sticker:hover { transform: scale(1.1) z-index: 1000 !important; }
 
-        .st-key { border-radius: 10px; }
-        .st-standard { border-radius: 2px; }
+        /* Formen */
+        .shape-rect { border-radius: 4px; }
+        .shape-round { border-radius: 50px; padding: 10px 20px; }
+        .shape-badge { border-radius: 15px 0 15px 0; }
+
+        .fb-icon { font-size: 14px; filter: grayscale(1); opacity: 0.2; }
+        .fb-active { filter: grayscale(0); opacity: 1; }
     </style>
 </head>
-<body>
+<body onclick="hideInfo(event)">
 
     <header>
-        <div style="width: 36px; height: 36px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold;">←</div>
         <h1>Passport & Luggage</h1>
     </header>
 
     <div class="suitcase-scene">
-        <div class="handle-top"></div>
+        <div class="handle-top">RIMOWA KÖLN</div>
         <div class="suitcase-body" id="canvas">
             <div class="wheel-area">
                 <div class="wheel"></div>
                 <div class="wheel"></div>
             </div>
-            <div class="handle-side"><span>RIMOWA KÖLN</span></div>
             
-            <div id="central-info">
-                <h3 id="info-city" style="margin-bottom: 10px;">City</h3>
-                <div class="dossier-row"><span>Land:</span> <strong id="info-country">-</strong></div>
-                <div class="dossier-row"><span>Nächte:</span> <strong id="info-nights">-</strong></div>
-                <div class="dossier-row"><span>Fußball:</span> <strong id="info-fb">-</strong></div>
-                <p id="info-desc" style="font-size: 11px; margin-top: 10px; color: #666; font-style: italic;"></p>
+            <div id="central-info" onclick="event.stopPropagation()">
+                <div class="info-header"><h3 id="info-city">-</h3></div>
+                <div class="info-row"><span>Land:</span> <strong id="info-country">-</strong></div>
+                <div class="info-row"><span>Aufenthalt:</span> <strong id="info-nights">-</strong></div>
+                <div class="info-row"><span>Fußball:</span> <span id="info-fb">⚽</span></div>
+                <p class="info-desc" id="info-desc">-</p>
             </div>
         </div>
     </div>
@@ -129,70 +138,73 @@
         const infoBox = document.getElementById('central-info');
 
         const DATA = [
-            { n: "Kopenhagen", key: true, nights: 4, flag: "🇩🇰", fb: true, desc: "Design & Hygge.", icon: "🚲" },
-            { n: "New York", key: true, nights: 4, flag: "🇺🇸", fb: false, desc: "The city that never sleeps.", icon: "🗽" },
-            { n: "Mainz", key: false, nights: 1, flag: "🇩🇪", fb: true, desc: "Rheinhessen Wein.", icon: "🍇" },
-            { n: "AIDA", key: true, nights: 10, flag: "🚢", fb: false, desc: "Vollpension auf Wellen.", icon: "⚓" }
+            { n: "Kopenhagen", nights: 4, flag: "🇩🇰", fb: true, desc: "Minimalistisches Design & Kanäle.", icon: "🚲", shape: "shape-round" },
+            { n: "New York", nights: 4, flag: "🇺🇸", fb: false, desc: "Energie pur in Manhattan.", icon: "🗽", shape: "shape-rect" },
+            { n: "Mainz", nights: 1, flag: "🇩🇪", fb: true, desc: "Fastnacht & Weinkultur.", icon: "🍇", shape: "shape-badge" },
+            { n: "AIDA", nights: 10, flag: "🚢", fb: false, desc: "Zwei Wochen auf dem Ozean.", icon: "⚓", shape: "shape-round" }
         ];
 
-        // Fülle auf 80 auf
+        // Sanfte Farbpalette
+        const COLORS = ['#D4E6B5', '#B5D8E6', '#E6B5B5', '#D1B5E6', '#E6D9B5', '#B5E6D2'];
+
         for(let i=4; i<80; i++) {
             DATA.push({
-                n: "City "+i, key: false, nights: Math.floor(Math.random()*3)+1,
-                flag: "🇪🇺", fb: Math.random()>0.5, desc: "Reise-Erinnerung.", icon: "📍"
+                n: "Stadt "+i, nights: Math.floor(Math.random()*4)+1,
+                flag: "🇪🇺", fb: Math.random()>0.7, desc: "Ein weiterer Meilenstein.",
+                icon: "📍", shape: ['shape-rect', 'shape-round', 'shape-badge'][i%3]
             });
         }
 
-        const COLORS = ['#e63946', '#f1faee', '#a8dadc', '#457b9d', '#ffb703', '#2a9d8f'];
-
         function build() {
+            // Wir nutzen ein einfaches Grid-System im Hintergrund, um Überlappungen zu minimieren
+            const cols = 9;
+            const rows = 9;
+            
             DATA.forEach((city, i) => {
                 const s = document.createElement('div');
-                s.className = `sticker ${city.key ? 'st-key' : 'st-standard'}`;
+                s.className = `sticker ${city.shape}`;
                 
                 const color = COLORS[i % COLORS.length];
-                const fontSize = 8 + (city.nights * 2);
-                const rot = (Math.random() * 10) - 5;
+                const fontSize = 9 + (city.nights * 1.5);
+                const rot = (Math.random() * 8) - 4;
                 
-                // Positionierung (Absolute Layering für Überlappung)
-                const top = Math.random() * 75 + 5;
-                const left = Math.random() * 75 + 5;
+                // Gitter-basierte Position mit leichtem Random-Offset gegen Überlappung
+                const gridX = (i % cols);
+                const gridY = Math.floor(i / cols);
+                const left = (gridX * 10) + 5 + (Math.random() * 3);
+                const top = (gridY * 10) + 5 + (Math.random() * 3);
 
                 s.style.cssText = `
                     background: ${color}; 
-                    color: ${getContrast(color)};
+                    color: #1e293b;
                     top: ${top}%; left: ${left}%;
                     transform: rotate(${rot}deg);
                     font-size: ${fontSize}px;
+                    z-index: ${i};
                 `;
 
-                s.innerHTML = `${city.key ? `<span style="font-size:1.5em">${city.icon}</span>` : ''} <span>${city.n}</span>`;
+                s.innerHTML = `<span>${city.n}</span>`;
                 
-                // Interaction
-                const showInfo = () => {
+                const showInfo = (e) => {
+                    e.stopPropagation();
                     document.getElementById('info-city').innerText = city.flag + " " + city.n;
-                    document.getElementById('info-country').innerText = city.flag;
-                    document.getElementById('info-nights').innerText = city.nights;
-                    document.getElementById('info-fb').innerText = city.fb ? "⚽ Ja" : "⚪ Nein";
+                    document.getElementById('info-country').innerText = city.flag + " " + (city.n === 'AIDA' ? 'International' : 'Europa');
+                    document.getElementById('info-nights').innerText = city.nights + " Nächte";
+                    const fb = document.getElementById('info-fb');
+                    fb.className = city.fb ? 'fb-active' : 'fb-icon';
                     document.getElementById('info-desc').innerText = city.desc;
                     infoBox.classList.add('active');
                 };
 
-                s.addEventListener('mouseenter', showInfo);
-                s.addEventListener('touchstart', (e) => { e.preventDefault(); showInfo(); });
-                
+                s.addEventListener('click', showInfo);
                 canvas.appendChild(s);
             });
         }
 
-        canvas.addEventListener('mouseleave', () => infoBox.classList.remove('active'));
-
-        function getContrast(hex){
-            hex = hex.replace('#','');
-            const r = parseInt(hex.substr(0,2),16);
-            const g = parseInt(hex.substr(2,2),16);
-            const b = parseInt(hex.substr(4,2),16);
-            return ((r*299)+(g*587)+(b*114))/1000 >= 128 ? 'black' : 'white';
+        function hideInfo(e) {
+            if (!infoBox.contains(e.target)) {
+                infoBox.classList.remove('active');
+            }
         }
 
         build();
