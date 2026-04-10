@@ -79,7 +79,7 @@ const MEINE_REISEN = [
     "id": "US",
     "flagge": "🇺🇸",
     "kontinent": "Nordamerika",
-    "Land": "USA",
+    "Land": "Vereinigte Staaten von Amerika",
     "name_en": "United States of America",
     "Wohnorte": 0,
     "erste Einreise": 2024,
