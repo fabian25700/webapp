@@ -3,202 +3,199 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Luggage | Fabian Geisbüsch</title>
+    <title>Life-Log | Rimowa Edition</title>
     <style>
         :root {
             --bg-color: #f0f2f5;
             --header-bg: rgba(240, 242, 245, 0.9);
             --header-text: #1e293b;
-            --header-border: #e2e8f0;
-            --alu-base: #bdc3c7;
-            --alu-dark: #95a5a6;
-            --alu-bright: #ecf0f1;
-            --rimowa-rille: rgba(0,0,0,0.1);
+            --alu: #bdc3c7;
+            --alu-dark: #7f8c8d;
         }
-
         @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #0f172a;
-                --header-bg: rgba(15, 23, 42, 0.9);
-                --header-text: #f1f5f9;
-                --header-border: #1e293b;
-            }
+            :root { --bg-color: #0f172a; --header-bg: rgba(15, 23, 42, 0.9); --header-text: #f1f5f9; }
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
-
         body {
             background: var(--bg-color);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            font-family: -apple-system, sans-serif;
             height: 100vh; overflow: hidden;
             display: flex; flex-direction: column; align-items: center;
         }
 
-        /* Header Style Konsistenz */
         header {
-            position: fixed; top: 0; width: 100%; z-index: 100;
-            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
-            display: flex; align-items: center; gap: 12px;
-            background: var(--header-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border-bottom: 1px solid var(--header-border);
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            padding: 20px; display: flex; align-items: center; gap: 15px;
+            background: var(--header-bg); backdrop-filter: blur(15px);
         }
-
-        .back-btn {
-            display: flex; align-items: center; justify-content: center;
-            width: 36px; height: 36px; border-radius: 12px;
-            background: white; border: 1px solid var(--header-border);
-            text-decoration: none; color: #1e293b; font-weight: bold;
-        }
-
-        header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
+        header h1 { font-size: 1.1rem; color: var(--header-text); font-weight: 800; }
 
         /* Koffer-Konstruktion */
-        .suitcase-wrapper {
-            margin-top: 120px; position: relative;
+        .suitcase-scene {
+            margin-top: 100px;
             display: flex; flex-direction: column; align-items: center;
+            perspective: 1000px;
         }
 
-        /* Anbauteile */
-        .handle-top {
-            width: 140px; height: 30px; background: #333;
-            border-radius: 8px 8px 0 0; position: relative; margin-bottom: -5px;
+        /* Mobile Drehung */
+        @media (max-width: 600px) {
+            .suitcase-scene { transform: rotate(90deg) scale(0.6); margin-top: 150px; }
         }
-        
+
         .suitcase-body {
-            width: 850px; height: 550px;
-            background: var(--alu-base);
-            border-radius: 45px; border: 12px solid var(--alu-dark);
-            position: relative; overflow: hidden;
-            display: flex; flex-wrap: wrap; align-content: flex-start;
-            padding: 40px; gap: 15px;
-            background-image: repeating-linear-gradient(90deg, transparent, transparent 40px, var(--rimowa-rille) 40px, var(--rimowa-rille) 42px);
-            box-shadow: 0 40px 80px rgba(0,0,0,0.2);
+            width: 800px; height: 500px;
+            background: var(--alu);
+            border-radius: 40px; border: 10px solid var(--alu-dark);
+            position: relative;
+            background-image: repeating-linear-gradient(90deg, transparent 0, transparent 40px, rgba(0,0,0,0.05) 40px, rgba(0,0,0,0.05) 42px);
+            box-shadow: 0 50px 100px rgba(0,0,0,0.3);
         }
 
-        /* Nieten & Griffe */
-        .niete { position: absolute; width: 8px; height: 8px; background: #7f8c8d; border-radius: 50%; box-shadow: inset 1px 1px 2px #000; }
-        .n1 { top: 20px; left: 20px; } .n2 { top: 20px; right: 20px; }
-        .n3 { bottom: 20px; left: 20px; } .n4 { bottom: 20px; right: 20px; }
-
+        /* Griffe & Rollen */
+        .handle-top { width: 120px; height: 25px; background: #333; border-radius: 5px; margin-bottom: -5px; }
         .handle-side {
-            position: absolute; right: -18px; top: 50%; transform: translateY(-50%);
-            width: 25px; height: 120px; background: #333; border-radius: 0 8px 8px 0;
+            position: absolute; right: -22px; top: 50%; transform: translateY(-50%);
+            width: 30px; height: 140px; background: #222; border-radius: 0 10px 10px 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .handle-side span { 
+            color: #555; transform: rotate(90deg); font-size: 8px; 
+            font-weight: 900; white-space: nowrap; letter-spacing: 1px;
         }
 
-        .wheels { width: 750px; display: flex; justify-content: space-between; margin-top: -10px; }
-        .wheel { width: 50px; height: 60px; background: #222; border-radius: 10px; border-bottom: 15px solid #000; }
+        .wheel-area { position: absolute; left: -35px; top: 50px; bottom: 50px; display: flex; flex-direction: column; justify-content: space-between; }
+        .wheel { width: 40px; height: 60px; background: #111; border-radius: 8px 0 0 8px; border-left: 10px solid #000; }
 
-        /* Sticker & Hover Card */
-        .sticker-container { position: relative; display: inline-block; }
+        /* Zentrales Dossier */
+        #central-info {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 240px; background: white; border-radius: 15px; padding: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            z-index: 1000; opacity: 0; pointer-events: none; transition: 0.3s;
+            border: 1px solid #ddd;
+        }
+        #central-info.active { opacity: 1; }
+        .dossier-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; }
 
+        /* Sticker Styles */
         .sticker {
-            padding: 10px 15px; font-weight: 900; text-transform: uppercase;
-            box-shadow: 2px 3px 6px rgba(0,0,0,0.2); cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-size: 11px; display: flex; align-items: center; gap: 5px;
-            border: 1px solid rgba(255,255,255,0.3);
-            white-space: nowrap;
+            position: absolute;
+            padding: 8px 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            border: 3px solid white; /* Sticker Rand */
+            box-shadow: 2px 4px 8px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex; flex-direction: column; align-items: center;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
+        .sticker:active, .sticker:hover { transform: scale(1.15) !important; z-index: 900 !important; }
 
-        .sticker:hover {
-            transform: scale(1.4) !important; z-index: 500;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-        }
-
-        /* Dossier / Info-Card */
-        .dossier {
-            position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
-            width: 200px; background: white; border-radius: 12px; padding: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            opacity: 0; pointer-events: none; transition: 0.3s;
-            z-index: 600; border: 1px solid #e2e8f0; text-transform: none;
-        }
-
-        .sticker-container:hover .dossier { opacity: 1; bottom: 130%; }
-
-        .dossier h4 { font-size: 14px; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 4px; color: #1e293b; }
-        .dossier-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; color: #64748b; }
-        .dossier-text { font-size: 10px; margin-top: 8px; font-style: italic; color: #94a3b8; line-height: 1.3; }
-        .football-icon { filter: grayscale(1); opacity: 0.3; }
-        .football-active { filter: grayscale(0); opacity: 1; }
-
+        .st-key { border-radius: 10px; }
+        .st-standard { border-radius: 2px; }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="index.html" class="back-btn">←</a>
-        <h1>Life-Log Suitcase</h1>
+        <div style="width: 36px; height: 36px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold;">←</div>
+        <h1>Passport & Luggage</h1>
     </header>
 
-    <div class="suitcase-wrapper">
+    <div class="suitcase-scene">
         <div class="handle-top"></div>
-        <div class="suitcase-body" id="suitcase-body">
-            <div class="niete n1"></div><div class="niete n2"></div>
-            <div class="niete n3"></div><div class="niete n4"></div>
-            <div class="handle-side"></div>
-        </div>
-        <div class="wheels">
-            <div class="wheel"></div><div class="wheel"></div>
+        <div class="suitcase-body" id="canvas">
+            <div class="wheel-area">
+                <div class="wheel"></div>
+                <div class="wheel"></div>
+            </div>
+            <div class="handle-side"><span>RIMOWA KÖLN</span></div>
+            
+            <div id="central-info">
+                <h3 id="info-city" style="margin-bottom: 10px;">City</h3>
+                <div class="dossier-row"><span>Land:</span> <strong id="info-country">-</strong></div>
+                <div class="dossier-row"><span>Nächte:</span> <strong id="info-nights">-</strong></div>
+                <div class="dossier-row"><span>Fußball:</span> <strong id="info-fb">-</strong></div>
+                <p id="info-desc" style="font-size: 11px; margin-top: 10px; color: #666; font-style: italic;"></p>
+            </div>
         </div>
     </div>
 
     <script>
-        const body = document.getElementById('suitcase-body');
+        const canvas = document.getElementById('canvas');
+        const infoBox = document.getElementById('central-info');
 
-        // Test-Daten
-        const CITIES = [
-            { n: "Kopenhagen", key: true, nights: 4, country: "DK", flag: "🇩🇰", fb: true, desc: "Design & Hygge am Wasser." },
-            { n: "New York", key: true, nights: 4, country: "USA", flag: "🇺🇸", fb: false, desc: "Business & Skyline pur." },
-            { n: "Mainz", key: false, nights: 1, country: "DE", flag: "🇩🇪", fb: true, desc: "Kurzer Stop am Rhein." },
-            { n: "AIDA", key: true, nights: 10, country: "Meer", flag: "🚢", fb: false, desc: "Einfach mal abschalten." }
+        const DATA = [
+            { n: "Kopenhagen", key: true, nights: 4, flag: "🇩🇰", fb: true, desc: "Design & Hygge.", icon: "🚲" },
+            { n: "New York", key: true, nights: 4, flag: "🇺🇸", fb: false, desc: "The city that never sleeps.", icon: "🗽" },
+            { n: "Mainz", key: false, nights: 1, flag: "🇩🇪", fb: true, desc: "Rheinhessen Wein.", icon: "🍇" },
+            { n: "AIDA", key: true, nights: 10, flag: "🚢", fb: false, desc: "Vollpension auf Wellen.", icon: "⚓" }
         ];
 
-        // Auffüllen auf 80 Stück
+        // Fülle auf 80 auf
         for(let i=4; i<80; i++) {
-            CITIES.push({
-                n: "City " + i, key: Math.random() > 0.8, nights: Math.floor(Math.random()*4)+1,
-                country: "EU", flag: "🇪🇺", fb: Math.random() > 0.5, desc: "Automatisch generierter Reise-Log."
+            DATA.push({
+                n: "City "+i, key: false, nights: Math.floor(Math.random()*3)+1,
+                flag: "🇪🇺", fb: Math.random()>0.5, desc: "Reise-Erinnerung.", icon: "📍"
             });
         }
 
-        const COLORS = ['#e63946', '#f1faee', '#a8dadc', '#457b9d', '#1d3557', '#ffb703', '#2a9d8f'];
+        const COLORS = ['#e63946', '#f1faee', '#a8dadc', '#457b9d', '#ffb703', '#2a9d8f'];
 
-        function buildStickers() {
-            CITIES.forEach(city => {
-                const container = document.createElement('div');
-                container.className = 'sticker-container';
-
-                const rot = (Math.random() * 6) - 3;
-                const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-                const size = 10 + (city.nights * 2);
+        function build() {
+            DATA.forEach((city, i) => {
+                const s = document.createElement('div');
+                s.className = `sticker ${city.key ? 'st-key' : 'st-standard'}`;
                 
-                container.innerHTML = `
-                    <div class="sticker" style="background:${color}; color:${getContrastYIQ(color)}; transform: rotate(${rot}deg); font-size: ${size}px">
-                        ${city.key ? `<span>${city.flag}</span>` : ''}
-                        <span>${city.n}</span>
-                    </div>
-                    <div class="dossier">
-                        <h4>${city.flag} ${city.n}</h4>
-                        <div class="dossier-row"><span>Nächte:</span> <strong>${city.nights}</strong></div>
-                        <div class="dossier-row"><span>Fußball:</span> <span class="${city.fb ? 'football-active' : 'football-icon'}">⚽</span></div>
-                        <div class="dossier-text">${city.desc}</div>
-                    </div>
+                const color = COLORS[i % COLORS.length];
+                const fontSize = 8 + (city.nights * 2);
+                const rot = (Math.random() * 10) - 5;
+                
+                // Positionierung (Absolute Layering für Überlappung)
+                const top = Math.random() * 75 + 5;
+                const left = Math.random() * 75 + 5;
+
+                s.style.cssText = `
+                    background: ${color}; 
+                    color: ${getContrast(color)};
+                    top: ${top}%; left: ${left}%;
+                    transform: rotate(${rot}deg);
+                    font-size: ${fontSize}px;
                 `;
-                body.appendChild(container);
+
+                s.innerHTML = `${city.key ? `<span style="font-size:1.5em">${city.icon}</span>` : ''} <span>${city.n}</span>`;
+                
+                // Interaction
+                const showInfo = () => {
+                    document.getElementById('info-city').innerText = city.flag + " " + city.n;
+                    document.getElementById('info-country').innerText = city.flag;
+                    document.getElementById('info-nights').innerText = city.nights;
+                    document.getElementById('info-fb').innerText = city.fb ? "⚽ Ja" : "⚪ Nein";
+                    document.getElementById('info-desc').innerText = city.desc;
+                    infoBox.classList.add('active');
+                };
+
+                s.addEventListener('mouseenter', showInfo);
+                s.addEventListener('touchstart', (e) => { e.preventDefault(); showInfo(); });
+                
+                canvas.appendChild(s);
             });
         }
 
-        function getContrastYIQ(hexcolor){
-            hexcolor = hexcolor.replace("#", "");
-            if(hexcolor.length === 3) hexcolor = hexcolor.split('').map(c => c+c).join('');
-            const r = parseInt(hexcolor.substr(0,2),16);
-            const g = parseInt(hexcolor.substr(2,2),16);
-            const b = parseInt(hexcolor.substr(4,2),16);
+        canvas.addEventListener('mouseleave', () => infoBox.classList.remove('active'));
+
+        function getContrast(hex){
+            hex = hex.replace('#','');
+            const r = parseInt(hex.substr(0,2),16);
+            const g = parseInt(hex.substr(2,2),16);
+            const b = parseInt(hex.substr(4,2),16);
             return ((r*299)+(g*587)+(b*114))/1000 >= 128 ? 'black' : 'white';
         }
 
-        buildStickers();
+        build();
     </script>
 </body>
 </html>
