@@ -5,191 +5,116 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Reisekoffer | Fabian Geisbüsch</title>
+    <title>Life-Log | Fabian Geisbüsch</title>
     <style>
+        /* Konsistente Variablen aus deinem Tech-Stack */
         :root {
-            --bg: #f0f2f5;
-            --surface: #ffffff;
-            --text-primary: #1e293b;
-            --border: #e2e8f0;
-            --alu-gradient: linear-gradient(145deg, #e6e9ef, #bdc3c7);
-            --alu-metal: linear-gradient(to bottom, #bdc3c7, #95a5a6, #bdc3c7);
-            --rimowa-rille: rgba(0,0,0,0.08);
+            --bg-color: #f0f2f5;
+            --header-bg: rgba(240, 242, 245, 0.9);
+            --header-text: #1e293b;
+            --header-border: #e2e8f0;
+            --card-bg: #ffffff;
+            --text-secondary: #64748b;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: #0f172a;
-                --surface: #1e293b;
-                --text-primary: #f1f5f9;
-                --border: #2d3f55;
-                --alu-gradient: linear-gradient(145deg, #34495e, #1e293b);
-                --alu-metal: linear-gradient(to bottom, #7f8c8d, #2c3e50, #7f8c8d);
+                --bg-color: #0f172a;
+                --header-bg: rgba(15, 23, 42, 0.9);
+                --header-text: #f1f5f9;
+                --header-border: #1e293b;
+                --card-bg: #1e293b;
             }
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        
         body {
-            font-family: -apple-system, sans-serif;
-            background: var(--bg); color: var(--text-primary);
-            height: 100vh; overflow: hidden; display: flex; flex-direction: column;
+            background: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center;
         }
 
+        /* Header Style Konsistenz */
         header {
+            position: fixed; top: 0; width: 100%; z-index: 2000;
             padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
             display: flex; align-items: center; gap: 12px;
-            border-bottom: 1px solid var(--border);
-            background: var(--bg);
+            background: var(--header-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--header-border);
+        }
+        header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
+
+        /* Die Koffer-Szene */
+        .suitcase-scene {
+            margin-top: 100px; /* Platz für Header */
+            flex: 1; display: flex; justify-content: center; align-items: center; perspective: 1000px;
         }
 
-        .back-btn {
-            width: 36px; height: 36px; border-radius: 12px;
-            background: var(--surface); border: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: center;
-            text-decoration: none; color: var(--text-primary);
+        /* Container für das Bild und die zukünftigen Sticker */
+        .suitcase-container {
+            position: relative;
+            /* Seitenverhältnis des Originalbildes beibehalten */
+            width: 80vh; /* Skaliert mit der Bildschirmhöhe */
+            max-width: 600px; /* Begrenzung auf großen Screens */
+            aspect-ratio: 1 / 1.4; /* Hochformat-Koffer */
+            
+            /* Das Originalbild als perfekter fotorealistischer Hintergrund */
+            background-image: url('image_0.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            
+            /* Subtiler Schatten für Tiefenwirkung auf der Seite */
+            filter: drop-shadow(0 30px 60px rgba(0,0,0,0.3));
         }
 
-        .viewport { flex: 1; display: flex; justify-content: center; align-items: center; }
+        /* Zentrales Dossier (optisch angepasst an deine Länder-Toggles) */
+        #central-info {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 280px; background: var(--card-bg); border-radius: 20px; padding: 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            z-index: 1500; opacity: 0; pointer-events: none; transition: 0.3s;
+            border: 1px solid var(--header-border);
+            text-align: center;
+        }
+        #central-info.active { opacity: 1; pointer-events: auto; }
 
-        .suitcase-container { position: relative; width: 850px; height: 550px; }
+        .info-header { border-bottom: 1px solid var(--header-border); padding-bottom: 12px; margin-bottom: 15px; }
+        .info-header h3 { font-size: 1.2rem; font-weight: 800; color: var(--header-text); }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: var(--text-secondary); }
+        .info-row strong { color: var(--header-text); }
+        .info-desc { font-size: 12px; margin-top: 15px; line-height: 1.5; color: var(--text-secondary); font-style: italic; }
 
-        @media (max-width: 600px) {
-            .suitcase-container { transform: rotate(-90deg) scale(0.6); }
-        }
-
-        /* 1. Teleskop-System (Oben) */
-        .telescope-unit {
-            position: absolute; top: -30px; left: 50%; transform: translateX(-50%);
-            width: 180px; height: 50px; z-index: 1; display: flex; justify-content: space-around;
-        }
-        .rail {
-            width: 18px; height: 60px;
-            background: linear-gradient(to right, #7f8c8d, #ecf0f1, #7f8c8d);
-            border: 1px solid rgba(0,0,0,0.2); border-radius: 4px;
-        }
-        .handle-top {
-            position: absolute; top: -10px; width: 100%; height: 26px;
-            background: linear-gradient(to bottom, #2c3e50, #000);
-            border-radius: 10px; border: 2px solid #1a1a1a;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-        }
-
-        /* 2. Koffer Body */
-        .suitcase-body {
-            width: 100%; height: 100%;
-            background: var(--alu-gradient);
-            border: 2px solid rgba(0,0,0,0.1);
-            border-radius: 60px;
-            position: relative; z-index: 5;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.2), inset 0 0 40px rgba(255,255,255,0.2);
-            overflow: hidden;
-            /* Rimowa Rillen */
-            background-image: repeating-linear-gradient(90deg, 
-                transparent 0, transparent 45px, 
-                var(--rimowa-rille) 45px, var(--rimowa-rille) 48px);
-        }
-
-        /* 3. Radkästen & Runde Rollen */
-        .wheel-housing {
-            position: absolute; left: 15px; width: 60px; height: 120px;
-            background: rgba(0,0,0,0.05); border-radius: 30px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            border: 1px solid rgba(0,0,0,0.1);
-        }
-        .wh-top { top: 80px; } .wh-bottom { bottom: 80px; }
-
-        .tire {
-            width: 44px; height: 44px; background: #1a1a1a;
-            border-radius: 50%; border-left: 12px solid #000;
-            box-shadow: inset 0 0 10px rgba(255,255,255,0.1), 5px 0 10px rgba(0,0,0,0.3);
-            margin: 5px 0;
-        }
-
-        /* 4. Seitengriff (Alu-Mount) */
-        .side-handle-unit {
-            position: absolute; right: 20px; top: 50%; transform: translateY(-50%);
-            width: 50px; height: 200px;
-            background: var(--alu-metal);
-            border-radius: 15px; border: 1px solid rgba(0,0,0,0.2);
-            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
-            display: flex; align-items: center; justify-content: center;
-        }
-        .side-handle-unit::after {
-            content: "RIMOWA KÖLN";
-            font-size: 10px; font-weight: 900; letter-spacing: 2px;
-            color: rgba(0,0,0,0.4); transform: rotate(90deg); white-space: nowrap;
-        }
-
-        /* 5. Nieten (Gleichmäßig am Rand) */
-        .niete {
-            position: absolute; width: 10px; height: 10px;
-            background: radial-gradient(circle at 30%, #ecf0f1, #7f8c8d);
-            border-radius: 50%; box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
-            z-index: 10;
-        }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="reise_stats.html" class="back-btn">←</a>
+        <div style="width: 36px; height: 36px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold;">←</div>
         <h1>Reisekoffer</h1>
     </header>
 
-    <div class="viewport">
-        <div class="suitcase-container">
-            <div class="telescope-unit">
-                <div class="handle-top"></div>
-                <div class="rail"></div>
-                <div class="rail"></div>
-            </div>
-
-            <div class="suitcase-body" id="canvas">
-                
-                <div class="wheel-housing wh-top">
-                    <div class="tire"></div>
-                    <div class="tire"></div>
-                </div>
-                <div class="wheel-housing wh-bottom">
-                    <div class="tire"></div>
-                    <div class="tire"></div>
-                </div>
-
-                <div class="side-handle-unit"></div>
+    <div class="suitcase-scene">
+        <div class="suitcase-container" id="canvas">
+            
+            <div id="central-info">
+                <div class="info-header"><h3 id="info-city">-</h3></div>
+                <div class="info-row"><span>Land:</span> <strong id="info-country">-</strong></div>
+                <div class="info-row"><span>Aufenthalt:</span> <strong id="info-nights">-</strong></div>
+                <div class="info-row"><span>Fußball:</span> <span id="info-fb">⚪</span></div>
+                <p class="info-desc" id="info-desc">-</p>
             </div>
         </div>
     </div>
 
     <script>
+        // Dieses Skript ist momentan leer, wird aber für die Sticker-Logik benötigt.
         const canvas = document.getElementById('canvas');
+        const infoBox = document.getElementById('central-info');
         
-        function placeRivets() {
-            const w = 850;
-            const h = 550;
-            const offset = 22; 
-            const step = 65;
-
-            // Umlaufende Nieten-Logik
-            for(let x = step; x < w - step; x += step) {
-                addRivet(x, offset);          // Oben
-                addRivet(x, h - offset - 10); // Unten
-            }
-            for(let y = step; y < h - step; y += step) {
-                addRivet(offset, y);          // Links
-                addRivet(w - offset - 10, y); // Rechts
-            }
-        }
-
-        function addRivet(x, y) {
-            const r = document.createElement('div');
-            r.className = 'niete';
-            r.style.left = x + 'px';
-            r.style.top = y + 'px';
-            canvas.appendChild(r);
-        }
-
-        placeRivets();
+        // Hier kommt später die Logik zum Generieren und Positionieren der Sticker hin.
     </script>
 </body>
 </html>
