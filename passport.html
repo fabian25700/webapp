@@ -46,8 +46,7 @@
             padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
             display: flex; align-items: center; gap: 12px;
             background: var(--header-bg);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             border-bottom: 1px solid var(--header-border);
         }
 
@@ -56,30 +55,20 @@
             width: 36px; height: 36px; border-radius: 12px;
             background: var(--btn-bg); border: 1px solid var(--btn-border);
             text-decoration: none; color: var(--btn-text);
-            -webkit-tap-highlight-color: transparent;
         }
 
         header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
 
         .book-container {
-            display: flex;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            height: 100vh;
-            padding-top: 100px;
-            scrollbar-width: none;
-            will-change: scroll-position;
+            display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+            height: 100vh; padding-top: 100px; scrollbar-width: none;
             -webkit-overflow-scrolling: touch;
         }
         .book-container::-webkit-scrollbar { display: none; }
 
         .page {
-            flex: 0 0 100vw;
-            scroll-snap-align: start;
-            display: flex;
-            justify-content: center;
-            padding: 10px;
-            contain: layout style;
+            flex: 0 0 100vw; scroll-snap-align: start;
+            display: flex; justify-content: center; padding: 10px;
         }
 
         .page-inner {
@@ -87,85 +76,63 @@
             background: var(--passport-green-soft);
             border-radius: 15px; position: relative;
             box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-            padding: 25px 20px;
-            border: 1px solid var(--border-page);
-            display: flex; flex-direction: column;
-            overflow: hidden; /* Wichtig für das Pseudo-Element */
+            padding: 25px 20px; border: 1px solid var(--border-page);
+            display: flex; flex-direction: column; overflow: hidden;
         }
 
-        /* Bundesadler Wasserzeichen wieder hinzugefügt */
         .page-inner::before {
-            content: ' ';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 220px;
-            height: 220px;
-            transform: translate(-50%, -50%);
+            content: ' '; position: absolute; top: 50%; left: 50%;
+            width: 220px; height: 220px; transform: translate(-50%, -50%);
             background: url('https://upload.wikimedia.org/wikipedia/commons/d/da/Coat_of_arms_of_Germany.svg') no-repeat center;
-            background-size: contain;
-            opacity: 0.04;
-            pointer-events: none;
-            z-index: 0;
+            background-size: contain; opacity: 0.04; pointer-events: none; z-index: 0;
         }
 
         .page-header {
-            position: relative; z-index: 1;
-            text-align: center; font-size: 0.65rem; font-weight: 700;
-            color: var(--text-secondary); text-transform: uppercase;
+            position: relative; z-index: 1; text-align: center; font-size: 0.65rem; 
+            font-weight: 700; color: var(--text-secondary); text-transform: uppercase;
             letter-spacing: 2px; border-bottom: 1px solid var(--border-page);
             padding-bottom: 10px; margin-bottom: 20px;
         }
 
         .stamp-grid {
-            position: relative; z-index: 1;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 15px; flex: 1;
+            position: relative; z-index: 1; display: grid;
+            grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(3, 1fr);
+            gap: 10px; flex: 1;
         }
 
-        .stamp-slot {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        .stamp-slot { display: flex; align-items: center; justify-content: center; }
 
         .stamp {
-            display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            padding: 12px; text-align: center;
-            border: 2.5px solid;
-            background: transparent; /* Verhindert das Überdecken des Adlers */
+            display: inline-flex; flex-direction: column; align-items: center; 
+            justify-content: center; padding: 10px; text-align: center; border: 2.5px solid;
+            background: transparent;
+            /* Umbruch-Logik: Nur bei Leerzeichen/Newline, nie im Wort */
+            white-space: pre-line; 
+            overflow-wrap: normal;
+            word-break: keep-all;
         }
 
-        .stamp-circle { border-radius: 50%; width: 110px; height: 110px; }
-        .stamp-rect   { border-radius: 4px; width: 125px; min-height: 85px; }
-        .stamp-hex    { border-radius: 10px; transform: skewX(-5deg); width: 120px; }
+        .stamp-circle { border-radius: 50%; aspect-ratio: 1/1; }
+        .stamp-rect   { border-radius: 4px; }
+        .stamp-hex    { border-radius: 10px; transform: skewX(-5deg); }
 
         .stamp .land {
-            font-weight: 900; font-size: 0.7rem;
-            text-transform: uppercase; line-height: 1.1;
-            max-width: 90px; word-wrap: break-word;
-        }
-        .stamp .jahr {
-            font-size: 1.2rem; font-weight: 900;
-            border-top: 2px solid; border-bottom: 2px solid;
-            margin: 4px 0; padding: 0 8px;
-        }
-        .stamp .type {
-            font-size: 0.45rem; letter-spacing: 1.2px;
-            font-weight: 800; opacity: 0.8;
+            font-weight: 900; text-transform: uppercase; line-height: 1.1;
         }
 
+        .stamp .jahr {
+            font-size: 1.1rem; font-weight: 900;
+            border-top: 2px solid; border-bottom: 2px solid;
+            margin: 4px 0; padding: 0 6px;
+        }
+
+        .stamp .type { font-size: 0.4rem; letter-spacing: 1px; font-weight: 800; opacity: 0.8; }
         .stamp-aged { filter: blur(0.4px); }
 
         .page-footer {
-            position: relative; z-index: 1;
-            text-align: center; font-size: 0.7rem; font-weight: 800;
-            color: var(--ink-dark); text-transform: uppercase;
-            margin-top: 15px; padding-top: 10px;
-            border-top: 1px solid var(--border-page);
+            position: relative; z-index: 1; text-align: center; font-size: 0.7rem; 
+            font-weight: 800; color: var(--ink-dark); text-transform: uppercase;
+            margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border-page);
         }
     </style>
 </head>
@@ -193,19 +160,39 @@
         }
 
         function buildStampHTML(reise) {
-            const h        = hashStr(reise.Land);
-            const color    = COLORS[h % COLORS.length];
-            const shape    = SHAPES[(h >> 3) % SHAPES.length];
-            const rotation = ((h % 12) - 6);
+            const h = hashStr(reise.Land);
+            const rawLand = reise.Land;
+            const words = rawLand.split(' ');
+            
+            // Längstes Wort finden, um Stempelbreite zu bestimmen
+            const longestWord = words.reduce((a, b) => a.length > b.length ? a : b);
+            
+            // Formatierung: Wenn mehrere Wörter, sinnvoll untereinander
+            const formattedLand = words.join('\n');
+
+            const color = COLORS[h % COLORS.length];
+            const shape = SHAPES[(h >> 3) % SHAPES.length];
+            const rotation = ((h % 10) - 5);
             const reiseJahr = reise["erste Einreise"] || AKTUELLES_JAHR;
-            const alter    = AKTUELLES_JAHR - reiseJahr;
-            const opacity  = Math.max(0.6, 0.95 - alter * 0.015).toFixed(3);
+            const alter = AKTUELLES_JAHR - reiseJahr;
+            const opacity = Math.max(0.6, 0.95 - alter * 0.015).toFixed(3);
             const agedClass = alter > 15 ? ' stamp-aged' : '';
 
+            // Dynamische Breite & Schriftgröße basierend auf dem LÄNGSTEN Wort
+            let fontSize = 0.75; 
+            let width = 110;
+
+            if (longestWord.length > 8) { fontSize = 0.65; width = 125; }
+            if (longestWord.length > 12) { fontSize = 0.55; width = 140; }
+
+            const sizeStyle = (shape === 'circle') 
+                ? `width: ${width}px; height: ${width}px;` 
+                : `min-width: ${width}px; padding-left: 15px; padding-right: 15px;`;
+
             return `<div class="stamp stamp-${shape}${agedClass}" 
-                        style="color:${color};border-color:${color};opacity:${opacity};transform:rotate(${rotation}deg)">
+                        style="color:${color}; border-color:${color}; opacity:${opacity}; transform:rotate(${rotation}deg); ${sizeStyle}">
                         <div class="type">ENTRY</div>
-                        <div class="land">${reise.Land}</div>
+                        <div class="land" style="font-size: ${fontSize}rem;">${formattedLand}</div>
                         <div class="jahr">${reiseJahr}</div>
                         <div class="type">IMMIGRATION</div>
                     </div>`;
@@ -213,6 +200,7 @@
 
         function renderPassport() {
             const container = document.getElementById('book-container');
+            if (typeof MEINE_REISEN === 'undefined') return;
 
             const reisen = MEINE_REISEN
                 .filter(r => r.Land !== 'Deutschland')
@@ -223,7 +211,6 @@
 
             for (let p = 0; p < totalPages; p++) {
                 const pageItems = reisen.slice(p * STAMPS_PER_PAGE, (p + 1) * STAMPS_PER_PAGE);
-
                 const stampsHTML = pageItems.map(buildStampHTML)
                     .map(s => `<div class="stamp-slot">${s}</div>`)
                     .join('');
@@ -236,10 +223,8 @@
                         <div class="stamp-grid">${stampsHTML}</div>
                         <div class="page-footer">Fabian Geisbüsch</div>
                     </div>`;
-
                 fragment.appendChild(page);
             }
-
             container.appendChild(fragment);
         }
 
