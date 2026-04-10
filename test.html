@@ -106,10 +106,8 @@
             display: inline-flex; flex-direction: column; align-items: center; 
             justify-content: center; padding: 10px; text-align: center; border: 2.5px solid;
             background: transparent;
-            /* Umbruch-Logik: Nur bei Leerzeichen/Newline, nie im Wort */
             white-space: pre-line; 
             overflow-wrap: normal;
-            word-break: keep-all;
         }
 
         .stamp-circle { border-radius: 50%; aspect-ratio: 1/1; }
@@ -159,16 +157,31 @@
             return Math.abs(h);
         }
 
+        function formatLandName(name) {
+            const words = name.split(' ');
+            if (words.length <= 1) return name;
+
+            let result = [];
+            for (let i = 0; i < words.length; i++) {
+                const word = words[i];
+                // Wenn das Wort sehr kurz ist (<= 3 Zeichen) und nicht das erste Wort ist, 
+                // hänge es an das vorherige Wort an.
+                if (word.length <= 3 && result.length > 0) {
+                    result[result.length - 1] += ' ' + word;
+                } else {
+                    result.push(word);
+                }
+            }
+            return result.join('\n');
+        }
+
         function buildStampHTML(reise) {
             const h = hashStr(reise.Land);
-            const rawLand = reise.Land;
-            const words = rawLand.split(' ');
+            const landName = reise.Land;
+            const formattedLand = formatLandName(landName);
             
-            // Längstes Wort finden, um Stempelbreite zu bestimmen
-            const longestWord = words.reduce((a, b) => a.length > b.length ? a : b);
-            
-            // Formatierung: Wenn mehrere Wörter, sinnvoll untereinander
-            const formattedLand = words.join('\n');
+            // Längstes Wort/Zeile für die Skalierung finden
+            const longestLine = formattedLand.split('\n').reduce((a, b) => a.length > b.length ? a : b);
 
             const color = COLORS[h % COLORS.length];
             const shape = SHAPES[(h >> 3) % SHAPES.length];
@@ -178,12 +191,11 @@
             const opacity = Math.max(0.6, 0.95 - alter * 0.015).toFixed(3);
             const agedClass = alter > 15 ? ' stamp-aged' : '';
 
-            // Dynamische Breite & Schriftgröße basierend auf dem LÄNGSTEN Wort
             let fontSize = 0.75; 
             let width = 110;
 
-            if (longestWord.length > 8) { fontSize = 0.65; width = 125; }
-            if (longestWord.length > 12) { fontSize = 0.55; width = 140; }
+            if (longestLine.length > 9) { fontSize = 0.65; width = 125; }
+            if (longestLine.length > 13) { fontSize = 0.55; width = 140; }
 
             const sizeStyle = (shape === 'circle') 
                 ? `width: ${width}px; height: ${width}px;` 
