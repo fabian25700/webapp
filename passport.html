@@ -8,17 +8,14 @@
     <script src="daten.js"></script>
     <style>
         :root {
-            /* Light Mode Standard */
-            --bg-color: #f0f2f5; 
+            --bg-color: #f0f2f5;
             --header-bg: rgba(240, 242, 245, 0.9);
             --header-text: #1e293b;
             --header-border: #e2e8f0;
             --btn-bg: #ffffff;
             --btn-border: #e2e8f0;
             --btn-text: #1e293b;
-
-            /* Passport Page Colors */
-            --passport-green-soft: #e8f2e9; 
+            --passport-green-soft: #e8f2e9;
             --ink-dark: #1a3a16;
             --border-page: #d1ddd2;
             --text-secondary: #7a8c7b;
@@ -42,14 +39,15 @@
             background: var(--bg-color);
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
             overflow: hidden;
-            transition: background 0.3s ease;
         }
 
         header {
             position: fixed; top: 0; width: 100%; z-index: 100;
             padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
             display: flex; align-items: center; gap: 12px;
-            background: var(--header-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            background: var(--header-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-bottom: 1px solid var(--header-border);
         }
 
@@ -58,7 +56,7 @@
             width: 36px; height: 36px; border-radius: 12px;
             background: var(--btn-bg); border: 1px solid var(--btn-border);
             text-decoration: none; color: var(--btn-text);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            -webkit-tap-highlight-color: transparent;
         }
 
         header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
@@ -70,13 +68,20 @@
             height: 100vh;
             padding-top: 100px;
             scrollbar-width: none;
+            /* Eigener Compositing-Layer für smooth scrolling */
+            will-change: scroll-position;
+            -webkit-overflow-scrolling: touch;
         }
         .book-container::-webkit-scrollbar { display: none; }
 
         .page {
             flex: 0 0 100vw;
             scroll-snap-align: start;
-            display: flex; justify-content: center; padding: 10px;
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+            /* Verhindert dass jede Page einen eigenen Layer bekommt */
+            contain: layout style;
         }
 
         .page-inner {
@@ -87,16 +92,6 @@
             padding: 25px 20px;
             border: 1px solid var(--border-page);
             display: flex; flex-direction: column;
-        }
-
-        .page-inner::before {
-            content: ' ';
-            position: absolute; top: 50%; left: 50%;
-            width: 220px; height: 220px;
-            transform: translate(-50%, -50%);
-            background: url('https://upload.wikimedia.org/wikipedia/commons/d/da/Coat_of_arms_of_Germany.svg') no-repeat center;
-            background-size: contain;
-            opacity: 0.04; pointer-events: none;
         }
 
         .page-header {
@@ -110,29 +105,50 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             grid-template-rows: repeat(3, 1fr);
-            gap: 20px; flex: 1;
+            gap: 15px; flex: 1;
         }
 
-        .stamp-slot { display: flex; align-items: center; justify-content: center; }
+        .stamp-slot {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
         .stamp {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            mix-blend-mode: multiply;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 12px; text-align: center;
+            border: 2.5px solid;
+            /* mix-blend-mode entfernt – war teuerster GPU-Kostenpunkt */
         }
 
-        .stamp-circle { border: 2.5px solid; border-radius: 50%; width: 100px; height: 100px; }
-        .stamp-rect { border: 2.5px solid; border-radius: 6px; width: 110px; height: 75px; }
-        .stamp-hex { border: 2.5px solid; clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); width: 100px; height: 100px; }
+        .stamp-circle { border-radius: 50%; width: 110px; height: 110px; }
+        .stamp-rect   { border-radius: 4px; width: 125px; min-height: 85px; }
+        .stamp-hex    { border-radius: 10px; transform: skewX(-5deg); width: 120px; }
 
-        .stamp .land { font-weight: 900; font-size: 0.75rem; text-transform: uppercase; text-align: center; line-height: 1.1; }
-        .stamp .jahr { font-size: 1.1rem; font-weight: 900; border-top: 1.5px solid; border-bottom: 1.5px solid; margin: 3px 0; }
-        .stamp .type { font-size: 0.45rem; letter-spacing: 1.5px; font-weight: 800; }
+        .stamp .land {
+            font-weight: 900; font-size: 0.7rem;
+            text-transform: uppercase; line-height: 1.1;
+            max-width: 90px; word-wrap: break-word;
+        }
+        .stamp .jahr {
+            font-size: 1.2rem; font-weight: 900;
+            border-top: 2px solid; border-bottom: 2px solid;
+            margin: 4px 0; padding: 0 8px;
+        }
+        .stamp .type {
+            font-size: 0.45rem; letter-spacing: 1.2px;
+            font-weight: 800; opacity: 0.8;
+        }
+
+        /* Blur nur per CSS-Klasse statt inline filter pro Element */
+        .stamp-aged { filter: blur(0.4px); }
 
         .page-footer {
-            text-align: center; font-size: 0.75rem; font-weight: 800;
+            text-align: center; font-size: 0.7rem; font-weight: 800;
             color: var(--ink-dark); text-transform: uppercase;
-            letter-spacing: 1.5px; margin-top: 20px;
-            padding-top: 12px; border-top: 1px solid var(--border-page);
+            margin-top: 15px; padding-top: 10px;
+            border-top: 1px solid var(--border-page);
         }
     </style>
 </head>
@@ -146,83 +162,78 @@
     <div class="book-container" id="book-container"></div>
 
     <script>
-        const colors = ['#1e3a8a', '#991b1b', '#064e3b', '#581c87', '#78350f'];
-        const shapes = ['circle', 'rect', 'hex'];
+        const COLORS = ['#1e3a8a', '#991b1b', '#064e3b', '#581c87', '#78350f'];
+        const SHAPES = ['circle', 'rect', 'hex'];
+        const STAMPS_PER_PAGE = 6;
+        const AKTUELLES_JAHR = 2026;
+
+        // Deterministischer Hash aus Länderstring
+        // → gleiche Farbe/Form bei jedem Reload, kein Random mehr
+        function hashStr(str) {
+            let h = 0;
+            for (let i = 0; i < str.length; i++) {
+                h = (Math.imul(31, h) + str.charCodeAt(i)) | 0;
+            }
+            return Math.abs(h);
+        }
+
+        function buildStampHTML(reise) {
+            const h        = hashStr(reise.Land);
+            const color    = COLORS[h % COLORS.length];
+            const shape    = SHAPES[(h >> 3) % SHAPES.length];
+            const rotation = ((h % 12) - 6);
+            const reiseJahr = reise["erste Einreise"] || AKTUELLES_JAHR;
+            const alter    = AKTUELLES_JAHR - reiseJahr;
+            const opacity  = Math.max(0.6, 0.95 - alter * 0.015).toFixed(3);
+            const agedClass = alter > 15 ? ' stamp-aged' : '';
+
+            // Inline-style nur für Werte die pro Stamp variieren
+            return `<div class="stamp stamp-${shape}${agedClass}"
+                        style="color:${color};border-color:${color};opacity:${opacity};transform:rotate(${rotation}deg)">
+                        <div class="type">ENTRY</div>
+                        <div class="land">${reise.Land}</div>
+                        <div class="jahr">${reiseJahr}</div>
+                        <div class="type">IMMIGRATION</div>
+                    </div>`;
+        }
 
         function renderPassport() {
             const container = document.getElementById('book-container');
-            const reisenFiltered = MEINE_REISEN.filter(r => r.Land !== "Deutschland");
-            
-            reisenFiltered.sort((a, b) => (a["erste Einreise"] || 2026) - (b["erste Einreise"] || 2026));
 
-            const stampsPerPage = 6;
-            const totalPages = Math.ceil(reisenFiltered.length / stampsPerPage);
+            const reisen = MEINE_REISEN
+                .filter(r => r.Land !== 'Deutschland')
+                .sort((a, b) => (b["erste Einreise"] || 2000) - (a["erste Einreise"] || 2000));
+
+            const totalPages = Math.ceil(reisen.length / STAMPS_PER_PAGE);
+
+            // Einmal Fragment bauen → ein einziger DOM-Insert
+            const fragment = document.createDocumentFragment();
 
             for (let p = 0; p < totalPages; p++) {
+                const pageItems = reisen.slice(p * STAMPS_PER_PAGE, (p + 1) * STAMPS_PER_PAGE);
+
+                const stampsHTML = pageItems.map(buildStampHTML)
+                    .map(s => `<div class="stamp-slot">${s}</div>`)
+                    .join('');
+
                 const page = document.createElement('div');
                 page.className = 'page';
-                
-                const pageInner = document.createElement('div');
-                pageInner.className = 'page-inner';
-                
-                const start = p * stampsPerPage;
-                const pageItems = reisenFiltered.slice(start, start + stampsPerPage);
+                page.innerHTML = `
+                    <div class="page-inner">
+                        <div class="page-header">Visa — Seite ${p + 1}</div>
+                        <div class="stamp-grid">${stampsHTML}</div>
+                        <div class="page-footer">Fabian Geisbüsch</div>
+                    </div>`;
 
-                pageInner.innerHTML = `
-                    <div class="page-header">Visa - Seite ${p + 1}</div>
-                    <div class="stamp-grid" id="grid-${p}"></div>
-                    <div class="page-footer">Fabian Geisbüsch</div>
-                `;
-                
-                page.appendChild(pageInner);
-                container.appendChild(page);
-
-                const grid = pageInner.querySelector(`#grid-${p}`);
-                pageItems.forEach(reise => {
-                    const slot = document.createElement('div');
-                    slot.className = 'stamp-slot';
-                    slot.appendChild(createStamp(reise));
-                    grid.appendChild(slot);
-                });
+                fragment.appendChild(page);
             }
+
+            container.appendChild(fragment);
         }
 
-        function createStamp(reise) {
-            const stampDiv = document.createElement('div');
-            const color = colors[Math.floor(Math.random() * colors.length)];
-            const shape = shapes[Math.floor(Math.random() * shapes.length)];
-            
-            const aktuellesJahr = new Date().getFullYear();
-            const reiseJahr = reise["erste Einreise"] || aktuellesJahr;
-            const alter = aktuellesJahr - reiseJahr;
-
-            // Abnutzungs-Berechnung
-            const opacity = Math.max(0.3, 0.9 - (alter * 0.12)); 
-            const blur = Math.min(1.2, alter * 0.15); 
-
-            stampDiv.className = `stamp stamp-${shape}`;
-            stampDiv.style.color = color;
-            stampDiv.style.borderColor = color;
-            stampDiv.style.opacity = opacity;
-            stampDiv.style.filter = `blur(${blur}px)`;
-
-            const rotation = Math.floor(Math.random() * 20) - 10; 
-            const jitterX = Math.floor(Math.random() * 10) - 5;
-            const jitterY = Math.floor(Math.random() * 10) - 5;
-            
-            stampDiv.style.transform = `rotate(${rotation}deg) translate(${jitterX}px, ${jitterY}px)`;
-
-            stampDiv.innerHTML = `
-                <div class="type">VISA</div>
-                <div class="land">${reise.Land}</div>
-                <div class="jahr">${reiseJahr}</div>
-                <div class="type">IMMIGRATION</div>
-            `;
-
-            return stampDiv;
-        }
-
-        window.onload = renderPassport;
+        // requestAnimationFrame statt window.onload →
+        // Browser hat Layout fertig bevor wir DOM befüllen
+        requestAnimationFrame(renderPassport);
     </script>
 </body>
 </html>
