@@ -2,129 +2,112 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sticker Demo | NYC USA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Reisekoffer | Fabian Geisbüsch</title>
     <style>
-        :root {
-            --bg-color: #f0f2f5;
-            --usa-blue: #002868;
-            --usa-red: #bf0a30;
-            --usa-white: #ffffff;
+        /* [DEIN BESTEHENDER CSS-CODE HIER - UNVERÄNDERT LASSEN] */
+        :root { --bg-color: #f0f2f5; --header-bg: rgba(240, 242, 245, 0.9); --header-text: #1e293b; --header-border: #e2e8f0; --card-bg: #ffffff; --alu-base: #bdc3c7; --alu-dark: #9da4a7; --alu-bright: #e1e4e6; }
+        body { background: var(--bg-color); font-family: -apple-system, sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; margin: 0; }
+        header { position: fixed; top: 0; width: 100%; z-index: 2000; padding: 20px; display: flex; align-items: center; gap: 12px; background: var(--header-bg); backdrop-filter: blur(15px); border-bottom: 1px solid var(--header-border); }
+        .back-btn { width: 36px; height: 36px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #ddd; text-decoration: none; color: black; }
+        .viewport { flex: 1; display: flex; justify-content: center; align-items: center; perspective: 1200px; width: 100%; }
+        .suitcase-container { position: relative; display: flex; flex-direction: column; align-items: center; }
+        @media (max-width: 600px) { .suitcase-container { transform: rotate(-90deg) scale(0.45); } }
+        .suitcase-body { width: 820px; height: 520px; background: var(--alu-base); border-radius: 54px; border: 14px solid var(--alu-dark); position: relative; z-index: 1; box-shadow: 0 50px 100px rgba(0,0,0,0.3); background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0, rgba(255,255,255,0.08) 38px, rgba(0,0,0,0.08) 38px, rgba(0,0,0,0.08) 42px), radial-gradient(circle at 50% 50%, var(--alu-bright), var(--alu-base)); }
+        
+        /* Sticker Basis mit Die-Cut Effekt */
+        .sticker {
+            position: absolute; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            text-align: center; padding: 10px; z-index: 10; transition: transform 0.2s;
+            filter: drop-shadow(0 2px 0px #fff) drop-shadow(0 4px 8px rgba(0,0,0,0.3));
         }
+        .sticker:hover { transform: scale(1.1) rotate(0deg) !important; z-index: 100; }
 
-        @media (prefers-color-scheme: dark) {
-            :root { --bg-color: #0f172a; }
-        }
-
-        body {
-            background: var(--bg-color);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0;
-            font-family: -apple-system, sans-serif;
-        }
-
-        /* Der weiße Schnittrand des Stickers */
-        .sticker-die-cut {
-            filter: drop-shadow(0 0 1px rgba(0,0,0,0.3)) 
-                    drop-shadow(0 4px 0px white) 
-                    drop-shadow(0 8px 15px rgba(0,0,0,0.4));
-            transition: transform 0.3s ease;
-            cursor: pointer;
-        }
-
-        .sticker-die-cut:hover {
-            transform: scale(1.05) rotate(3deg);
-        }
-
-        .apple-shape {
-            width: 280px;
-            height: 280px;
-            position: relative;
-            /* Apfel-Silhouette mit Anbiss rechts oben */
-            clip-path: polygon(50% 0%, 75% 5%, 85% 15%, 83% 25%, 95% 35%, 100% 50%, 95% 75%, 85% 90%, 50% 100%, 15% 90%, 5% 75%, 0% 50%, 5% 35%, 15% 15%, 25% 5%);
-            
-            /* USA FAHNE ALS HINTERGRUND */
-            background: 
-                /* 1. Das blaue Feld mit Sternen (vereinfacht als Punkte) */
-                radial-gradient(circle, white 15%, transparent 16%) 0 0 / 20px 20px,
-                var(--usa-blue);
-            background-size: 15px 15px, 45% 45%;
-            background-repeat: repeat, no-repeat;
-            
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        /* Die roten Streifen (über das blaue Feld gelegt) */
-        .apple-shape::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                var(--usa-red),
-                var(--usa-red) 14.28%,
-                var(--usa-white) 14.28%,
-                var(--usa-white) 28.56%
-            );
-            /* Lässt das blaue Feld oben links frei */
-            clip-path: polygon(45% 0, 100% 0, 100% 100%, 0 100%, 0 45%, 45% 45%);
-            z-index: 1;
-        }
-
-        /* Typografie */
-        .label {
-            position: relative;
-            z-index: 10;
-            background: white;
-            color: var(--usa-blue);
-            padding: 5px 20px;
-            font-weight: 900;
-            font-size: 32px;
-            letter-spacing: -1px;
-            text-transform: uppercase;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transform: rotate(-5deg);
-            border: 2px solid var(--usa-blue);
-        }
-
-        .sub-label {
-            position: relative;
-            z-index: 10;
-            margin-top: 10px;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            font-weight: 700;
-            font-size: 14px;
-        }
-
-        /* Apfel-Stiel */
-        .stem {
-            position: absolute;
-            top: 0; left: 50%;
-            transform: translateX(-50%);
-            width: 12px; height: 30px;
-            background: #4a2f1b;
-            z-index: 5;
-            border-radius: 4px;
-        }
+        #central-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; background: var(--card-bg); border-radius: 20px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.4); z-index: 1500; opacity: 0; pointer-events: none; transition: 0.3s; border: 1px solid var(--header-border); text-align: center; }
+        #central-info.active { opacity: 1; pointer-events: auto; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
+        .info-desc { margin-top: 15px; font-style: italic; border-top: 1px solid #eee; padding-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="sticker-die-cut">
-        <div class="stem"></div>
-        <div class="apple-shape">
-            <div class="label">New York</div>
-            <div class="sub-label">Est. 1624</div>
+    <header>
+        <a href="reise_stats.html" class="back-btn">←</a>
+        <h1>Reisekoffer</h1>
+    </header>
+
+    <div class="viewport" onclick="hideDossier()">
+        <div class="suitcase-container" onclick="event.stopPropagation()">
+            <div class="suitcase-body" id="canvas">
+                <div id="central-info">
+                    <h3 id="info-city" style="margin-bottom:15px;">-</h3>
+                    <div class="info-row"><span>Land:</span> <strong id="info-country">-</strong></div>
+                    <div class="info-row"><span>Nächte:</span> <strong id="info-nights">-</strong></div>
+                    <div class="info-row"><span>Fußball:</span> <strong id="info-fb">-</strong></div>
+                    <p class="info-desc" id="info-desc">-</p>
+                </div>
+            </div>
         </div>
     </div>
 
+    <script src="sticker.js"></script>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const info = document.getElementById('central-info');
+
+        function createStickers() {
+            const usedAreas = [];
+            // Nutzt stickerDaten aus der sticker.js
+            stickerDaten.filter(d => d.top10).forEach(data => {
+                const s = document.createElement('div');
+                s.className = 'sticker';
+                s.innerText = data.stadt;
+                
+                // Dynamische Größe basierend auf Nächten
+                const size = 70 + (data.naechte * 8);
+                s.style.width = size + 'px';
+                s.style.height = size + 'px';
+
+                // CSS-Styles aus der sticker.js anwenden
+                Object.assign(s.style, data.style);
+
+                // Überlappungsfreie Positionierung
+                let x, y, collision, attempts = 0;
+                do {
+                    collision = false;
+                    x = Math.random() * (720 - size) + 50;
+                    y = Math.random() * (420 - size) + 50;
+                    if (x > 250 && x < 570 && y > 140 && y < 380) collision = true; // Mitte frei
+                    for(let area of usedAreas) {
+                        if(!(x + size < area.x || x > area.x + area.w || y + size < area.y || y > area.y + area.h)) collision = true;
+                    }
+                    attempts++;
+                } while(collision && attempts < 100);
+
+                usedAreas.push({x: x, y: y, w: size, h: size});
+                s.style.left = x + 'px';
+                s.style.top = y + 'px';
+                s.style.transform = `rotate(${Math.random() * 40 - 20}deg)`;
+
+                s.addEventListener('mouseenter', () => showDossier(data));
+                s.addEventListener('touchstart', (e) => { e.stopPropagation(); showDossier(data); });
+                canvas.appendChild(s);
+            });
+        }
+
+        function showDossier(data) {
+            document.getElementById('info-city').innerText = data.stadt;
+            document.getElementById('info-country').innerText = data.land;
+            document.getElementById('info-nights').innerText = data.naechte;
+            document.getElementById('info-fb').innerText = data.fussball;
+            document.getElementById('info-desc').innerText = data.notiz || "";
+            info.classList.add('active');
+        }
+
+        function hideDossier() { info.classList.remove('active'); }
+
+        // Start
+        createStickers();
+    </script>
 </body>
 </html>
