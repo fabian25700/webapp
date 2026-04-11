@@ -3,47 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Reisekoffer | Fabian Geisbüsch</title>
     <style>
-        /* [DEIN BESTEHENDER CSS-CODE HIER - UNVERÄNDERT LASSEN] */
-        :root { --bg-color: #f0f2f5; --header-bg: rgba(240, 242, 245, 0.9); --header-text: #1e293b; --header-border: #e2e8f0; --card-bg: #ffffff; --alu-base: #bdc3c7; --alu-dark: #9da4a7; --alu-bright: #e1e4e6; }
-        body { background: var(--bg-color); font-family: -apple-system, sans-serif; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; margin: 0; }
-        header { position: fixed; top: 0; width: 100%; z-index: 2000; padding: 20px; display: flex; align-items: center; gap: 12px; background: var(--header-bg); backdrop-filter: blur(15px); border-bottom: 1px solid var(--header-border); }
-        .back-btn { width: 36px; height: 36px; background: white; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 1px solid #ddd; text-decoration: none; color: black; }
-        .viewport { flex: 1; display: flex; justify-content: center; align-items: center; perspective: 1200px; width: 100%; }
-        .suitcase-container { position: relative; display: flex; flex-direction: column; align-items: center; }
-        @media (max-width: 600px) { .suitcase-container { transform: rotate(-90deg) scale(0.45); } }
-        .suitcase-body { width: 820px; height: 520px; background: var(--alu-base); border-radius: 54px; border: 14px solid var(--alu-dark); position: relative; z-index: 1; box-shadow: 0 50px 100px rgba(0,0,0,0.3); background-image: repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0, rgba(255,255,255,0.08) 38px, rgba(0,0,0,0.08) 38px, rgba(0,0,0,0.08) 42px), radial-gradient(circle at 50% 50%, var(--alu-bright), var(--alu-base)); }
+        :root {
+            --bg-color: #f0f2f5;
+            --header-bg: rgba(240, 242, 245, 0.9);
+            --header-text: #1e293b;
+            --header-border: #e2e8f0;
+            --card-bg: #ffffff;
+            --text-secondary: #64748b;
+            --alu-base: #bdc3c7;
+            --alu-dark: #9da4a7;
+            --alu-bright: #e1e4e6;
+            /* Dossier/Toggle-Style Farben */
+            --accent-blue: #007AFF;
+            --chip-bg: #f1f5f9;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0f172a;
+                --header-bg: rgba(15, 23, 42, 0.9);
+                --header-text: #f1f5f9;
+                --header-border: #1e293b;
+                --card-bg: #1e293b;
+                --alu-base: #7f8c8d;
+                --alu-dark: #2c3e50;
+                --alu-bright: #bdc3c7;
+                --chip-bg: #334155;
+            }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
         
-        /* Sticker Basis mit Die-Cut Effekt */
+        body {
+            background: var(--bg-color);
+            font-family: -apple-system, sans-serif;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            position: fixed; top: 0; width: 100%; z-index: 2000;
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            display: flex; align-items: center; gap: 12px;
+            background: var(--header-bg); backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--header-border);
+        }
+        header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
+
+        .back-btn {
+            width: 36px; height: 36px; background: white; border-radius: 10px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-weight: bold; border: 1px solid #ddd; text-decoration: none; color: black;
+        }
+
+        .viewport {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1200px;
+            width: 100%;
+        }
+
+        .suitcase-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform-origin: center center;
+        }
+
+        @media (max-width: 600px) {
+            .suitcase-container { 
+                transform: rotate(-90deg) scale(0.45) translateY(0); 
+                margin-top: 20px;
+            }
+        }
+
+        .telescope-system {
+            width: 160px; height: 50px; position: relative; margin-bottom: -15px; z-index: 0;
+        }
+        .rail {
+            position: absolute; width: 16px; height: 100%;
+            background: linear-gradient(to right, #333, #555, #333);
+            border-radius: 4px 4px 0 0; border: 1px solid #1a1a1a;
+        }
+        .rail.left { left: 25px; }
+        .rail.right { right: 25px; }
+        .handle-bar {
+            position: absolute; top: 0; left: 10px; right: 10px; height: 26px;
+            background: linear-gradient(to bottom, #2a2a2a, #0a0a0a, #000);
+            border-radius: 8px; border: 1px solid #111;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        .handle-bar::after {
+            content: "RIMOWA";
+            font-size: 9px; font-weight: 900; letter-spacing: 3px;
+            background: linear-gradient(135deg, #fff 0%, #eee 40%, #ccc 50%, #eee 60%, #fff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 1px rgba(255,255,255,0.3));
+        }
+
+        .suitcase-body {
+            width: 820px; height: 520px;
+            background: var(--alu-base);
+            border-radius: 54px; border: 14px solid var(--alu-dark);
+            position: relative; z-index: 1;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.3);
+            background-image: 
+                repeating-linear-gradient(90deg, 
+                    rgba(255,255,255,0.08) 0, rgba(255,255,255,0.08) 38px, 
+                    rgba(0,0,0,0.08) 38px, rgba(0,0,0,0.08) 42px
+                ),
+                radial-gradient(circle at 50% 50%, var(--alu-bright), var(--alu-base));
+        }
+
+        .niete {
+            position: absolute; width: 8px; height: 8px;
+            background: radial-gradient(circle at 3px 3px, var(--alu-bright), #7f8c8d);
+            border-radius: 50%; box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+            z-index: 5;
+        }
+
+        /* Sticker Styling */
         .sticker {
             position: absolute; cursor: pointer; display: flex; align-items: center; justify-content: center;
             text-align: center; padding: 10px; z-index: 10; transition: transform 0.2s;
             filter: drop-shadow(0 2px 0px #fff) drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+            font-weight: 900; font-size: 11px; text-transform: uppercase;
         }
         .sticker:hover { transform: scale(1.1) rotate(0deg) !important; z-index: 100; }
 
-        #central-info { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 320px; background: var(--card-bg); border-radius: 20px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.4); z-index: 1500; opacity: 0; pointer-events: none; transition: 0.3s; border: 1px solid var(--header-border); text-align: center; }
-        #central-info.active { opacity: 1; pointer-events: auto; }
-        .info-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px; }
-        .info-desc { margin-top: 15px; font-style: italic; border-top: 1px solid #eee; padding-top: 10px; }
+        /* Dossier im Toggle-Style */
+        #central-info {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 320px; background: var(--card-bg); border-radius: 24px; padding: 24px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+            z-index: 1500; opacity: 0; pointer-events: none; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--header-border);
+            text-align: left;
+        }
+        #central-info.active { opacity: 1; pointer-events: auto; transform: translate(-50%, -52%); }
+
+        .info-header h3 { font-size: 1.4rem; font-weight: 800; margin-bottom: 16px; color: var(--header-text); }
+        
+        .info-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+        .chip {
+            background: var(--chip-bg); padding: 6px 12px; border-radius: 10px;
+            font-size: 12px; font-weight: 600; color: var(--text-secondary);
+            display: flex; align-items: center; gap: 6px;
+        }
+        .chip strong { color: var(--header-text); }
+        .chip.highlight { border: 1px solid var(--accent-blue); color: var(--accent-blue); }
+
+        .info-desc { 
+            font-size: 13px; line-height: 1.5; color: var(--text-secondary); 
+            padding-top: 12px; border-top: 1px solid var(--header-border);
+        }
     </style>
 </head>
-<body>
+<body onclick="hideDossier()">
 
     <header>
         <a href="reise_stats.html" class="back-btn">←</a>
         <h1>Reisekoffer</h1>
     </header>
 
-    <div class="viewport" onclick="hideDossier()">
+    <div class="viewport">
         <div class="suitcase-container" onclick="event.stopPropagation()">
+            <div class="telescope-system">
+                <div class="rail left"></div>
+                <div class="rail right"></div>
+                <div class="handle-bar"></div>
+            </div>
+
             <div class="suitcase-body" id="canvas">
                 <div id="central-info">
-                    <h3 id="info-city" style="margin-bottom:15px;">-</h3>
-                    <div class="info-row"><span>Land:</span> <strong id="info-country">-</strong></div>
-                    <div class="info-row"><span>Nächte:</span> <strong id="info-nights">-</strong></div>
-                    <div class="info-row"><span>Fußball:</span> <strong id="info-fb">-</strong></div>
+                    <div class="info-header"><h3 id="info-city">-</h3></div>
+                    <div class="info-grid">
+                        <div class="chip">📍 <strong id="info-country">-</strong></div>
+                        <div class="chip">🌙 <strong id="info-nights">-</strong></div>
+                        <div class="chip" id="chip-fb">⚽ <strong id="info-fb">-</strong></div>
+                    </div>
                     <p class="info-desc" id="info-desc">-</p>
                 </div>
             </div>
@@ -54,43 +205,58 @@
     <script>
         const canvas = document.getElementById('canvas');
         const info = document.getElementById('central-info');
+        
+        function placeRivets() {
+            const w = 820, h = 520, step = 60;
+            for(let x = step; x < w - step; x += step) { addRivet(x, 15); addRivet(x, h - 45); }
+            for(let y = step; y < h - step; y += step) { addRivet(15, y); addRivet(w - 45, y); }
+        }
+
+        function addRivet(x, y) {
+            const r = document.createElement('div');
+            r.className = 'niete';
+            r.style.left = x + 'px'; r.style.top = y + 'px';
+            canvas.appendChild(r);
+        }
 
         function createStickers() {
             const usedAreas = [];
-            // Nutzt stickerDaten aus der sticker.js
             stickerDaten.filter(d => d.top10).forEach(data => {
                 const s = document.createElement('div');
                 s.className = 'sticker';
                 s.innerText = data.stadt;
                 
-                // Dynamische Größe basierend auf Nächten
-                const size = 70 + (data.naechte * 8);
+                const size = 75 + (data.naechte * 7);
                 s.style.width = size + 'px';
                 s.style.height = size + 'px';
+                if (data.style) Object.assign(s.style, data.style);
 
-                // CSS-Styles aus der sticker.js anwenden
-                Object.assign(s.style, data.style);
-
-                // Überlappungsfreie Positionierung
                 let x, y, collision, attempts = 0;
                 do {
                     collision = false;
-                    x = Math.random() * (720 - size) + 50;
-                    y = Math.random() * (420 - size) + 50;
-                    if (x > 250 && x < 570 && y > 140 && y < 380) collision = true; // Mitte frei
+                    x = Math.random() * (700 - size) + 60;
+                    y = Math.random() * (400 - size) + 60;
+                    if (x > 240 && x < 580 && y > 130 && y < 390) collision = true; 
                     for(let area of usedAreas) {
                         if(!(x + size < area.x || x > area.x + area.w || y + size < area.y || y > area.y + area.h)) collision = true;
                     }
                     attempts++;
-                } while(collision && attempts < 100);
+                } while(collision && attempts < 150);
 
-                usedAreas.push({x: x, y: y, w: size, h: size});
+                usedAreas.push({x, y, w: size, h: size});
                 s.style.left = x + 'px';
                 s.style.top = y + 'px';
-                s.style.transform = `rotate(${Math.random() * 40 - 20}deg)`;
+                s.style.transform = `rotate(${Math.random() * 30 - 15}deg)`;
 
+                // Desktop: Hover
                 s.addEventListener('mouseenter', () => showDossier(data));
-                s.addEventListener('touchstart', (e) => { e.stopPropagation(); showDossier(data); });
+                s.addEventListener('mouseleave', () => hideDossier());
+                // Mobile: Click
+                s.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showDossier(data);
+                });
+
                 canvas.appendChild(s);
             });
         }
@@ -98,16 +264,27 @@
         function showDossier(data) {
             document.getElementById('info-city').innerText = data.stadt;
             document.getElementById('info-country').innerText = data.land;
-            document.getElementById('info-nights').innerText = data.naechte;
+            document.getElementById('info-nights').innerText = data.naechte + " Nächte";
             document.getElementById('info-fb').innerText = data.fussball;
-            document.getElementById('info-desc').innerText = data.notiz || "";
+            document.getElementById('info-desc').innerText = data.notiz || "Keine weiteren Notizen.";
+            
+            // Highlight Chip für Fußball
+            const fbChip = document.getElementById('chip-fb');
+            if(data.fussball.includes("Ja")) {
+                fbChip.classList.add('highlight');
+            } else {
+                fbChip.classList.remove('highlight');
+            }
+            
             info.classList.add('active');
         }
 
-        function hideDossier() { info.classList.remove('active'); }
+        function hideDossier() {
+            info.classList.remove('active');
+        }
 
-        // Start
-        createStickers();
+        placeRivets();
+        if (typeof stickerDaten !== 'undefined') createStickers();
     </script>
 </body>
 </html>
