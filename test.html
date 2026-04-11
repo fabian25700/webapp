@@ -17,7 +17,6 @@
             --alu-base: #bdc3c7;
             --alu-dark: #9da4a7;
             --alu-bright: #e1e4e6;
-            /* Dossier/Toggle-Style Farben */
             --accent-blue: #007AFF;
             --chip-bg: #f1f5f9;
         }
@@ -57,9 +56,9 @@
         header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
 
         .back-btn {
-            width: 36px; height: 36px; background: white; border-radius: 10px; 
+            width: 36px; height: 36px; background: var(--card-bg); border-radius: 10px; 
             display: flex; align-items: center; justify-content: center; 
-            font-weight: bold; border: 1px solid #ddd; text-decoration: none; color: black;
+            font-weight: bold; border: 1px solid var(--header-border); text-decoration: none; color: var(--header-text);
         }
 
         .viewport {
@@ -111,7 +110,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 0 1px rgba(255,255,255,0.3));
         }
 
         .suitcase-body {
@@ -135,7 +133,6 @@
             z-index: 5;
         }
 
-        /* Sticker Styling */
         .sticker {
             position: absolute; cursor: pointer; display: flex; align-items: center; justify-content: center;
             text-align: center; padding: 10px; z-index: 10; transition: transform 0.2s;
@@ -144,7 +141,6 @@
         }
         .sticker:hover { transform: scale(1.1) rotate(0deg) !important; z-index: 100; }
 
-        /* Dossier im Toggle-Style */
         #central-info {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
             width: 320px; background: var(--card-bg); border-radius: 24px; padding: 24px;
@@ -156,7 +152,6 @@
         #central-info.active { opacity: 1; pointer-events: auto; transform: translate(-50%, -52%); }
 
         .info-header h3 { font-size: 1.4rem; font-weight: 800; margin-bottom: 16px; color: var(--header-text); }
-        
         .info-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
         .chip {
             background: var(--chip-bg); padding: 6px 12px; border-radius: 10px;
@@ -187,8 +182,8 @@
                 <div class="handle-bar"></div>
             </div>
 
-            <div class="suitcase-body" id="canvas">
-                <div id="central-info">
+            <div class="suitcase-body" id="canvas" onclick="hideDossier()">
+                <div id="central-info" onclick="event.stopPropagation()">
                     <div class="info-header"><h3 id="info-city">-</h3></div>
                     <div class="info-grid">
                         <div class="chip">📍 <strong id="info-country">-</strong></div>
@@ -201,7 +196,7 @@
         </div>
     </div>
 
-    <script src="sticker.html"></script>
+    <script src="sticker.js"></script>
     <script>
         const canvas = document.getElementById('canvas');
         const info = document.getElementById('central-info');
@@ -220,6 +215,7 @@
         }
 
         function createStickers() {
+            if (typeof stickerDaten === 'undefined') return;
             const usedAreas = [];
             stickerDaten.filter(d => d.top10).forEach(data => {
                 const s = document.createElement('div');
@@ -236,6 +232,7 @@
                     collision = false;
                     x = Math.random() * (700 - size) + 60;
                     y = Math.random() * (400 - size) + 60;
+                    // Keep center clear for Dossier
                     if (x > 240 && x < 580 && y > 130 && y < 390) collision = true; 
                     for(let area of usedAreas) {
                         if(!(x + size < area.x || x > area.x + area.w || y + size < area.y || y > area.y + area.h)) collision = true;
@@ -249,8 +246,12 @@
                 s.style.transform = `rotate(${Math.random() * 30 - 15}deg)`;
 
                 // Desktop: Hover
-                s.addEventListener('mouseenter', () => showDossier(data));
+                s.addEventListener('mouseenter', (e) => {
+                    e.stopPropagation();
+                    showDossier(data);
+                });
                 s.addEventListener('mouseleave', () => hideDossier());
+                
                 // Mobile: Click
                 s.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -265,16 +266,12 @@
             document.getElementById('info-city').innerText = data.stadt;
             document.getElementById('info-country').innerText = data.land;
             document.getElementById('info-nights').innerText = data.naechte + " Nächte";
-            document.getElementById('info-fb').innerText = data.fussball;
-            document.getElementById('info-desc').innerText = data.notiz || "Keine weiteren Notizen.";
+            document.getElementById('info-fb').innerText = data.fussball || "Nein";
+            document.getElementById('info-desc').innerText = data.notiz || "";
             
-            // Highlight Chip für Fußball
             const fbChip = document.getElementById('chip-fb');
-            if(data.fussball.includes("Ja")) {
-                fbChip.classList.add('highlight');
-            } else {
-                fbChip.classList.remove('highlight');
-            }
+            if(data.fussball && data.fussball.includes("Ja")) fbChip.classList.add('highlight');
+            else fbChip.classList.remove('highlight');
             
             info.classList.add('active');
         }
@@ -284,7 +281,7 @@
         }
 
         placeRivets();
-        if (typeof stickerDaten !== 'undefined') createStickers();
+        window.onload = createStickers;
     </script>
 </body>
 </html>
