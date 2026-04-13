@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Reisekoffer</title>
+    <title>Reisekoffer | Fabian</title>
     <style>
         :root {
             --bg-color: #f0f2f5;
@@ -13,7 +13,6 @@
             --header-text: #1e293b;
             --header-border: #e2e8f0;
             --card-bg: #ffffff;
-            --text-secondary: #64748b;
             --alu-base: #bdc3c7;
             --alu-dark: #9da4a7;
             --alu-bright: #e1e4e6;
@@ -37,7 +36,7 @@
         body {
             background: var(--bg-color);
             font-family: -apple-system, sans-serif;
-            height: 100dvh; /* Dynamic Viewport Height */
+            height: 100dvh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
@@ -67,7 +66,6 @@
             width: 100%;
         }
 
-        /* Container Zentrierung */
         .suitcase-container {
             position: relative;
             display: flex;
@@ -76,10 +74,8 @@
             transform-origin: center center;
         }
 
-        /* Mobile Optimierung: Drehung + Skalierung um Abschneiden zu verhindern */
         @media (max-width: 600px) {
             .suitcase-container { 
-                /* Skalierung auf 0.45 reduziert, damit 820px Breite in 100vh Höhe passt */
                 transform: rotate(-90deg) scale(0.45) translateY(0); 
                 margin-top: 20px;
             }
@@ -111,7 +107,6 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            filter: drop-shadow(0 0 1px rgba(255,255,255,0.3));
         }
 
         /* 2. Koffer-Korpus */
@@ -137,15 +132,22 @@
             z-index: 5;
         }
 
-        #central-info {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 300px; background: var(--card-bg); border-radius: 20px; padding: 25px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
-            z-index: 1500; opacity: 0; pointer-events: none; transition: 0.3s;
-            border: 1px solid var(--header-border);
+        /* Sticker Basis-Klasse für das Rendering */
+        .sticker-instance {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             text-align: center;
+            cursor: pointer;
+            z-index: 100;
+            user-select: none;
+            transition: transform 0.2s;
         }
-        #central-info.active { opacity: 1; pointer-events: auto; }
+        .sticker-instance:hover {
+            z-index: 500;
+            transform: scale(1.1) !important;
+        }
     </style>
 </head>
 <body>
@@ -164,24 +166,72 @@
             </div>
 
             <div class="suitcase-body" id="canvas">
-                <div id="central-info">
-                    <div class="info-header"><h3 id="info-city">-</h3></div>
-                    <div class="info-row"><span>Land:</span> <strong id="info-country">-</strong></div>
-                    <div class="info-row"><span>Aufenthalt:</span> <strong id="info-nights">-</strong></div>
-                    <div class="info-row"><span>Fußball:</span> <span id="info-fb">⚪</span></div>
-                    <p class="info-desc" id="info-desc">-</p>
                 </div>
-            </div>
         </div>
     </div>
 
+    <script src="sticker.js"></script>
+
     <script>
         const canvas = document.getElementById('canvas');
-        
+        const placedRects = [];
+
+        // Kollisionsprüfung (max 5% Überlappung)
+        function isOverlapping(newRect) {
+            return placedRects.some(rect => {
+                const overlapX = Math.max(0, Math.min(newRect.right, rect.right) - Math.max(newRect.left, rect.left));
+                const overlapY = Math.max(0, Math.min(newRect.bottom, rect.bottom) - Math.max(newRect.top, rect.top));
+                const overlapArea = overlapX * overlapY;
+                const newArea = (newRect.right - newRect.left) * (newRect.bottom - newRect.top);
+                return overlapArea > (newArea * 0.05);
+            });
+        }
+
+        function renderStickers() {
+            if (typeof stickerDaten === 'undefined') {
+                console.error("sticker.js nicht geladen!");
+                return;
+            }
+
+            stickerDaten.forEach(data => {
+                const s = document.createElement('div');
+                s.className = 'sticker-instance';
+                s.innerText = data.stadt;
+
+                // Größe basierend auf Nächten
+                const size = 110 + (data.naechte * 4);
+                s.style.width = size + 'px';
+                s.style.height = size + 'px';
+                
+                // Styles aus der sticker.js übertragen
+                if (data.style) Object.assign(s.style, data.style);
+
+                // Positionierung
+                let x, y, rect;
+                let attempts = 0;
+                const margin = 70; // Sicherheitsabstand zu den Nieten
+
+                do {
+                    x = margin + Math.random() * (820 - size - margin * 2);
+                    y = margin + Math.random() * (520 - size - margin * 2);
+                    rect = { left: x, top: y, right: x + size, bottom: y + size };
+                    attempts++;
+                } while (isOverlapping(rect) && attempts < 150);
+
+                placedRects.push(rect);
+                s.style.left = x + 'px';
+                s.style.top = y + 'px';
+                
+                // Leichte Rotation für den Sticker-Look
+                const rotation = (Math.random() - 0.5) * 25;
+                s.style.transform = `rotate(${rotation}deg)`;
+
+                canvas.appendChild(s);
+            });
+        }
+
         function placeRivets() {
-            const w = 820;
-            const h = 520;
-            const step = 60;
+            const w = 820, h = 520, step = 60;
             for(let x = step; x < w - step; x += step) {
                 addRivet(x, 15);
                 addRivet(x, h - 45);
@@ -200,11 +250,9 @@
             canvas.appendChild(r);
         }
 
+        // Ausführung
         placeRivets();
-        
-        function showDossier() {
-            document.getElementById('central-info').classList.add('active');
-        }
+        renderStickers();
     </script>
 </body>
 </html>
