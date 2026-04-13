@@ -2,97 +2,49 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Sticker-Kontrolle | Fabian Geisbüsch</title>
+    <title>Sticker Vorschau</title>
     <style>
-        body {
-            background: #f1f5f9;
-            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-            background-size: 20px 20px;
-            font-family: sans-serif;
+        body { background: #e2e8f0; font-family: sans-serif; padding: 50px; display: flex; flex-wrap: wrap; gap: 40px; justify-content: center; }
+        .sticker-wrap { display: flex; flex-direction: column; align-items: center; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .sticker-render {
+            /* Das CSS aus der sticker.js wird hier reingeladen */
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 40px;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
         }
-
-        .preview-grid {
-            width: 100%;
-            max-width: 800px;
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-
-        .control-row {
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            display: grid;
-            grid-template-columns: 200px 1fr;
-            align-items: center;
-            gap: 30px;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-        }
-
-        .sticker-item {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            /* Der entscheidende Sticker-Effekt: Weißer Rand um die Clip-Path Form */
-            filter: drop-shadow(3px 3px 0px #fff) drop-shadow(-3px -3px 0px #fff) 
-                    drop-shadow(3px -3px 0px #fff) drop-shadow(-3px 3px 0px #fff)
-                    drop-shadow(0 10px 10px rgba(0,0,0,0.2));
-        }
-
-        .info-panel strong { font-size: 1.4rem; display: block; margin-bottom: 5px; }
-        .badge { background: #e2e8f0; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: bold; color: #475569; }
+        .label { margin-top: 15px; font-weight: bold; color: #64748b; }
     </style>
 </head>
 <body>
 
-    <h1>Sticker-Detail-Check</h1>
-
-    <div class="preview-grid" id="preview-grid"></div>
-
     <script src="sticker.js"></script>
 
     <script>
-        const grid = document.getElementById('preview-grid');
-
         if (typeof stickerDaten !== 'undefined') {
             stickerDaten.forEach(data => {
-                const row = document.createElement('div');
-                row.className = 'control-row';
+                const wrap = document.createElement('div');
+                wrap.className = 'sticker-wrap';
 
                 const sticker = document.createElement('div');
-                sticker.className = 'sticker-item';
+                sticker.className = 'sticker-render';
                 sticker.innerText = data.stadt;
                 
-                // Größe basierend auf Nächten
-                const size = 130 + (data.naechte * 3); 
-                sticker.style.width = size + 'px';
-                sticker.style.height = size + 'px';
+                // Größe festlegen
+                sticker.style.width = "150px";
+                sticker.style.height = "150px";
                 
                 // Styles aus der sticker.js anwenden
                 if (data.style) Object.assign(sticker.style, data.style);
 
-                const info = document.createElement('div');
-                info.className = 'info-panel';
-                info.innerHTML = `
-                    <strong>${data.stadt}</strong>
-                    <span class="badge">${data.land}</span>
-                    <p style="font-size: 13px; color: #64748b; margin-top: 10px;">
-                        Status: Detail-Sticker geladen ✅
-                    </p>
-                `;
+                const label = document.createElement('div');
+                label.className = 'label';
+                label.innerText = data.stadt + " (" + data.land + ")";
 
-                row.appendChild(sticker);
-                row.appendChild(info);
-                grid.appendChild(row);
+                wrap.appendChild(sticker);
+                wrap.appendChild(label);
+                document.body.appendChild(wrap);
             });
         } else {
-            grid.innerHTML = "<h2 style='color:red;'>sticker.js nicht gefunden!</h2><p>Prüfe, ob sticker.js im selben Ordner liegt.</p>";
+            document.body.innerHTML = "<h1>Fehler: sticker.js nicht gefunden!</h1>";
         }
     </script>
 </body>
