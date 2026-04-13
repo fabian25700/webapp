@@ -1,193 +1,210 @@
-const stickerDaten = [
-    {
-        stadt: "Kopenhagen",
-        land: "Dänemark",
-        naechte: 4,
-        fussball: "Ja ⚽",
-        top10: true,
-        style: {
-            /* DETAIL: Die ikonische Kleine Meerjungfrau Silhouette sitzt auf einem grauen Stein vor der Dannebrog-Flagge.
-               Der Text sitzt im klaren, roten Bereich oben. */
-            background: `
-                /* Meerjungfrau Silhouette (schwarz, unten rechts) */
-                radial-gradient(circle at 75% 85%, #000 0%, #000 15%, transparent 16%),
-                radial-gradient(circle at 70% 75%, #000 0%, #000 10%, transparent 11%),
-                /* Der Stein (Grau, unten) */
-                linear-gradient(to top, #7f8c8d 0%, #7f8c8d 30%, transparent 31%),
-                /* Dänemark-Flagge (Dannebrog) Kreuz */
-                linear-gradient(90deg, transparent 20%, #fff 20%, #fff 25%, transparent 25%),
-                linear-gradient(0deg, transparent 45%, #fff 45%, #fff 55%, transparent 55%),
-                /* Grundfarbe Rot */
-                #C8102E
-            `,
-            clipPath: "polygon(0% 15%, 15% 15%, 20% 0%, 35% 15%, 60% 15%, 70% 30%, 80% 45%, 90% 65%, 100% 85%, 100% 100%, 0% 100%)", // Wellen-Form
-            color: "#ffffff",
-            fontWeight: "bold",
-            fontSize: "12px",
-            /* KORREKTUR FÜR LESBARKEIT: Schwarzer Rand um weissen Text */
-            textShadow: "1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000",
-            border: "1px solid rgba(0,0,0,0.2)",
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "flex-start",
-            padding: "20px 10px",
-            filter: "drop-shadow(3px 3px 0px #fff) drop-shadow(-3px -3px 0px #fff)"
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Reisekoffer</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --header-bg: rgba(240, 242, 245, 0.9);
+            --header-text: #1e293b;
+            --header-border: #e2e8f0;
+            --card-bg: #ffffff;
+            --text-secondary: #64748b;
+            --alu-base: #bdc3c7;
+            --alu-dark: #9da4a7;
+            --alu-bright: #e1e4e6;
         }
-    },
-    {
-        stadt: "New York",
-        land: "USA",
-        naechte: 4,
-        fussball: "Nein",
-        top10: true,
-        style: {
-            /* DETAIL: Der "Big Apple" mit USA-Flagge und detailreicherer Skyline Silhouette (Freiheitsstatue & Empire State Building). */
-            background: `
-                /* Skyline Silhouette (Empire State & Statue of Liberty) */
-                linear-gradient(to top, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.7) 25%, transparent 30%),
-                /* US-Flagge: Blaues Feld mit Sternen (Punkte) */
-                radial-gradient(circle at 10% 10%, #fff 0%, #fff 2%, transparent 3%),
-                radial-gradient(circle at 20% 20%, #fff 0%, #fff 2%, transparent 3%),
-                radial-gradient(circle at 10% 30%, #fff 0%, #fff 2%, transparent 3%),
-                radial-gradient(circle at 20% 40%, #fff 0%, #fff 2%, transparent 3%),
-                linear-gradient(90deg, #002868 40%, transparent 40%),
-                /* US-Flagge: Rote Streifen */
-                repeating-linear-gradient(0deg, #bf0a30, #bf0a30 14.28px, #fff 14.28px, #fff 28.56px),
-                /* Grundfarbe */
-                #fff
-            `,
-            clipPath: "polygon(50% 0%, 65% 5%, 85% 15%, 83% 25%, 95% 35%, 100% 50%, 95% 75%, 85% 90%, 50% 100%, 15% 90%, 5% 75%, 0% 50%, 5% 35%, 15% 15%, 35% 5%)",
-            color: "#ffffff",
-            fontWeight: "900",
-            fontSize: "14px",
-            /* KORREKTUR FÜR LESBARKEIT: Dunkelblauer Rand um weissen Text */
-            textShadow: "2px 2px 0 #002868, 3px 3px 0 rgba(0,0,0,0.3)",
-            letterSpacing: "1px",
-            textTransform: "uppercase",
-            border: "1px solid rgba(0,0,0,0.2)",
-            filter: "drop-shadow(3px 3px 0px #fff) drop-shadow(-3px -3px 0px #fff)"
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0f172a;
+                --header-bg: rgba(15, 23, 42, 0.9);
+                --header-text: #f1f5f9;
+                --header-border: #1e293b;
+                --card-bg: #1e293b;
+                --alu-base: #7f8c8d;
+                --alu-dark: #2c3e50;
+                --alu-bright: #bdc3c7;
+            }
         }
-    },
-    {
-        stadt: "AIDA",
-        land: "International",
-        naechte: 10,
-        fussball: "Nein",
-        top10: true,
-        style: {
-            /* DETAIL: Der Bug eines AIDA-Schiffes mit dem ikonischen Kussmund und dem Auge vor den Firmenfarben.
-               Der Text ist oben im klaren, blauen Bereich. */
-            background: `
-                /* Das blaue Auge (oben links) */
-                radial-gradient(circle at 20% 25%, #fff 0%, #fff 8%, #005DAA 9%, #005DAA 15%, #fff 16%, #fff 20%, transparent 21%),
-                /* Die roten Kussmund-Lippen (unten mittig) */
-                radial-gradient(ellipse at 50% 85%, #E2001A 0%, #E2001A 25%, transparent 26%),
-                radial-gradient(ellipse at 40% 75%, #E2001A 0%, #E2001A 15%, transparent 16%),
-                radial-gradient(ellipse at 60% 75%, #E2001A 0%, #E2001A 15%, transparent 16%),
-                /* Streifen (Blau & Weiß) */
-                linear-gradient(180deg, #005DAA 50%, #fff 50%)
-            `,
-            clipPath: "polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%)", // Schiffsbug-Form
-            color: "#E2001A", // Rot auf weissem Grund (unten) oder blauem Grund (oben, mit Schatten)
-            fontStyle: "italic",
-            fontWeight: "bold",
-            fontSize: "16px",
-            padding: "15px 5px",
-            border: "2px solid #005DAA",
-            /* KORREKTUR FÜR LESBARKEIT: Weißer Rand um roten Text */
-            textShadow: "1px 1px 0 #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff",
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "flex-start"
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        
+        body {
+            background: var(--bg-color);
+            font-family: -apple-system, sans-serif;
+            height: 100dvh; /* Dynamic Viewport Height */
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
-    },
-    {
-        stadt: "Dubai",
-        land: "VAE",
-        naechte: 9,
-        fussball: "Ja ⚽",
-        top10: true,
-        style: {
-            /* DETAIL: Die Silhouette des Burj Al Arab ("Segel-Hotel") vor der VAE-Flagge.
-               Der Text sitzt im klaren, grünen Bereich oben. */
-            background: `
-                /* Der schwarze Balken der Flagge (unten) */
-                linear-gradient(to bottom, transparent 66%, #000 66%),
-                /* Burj Al Arab Silhouette (weiß, mittig, von unten kommend) */
-                linear-gradient(to top, #fff 0%, #fff 50%, transparent 55%),
-                /* Das Segel-Profil ( clip-path des Inhalts) */
-                linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.4) 45%, transparent 50%),
-                /* Flaggenfarben (Rot links, Grün rechts oben) */
-                linear-gradient(to right, #FF0000 25%, #00732F 25%)
-            `,
-            clipPath: "polygon(50% 0%, 100% 50%, 80% 100%, 20% 100%, 0% 50%)", // Segel-Form
-            color: "#ffffff",
-            fontWeight: "bold",
-            fontSize: "12px",
-            padding: "10px 5px",
-            border: "1px solid rgba(0,0,0,0.2)",
-            /* KORREKTUR FÜR LESBARKEIT: Schwarzer Rand um weissen Text */
-            textShadow: "1px 1px 2px #000, -1px -1px 1px #000",
-            filter: "drop-shadow(3px 3px 0px #fff) drop-shadow(-3px -3px 0px #fff)"
+
+        header {
+            position: fixed; top: 0; width: 100%; z-index: 2000;
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            display: flex; align-items: center; gap: 12px;
+            background: var(--header-bg); backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--header-border);
         }
-    },
-    {
-        stadt: "Stockholm",
-        land: "Schweden",
-        naechte: 4,
-        fussball: "Ja ⚽",
-        top10: true,
-        style: {
-            /* DETAIL: Das ikonische gelbe Kreuz auf blauem Grund, kombiniert mit der Silhouette des Rathauses (Stadshuset) und seinen drei Kronen. */
-            background: `
-                /* Vertikale gelbe Linie */
-                linear-gradient(90deg, transparent 30%, #FECC00 30%, #FECC00 40%, transparent 40%),
-                /* Horizontale gelbe Linie */
-                linear-gradient(0deg, transparent 45%, #FECC00 45%, #FECC00 55%, transparent 55%),
-                /* Rathaus Silhouette (schwarz, unten rechts) */
-                linear-gradient(to top, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.6) 30%, transparent 31%),
-                /* Drei Kronen Symbol (vereinfacht, gelb, oben links) */
-                radial-gradient(circle at 15% 15%, #FECC00 0%, #FECC00 5%, transparent 6%),
-                radial-gradient(circle at 20% 25%, #FECC00 0%, #FECC00 5%, transparent 6%),
-                radial-gradient(circle at 10% 25%, #FECC00 0%, #FECC00 5%, transparent 6%),
-                /* Grundfarbe Blau */
-                #006AA7
-            `,
-            clipPath: "polygon(0% 0%, 100% 0%, 100% 70%, 50% 100%, 0% 70%)", // Wappen-Form
-            color: "#FECC00",
-            fontWeight: "bold",
-            fontSize: "13px",
-            border: "4px solid #FECC00",
-            boxShadow: "inset 0 0 10px rgba(0,0,0,0.3)", // Tiefenwirkung
-            /* KORREKTUR FÜR LESBARKEIT: Dunkelblauer Rand um gelben Text */
-            textShadow: "1px 1px 2px #006AA7, -1px -1px 1px #006AA7",
-            filter: "drop-shadow(3px 3px 0px #fff) drop-shadow(-3px -3px 0px #fff)"
+        header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
+
+        .back-btn {
+            width: 36px; height: 36px; background: white; border-radius: 10px; 
+            display: flex; align-items: center; justify-content: center; 
+            font-weight: bold; border: 1px solid #ddd; text-decoration: none; color: black;
         }
-    },
-    {
-        stadt: "Le Morne",
-        land: "Mauritius",
-        naechte: 5,
-        fussball: "Nein",
-        top10: true,
-        style: {
-            /* DETAIL: Die Silhouette des Berges Le Morne Brabant vor der vierfarbigen Nationalflagge. */
-            background: `
-                /* Berg Silhouette (dunkel, unten) */
-                linear-gradient(to top, #2c3e50 0%, #2c3e50 40%, transparent 45%),
-                /* Streifen der Flagge (Rot, Blau, Gelb, Grün) */
-                linear-gradient(180deg, #EA2839 25%, #1A206D 25%, #1A206D 50%, #FFD500 50%, #FFD500 75%, #00A551 75%)
-            `,
-            clipPath: "polygon(0% 100%, 20% 80%, 40% 20%, 60% 0%, 80% 20%, 100% 100%)", // Berg-Silhouette
-            color: "#ffffff",
-            fontWeight: "bold",
-            fontSize: "11px",
-            padding: "15px 5px",
-            border: "1px solid rgba(0,0,0,0.2)",
-            /* KORREKTUR FÜR LESBARKEIT: Schwarzer Rand um weissen Text */
-            textShadow: "1px 1px 2px #000, -1px -1px 1px #000",
-            letterSpacing: "0.5px",
-            filter: "drop-shadow(3px 3px 0px #fff) drop-shadow(-3px -3px 0px #fff)"
+
+        .viewport {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1200px;
+            width: 100%;
         }
-    }
-];
+
+        /* Container Zentrierung */
+        .suitcase-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform-origin: center center;
+        }
+
+        /* Mobile Optimierung: Drehung + Skalierung um Abschneiden zu verhindern */
+        @media (max-width: 600px) {
+            .suitcase-container { 
+                /* Skalierung auf 0.45 reduziert, damit 820px Breite in 100vh Höhe passt */
+                transform: rotate(-90deg) scale(0.45) translateY(0); 
+                margin-top: 20px;
+            }
+        }
+
+        /* 1. Teleskopgriff */
+        .telescope-system {
+            width: 160px; height: 50px; position: relative; margin-bottom: -15px; z-index: 0;
+        }
+        .rail {
+            position: absolute; width: 16px; height: 100%;
+            background: linear-gradient(to right, #333, #555, #333);
+            border-radius: 4px 4px 0 0; border: 1px solid #1a1a1a;
+        }
+        .rail.left { left: 25px; }
+        .rail.right { right: 25px; }
+        .handle-bar {
+            position: absolute; top: 0; left: 10px; right: 10px; height: 26px;
+            background: linear-gradient(to bottom, #2a2a2a, #0a0a0a, #000);
+            border-radius: 8px; border: 1px solid #111;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+            display: flex; align-items: center; justify-content: center;
+        }
+        
+        .handle-bar::after {
+            content: "RIMOWA";
+            font-size: 9px; font-weight: 900; letter-spacing: 3px;
+            background: linear-gradient(135deg, #fff 0%, #eee 40%, #ccc 50%, #eee 60%, #fff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 1px rgba(255,255,255,0.3));
+        }
+
+        /* 2. Koffer-Korpus */
+        .suitcase-body {
+            width: 820px; height: 520px;
+            background: var(--alu-base);
+            border-radius: 54px; border: 14px solid var(--alu-dark);
+            position: relative; z-index: 1;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.3);
+            overflow: hidden;
+            background-image: 
+                repeating-linear-gradient(90deg, 
+                    rgba(255,255,255,0.08) 0, rgba(255,255,255,0.08) 38px, 
+                    rgba(0,0,0,0.08) 38px, rgba(0,0,0,0.08) 42px
+                ),
+                radial-gradient(circle at 50% 50%, var(--alu-bright), var(--alu-base));
+        }
+
+        .niete {
+            position: absolute; width: 8px; height: 8px;
+            background: radial-gradient(circle at 3px 3px, var(--alu-bright), #7f8c8d);
+            border-radius: 50%; box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+            z-index: 5;
+        }
+
+        #central-info {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 300px; background: var(--card-bg); border-radius: 20px; padding: 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+            z-index: 1500; opacity: 0; pointer-events: none; transition: 0.3s;
+            border: 1px solid var(--header-border);
+            text-align: center;
+        }
+        #central-info.active { opacity: 1; pointer-events: auto; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="reise_stats.html" class="back-btn">←</a>
+        <h1>Reisekoffer</h1>
+    </header>
+
+    <div class="viewport">
+        <div class="suitcase-container">
+            <div class="telescope-system">
+                <div class="rail left"></div>
+                <div class="rail right"></div>
+                <div class="handle-bar"></div>
+            </div>
+
+            <div class="suitcase-body" id="canvas">
+                <div id="central-info">
+                    <div class="info-header"><h3 id="info-city">-</h3></div>
+                    <div class="info-row"><span>Land:</span> <strong id="info-country">-</strong></div>
+                    <div class="info-row"><span>Aufenthalt:</span> <strong id="info-nights">-</strong></div>
+                    <div class="info-row"><span>Fußball:</span> <span id="info-fb">⚪</span></div>
+                    <p class="info-desc" id="info-desc">-</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        
+        function placeRivets() {
+            const w = 820;
+            const h = 520;
+            const step = 60;
+            for(let x = step; x < w - step; x += step) {
+                addRivet(x, 15);
+                addRivet(x, h - 45);
+            }
+            for(let y = step; y < h - step; y += step) {
+                addRivet(15, y);
+                addRivet(w - 45, y);
+            }
+        }
+
+        function addRivet(x, y) {
+            const r = document.createElement('div');
+            r.className = 'niete';
+            r.style.left = x + 'px';
+            r.style.top = y + 'px';
+            canvas.appendChild(r);
+        }
+
+        placeRivets();
+        
+        function showDossier() {
+            document.getElementById('central-info').classList.add('active');
+        }
+    </script>
+</body>
+</html>
