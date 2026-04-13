@@ -2,122 +2,61 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sticker-Kontrolle | Fabian Geisbüsch</title>
     <style>
-        :root {
-            --bg-main: #f8fafc;
-            --card-bg: #ffffff;
-            --border-color: #e2e8f0;
-            --text-main: #0f172a;
-        }
-
         body {
-            background-color: var(--bg-main);
-            /* Subtiles Raster zur besseren Beurteilung der Sticker-Formen */
+            background: #f1f5f9;
             background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
             background-size: 20px 20px;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            padding: 40px 20px;
-            color: var(--text-main);
+            font-family: sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-        }
-
-        h1 {
-            font-weight: 800;
-            margin-bottom: 40px;
-            letter-spacing: -0.02em;
+            padding: 40px;
         }
 
         .preview-grid {
             width: 100%;
-            max-width: 900px;
+            max-width: 800px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 25px;
         }
 
         .control-row {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
             display: grid;
             grid-template-columns: 200px 1fr;
             align-items: center;
-            gap: 40px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            gap: 30px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
         }
 
-        .sticker-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* Die Sticker-Klasse nutzt die Styles aus der JS */
         .sticker-item {
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            filter: drop-shadow(0 2px 0px #fff) drop-shadow(0 10px 15px rgba(0,0,0,0.15));
-            transition: transform 0.2s ease;
-        }
-        
-        .sticker-item:hover {
-            transform: scale(1.05);
+            /* Der entscheidende Sticker-Effekt: Weißer Rand um die Clip-Path Form */
+            filter: drop-shadow(3px 3px 0px #fff) drop-shadow(-3px -3px 0px #fff) 
+                    drop-shadow(3px -3px 0px #fff) drop-shadow(-3px 3px 0px #fff)
+                    drop-shadow(0 10px 10px rgba(0,0,0,0.2));
         }
 
-        .info-panel {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .info-panel strong {
-            font-size: 1.25rem;
-            color: var(--text-main);
-        }
-
-        .badge-row {
-            display: flex;
-            gap: 8px;
-            margin-top: 4px;
-        }
-
-        .badge {
-            background: #f1f5f9;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #64748b;
-        }
-
-        .code-snippet {
-            margin-top: 12px;
-            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-            font-size: 11px;
-            background: #fdfdfd;
-            border: 1px solid #edf2f7;
-            padding: 10px;
-            border-radius: 8px;
-            color: #718096;
-            white-space: pre-wrap;
-        }
+        .info-panel strong { font-size: 1.4rem; display: block; margin-bottom: 5px; }
+        .badge { background: #e2e8f0; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: bold; color: #475569; }
     </style>
 </head>
 <body>
 
-    <h1>Sticker Kontroll-Sheet</h1>
+    <h1>Sticker-Detail-Check</h1>
 
-    <div class="preview-grid" id="preview-grid">
-        </div>
+    <div class="preview-grid" id="preview-grid"></div>
 
     <script src="sticker.js"></script>
+
     <script>
         const grid = document.getElementById('preview-grid');
 
@@ -126,49 +65,34 @@
                 const row = document.createElement('div');
                 row.className = 'control-row';
 
-                // Sticker Element
-                const container = document.createElement('div');
-                container.className = 'sticker-container';
-                
                 const sticker = document.createElement('div');
                 sticker.className = 'sticker-item';
                 sticker.innerText = data.stadt;
                 
-                // Größe berechnen (wie im Koffer)
-                const size = 100 + (data.naechte * 5); 
+                // Größe basierend auf Nächten
+                const size = 130 + (data.naechte * 3); 
                 sticker.style.width = size + 'px';
                 sticker.style.height = size + 'px';
                 
-                // Individuelle Styles anwenden
+                // Styles aus der sticker.js anwenden
                 if (data.style) Object.assign(sticker.style, data.style);
 
-                container.appendChild(sticker);
-
-                // Info Panel
                 const info = document.createElement('div');
                 info.className = 'info-panel';
-                
-                const shapeType = data.style.clipPath ? 'Custom ClipPath' : (data.style.borderRadius ? 'Rounded' : 'Square');
-                
                 info.innerHTML = `
                     <strong>${data.stadt}</strong>
-                    <div class="badge-row">
-                        <span class="badge">📍 ${data.land}</span>
-                        <span class="badge">🌙 ${data.naechte} Nächte</span>
-                        <span class="badge">⚽ ${data.fussball}</span>
-                    </div>
-                    <div class="code-snippet">
-                        Shape: ${shapeType}
-                        Note: ${data.notiz || '-'}
-                    </div>
+                    <span class="badge">${data.land}</span>
+                    <p style="font-size: 13px; color: #64748b; margin-top: 10px;">
+                        Status: Detail-Sticker geladen ✅
+                    </p>
                 `;
 
-                row.appendChild(container);
+                row.appendChild(sticker);
                 row.appendChild(info);
                 grid.appendChild(row);
             });
         } else {
-            grid.innerHTML = "<p style='color:red;'>Fehler: sticker.js konnte nicht geladen werden oder stickerDaten sind nicht definiert.</p>";
+            grid.innerHTML = "<h2 style='color:red;'>sticker.js nicht gefunden!</h2><p>Prüfe, ob sticker.js im selben Ordner liegt.</p>";
         }
     </script>
 </body>
