@@ -52,23 +52,47 @@ const stickerDaten = [
         }
     },
     {
-        stadt: "Dubai",
-        land: "VAE",
-        naechte: 9,
-        style: {
-            background: "linear-gradient(to right, #FF0000 20%, #00732F 21%, #00732F 100%)",
-            clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)",
-            color: "#ffffff",
-            fontWeight: "bold",
-            fontSize: "13px",
-            paddingTop: "40px",
-            textShadow: "1px 1px 2px #000",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            filter: "drop-shadow(3px 3px 0px #fff)"
-        }
-    },
+    stadt: "DUBAI",
+    land: "VAE",
+    naechte: 9,
+    style: {
+        /* Briefmarken-Hintergrund: Himmelblau mit gezacktem Rand (simuliert durch radial-gradient) */
+        backgroundColor: "#87CEEB",
+        backgroundImage: `
+            radial-gradient(circle, #fff 50%, transparent 55%),
+            radial-gradient(circle, #fff 50%, transparent 55%),
+            radial-gradient(circle, #fff 50%, transparent 55%),
+            radial-gradient(circle, #fff 50%, transparent 55%),
+            /* Darstellung des Burj Khalifa (stilisierte Stufenpyramide/Nadel) */
+            linear-gradient(90deg, transparent 60%, #475569 60%, #475569 62%, transparent 62%, transparent 64%, #475569 64%, #475569 68%, transparent 68%, transparent 70%, #475569 70%, #475569 72%, transparent 72%),
+            linear-gradient(0deg, #64748b 0%, #64748b 40%, #94a3b8 40%, #94a3b8 70%, #cbd5e1 70%, #cbd5e1 90%, transparent 90%)
+        `,
+        backgroundSize: "20px 20px, 20px 20px, 20px 20px, 20px 20px, 100% 100%, 40px 150px",
+        backgroundPosition: "0 -10px, 0 100%, -10px 0, 100% 0, 0 0, 70% 80%",
+        backgroundRepeat: "repeat-x, repeat-x, repeat-y, repeat-y, no-repeat, no-repeat",
+        
+        /* Briefmarken-Form */
+        clipPath: "none", 
+        borderRadius: "2px",
+        border: "12px solid #fff",
+        
+        color: "#1e293b",
+        fontWeight: "bold",
+        fontSize: "16px",
+        letterSpacing: "2px",
+        textShadow: "none",
+        
+        display: "flex",
+        /* Text links senkrecht positionieren */
+        alignItems: "center",
+        justifyContent: "flex-start",
+        writingMode: "vertical-rl",
+        transform: "rotate(180deg)",
+        paddingRight: "20px",
+        
+        filter: "drop-shadow(3px 3px 0px #fff)"
+    }
+}
     {
     stadt: "Stockholm",
     land: "Schweden",
