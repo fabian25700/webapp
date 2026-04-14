@@ -62,25 +62,28 @@ const stickerDaten = [
                 radial-gradient(circle, #fff 50%, transparent 55%),
                 radial-gradient(circle, #fff 50%, transparent 55%),
                 radial-gradient(circle, #fff 50%, transparent 55%),
-                linear-gradient(90deg, transparent 60%, #475569 60%, #475569 62%, transparent 62%, transparent 64%, #475569 64%, #475569 68%, transparent 68%, transparent 70%, #475569 70%, #475569 72%, transparent 72%),
-                linear-gradient(0deg, #64748b 0%, #64748b 40%, #94a3b8 40%, #94a3b8 70%, #cbd5e1 70%, #cbd5e1 90%, transparent 90%)
+                /* Burj Khalifa: Richtung umgekehrt (unten breit, oben spitz) und rechts platziert */
+                linear-gradient(to top, #475569 0%, #475569 5%, transparent 5%),
+                linear-gradient(90deg, transparent 70%, #475569 70%, #475569 85%, transparent 85%),
+                linear-gradient(0deg, transparent 10%, #64748b 10%, #64748b 40%, #94a3b8 40%, #94a3b8 70%, #cbd5e1 70%, #cbd5e1 95%, transparent 95%)
             `,
-            backgroundSize: "20px 20px, 20px 20px, 20px 20px, 20px 20px, 100% 100%, 40px 150px",
-            backgroundPosition: "0 -10px, 0 100%, -10px 0, 100% 0, 0 0, 70% 80%",
-            backgroundRepeat: "repeat-x, repeat-x, repeat-y, repeat-y, no-repeat, no-repeat",
+            backgroundSize: "20px 20px, 20px 20px, 20px 20px, 20px 20px, 100% 100%, 100% 100%, 25px 100%",
+            backgroundPosition: "0 -10px, 0 100%, -10px 0, 100% 0, 0 0, 0 0, 75% 0",
+            backgroundRepeat: "repeat-x, repeat-x, repeat-y, repeat-y, no-repeat, no-repeat, no-repeat",
             clipPath: "none",
             borderRadius: "2px",
             border: "12px solid #fff",
             color: "#1e293b",
-            fontWeight: "bold",
-            fontSize: "16px",
-            letterSpacing: "2px",
+            fontWeight: "900",
+            fontSize: "14px",
+            letterSpacing: "1px",
+            fontFamily: "serif",
             display: "flex",
             alignItems: "center",
             justifyContent: "flex-start",
             writingMode: "vertical-rl",
             transform: "rotate(180deg)",
-            paddingRight: "20px",
+            paddingRight: "15px",
             filter: "drop-shadow(3px 3px 0px #fff)"
         }
     },
@@ -91,12 +94,14 @@ const stickerDaten = [
         style: {
             background: "#006AA7",
             backgroundImage: `
-                radial-gradient(circle at 75% 20%, #FECC00 6px, transparent 7px),
-                radial-gradient(circle at 65% 35%, #FECC00 6px, transparent 7px),
-                radial-gradient(circle at 85% 35%, #FECC00 6px, transparent 7px),
+                /* Drei Kronen (stilisierte E-Formen nach oben gerichtet) */
+                linear-gradient(#FECC00, #FECC00) 70% 20% / 12px 4px, linear-gradient(#FECC00, #FECC00) 68% 16% / 2px 8px, linear-gradient(#FECC00, #FECC00) 72% 16% / 2px 8px, linear-gradient(#FECC00, #FECC00) 70% 16% / 2px 8px,
+                linear-gradient(#FECC00, #FECC00) 60% 35% / 12px 4px, linear-gradient(#FECC00, #FECC00) 58% 31% / 2px 8px, linear-gradient(#FECC00, #FECC00) 62% 31% / 2px 8px, linear-gradient(#FECC00, #FECC00) 60% 31% / 2px 8px,
+                linear-gradient(#FECC00, #FECC00) 80% 35% / 12px 4px, linear-gradient(#FECC00, #FECC00) 78% 31% / 2px 8px, linear-gradient(#FECC00, #FECC00) 82% 31% / 2px 8px, linear-gradient(#FECC00, #FECC00) 80% 31% / 2px 8px,
                 linear-gradient(90deg, transparent 25%, #FECC00 25%, #FECC00 35%, transparent 35%),
                 linear-gradient(0deg, transparent 45%, #FECC00 45%, #FECC00 55%, transparent 55%)
             `,
+            backgroundRepeat: "no-repeat",
             border: "6px double #FECC00",
             borderRadius: "15px",
             color: "#FECC00",
