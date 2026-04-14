@@ -14,7 +14,7 @@ const stickerDaten = [
             `,
             color: "#ffffff",
             fontWeight: "900",
-            fontSize: "12px",
+            fontSize: "14px", // Leicht erhöht für Sichtbarkeit
             textShadow: "1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000",
             display: "flex",
             alignItems: "center",
@@ -22,7 +22,7 @@ const stickerDaten = [
             filter: "drop-shadow(2px 2px 0px rgba(0,0,0,0.4))",
             overflow: "hidden"
         },
-        suffix: " Ø"
+        suffix: " Ø" // Das Ø wird jetzt durch die Schriftgröße präsenter
     },
     {
         stadt: "New York",
@@ -54,13 +54,9 @@ const stickerDaten = [
         style: {
             width: "140px",
             height: "100px",
-            clipPath: "polygon(15% 0%, 100% 0%, 85% 100%, 0% 100%)",
-            background: `
-                linear-gradient(to bottom, #005DAA 0%, #005DAA 50%, #ffffff 50%, #ffffff 100%),
-                linear-gradient(to right, transparent 75%, #E2001A 75%)
-            `,
-            // Das Rot wird hier überlagert für den Kussmund-Effekt rechts
-            backgroundImage: `linear-gradient(to right, transparent 75%, #E2001A 75%), linear-gradient(to bottom, #005DAA 0%, #005DAA 50%, #ffffff 50%, #ffffff 100%)`,
+            // Neuer Clip-Path: Vorne spitz (Bug), hinten gerade (Heck) -> Schiffsrumpf
+            clipPath: "polygon(0% 20%, 85% 20%, 100% 50%, 85% 80%, 0% 80%)",
+            background: `linear-gradient(to right, transparent 80%, #E2001A 80%), linear-gradient(to bottom, #005DAA 0%, #005DAA 50%, #ffffff 50%, #ffffff 100%)`,
             color: "#005DAA",
             fontWeight: "bold",
             fontSize: "16px",
@@ -68,7 +64,7 @@ const stickerDaten = [
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            paddingTop: "20px",
+            paddingRight: "15px", // Text weg vom Bug
             filter: "drop-shadow(2px 2px 0px rgba(0,0,0,0.3))",
             overflow: "hidden"
         }
@@ -81,7 +77,6 @@ const stickerDaten = [
             width: "105px",
             height: "140px",
             background: `
-                /* 1. Burj Khalifa Architektur zurückgesetzt (4 Segmente) */
                 linear-gradient(to top, transparent 92%, #475569 92%, #475569 100%, transparent 100%),
                 linear-gradient(to top, transparent 75%, #475569 75%, #475569 92%, transparent 92%),
                 linear-gradient(to top, transparent 30%, #475569 30%, #475569 75%, transparent 75%),
@@ -102,9 +97,9 @@ const stickerDaten = [
             textShadow: "1px 1px 0 #003580",
             display: "flex",
             alignItems: "center",
-            justifyContent: "flex-start", // Text links vom Haus
+            justifyContent: "flex-start",
             writingMode: "vertical-rl",
-            transform: "rotate(180deg)", // D unten, I oben
+            transform: "rotate(180deg)",
             padding: "10px",
             filter: "drop-shadow(2px 2px 0px rgba(0,0,0,0.3))",
             overflow: "hidden"
@@ -118,14 +113,17 @@ const stickerDaten = [
             width: "130px",
             height: "115px",
             background: "#006AA7",
-            // 2. Kronen-Shapes via schärfere Radial-Gradients (3 Punkte pro Krone angedeutet)
+            // Kronen-Shape: Jetzt als 3 gezackte Mini-Blöcke (3-Pixel-Spitzen)
             backgroundImage: `
-                radial-gradient(circle, #FECC00 2px, transparent 3px), radial-gradient(circle, #FECC00 2px, transparent 3px), radial-gradient(circle, #FECC00 2px, transparent 3px),
+                linear-gradient(to bottom, #FECC00 2px, transparent 2px) ,
+                linear-gradient(to right, #FECC00 2px, transparent 2px, transparent 4px, #FECC00 4px, #FECC00 6px, transparent 6px, transparent 8px, #FECC00 8px),
+                linear-gradient(to bottom, #FECC00 2px, transparent 2px) ,
+                linear-gradient(to right, #FECC00 2px, transparent 2px, transparent 4px, #FECC00 4px, #FECC00 6px, transparent 6px, transparent 8px, #FECC00 8px),
                 linear-gradient(90deg, transparent 30%, #FECC00 30%, #FECC00 40%, transparent 40%),
                 linear-gradient(0deg,  transparent 45%, #FECC00 45%, #FECC00 55%, transparent 55%)
             `,
-            backgroundPosition: "10% 15%, 20% 15%, 15% 25%, 0 0, 0 0",
-            backgroundSize: "8px 8px, 8px 8px, 8px 8px, 100% 100%, 100% 100%",
+            backgroundPosition: "10% 15%, 10% 18%, 25% 15%, 25% 18%, 0 0, 0 0",
+            backgroundSize: "10px 2px, 10px 6px, 10px 2px, 10px 6px, 100% 100%, 100% 100%",
             backgroundRepeat: "no-repeat",
             border: "4px double #FECC00",
             borderRadius: "10px",
@@ -149,7 +147,6 @@ const stickerDaten = [
             width: "130px",
             height: "120px",
             clipPath: "polygon(5% 100%, 15% 55%, 35% 25%, 50% 15%, 65% 25%, 85% 55%, 100% 100%)",
-            // 3. Mehr Rot-Anteil (30% statt 25%)
             background: "linear-gradient(180deg, #EA2839 0%, #EA2839 30%, #1A206D 30%, #1A206D 53%, #FFD500 53%, #FFD500 76%, #00A551 76%, #00A551 100%)",
             color: "#ffffff",
             fontWeight: "900",
