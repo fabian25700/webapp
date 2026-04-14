@@ -62,9 +62,8 @@ const stickerDaten = [
                 radial-gradient(circle, #fff 50%, transparent 55%),
                 radial-gradient(circle, #fff 50%, transparent 55%),
                 radial-gradient(circle, #fff 50%, transparent 55%),
-                /* Burj Khalifa Spitze */
+                /* Burj Khalifa: Spitze und Körper */
                 linear-gradient(to top, transparent 80%, #475569 80%, #475569 98%, transparent 98%),
-                /* Burj Khalifa Körper */
                 linear-gradient(to top, #475569 0%, #475569 80%, transparent 80%)
             `,
             backgroundSize: "20px 20px, 20px 20px, 20px 20px, 20px 20px, 2px 90%, 25px 70%",
@@ -80,9 +79,10 @@ const stickerDaten = [
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            /* Text-Orientierung: D oben, I unten (Normaler vertikaler Fluss) */
+            /* D unten, I oben durch 180 Grad Drehung von vertical-rl */
             writingMode: "vertical-rl",
-            paddingLeft: "30px",
+            transform: "rotate(180deg)",
+            paddingRight: "30px",
             filter: "drop-shadow(3px 3px 0px #fff)"
         }
     },
@@ -93,13 +93,14 @@ const stickerDaten = [
         style: {
             background: "#006AA7",
             backgroundImage: `
-                /* 3 Kronen stilisieren */
+                /* Layer 1 (Ganz oben): Kronen */
                 linear-gradient(#FECC00, #FECC00) 72% 18% / 10px 3px, linear-gradient(#FECC00, #FECC00) 72% 14% / 2px 6px,
                 linear-gradient(#FECC00, #FECC00) 62% 28% / 10px 3px, linear-gradient(#FECC00, #FECC00) 62% 24% / 2px 6px,
                 linear-gradient(#FECC00, #FECC00) 82% 28% / 10px 3px, linear-gradient(#FECC00, #FECC00) 82% 24% / 2px 6px,
-                /* Gelbes Kreuz (Wiederhergestellt) */
+                /* Layer 2: Gelbes Kreuz */
                 linear-gradient(90deg, transparent 25%, #FECC00 25%, #FECC00 35%, transparent 35%),
                 linear-gradient(0deg, transparent 45%, #FECC00 45%, #FECC00 55%, transparent 55%)
+                /* Hintergrundfarbe ist #006AA7 */
             `,
             backgroundRepeat: "no-repeat",
             border: "6px double #FECC00",
