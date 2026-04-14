@@ -5,7 +5,11 @@ const stickerDaten = [
         naechte: 4,
         style: {
             clipPath: "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)",
-            background: `linear-gradient(90deg, transparent 30%, #ffffff 30%, #ffffff 40%, transparent 40%), linear-gradient(0deg, transparent 45%, #ffffff 45%, #ffffff 55%, transparent 55%), #C8102E`,
+            background: `
+                linear-gradient(90deg, transparent 30%, #ffffff 30%, #ffffff 40%, transparent 40%),
+                linear-gradient(0deg,  transparent 45%, #ffffff 45%, #ffffff 55%, transparent 55%),
+                #C8102E
+            `,
             color: "#ffffff",
             fontWeight: "900",
             fontSize: "12px",
@@ -13,11 +17,11 @@ const stickerDaten = [
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "10px",
+            padding: "14px 10px",
             filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.4))",
-            overflow: "hidden"
+            overflow: "hidden" // 1. Kein Text außerhalb
         },
-        suffix: " Ø" // Klassisches O mit Strich
+        suffix: " Ø" // 4. Klassisches O mit Strich
     },
     {
         stadt: "New York",
@@ -25,7 +29,10 @@ const stickerDaten = [
         naechte: 4,
         style: {
             clipPath: "polygon(30% 0%, 40% 5%, 55% 0%, 70% 5%, 85% 15%, 95% 30%, 100% 50%, 95% 70%, 85% 85%, 70% 95%, 50% 100%, 30% 95%, 15% 85%, 5% 70%, 0% 50%, 5% 30%, 15% 15%)",
-            background: `linear-gradient(90deg, #002868 0%, #002868 38%, transparent 38%), repeating-linear-gradient(0deg, #BF0A30 0px, #BF0A30 13px, #ffffff 13px, #ffffff 26px)`,
+            background: `
+                linear-gradient(90deg, #002868 0%, #002868 38%, transparent 38%),
+                repeating-linear-gradient(0deg, #BF0A30 0px, #BF0A30 13px, #ffffff 13px, #ffffff 26px)
+            `,
             color: "#ffffff",
             fontWeight: "900",
             fontSize: "15px",
@@ -34,7 +41,7 @@ const stickerDaten = [
             alignItems: "center",
             justifyContent: "center",
             filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.4))",
-            overflow: "hidden"
+            overflow: "hidden" // 1. Kein Text außerhalb
         }
     },
     {
@@ -42,20 +49,23 @@ const stickerDaten = [
         land: "International",
         naechte: 10,
         style: {
-            clipPath: "polygon(0% 25%, 75% 25%, 100% 50%, 75% 75%, 0% 75%)", // Schiffsrumpf
+            // 2. Form Kreuzfahrtschiff (Bug vorne spitz, hinten gerade)
+            clipPath: "polygon(0% 20%, 80% 20%, 100% 50%, 80% 80%, 0% 80%)", 
             background: `
-                radial-gradient(circle at 70% 50%, #005DAA 4px, transparent 4.5px), /* Anker Punkt */
-                linear-gradient(to bottom, #005DAA 0%, #005DAA 40%, #ffffff 40%, #ffffff 60%, #E2001A 60%, #E2001A 100%)
+                /* 2. Anker auf dem weißen Bereich */
+                radial-gradient(circle at 85% 50%, #005DAA 2px, transparent 2.5px),
+                linear-gradient(to bottom, #005DAA 0%, #005DAA 45%, #ffffff 45%, #ffffff 55%, #E2001A 55%, #E2001A 100%)
             `,
             color: "#005DAA",
             fontWeight: "bold",
-            fontSize: "16px",
+            fontSize: "17px",
             fontStyle: "italic",
+            textShadow: "1px 1px 0 rgba(255,255,255,0.8)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
             filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.3))",
-            overflow: "hidden"
+            overflow: "hidden" // 1. Kein Text außerhalb
         }
     },
     {
@@ -64,7 +74,8 @@ const stickerDaten = [
         naechte: 9,
         style: {
             background: `
-                linear-gradient(to top, #475569 0%, #475569 100%) 15% 0% / 15% 100% no-repeat, /* Haus links */
+                /* Burj Khalifa links positioniert */
+                linear-gradient(to top, #475569 0%, #475569 100%) 15% 0% / 20% 100% no-repeat,
                 #87CEEB
             `,
             borderRadius: "2px",
@@ -74,15 +85,16 @@ const stickerDaten = [
             color: "#1e293b",
             fontWeight: "900",
             fontSize: "14px",
+            fontFamily: "Georgia, serif",
             textShadow: "1px 1px 0 #ffffff",
             display: "flex",
             alignItems: "center",
-            justifyContent: "flex-end", // Text nach rechts
+            justifyContent: "flex-end", // 5. Text auf die andere Seite (rechts)
             writingMode: "vertical-rl",
-            transform: "rotate(0deg)", // 180 Grad Drehung rückgängig gemacht
+            transform: "rotate(0deg)", // 5. Um 180 Grad gedreht (von 180 auf 0)
             padding: "8px",
             filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.3))",
-            overflow: "hidden"
+            overflow: "hidden" // 1. Kein Text außerhalb
         }
     },
     {
@@ -92,14 +104,14 @@ const stickerDaten = [
         style: {
             background: "#006AA7",
             backgroundImage: `
-                radial-gradient(#FECC00 2px, transparent 2.5px), /* Krone 1 */
-                radial-gradient(#FECC00 2px, transparent 2.5px), /* Krone 2 */
-                radial-gradient(#FECC00 2px, transparent 2.5px), /* Krone 3 */
+                /* 3. Drei gelbe Kronen (sichtbar oben links) */
+                linear-gradient(#FECC00, #FECC00) 10% 10% / 8px 5px,
+                linear-gradient(#FECC00, #FECC00) 25% 10% / 8px 5px,
+                linear-gradient(#FECC00, #FECC00) 17.5% 25% / 8px 5px,
+                /* 3. Gelbes Kreuz analog zu Dänemark */
                 linear-gradient(90deg, transparent 30%, #FECC00 30%, #FECC00 40%, transparent 40%),
-                linear-gradient(0deg, transparent 45%, #FECC00 45%, #FECC00 55%, transparent 55%)
+                linear-gradient(0deg,  transparent 43%, #FECC00 43%, #FECC00 57%, transparent 57%)
             `,
-            backgroundPosition: "15% 15%, 25% 15%, 20% 25%, 0 0, 0 0",
-            backgroundSize: "8px 8px, 8px 8px, 8px 8px, 100% 100%, 100% 100%",
             backgroundRepeat: "no-repeat",
             border: "5px double #FECC00",
             borderRadius: "14px",
@@ -110,8 +122,9 @@ const stickerDaten = [
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            padding: "10px 12px",
             filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.3))",
-            overflow: "hidden"
+            overflow: "hidden" // 1. Kein Text außerhalb
         }
     },
     {
@@ -128,9 +141,9 @@ const stickerDaten = [
             display: "flex",
             alignItems: "flex-end",
             justifyContent: "center",
-            paddingBottom: "12px",
+            paddingBottom: "8px",
             filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.4))",
-            overflow: "hidden"
+            overflow: "hidden" // 1. Kein Text außerhalb
         }
     }
 ];
