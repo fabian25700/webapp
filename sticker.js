@@ -70,23 +70,40 @@ const stickerDaten = [
         }
     },
     {
-        stadt: "Stockholm",
-        land: "Schweden",
-        naechte: 4,
-        style: {
-            background: "#006AA7",
-            border: "6px double #FECC00",
-            borderRadius: "15px",
-            color: "#FECC00",
-            fontWeight: "800",
-            fontSize: "15px",
-            textShadow: "1px 1px 0 #000",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            filter: "drop-shadow(3px 3px 0px #fff)"
-        }
-    },
+    stadt: "Stockholm",
+    land: "Schweden",
+    naechte: 4,
+    style: {
+        /* Hintergrund mit gelbem Kreuz und blauem Feld */
+        background: `
+            linear-gradient(90deg, transparent 25%, #FECC00 25%, #FECC00 35%, transparent 35%),
+            linear-gradient(0deg, transparent 45%, #FECC00 45%, #FECC00 55%, transparent 55%),
+            #006AA7
+        `,
+        border: "6px double #FECC00",
+        borderRadius: "15px",
+        color: "#FECC00",
+        fontWeight: "800",
+        fontSize: "15px",
+        textShadow: "1px 1px 0 #000",
+        display: "flex",
+        /* Positionierung in der unteren rechten Ecke */
+        alignItems: "flex-end",
+        justifyContent: "flex-end",
+        padding: "15px",
+        /* Drei stilisierte Kronen im oberen rechten Feld via ::before (wird hier als Pseudo-Element simuliert) */
+        /* Für die Kronen nutzen wir ein zusätzliches Hintergrund-Element (radial-gradients) */
+        backgroundImage: `
+            radial-gradient(circle at 75% 20%, #FECC00 6px, transparent 7px),
+            radial-gradient(circle at 65% 35%, #FECC00 6px, transparent 7px),
+            radial-gradient(circle at 85% 35%, #FECC00 6px, transparent 7px),
+            linear-gradient(90deg, transparent 25%, #FECC00 25%, #FECC00 35%, transparent 35%),
+            linear-gradient(0deg, transparent 45%, #FECC00 45%, #FECC00 55%, transparent 55%)
+        `,
+        backgroundColor: "#006AA7",
+        filter: "drop-shadow(3px 3px 0px #fff)"
+    }
+}
    {
     stadt: "Le Morne Brabant",
     land: "Mauritius",
