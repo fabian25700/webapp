@@ -1,29 +1,33 @@
 const stickerDaten = [
     {
-        stadt: "Kopenhagen",
-        land: "Dänemark",
-        naechte: 4,
-        style: {
-            width: "125px",
-            height: "110px",
-            clipPath: "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)",
-            background: `
-                linear-gradient(90deg, transparent 30%, #ffffff 30%, #ffffff 40%, transparent 40%),
-                linear-gradient(0deg,  transparent 45%, #ffffff 45%, #ffffff 55%, transparent 55%),
-                #C8102E
-            `,
-            color: "#ffffff",
-            fontWeight: "900",
-            fontSize: "14px", // Leicht erhöht für Sichtbarkeit
-            textShadow: "1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            filter: "drop-shadow(2px 2px 0px rgba(0,0,0,0.4))",
-            overflow: "hidden"
-        },
-        suffix: " Ø" // Das Ø wird jetzt durch die Schriftgröße präsenter
-    },
+    stadt: "Kopenhagen",
+    land: "Dänemark",
+    naechte: 4,
+    style: {
+        width: "125px",
+        height: "110px",
+        boxSizing: "border-box",
+        clipPath: "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)",
+        background: `
+            /* Das Ø als SVG - Garantiert weißer Strich mit schwarzer Outline */
+            url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='white' stroke='black' stroke-width='1' font-family='Arial' font-weight='900' font-size='20'%3EØ%3C/text%3E%3C/svg%3E") no-repeat center / 40px 40px,
+            /* Das dänische Kreuz */
+            linear-gradient(90deg, transparent 30%, #ffffff 30%, #ffffff 40%, transparent 40%),
+            linear-gradient(0deg,   transparent 45%, #ffffff 45%, #ffffff 55%, transparent 55%),
+            #C8102E
+        `,
+        color: "#ffffff",
+        fontWeight: "900",
+        fontSize: "14px",
+        textShadow: "1.5px 1.5px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000",
+        display: "flex",
+        alignItems: "flex-end", // Text nach unten, damit er das Ø in der Mitte nicht voll verdeckt
+        justifyContent: "center",
+        paddingBottom: "10px",
+        filter: "drop-shadow(2px 2px 0px rgba(0,0,0,0.4))",
+        overflow: "hidden"
+    }
+},
     {
         stadt: "New York",
         land: "USA",
