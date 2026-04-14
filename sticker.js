@@ -62,12 +62,13 @@ const stickerDaten = [
                 radial-gradient(circle, #fff 50%, transparent 55%),
                 radial-gradient(circle, #fff 50%, transparent 55%),
                 radial-gradient(circle, #fff 50%, transparent 55%),
-                /* Burj Khalifa Silhouette: Spitze + Stufen */
-                linear-gradient(to top, #475569 0%, #475569 70%, transparent 70%),
-                linear-gradient(to top, transparent 70%, #475569 70%, #475569 95%, transparent 95%)
+                /* Burj Khalifa Spitze */
+                linear-gradient(to top, transparent 80%, #475569 80%, #475569 98%, transparent 98%),
+                /* Burj Khalifa Körper */
+                linear-gradient(to top, #475569 0%, #475569 80%, transparent 80%)
             `,
-            backgroundSize: "20px 20px, 20px 20px, 20px 20px, 20px 20px, 30px 60%, 2px 85%",
-            backgroundPosition: "0 -10px, 0 100%, -10px 0, 100% 0, 75% 100%, 79.5% 80%",
+            backgroundSize: "20px 20px, 20px 20px, 20px 20px, 20px 20px, 2px 90%, 25px 70%",
+            backgroundPosition: "0 -10px, 0 100%, -10px 0, 100% 0, 81% 100%, 80% 100%",
             backgroundRepeat: "repeat-x, repeat-x, repeat-y, repeat-y, no-repeat, no-repeat",
             clipPath: "none",
             borderRadius: "2px",
@@ -79,9 +80,9 @@ const stickerDaten = [
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            /* Text-Orientierung: D oben, I unten */
-            writingMode: "vertical-lr",
-            paddingLeft: "20px",
+            /* Text-Orientierung: D oben, I unten (Normaler vertikaler Fluss) */
+            writingMode: "vertical-rl",
+            paddingLeft: "30px",
             filter: "drop-shadow(3px 3px 0px #fff)"
         }
     },
@@ -92,11 +93,11 @@ const stickerDaten = [
         style: {
             background: "#006AA7",
             backgroundImage: `
-                /* Drei Kronen */
-                linear-gradient(#FECC00, #FECC00) 75% 15% / 10px 3px, linear-gradient(#FECC00, #FECC00) 75% 12% / 2px 6px,
-                linear-gradient(#FECC00, #FECC00) 65% 25% / 10px 3px, linear-gradient(#FECC00, #FECC00) 65% 22% / 2px 6px,
-                linear-gradient(#FECC00, #FECC00) 85% 25% / 10px 3px, linear-gradient(#FECC00, #FECC00) 85% 22% / 2px 6px,
-                /* Gelbes Kreuz */
+                /* 3 Kronen stilisieren */
+                linear-gradient(#FECC00, #FECC00) 72% 18% / 10px 3px, linear-gradient(#FECC00, #FECC00) 72% 14% / 2px 6px,
+                linear-gradient(#FECC00, #FECC00) 62% 28% / 10px 3px, linear-gradient(#FECC00, #FECC00) 62% 24% / 2px 6px,
+                linear-gradient(#FECC00, #FECC00) 82% 28% / 10px 3px, linear-gradient(#FECC00, #FECC00) 82% 24% / 2px 6px,
+                /* Gelbes Kreuz (Wiederhergestellt) */
                 linear-gradient(90deg, transparent 25%, #FECC00 25%, #FECC00 35%, transparent 35%),
                 linear-gradient(0deg, transparent 45%, #FECC00 45%, #FECC00 55%, transparent 55%)
             `,
