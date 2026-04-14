@@ -62,28 +62,26 @@ const stickerDaten = [
                 radial-gradient(circle, #fff 50%, transparent 55%),
                 radial-gradient(circle, #fff 50%, transparent 55%),
                 radial-gradient(circle, #fff 50%, transparent 55%),
-                /* Burj Khalifa: Richtung umgekehrt (unten breit, oben spitz) und rechts platziert */
-                linear-gradient(to top, #475569 0%, #475569 5%, transparent 5%),
-                linear-gradient(90deg, transparent 70%, #475569 70%, #475569 85%, transparent 85%),
-                linear-gradient(0deg, transparent 10%, #64748b 10%, #64748b 40%, #94a3b8 40%, #94a3b8 70%, #cbd5e1 70%, #cbd5e1 95%, transparent 95%)
+                /* Burj Khalifa Silhouette: Spitze + Stufen */
+                linear-gradient(to top, #475569 0%, #475569 70%, transparent 70%),
+                linear-gradient(to top, transparent 70%, #475569 70%, #475569 95%, transparent 95%)
             `,
-            backgroundSize: "20px 20px, 20px 20px, 20px 20px, 20px 20px, 100% 100%, 100% 100%, 25px 100%",
-            backgroundPosition: "0 -10px, 0 100%, -10px 0, 100% 0, 0 0, 0 0, 75% 0",
-            backgroundRepeat: "repeat-x, repeat-x, repeat-y, repeat-y, no-repeat, no-repeat, no-repeat",
+            backgroundSize: "20px 20px, 20px 20px, 20px 20px, 20px 20px, 30px 60%, 2px 85%",
+            backgroundPosition: "0 -10px, 0 100%, -10px 0, 100% 0, 75% 100%, 79.5% 80%",
+            backgroundRepeat: "repeat-x, repeat-x, repeat-y, repeat-y, no-repeat, no-repeat",
             clipPath: "none",
             borderRadius: "2px",
             border: "12px solid #fff",
             color: "#1e293b",
             fontWeight: "900",
-            fontSize: "14px",
-            letterSpacing: "1px",
+            fontSize: "15px",
             fontFamily: "serif",
             display: "flex",
             alignItems: "center",
-            justifyContent: "flex-start",
-            writingMode: "vertical-rl",
-            transform: "rotate(180deg)",
-            paddingRight: "15px",
+            justifyContent: "center",
+            /* Text-Orientierung: D oben, I unten */
+            writingMode: "vertical-lr",
+            paddingLeft: "20px",
             filter: "drop-shadow(3px 3px 0px #fff)"
         }
     },
@@ -94,10 +92,11 @@ const stickerDaten = [
         style: {
             background: "#006AA7",
             backgroundImage: `
-                /* Drei Kronen (stilisierte E-Formen nach oben gerichtet) */
-                linear-gradient(#FECC00, #FECC00) 70% 20% / 12px 4px, linear-gradient(#FECC00, #FECC00) 68% 16% / 2px 8px, linear-gradient(#FECC00, #FECC00) 72% 16% / 2px 8px, linear-gradient(#FECC00, #FECC00) 70% 16% / 2px 8px,
-                linear-gradient(#FECC00, #FECC00) 60% 35% / 12px 4px, linear-gradient(#FECC00, #FECC00) 58% 31% / 2px 8px, linear-gradient(#FECC00, #FECC00) 62% 31% / 2px 8px, linear-gradient(#FECC00, #FECC00) 60% 31% / 2px 8px,
-                linear-gradient(#FECC00, #FECC00) 80% 35% / 12px 4px, linear-gradient(#FECC00, #FECC00) 78% 31% / 2px 8px, linear-gradient(#FECC00, #FECC00) 82% 31% / 2px 8px, linear-gradient(#FECC00, #FECC00) 80% 31% / 2px 8px,
+                /* Drei Kronen */
+                linear-gradient(#FECC00, #FECC00) 75% 15% / 10px 3px, linear-gradient(#FECC00, #FECC00) 75% 12% / 2px 6px,
+                linear-gradient(#FECC00, #FECC00) 65% 25% / 10px 3px, linear-gradient(#FECC00, #FECC00) 65% 22% / 2px 6px,
+                linear-gradient(#FECC00, #FECC00) 85% 25% / 10px 3px, linear-gradient(#FECC00, #FECC00) 85% 22% / 2px 6px,
+                /* Gelbes Kreuz */
                 linear-gradient(90deg, transparent 25%, #FECC00 25%, #FECC00 35%, transparent 35%),
                 linear-gradient(0deg, transparent 45%, #FECC00 45%, #FECC00 55%, transparent 55%)
             `,
