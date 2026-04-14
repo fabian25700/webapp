@@ -87,21 +87,25 @@ const stickerDaten = [
             filter: "drop-shadow(3px 3px 0px #fff)"
         }
     },
-    {
-        stadt: "Le Morne",
-        land: "Mauritius",
-        naechte: 5,
-        style: {
-            background: "linear-gradient(180deg, #EA2839 25%, #1A206D 26%, #1A206D 50%, #FFD500 51%, #FFD500 75%, #00A551 76%)",
-            clipPath: "polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)",
-            color: "#ffffff",
-            fontWeight: "900",
-            fontSize: "12px",
-            textShadow: "2px 2px 4px #000",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            filter: "drop-shadow(3px 3px 0px #fff)"
-        }
+   {
+    stadt: "Le Morne Brabant",
+    land: "Mauritius",
+    naechte: 5,
+    style: {
+        background: "linear-gradient(180deg, #EA2839 25%, #1A206D 26%, #1A206D 50%, #FFD500 51%, #FFD500 75%, #00A551 76%)",
+        /* polygon geändert, um die Silhouette des Berges Le Morne Brabant nachzubilden */
+        clipPath: "polygon(50% 0%, 80% 20%, 100% 100%, 0% 100%, 20% 20%)",
+        color: "#ffffff",
+        fontWeight: "900",
+        fontSize: "12px",
+        textShadow: "2px 2px 4px #000",
+        display: "flex",
+        /* alignItems geändert, um Text unten zu positionieren */
+        alignItems: "flex-end",
+        justifyContent: "center",
+        /* padding hinzugefügt, damit der Text mittig im grünen Streifen sitzt */
+        paddingBottom: "10px",
+        filter: "drop-shadow(3px 3px 0px #fff)"
     }
+}
 ];
