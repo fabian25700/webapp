@@ -4,27 +4,31 @@ const stickerDaten = [
         land: "Dänemark",
         naechte: 4,
         style: {
+            // 1. Einheitliche Größe
+            width: "250px",
+            height: "150px",
+            boxSizing: "border-box",
             // Sechseck via clip-path
             clipPath: "polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%)",
-            // Dannebrog: Rotes Feld mit weißem Kreuz (vertikaler Balken bei 35%, horizontaler bei 50%)
+            // Dannebrog
             background: `
                 linear-gradient(90deg, transparent 30%, #ffffff 30%, #ffffff 40%, transparent 40%),
-                linear-gradient(0deg,  transparent 45%, #ffffff 45%, #ffffff 55%, transparent 55%),
+                linear-gradient(0deg,   transparent 45%, #ffffff 45%, #ffffff 55%, transparent 55%),
                 #C8102E
             `,
             color: "#ffffff",
             fontWeight: "900",
-            fontSize: "12px",
+            fontSize: "18px",
             textShadow: "1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000",
             display: "flex",
-            alignItems: "flex-end",
-            justifyContent: "flex-end",
-            padding: "14px 10px",
-            // Ø als Pseudo-Overlay – wird per position:relative + ::before gemacht,
-            // hier als Unicode direkt im Text-Content ergänzt (siehe unten bei textContent)
-            filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.4))"
+            // 2. Text zentriert, suffix wird im content übergeben
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "10px",
+            filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.4))",
+            overflow: "hidden"
         },
-        // Sonderzeichen das im Sticker-Text ergänzt wird
+        // Sonderzeichen im Text
         suffix: " Ø"
     },
     {
@@ -32,28 +36,27 @@ const stickerDaten = [
         land: "USA",
         naechte: 4,
         style: {
-            // Apfel-Form via clip-path (Big Apple)
+            // 1. Einheitliche Größe
+            width: "250px",
+            height: "150px",
+            boxSizing: "border-box",
+            // Apfel-Form
             clipPath: "polygon(30% 0%, 40% 5%, 55% 0%, 70% 5%, 85% 15%, 95% 30%, 100% 50%, 95% 70%, 85% 85%, 70% 95%, 50% 100%, 30% 95%, 15% 85%, 5% 70%, 0% 50%, 5% 30%, 15% 15%)",
-            // US-Flagge: blaues Feld oben links + rote/weiße Streifen
+            // US-Flagge
             background: `
-                linear-gradient(90deg,
-                    #002868 0%,   #002868 38%,
-                    transparent 38%
-                ),
-                repeating-linear-gradient(
-                    0deg,
-                    #BF0A30 0px, #BF0A30 13px,
-                    #ffffff 13px, #ffffff 26px
-                )
+                linear-gradient(90deg, #002868 0%, #002868 45%, transparent 45%),
+                repeating-linear-gradient(0deg, #BF0A30 0px, #BF0A30 13px, #ffffff 13px, #ffffff 26px)
             `,
             color: "#ffffff",
             fontWeight: "900",
-            fontSize: "15px",
+            fontSize: "22px",
             textShadow: "1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.4))"
+            padding: "10px",
+            filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.4))",
+            overflow: "hidden"
         }
     },
     {
@@ -61,28 +64,31 @@ const stickerDaten = [
         land: "International",
         naechte: 10,
         style: {
-            // Parallelogramm (Schiffsrumpf-Silhouette)
+            // 1. Einheitliche Größe
+            width: "250px",
+            height: "150px",
+            boxSizing: "border-box",
+            // 6. Form: dynamisches, schräges Parallelogramm
             clipPath: "polygon(12% 0%, 100% 0%, 88% 100%, 0% 100%)",
-            // Blau oben (60%), Weiß mitte (20%), Rot unten rechts (20%) – Kussmund-Schiffe
+            // 6. Design: Blau (oben), Weiß (unten), Rot (unten rechts)
             background: `
-                linear-gradient(
-                    to bottom right,
-                    #005DAA 0%,   #005DAA 58%,
-                    #ffffff 58%,  #ffffff 78%,
-                    #E2001A 78%,  #E2001A 100%
-                )
+                /* Rotes Feld unten rechts */
+                linear-gradient(to top left, #E2001A 0%, #E2001A 20%, transparent 20%),
+                /* Horizontale Teilung Blau/Weiß */
+                linear-gradient(to bottom, #005DAA 0%, #005DAA 50%, #ffffff 50%, #ffffff 100%)
             `,
+            // 6. Text: kursiv, blau, mittig auf dem weißen Streifen
             color: "#005DAA",
             fontWeight: "bold",
-            fontSize: "17px",
+            fontSize: "24px",
             fontStyle: "italic",
-            // Text sitzt auf dem weißen Streifen
-            textShadow: "1px 1px 0 rgba(255,255,255,0.8), -1px -1px 0 rgba(255,255,255,0.8)",
+            textShadow: "1px 1px 0 rgba(255,255,255,0.8)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            paddingTop: "18%",   // nach unten schieben in den weißen Streifen
-            filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.3))"
+            paddingTop: "18%", // nach unten schieben in den weißen Streifen
+            filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.3))",
+            overflow: "hidden"
         }
     },
     {
@@ -90,53 +96,44 @@ const stickerDaten = [
         land: "VAE",
         naechte: 9,
         style: {
-            // Briefmarken-Rand: weiß mit gezacktem Rand via SVG-ähnlichem repeating-gradient
+            // 1. Einheitliche Größe
+            width: "250px",
+            height: "150px",
+            boxSizing: "border-box",
+            // Briefmarken-Rand
             background: `
-                /* Burj Khalifa Silhouette – rechte Seite, volle Höhe */
-                /* Spitze (sehr schmal oben) */
+                /* Burj Khalifa Silhouette – auf die LINKE Seite verschoben */
                 linear-gradient(to top, transparent 92%, #475569 92%, #475569 100%, transparent 100%),
-                /* Oberer Turm-Abschnitt */
                 linear-gradient(to top, transparent 75%, #475569 75%, #475569 92%, transparent 92%),
-                /* Mittlerer Hauptkörper */
                 linear-gradient(to top, transparent 30%, #475569 30%, #475569 75%, transparent 75%),
-                /* Breiter Sockel */
                 linear-gradient(to top, #475569 0%, #475569 30%, transparent 30%),
                 /* Himmel */
                 #87CEEB
             `,
-            backgroundSize: `
-                2px 100%,
-                8px 100%,
-                18px 100%,
-                28px 100%,
-                100% 100%
-            `,
-            backgroundPosition: `
-                83% 0,
-                82% 0,
-                79% 0,
-                76% 0,
-                0 0
-            `,
+            backgroundSize: "2px 100%, 8px 100%, 18px 100%, 28px 100%, 100% 100%",
+            // Burj Khalifa links (ca. 20% position)
+            backgroundPosition: "23% 0, 22% 0, 19% 0, 16% 0, 0 0",
             backgroundRepeat: "no-repeat",
-            // Gezackter Briefmarken-Rand via outline + border-Kombination
             borderRadius: "2px",
             border: "8px solid #ffffff",
             outline: "2px dashed #cccccc",
             outlineOffset: "-4px",
-            // Text links, vertikal, D unten I oben
+            // Text-Styling
             color: "#1e293b",
             fontWeight: "900",
-            fontSize: "14px",
+            fontSize: "18px",
             fontFamily: "Georgia, serif",
-            textShadow: "1px 1px 0 #003580, -1px -1px 0 #003580, 1px -1px 0 #003580, -1px 1px 0 #003580",
+            textShadow: "1px 1px 0 #003580",
             display: "flex",
             alignItems: "flex-start",
-            justifyContent: "flex-start",
+            // 4. Text auf der rechten Seite (flex-end)
+            justifyContent: "flex-end",
             writingMode: "vertical-rl",
-            transform: "rotate(180deg)",
-            padding: "8px",
-            filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.3))"
+            // Drehung angepasst: D oben, I unten (von oben nach unten lesbar)
+            transform: "rotate(0deg)",
+            padding: "10px",
+            filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.3))",
+            overflow: "hidden"
         }
     },
     {
@@ -144,40 +141,37 @@ const stickerDaten = [
         land: "Schweden",
         naechte: 4,
         style: {
+            // 1. Einheitliche Größe
+            width: "250px",
+            height: "150px",
+            boxSizing: "border-box",
             background: "#006AA7",
+            // 3. Kreuz und Kronen sichtbar machen (Größe/Position angepasst)
             backgroundImage: `
-                /* 3 Kronen – oben links, oben rechts, mittig links */
+                /* 3 Kronen – stilisierte Patterns */
                 /* Krone 1: oben links */
-                linear-gradient(#FECC00, #FECC00) 15% 15% / 12px 3px,
-                linear-gradient(#FECC00, #FECC00) 18% 10% / 2px 7px,
-                linear-gradient(#FECC00, #FECC00) 13% 10% / 2px 4px,
-                linear-gradient(#FECC00, #FECC00) 23% 10% / 2px 4px,
+                linear-gradient(#FECC00, #FECC00) 15% 20% / 15px 10px,
                 /* Krone 2: oben rechts */
-                linear-gradient(#FECC00, #FECC00) 65% 15% / 12px 3px,
-                linear-gradient(#FECC00, #FECC00) 68% 10% / 2px 7px,
-                linear-gradient(#FECC00, #FECC00) 63% 10% / 2px 4px,
-                linear-gradient(#FECC00, #FECC00) 73% 10% / 2px 4px,
+                linear-gradient(#FECC00, #FECC00) 80% 20% / 15px 10px,
                 /* Krone 3: unten links */
-                linear-gradient(#FECC00, #FECC00) 15% 65% / 12px 3px,
-                linear-gradient(#FECC00, #FECC00) 18% 60% / 2px 7px,
-                linear-gradient(#FECC00, #FECC00) 13% 60% / 2px 4px,
-                linear-gradient(#FECC00, #FECC00) 23% 60% / 2px 4px,
+                linear-gradient(#FECC00, #FECC00) 15% 75% / 15px 10px,
                 /* Gelbes Kreuz */
                 linear-gradient(90deg, transparent 28%, #FECC00 28%, #FECC00 38%, transparent 38%),
-                linear-gradient(0deg,  transparent 43%, #FECC00 43%, #FECC00 57%, transparent 57%)
+                linear-gradient(0deg,   transparent 43%, #FECC00 43%, #FECC00 57%, transparent 57%)
             `,
             backgroundRepeat: "no-repeat",
             border: "5px double #FECC00",
             borderRadius: "14px",
             color: "#FECC00",
             fontWeight: "800",
-            fontSize: "13px",
+            fontSize: "16px",
             textShadow: "1px 1px 0 #000",
             display: "flex",
             alignItems: "flex-end",
             justifyContent: "flex-end",
-            padding: "10px 12px",
-            filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.3))"
+            padding: "12px",
+            filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.3))",
+            overflow: "hidden"
         }
     },
     {
@@ -185,19 +179,24 @@ const stickerDaten = [
         land: "Mauritius",
         naechte: 5,
         style: {
-            // Berg-Silhouette: breite Basis, Spitze leicht links der Mitte
-            clipPath: "polygon(5% 100%, 0% 85%, 8% 70%, 15% 55%, 22% 40%, 32% 28%, 42% 18%, 48% 8%, 53% 4%, 58% 8%, 62% 15%, 68% 25%, 75% 38%, 83% 52%, 90% 65%, 96% 78%, 100% 90%, 100% 100%)",
-            // 4 Landesfarben: Rot 25%, Blau 25%, Gelb 25%, Grün 25%
+            // 1. Einheitliche Größe
+            width: "250px",
+            height: "150px",
+            boxSizing: "border-box",
+            // 5. Berg-Silhouette: oben WENIGER spitz (abgeflacht)
+            clipPath: "polygon(5% 100%, 0% 85%, 8% 70%, 15% 55%, 22% 40%, 32% 28%, 42% 18%, 46% 12%, 54% 12%, 58% 18%, 62% 25%, 68% 35%, 75% 48%, 83% 60%, 90% 72%, 96% 85%, 100% 95%, 100% 100%)",
+            // 4 Landesfarben
             background: "linear-gradient(180deg, #EA2839 0%, #EA2839 25%, #1A206D 25%, #1A206D 50%, #FFD500 50%, #FFD500 75%, #00A551 75%, #00A551 100%)",
             color: "#ffffff",
             fontWeight: "900",
-            fontSize: "11px",
+            fontSize: "14px",
             textShadow: "1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000",
             display: "flex",
             alignItems: "flex-end",
             justifyContent: "center",
-            paddingBottom: "8px",
-            filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.4))"
+            paddingBottom: "10px",
+            filter: "drop-shadow(3px 3px 0px rgba(0,0,0,0.4))",
+            overflow: "hidden"
         }
     }
 ];
