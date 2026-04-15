@@ -18,6 +18,9 @@
             --flap-bg: #222;
             --text-white: #ffffff;
             --text-yellow: #fdb813;
+            --flap-w: 20px;
+            --flap-h: 30px;
+            --flap-font: 18px;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -66,29 +69,35 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
-            margin-top: 60px; /* Platz für Header */
+            position: relative;
         }
 
         #departure-board {
             background-color: var(--board-bg);
-            padding: 25px;
-            border: 8px solid #333;
-            border-radius: 15px;
+            padding: 20px;
+            border: 6px solid #333;
+            border-radius: 12px;
             box-shadow: 0 30px 60px rgba(0,0,0,0.4);
-            width: max-content; /* Passt sich dem Inhalt an */
+            width: max-content;
         }
 
-        /* Mobile Optimierung: Rotation und Skalierung */
+        /* Mobile Optimierung */
         @media screen and (max-width: 768px) and (orientation: portrait) {
-            .content-container {
-                margin-top: 0;
+            :root {
+                --flap-w: 14px; /* Schmalere Flaps für Mobile */
+                --flap-h: 22px;
+                --flap-font: 13px;
             }
             #departure-board {
-                transform: rotate(-90deg) scale(0.65); /* In die andere Richtung drehen & kleiner */
+                position: fixed;
+                left: 50%;
+                top: 55%; /* Leicht nach unten versetzt für optische Mitte */
+                transform: translate(-50%, -50%) rotate(-90deg);
                 transform-origin: center center;
-                white-space: nowrap;
+                max-width: 90vh; /* Verhindert Überlappen oben/unten im gedrehten Zustand */
+                padding: 15px;
             }
+            .board-title { font-size: 1.2rem !important; margin-bottom: 10px !important; }
         }
 
         .board-title {
@@ -106,32 +115,32 @@
 
         .board-header {
             display: grid;
-            gap: 10px;
-            margin-bottom: 12px;
+            gap: 8px;
+            margin-bottom: 8px;
             color: #555;
-            font-size: 11px;
+            font-size: 9px;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
             font-weight: 700;
         }
 
         .flight-row {
             display: grid;
-            gap: 10px;
-            margin-bottom: 8px;
+            gap: 8px;
+            margin-bottom: 6px;
         }
 
-        .flap-group { display: flex; gap: 2px; }
+        .flap-group { display: flex; gap: 1.5px; }
 
         .flap {
-            width: 20px;
-            height: 30px;
+            width: var(--flap-w);
+            height: var(--flap-h);
             background-color: var(--flap-bg);
             color: var(--text-white);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 18px;
+            font-size: var(--flap-font);
             font-weight: bold;
             font-family: 'Courier New', Courier, monospace;
             border-radius: 2px;
@@ -152,7 +161,6 @@
             0% { transform: rotateX(0deg); }
             100% { transform: rotateX(-360deg); }
         }
-
         .flipping { animation: flip 0.1s ease-in-out infinite; }
     </style>
 </head>
@@ -193,8 +201,9 @@
     function initBoard() {
         const headerRow = document.getElementById('board-header-row');
         const rowsContainer = document.getElementById('rows-container');
-        // Breite pro Flap im CSS ist 20px + gap/border -> ca 22px Kalkulationsbasis
-        const gridTemplate = colLengths.map(l => `calc(${l} * 22px)`).join(" ");
+        
+        // Dynamische Spaltenbreite basierend auf CSS Variable
+        const gridTemplate = colLengths.map(l => `calc(${l} * (var(--flap-w) + 2px))`).join(" ");
         
         headerRow.style.gridTemplateColumns = gridTemplate;
         
