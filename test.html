@@ -19,7 +19,7 @@
             --text-white: #ffffff;
             --text-yellow: #fdb813;
             
-            /* Standard Laptop Maße */
+            /* Laptop Standard */
             --flap-w: 20px;
             --flap-h: 30px;
             --flap-font: 18px;
@@ -74,43 +74,40 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            margin-top: 40px;
         }
 
         #departure-board {
             background-color: var(--board-bg);
-            padding: 20px;
-            border: 6px solid #333;
-            border-radius: 12px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+            padding: 25px;
+            border: 8px solid #333;
+            border-radius: 15px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
             width: max-content;
             transform: rotate(var(--rotation)) scale(var(--board-scale));
-            transition: all 0.3s ease;
         }
 
-        /* Mobile Optimierung: Erzwungene Anpassung */
+        /* Handy Optimierung */
         @media screen and (max-width: 768px) {
             :root {
-                /* Nutzt Viewport-Einheiten: Das Board wird IMMER so breit wie das Display hoch ist */
-                --flap-w: 1.6vh; 
-                --flap-h: 2.5vh;
-                --flap-font: 1.4vh;
+                /* Reduzierte vh-Werte für mehr Abstand zum Rand */
+                --flap-w: 1.4vh; 
+                --flap-h: 2.2vh;
+                --flap-font: 1.2vh;
                 --rotation: -90deg;
-                --board-scale: 1;
             }
             
             #departure-board {
                 position: fixed;
                 left: 50%;
-                top: 55%;
+                top: 52%;
                 transform: translate(-50%, -50%) rotate(-90deg);
-                padding: 10px;
-                border-width: 4px;
+                padding: 15px;
+                border-width: 5px;
             }
 
-            .board-title { font-size: 3vh !important; margin-bottom: 10px !important; }
-            .board-header { font-size: 1.2vh !important; gap: 4px !important; }
-            .flight-row { gap: 4px !important; margin-bottom: 4px !important; }
+            .board-title { font-size: 2.5vh !important; margin-bottom: 12px !important; }
+            .board-header { font-size: 1.1vh !important; gap: 5px !important; }
+            .flight-row { gap: 5px !important; margin-bottom: 5px !important; }
             .flap-group { gap: 1px !important; }
         }
 
@@ -130,7 +127,7 @@
         .board-header {
             display: grid;
             gap: 10px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             color: #555;
             font-size: 10px;
             text-transform: uppercase;
@@ -141,7 +138,7 @@
         .flight-row {
             display: grid;
             gap: 10px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .flap-group { display: flex; gap: 2px; }
@@ -194,14 +191,15 @@
     </div>
 
 <script>
-    const CHARS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:.";
+    const CHARS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:/";
     
+    // Daten mit / statt .
     const travelData = [
-        { date: "15.04.26", flight: "EK046", from: "DUESSELDORF", to: "DUBAI", airline: "EMIRATES" },
-        { date: "10.06.26", flight: "SK638", from: "DUESSELDORF", to: "STOCKHOLM", airline: "SAS" },
-        { date: "05.07.26", flight: "UA122", from: "FRANKFURT", to: "NEW YORK", airline: "UNITED" },
-        { date: "12.08.26", flight: "MK011", from: "PARIS", to: "MAURITIUS", airline: "AIR MAURITIUS" },
-        { date: "20.09.26", flight: "LH184", from: "KOELN", to: "COPENHAGEN", airline: "LUFTHANSA" }
+        { date: "15/04/26", flight: "EK046", from: "DUESSELDORF", to: "DUBAI", airline: "EMIRATES" },
+        { date: "10/06/26", flight: "SK638", from: "DUESSELDORF", to: "STOCKHOLM", airline: "SAS" },
+        { date: "05/07/26", flight: "UA122", from: "FRANKFURT", to: "NEW YORK", airline: "UNITED" },
+        { date: "12/08/26", flight: "MK011", from: "PARIS", to: "MAURITIUS", airline: "AIR MAURITIUS" },
+        { date: "20/09/26", flight: "LH184", from: "KOELN", to: "COPENHAGEN", airline: "LUFTHANSA" }
     ];
 
     const keys = ["date", "flight", "from", "to", "airline"];
@@ -215,8 +213,6 @@
     function initBoard() {
         const headerRow = document.getElementById('board-header-row');
         const rowsContainer = document.getElementById('rows-container');
-        
-        // Berechnung der Grid-Spalten basierend auf den Buchstaben-Längen
         const gridTemplate = colLengths.map(l => `calc(${l} * (var(--flap-w) + 2px))`).join(" ");
         
         headerRow.style.gridTemplateColumns = gridTemplate;
