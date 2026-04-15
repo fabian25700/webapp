@@ -2,284 +2,196 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Departures</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Videotext Tafel 100</title>
     <style>
         :root {
-            --bg-color: #f0f2f5;
-            --header-bg: rgba(240, 242, 245, 0.9);
-            --header-text: #1e293b;
-            --header-border: #e2e8f0;
-            --btn-bg: #ffffff;
-            --btn-border: #e2e8f0;
-            --btn-text: #1e293b;
-            --board-bg: #1a1a1a;
-            --flap-bg: #222;
-            --text-white: #ffffff;
-            --text-yellow: #fdb813;
-            
-            /* Laptop Standard */
-            --flap-w: 20px;
-            --flap-h: 30px;
-            --flap-font: 18px;
-            --rotation: 0deg;
+            --ttx-bg: #000000;
+            --ttx-white: #ffffff;
+            --ttx-yellow: #ffff00;
+            --ttx-cyan: #00ffff;
+            --ttx-green: #00ff00;
+            --ttx-magenta: #ff00ff;
+            --ttx-red: #ff0000;
+            --ttx-blue: #0000ff;
         }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #0f172a;
-                --header-bg: rgba(15, 23, 42, 0.9);
-                --header-text: #f1f5f9;
-                --header-border: #1e293b;
-                --btn-bg: #1e293b;
-                --btn-border: #2d3f55;
-                --btn-text: #f1f5f9;
-            }
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background: var(--bg-color);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            background-color: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        #teletext-screen {
+            background-color: var(--ttx-bg);
+            width: 100%;
+            max-width: 800px;
+            aspect-ratio: 4 / 3;
+            padding: 20px;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            border: 4px solid #333;
         }
 
-        header {
-            position: fixed; top: 0; width: 100%; z-index: 100;
-            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
-            display: flex; align-items: center; gap: 12px;
-            background: var(--header-bg);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border-bottom: 1px solid var(--header-border);
-        }
-
-        .back-btn {
-            display: flex; align-items: center; justify-content: center;
-            width: 36px; height: 36px; border-radius: 12px;
-            background: var(--btn-bg); border: 1px solid var(--btn-border);
-            text-decoration: none; color: var(--btn-text);
-        }
-
-        header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
-
-        .content-container {
-            flex: 1;
+        /* Header Zeile */
+        .ttx-header {
             display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-
-        #departure-board {
-            background-color: var(--board-bg);
-            padding: 25px;
-            border: 8px solid #333;
-            border-radius: 15px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
-            width: max-content;
-            transform: rotate(var(--rotation));
-        }
-
-        /* Handy Optimierung */
-        @media screen and (max-width: 768px) {
-            :root {
-                --flap-w: 1.3vh; 
-                --flap-h: 2.1vh;
-                --flap-font: 1.1vh;
-                --rotation: -90deg;
-            }
-            
-            #departure-board {
-                position: fixed;
-                left: 50%;
-                /* top rückt das Board weiter nach unten, um dem Header Platz zu machen */
-                top: calc(50% + 40px); 
-                transform: translate(-50%, -50%) rotate(-90deg);
-                padding: 15px;
-                border-width: 4px;
-            }
-
-            .board-title { font-size: 2.2vh !important; margin-bottom: 10px !important; }
-            .board-header { font-size: 1vh !important; gap: 4px !important; }
-            .flight-row { gap: 4px !important; margin-bottom: 4px !important; }
-            .flap-group { gap: 1px !important; }
-        }
-
-        .board-title {
-            color: var(--text-yellow);
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 1.8rem;
-            font-weight: 900;
-            letter-spacing: 5px;
-            text-transform: uppercase;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .board-header {
-            display: grid;
-            gap: 10px;
-            margin-bottom: 10px;
-            color: #555;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 700;
-        }
-
-        .flight-row {
-            display: grid;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .flap-group { display: flex; gap: 2px; }
-
-        .flap {
-            width: var(--flap-w);
-            height: var(--flap-h);
-            background-color: var(--flap-bg);
-            color: var(--text-white);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: var(--flap-font);
+            justify-content: space-between;
+            color: var(--ttx-white);
             font-weight: bold;
-            font-family: 'Courier New', Courier, monospace;
-            border-radius: 2px;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid #000;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--ttx-white);
+            padding-bottom: 5px;
         }
 
-        .flight-row div:nth-child(4) .flap { color: var(--text-yellow); }
+        .page-num { color: var(--ttx-yellow); }
 
-        .flap::after {
-            content: ''; position: absolute; top: 50%; left: 0;
-            width: 100%; height: 1px; background: rgba(0,0,0,0.6);
-            z-index: 2;
+        /* Text-Inhalt */
+        .ttx-content {
+            flex: 1;
+            line-height: 1.2;
+            font-size: 1.5rem;
+            white-space: pre;
         }
 
-        @keyframes flip {
-            0% { transform: rotateX(0deg); }
-            100% { transform: rotateX(-360deg); }
+        @media (max-width: 600px) {
+            .ttx-content { font-size: 0.9rem; }
+            #teletext-screen { aspect-ratio: auto; height: 90vh; }
         }
-        .flipping { animation: flip 0.1s ease-in-out infinite; }
+
+        /* Farben */
+        .white { color: var(--ttx-white); }
+        .yellow { color: var(--ttx-yellow); }
+        .cyan { color: var(--ttx-cyan); }
+        .green { color: var(--ttx-green); }
+        .magenta { color: var(--ttx-magenta); }
+        
+        .bg-blue { background-color: var(--ttx-blue); color: var(--ttx-white); padding: 0 5px; }
+
+        /* Links */
+        .ttx-link {
+            text-decoration: none;
+            cursor: pointer;
+            border-bottom: 1px dashed transparent;
+        }
+        .ttx-link:hover {
+            background-color: #333;
+            border-bottom-color: currentColor;
+        }
+
+        /* Nav-Leiste unten */
+        .ttx-nav {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2px;
+            margin-top: 20px;
+        }
+
+        .nav-item {
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: #000;
+            cursor: pointer;
+        }
+
+        .nav-red { background-color: var(--ttx-red); }
+        .nav-green { background-color: var(--ttx-green); }
+        .nav-yellow { background-color: var(--ttx-yellow); }
+        .nav-blue { background-color: var(--ttx-cyan); }
+
+        /* Scanline Effekt */
+        #teletext-screen::after {
+            content: " ";
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
 
-    <header>
-        <a href="reise_stats.html" class="back-btn">←</a>
-        <h1>Departures</h1>
-    </header>
+    <div id="teletext-screen">
+        <div class="ttx-header">
+            <span>FAB-TEXT</span>
+            <span class="page-num" id="current-page">100</span>
+            <span id="ttx-time">16:45:12</span>
+        </div>
 
-    <div class="content-container">
-        <div id="departure-board">
-            <div class="board-title">DEPARTURES ✈</div>
-            <div id="board-header-row" class="board-header"></div>
-            <div id="rows-container"></div>
+        <div class="ttx-content" id="page-content">
+<span class="bg-blue"> HAUPTMENÜ </span>
+
+<span class="yellow">NACHRICHTEN</span> ............ <span class="white ttx-link" onclick="loadPage(110)">110</span>
+<span class="yellow">SPORT</span> .................. <span class="white ttx-link" onclick="loadPage(200)">200</span>
+<span class="yellow">REISE-STATS</span> ............ <span class="white ttx-link" onclick="loadPage(300)">300</span>
+<span class="yellow">WETTER</span> ................. <span class="white ttx-link" onclick="loadPage(400)">400</span>
+
+<span class="cyan">-----------------------------------</span>
+
+<span class="magenta">TOP-THEMEN:</span>
+* <span class="white">Immobilienmarkt NRW stabil</span> .. <span class="white ttx-link" onclick="loadPage(120)">120</span>
+* <span class="white">Lauf-Event Köln gestartet</span> ... <span class="white ttx-link" onclick="loadPage(210)">210</span>
+* <span class="white">Neue Asset Management Jobs</span> .. <span class="white ttx-link" onclick="loadPage(500)">500</span>
+
+<span class="green">
+INDEX A-Z ..................... 700
+PROFIL ........................ 800</span>
+        </div>
+
+        <div class="ttx-nav">
+            <div class="nav-item nav-red" onclick="loadPage(110)">News</div>
+            <div class="nav-item nav-green" onclick="loadPage(200)">Sport</div>
+            <div class="nav-item nav-yellow" onclick="loadPage(300)">Reise</div>
+            <div class="nav-item nav-blue" onclick="loadPage(100)">Index</div>
         </div>
     </div>
 
-<script>
-    const CHARS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:/";
-    
-    const travelData = [
-        { date: "15/04/26", flight: "EK046", from: "DUESSELDORF", to: "DUBAI", airline: "EMIRATES" },
-        { date: "10/06/26", flight: "SK638", from: "DUESSELDORF", to: "STOCKHOLM", airline: "SAS" },
-        { date: "05/07/26", flight: "UA122", from: "FRANKFURT", to: "NEW YORK", airline: "UNITED" },
-        { date: "12/08/26", flight: "MK011", from: "PARIS", to: "MAURITIUS", airline: "AIR MAURITIUS" },
-        { date: "20/09/26", flight: "LH184", from: "KOELN", to: "COPENHAGEN", airline: "LUFTHANSA" }
-    ];
-
-    const keys = ["date", "flight", "from", "to", "airline"];
-    const labels = ["Datum", "Flug", "Abflug", "Ankunft", "Airline"];
-    
-    const colLengths = keys.map((key, i) => {
-        const maxDataLen = Math.max(...travelData.map(d => d[key].length));
-        return Math.max(maxDataLen, labels[i].length);
-    });
-
-    function initBoard() {
-        const headerRow = document.getElementById('board-header-row');
-        const rowsContainer = document.getElementById('rows-container');
-        const gridTemplate = colLengths.map(l => `calc(${l} * (var(--flap-w) + 2px))`).join(" ");
-        
-        headerRow.style.gridTemplateColumns = gridTemplate;
-        
-        labels.forEach(label => {
-            const div = document.createElement('div');
-            div.textContent = label;
-            headerRow.appendChild(div);
-        });
-
-        travelData.forEach(() => {
-            const row = document.createElement('div');
-            row.className = 'flight-row';
-            row.style.gridTemplateColumns = gridTemplate;
-            colLengths.forEach(len => row.appendChild(createFlapGroup(len)));
-            rowsContainer.appendChild(row);
-        });
-    }
-
-    function createFlapGroup(length) {
-        const group = document.createElement('div');
-        group.className = 'flap-group';
-        for (let i = 0; i < length; i++) {
-            const flap = document.createElement('div');
-            flap.className = 'flap';
-            flap.textContent = ' ';
-            group.appendChild(flap);
+    <script>
+        // Uhrzeit-Update
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + 
+                          now.getMinutes().toString().padStart(2, '0') + ':' + 
+                          now.getSeconds().toString().padStart(2, '0');
+            document.getElementById('ttx-time').textContent = timeStr;
         }
-        return group;
-    }
+        setInterval(updateTime, 1000);
+        updateTime();
 
-    async function animateFlap(flap, targetChar) {
-        let currentIndex = 0;
-        flap.classList.add('flipping');
-        return new Promise(resolve => {
-            const interval = setInterval(() => {
-                const char = CHARS[currentIndex];
-                flap.textContent = char;
-                if (char === targetChar) {
-                    clearInterval(interval);
-                    flap.classList.remove('flipping');
-                    resolve();
+        // Seiten-Logik
+        const pages = {
+            100: document.getElementById('page-content').innerHTML,
+            300: `<span class="bg-blue"> REISE-STATISTIKEN </span>\n\n<span class="yellow">ÜBERBLICK</span>\n\n<span class="white">LÄNDER GEREIST:</span> ....... <span class="cyan">14</span>\n<span class="white">FLÜGE GESAMT:</span> ........ <span class="cyan">32</span>\n<span class="white">NÄCHTE INTERN.:</span> ...... <span class="cyan">156</span>\n\n<span class="magenta">LÄUFE WELTWEIT:</span>\n<span class="white">KM GESAMT:</span> ........... <span class="green">1.240</span>\n\n<span class="white ttx-link" onclick="loadPage(100)">ZURÜCK ZUM HAUPTMENÜ 100</span>`,
+            110: `<span class="bg-blue"> NACHRICHTEN </span>\n\n<span class="yellow">NRW MARKTBERICHT</span>\n\n<span class="white">Die Nachfrage nach Wohnraum in\nKöln und Düsseldorf bleibt auf\neinem Rekordniveau.\n\nProjektentwickler fokussieren\nsich zunehmend auf\nBestandssanierung.</span>\n\n<span class="white ttx-link" onclick="loadPage(100)">ZURÜCK 100</span>`
+        };
+
+        function loadPage(num) {
+            const screen = document.getElementById('page-content');
+            const pageDisplay = document.getElementById('current-page');
+            
+            // Simuliere das "Suchen" des Videotextes
+            screen.innerHTML = "\n\n   SUCHE SEITE " + num + " ...";
+            pageDisplay.textContent = num;
+
+            setTimeout(() => {
+                if (pages[num]) {
+                    screen.innerHTML = pages[num];
+                } else {
+                    screen.innerHTML = `\n\n<span class="red">FEHLER: SEITE ${num} NICHT GEFUNDEN</span>\n\n<span class="white ttx-link" onclick="loadPage(100)">ZURÜCK ZUM INDEX 100</span>`;
                 }
-                currentIndex = (currentIndex + 1) % CHARS.length;
-            }, 30);
-        });
-    }
-
-    async function updateRow(rowIndex, data) {
-        const row = document.getElementsByClassName('flight-row')[rowIndex];
-        const groups = row.getElementsByClassName('flap-group');
-
-        for (let g = 0; g < groups.length; g++) {
-            const flaps = groups[g].getElementsByClassName('flap');
-            const targetStr = data[keys[g]].toUpperCase().padEnd(colLengths[g]);
-            for (let f = 0; f < flaps.length; f++) {
-                animateFlap(flaps[f], targetStr[f]);
-                await new Promise(r => setTimeout(r, 20));
-            }
+            }, 600);
         }
-    }
-
-    initBoard();
-    setTimeout(() => {
-        travelData.forEach((data, index) => {
-            setTimeout(() => updateRow(index, data), index * 400);
-        });
-    }, 800);
-</script>
-
+    </script>
 </body>
 </html>
