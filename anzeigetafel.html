@@ -7,14 +7,29 @@
     <title>Departures</title>
     <style>
         :root {
-            --bg-color: #0f172a;
-            --header-bg: rgba(15, 23, 42, 0.9);
-            --header-text: #fdb813; /* Flughafen-Gelb */
-            --header-border: #1e293b;
+            --bg-color: #f0f2f5;
+            --header-bg: rgba(240, 242, 245, 0.9);
+            --header-text: #1e293b;
+            --header-border: #e2e8f0;
+            --btn-bg: #ffffff;
+            --btn-border: #e2e8f0;
+            --btn-text: #1e293b;
             --board-bg: #1a1a1a;
             --flap-bg: #222;
             --text-white: #ffffff;
             --text-yellow: #fdb813;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0f172a;
+                --header-bg: rgba(15, 23, 42, 0.9);
+                --header-text: #f1f5f9;
+                --header-border: #1e293b;
+                --btn-bg: #1e293b;
+                --btn-border: #2d3f55;
+                --btn-text: #f1f5f9;
+            }
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -22,71 +37,78 @@
         body {
             background: var(--bg-color);
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-            display: flex;
-            flex-direction: column;
             height: 100vh;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         header {
             position: fixed; top: 0; width: 100%; z-index: 100;
             padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
-            display: flex; align-items: center; justify-content: space-between;
+            display: flex; align-items: center; gap: 12px;
             background: var(--header-bg);
             backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
             border-bottom: 1px solid var(--header-border);
         }
 
-        header h1 { 
-            color: var(--header-text); 
-            font-size: 1.15rem; 
-            font-weight: 800; 
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
         .back-btn {
             display: flex; align-items: center; justify-content: center;
             width: 36px; height: 36px; border-radius: 12px;
-            background: #1e293b; border: 1px solid #2d3f55;
-            text-decoration: none; color: #f1f5f9;
+            background: var(--btn-bg); border: 1px solid var(--btn-border);
+            text-decoration: none; color: var(--btn-text);
         }
 
-        /* Board Styling */
-        .board-container {
+        header h1 { color: var(--header-text); font-size: 1.15rem; font-weight: 800; }
+
+        .content-container {
             flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding-top: 80px;
-            padding-bottom: env(safe-area-inset-bottom);
+            padding: 100px 10px 20px;
         }
 
         #departure-board {
             background-color: var(--board-bg);
-            padding: 25px;
-            border: 6px solid #333;
-            border-radius: 12px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            width: fit-content;
+            padding: 30px 20px;
+            border: 8px solid #333;
+            border-radius: 15px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+            width: 100%;
+            max-width: 850px;
+        }
+
+        .board-title {
+            color: var(--text-yellow);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            padding-left: 5px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
         .board-header {
             display: grid;
-            grid-template-columns: 100px 80px 160px 160px 140px;
+            grid-template-columns: 85px 75px 1fr 1fr 120px;
             gap: 8px;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
             color: #555;
-            font-size: 11px;
-            font-family: "SF Pro Text", sans-serif;
+            font-size: 10px;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             font-weight: 700;
+            padding: 0 5px;
         }
 
         .flight-row {
             display: grid;
-            grid-template-columns: 100px 80px 160px 160px 140px;
+            grid-template-columns: 85px 75px 1fr 1fr 120px;
             gap: 8px;
             margin-bottom: 6px;
         }
@@ -94,13 +116,14 @@
         .flap-group { display: flex; gap: 2px; }
 
         .flap {
-            width: 18px;
-            height: 28px;
+            width: 17px;
+            height: 26px;
             background-color: var(--flap-bg);
+            color: var(--text-white);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
             font-family: 'Courier New', Courier, monospace;
             border-radius: 2px;
@@ -109,10 +132,10 @@
             border: 1px solid #000;
         }
 
-        /* Standard Textfarbe Weiß */
-        .flap { color: var(--text-white); }
-        /* Ankunftsort (4. Gruppe) Textfarbe Gelb */
-        .flight-row div:nth-child(4) .flap { color: var(--text-yellow); }
+        /* Ankunftsort (4. Spalte) in Gelb */
+        .flight-row div:nth-child(4) .flap {
+            color: var(--text-yellow);
+        }
 
         .flap::after {
             content: ''; position: absolute; top: 50%; left: 0;
@@ -131,17 +154,21 @@
 <body>
 
     <header>
-        <a href="index.html" class="back-btn">←</a>
-        <h1>Departures ✈</h1>
+        <a href="reise_stats.html" class="back-btn">←</a>
+        <h1>Departures</h1>
     </header>
 
-    <div class="board-container">
+    <div class="content-container">
         <div id="departure-board">
+            <div class="board-title">
+                DEPARTURES ✈
+            </div>
+            
             <div class="board-header">
                 <div>Datum</div>
                 <div>Flug</div>
-                <div>Abflugort</div>
-                <div>Ankunftort</div>
+                <div>Abflug</div>
+                <div>Ankunft</div>
                 <div>Airline</div>
             </div>
             <div id="rows-container"></div>
@@ -151,13 +178,12 @@
 <script>
     const CHARS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:.";
     
-    // Deine Reise-Historie (Beispielwerte)
     const travelData = [
-        { date: "15.04.26", flight: "EK046", from: "DUSSELDORF", to: "DUBAI", airline: "EMIRATES" },
-        { date: "10.06.26", flight: "SK638", from: "DUSSELDORF", to: "STOCKHOLM", airline: "SAS" },
-        { date: "05.07.26", flight: "UA122", from: "FRANKFURT", to: "NEW YORK", airline: "UNITED" },
-        { date: "12.08.26", flight: "MK011", from: "PARIS", to: "MAURITIUS", airline: "AIR MAURIT" },
-        { date: "20.09.26", flight: "LH184", from: "COLOGNE", to: "COPENHAGEN", airline: "LUFTHANSA" }
+        { date: "15.04.26", flight: "EK046", from: "DUS", to: "DUBAI", airline: "EMIRATES" },
+        { date: "10.06.26", flight: "SK638", from: "DUS", to: "STOCKHOLM", airline: "SAS" },
+        { date: "05.07.26", flight: "UA122", from: "FRA", to: "NEW YORK", airline: "UNITED" },
+        { date: "12.08.26", flight: "MK011", from: "CDG", to: "MAURITIUS", airline: "AIR MAURIT" },
+        { date: "20.09.26", flight: "LH184", from: "CGN", to: "COPENHAGEN", airline: "LUFTHANSA" }
     ];
 
     function createFlapGroup(length) {
@@ -179,8 +205,8 @@
             row.className = 'flight-row';
             row.appendChild(createFlapGroup(8));  // Datum
             row.appendChild(createFlapGroup(6));  // Flug
-            row.appendChild(createFlapGroup(12)); // Abflugort
-            row.appendChild(createFlapGroup(12)); // Ankunftort
+            row.appendChild(createFlapGroup(10)); // Abflug
+            row.appendChild(createFlapGroup(10)); // Ankunft
             row.appendChild(createFlapGroup(10)); // Airline
             container.appendChild(row);
         });
@@ -209,8 +235,8 @@
         const values = [
             data.date.padEnd(8),
             data.flight.padEnd(6),
-            data.from.padEnd(12),
-            data.to.padEnd(12),
+            data.from.padEnd(10),
+            data.to.padEnd(10),
             data.airline.padEnd(10)
         ];
 
