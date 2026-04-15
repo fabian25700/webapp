@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airport Departure Board</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --board-bg: #1a1a1a;
+            --flap-bg: #222;
+            --text-color: #fdb813; /* Typisches Flughafen-Gelb */
+            --font-size: 24px;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        #departure-board {
+            background-color: var(--board-bg);
+            padding: 40px;
+            border: 10px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+
+        .header {
+            display: grid;
+            grid-template-columns: 100px 250px 150px 100px 200px;
+            gap: 10px;
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding-left: 5px;
+        }
+
+        .flight-row {
+            display: grid;
+            grid-template-columns: 100px 250px 150px 100px 200px;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .flap-group {
+            display: flex;
+            gap: 2px;
+        }
+
+        .flap {
+            width: 24px;
+            height: 36px;
+            background-color: var(--flap-bg);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: var(--font-size);
+            font-weight: bold;
+            border-radius: 3px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #000;
+        }
+
+        /* Effekt für den mechanischen Trennstrich in der Mitte */
+        .flap::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: rgba(0,0,0,0.5);
+            z-index: 2;
+        }
+
+        /* Animation für das Durchrollen */
+        @keyframes flip {
+            0% { transform: rotateX(0deg); }
+            100% { transform: rotateX(-360deg); }
+        }
+
+        .flipping {
+            animation: flip 0.15s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+
+<div id="departure-board">
+    <div class="header">
+        <div>Zeit</div>
+        <div>Ziel</div>
+        <div>Flug</div>
+        <div>Gate</div>
+        <div>Status</div>
+    </div>
+    <div id="rows-container"></div>
+</div>
+
+<script>
+    const ROWS_COUNT = 5;
+    const CHARS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+    const exampleData = [
+        { time: "10:45", destination: "DUBAI", flight: "EK046", gate: "B12", status: "BOARDING" },
+        { time: "11:20", destination: "STOCKHOLM", flight: "SK638", gate: "A05", status: "ON TIME" },
+        { time: "12:05", destination: "MAURITIUS", flight: "MK011", gate: "C18", status: "DELAYED" },
+        { time: "13:30", destination: "NEW YORK", flight: "UA122", gate: "B02", status: "ON TIME" },
+        { time: "15:10", destination: "COPENHAGEN", flight: "LH184", gate: "A12", status: "ON TIME" }
+    ];
+
+    function createFlapGroup(length) {
+        const group = document.createElement('div');
+        group.className = 'flap-group';
+        for (let i = 0; i < length; i++) {
+            const flap = document.createElement('div');
+            flap.className = 'flap';
+            flap.textContent = ' ';
+            group.appendChild(flap);
+        }
+        return group;
+    }
+
+    function initBoard() {
+        const container = document.getElementById('rows-container');
+        for (let i = 0; i < ROWS_COUNT; i++) {
+            const row = document.createElement('div');
+            row.className = 'flight-row';
+            
+            row.appendChild(createFlapGroup(5));  // Zeit
+            row.appendChild(createFlapGroup(12)); // Ziel
+            row.appendChild(createFlapGroup(6));  // Flug
+            row.appendChild(createFlapGroup(3));  // Gate
+            row.appendChild(createFlapGroup(10)); // Status
+            
+            container.appendChild(row);
+        }
+    }
+
+    async function animateFlap(flap, targetChar) {
+        let currentIndex = 0;
+        flap.classList.add('flipping');
+
+        return new Promise(resolve => {
+            const interval = setInterval(() => {
+                const char = CHARS[currentIndex];
+                flap.textContent = char;
+
+                if (char === targetChar) {
+                    clearInterval(interval);
+                    flap.classList.remove('flipping');
+                    resolve();
+                }
+
+                currentIndex = (currentIndex + 1) % CHARS.length;
+            }, 50);
+        });
+    }
+
+    async function updateRow(rowIndex, data) {
+        const row = document.getElementsByClassName('flight-row')[rowIndex];
+        const groups = row.getElementsByClassName('flap-group');
+        
+        const values = [
+            data.time.padEnd(5),
+            data.destination.padEnd(12),
+            data.flight.padEnd(6),
+            data.gate.padEnd(3),
+            data.status.padEnd(10)
+        ];
+
+        for (let g = 0; g < groups.length; g++) {
+            const flaps = groups[g].getElementsByClassName('flap');
+            const targetStr = values[g].toUpperCase();
+            
+            for (let f = 0; f < flaps.length; f++) {
+                animateFlap(flaps[f], targetStr[f]);
+                // Kleiner Delay zwischen den Buchstaben für natürlichen Look
+                await new Promise(r => setTimeout(r, 30));
+            }
+        }
+    }
+
+    // Startsequenz
+    initBoard();
+    
+    // Board nach kurzem Delay mit Daten füllen
+    setTimeout(() => {
+        exampleData.forEach((data, index) => {
+            setTimeout(() => updateRow(index, data), index * 500);
+        });
+    }, 1000);
+
+</script>
+
+</body>
+</html>
