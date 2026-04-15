@@ -18,9 +18,13 @@
             --flap-bg: #222;
             --text-white: #ffffff;
             --text-yellow: #fdb813;
+            
+            /* Standard Laptop Maße */
             --flap-w: 20px;
             --flap-h: 30px;
             --flap-font: 18px;
+            --board-scale: 1;
+            --rotation: 0deg;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -69,7 +73,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
+            padding: 20px;
+            margin-top: 40px;
         }
 
         #departure-board {
@@ -79,25 +84,34 @@
             border-radius: 12px;
             box-shadow: 0 30px 60px rgba(0,0,0,0.4);
             width: max-content;
+            transform: rotate(var(--rotation)) scale(var(--board-scale));
+            transition: all 0.3s ease;
         }
 
-        /* Mobile Optimierung */
-        @media screen and (max-width: 768px) and (orientation: portrait) {
+        /* Mobile Optimierung: Erzwungene Anpassung */
+        @media screen and (max-width: 768px) {
             :root {
-                --flap-w: 14px; /* Schmalere Flaps für Mobile */
-                --flap-h: 22px;
-                --flap-font: 13px;
+                /* Nutzt Viewport-Einheiten: Das Board wird IMMER so breit wie das Display hoch ist */
+                --flap-w: 1.6vh; 
+                --flap-h: 2.5vh;
+                --flap-font: 1.4vh;
+                --rotation: -90deg;
+                --board-scale: 1;
             }
+            
             #departure-board {
                 position: fixed;
                 left: 50%;
-                top: 55%; /* Leicht nach unten versetzt für optische Mitte */
+                top: 55%;
                 transform: translate(-50%, -50%) rotate(-90deg);
-                transform-origin: center center;
-                max-width: 90vh; /* Verhindert Überlappen oben/unten im gedrehten Zustand */
-                padding: 15px;
+                padding: 10px;
+                border-width: 4px;
             }
-            .board-title { font-size: 1.2rem !important; margin-bottom: 10px !important; }
+
+            .board-title { font-size: 3vh !important; margin-bottom: 10px !important; }
+            .board-header { font-size: 1.2vh !important; gap: 4px !important; }
+            .flight-row { gap: 4px !important; margin-bottom: 4px !important; }
+            .flap-group { gap: 1px !important; }
         }
 
         .board-title {
@@ -115,10 +129,10 @@
 
         .board-header {
             display: grid;
-            gap: 8px;
+            gap: 10px;
             margin-bottom: 8px;
             color: #555;
-            font-size: 9px;
+            font-size: 10px;
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 700;
@@ -126,11 +140,11 @@
 
         .flight-row {
             display: grid;
-            gap: 8px;
-            margin-bottom: 6px;
+            gap: 10px;
+            margin-bottom: 8px;
         }
 
-        .flap-group { display: flex; gap: 1.5px; }
+        .flap-group { display: flex; gap: 2px; }
 
         .flap {
             width: var(--flap-w);
@@ -202,7 +216,7 @@
         const headerRow = document.getElementById('board-header-row');
         const rowsContainer = document.getElementById('rows-container');
         
-        // Dynamische Spaltenbreite basierend auf CSS Variable
+        // Berechnung der Grid-Spalten basierend auf den Buchstaben-Längen
         const gridTemplate = colLengths.map(l => `calc(${l} * (var(--flap-w) + 2px))`).join(" ");
         
         headerRow.style.gridTemplateColumns = gridTemplate;
