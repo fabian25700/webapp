@@ -23,7 +23,6 @@
             --flap-w: 20px;
             --flap-h: 30px;
             --flap-font: 18px;
-            --board-scale: 1;
             --rotation: 0deg;
         }
 
@@ -83,31 +82,31 @@
             border-radius: 15px;
             box-shadow: 0 30px 60px rgba(0,0,0,0.5);
             width: max-content;
-            transform: rotate(var(--rotation)) scale(var(--board-scale));
+            transform: rotate(var(--rotation));
         }
 
         /* Handy Optimierung */
         @media screen and (max-width: 768px) {
             :root {
-                /* Reduzierte vh-Werte für mehr Abstand zum Rand */
-                --flap-w: 1.4vh; 
-                --flap-h: 2.2vh;
-                --flap-font: 1.2vh;
+                --flap-w: 1.3vh; 
+                --flap-h: 2.1vh;
+                --flap-font: 1.1vh;
                 --rotation: -90deg;
             }
             
             #departure-board {
                 position: fixed;
                 left: 50%;
-                top: 52%;
+                /* top rückt das Board weiter nach unten, um dem Header Platz zu machen */
+                top: calc(50% + 40px); 
                 transform: translate(-50%, -50%) rotate(-90deg);
                 padding: 15px;
-                border-width: 5px;
+                border-width: 4px;
             }
 
-            .board-title { font-size: 2.5vh !important; margin-bottom: 12px !important; }
-            .board-header { font-size: 1.1vh !important; gap: 5px !important; }
-            .flight-row { gap: 5px !important; margin-bottom: 5px !important; }
+            .board-title { font-size: 2.2vh !important; margin-bottom: 10px !important; }
+            .board-header { font-size: 1vh !important; gap: 4px !important; }
+            .flight-row { gap: 4px !important; margin-bottom: 4px !important; }
             .flap-group { gap: 1px !important; }
         }
 
@@ -193,7 +192,6 @@
 <script>
     const CHARS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:/";
     
-    // Daten mit / statt .
     const travelData = [
         { date: "15/04/26", flight: "EK046", from: "DUESSELDORF", to: "DUBAI", airline: "EMIRATES" },
         { date: "10/06/26", flight: "SK638", from: "DUESSELDORF", to: "STOCKHOLM", airline: "SAS" },
