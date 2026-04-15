@@ -66,28 +66,38 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 100px 10px 20px;
+            padding: 80px 10px 20px;
+        }
+
+        /* Automatisches Drehen auf dem Handy für mehr Platz */
+        @media screen and (max-width: 768px) and (orientation: portrait) {
+            .content-container {
+                transform: rotate(90deg);
+                transform-origin: center;
+                width: 100vh;
+                height: 100vw;
+            }
         }
 
         #departure-board {
             background-color: var(--board-bg);
-            padding: 30px 20px;
+            padding: 25px;
             border: 8px solid #333;
             border-radius: 15px;
             box-shadow: 0 30px 60px rgba(0,0,0,0.4);
-            width: 100%;
-            max-width: 850px;
+            width: auto;
+            max-width: 95vw;
+            overflow-x: auto;
         }
 
         .board-title {
             color: var(--text-yellow);
             font-family: 'Courier New', Courier, monospace;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             font-weight: 900;
-            letter-spacing: 4px;
+            letter-spacing: 5px;
             text-transform: uppercase;
-            margin-bottom: 25px;
-            padding-left: 5px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 15px;
@@ -95,35 +105,32 @@
 
         .board-header {
             display: grid;
-            grid-template-columns: 85px 75px 1fr 1fr 120px;
-            gap: 8px;
+            gap: 10px;
             margin-bottom: 12px;
             color: #555;
-            font-size: 10px;
+            font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             font-weight: 700;
-            padding: 0 5px;
         }
 
         .flight-row {
             display: grid;
-            grid-template-columns: 85px 75px 1fr 1fr 120px;
-            gap: 8px;
-            margin-bottom: 6px;
+            gap: 10px;
+            margin-bottom: 8px;
         }
 
         .flap-group { display: flex; gap: 2px; }
 
         .flap {
-            width: 17px;
-            height: 26px;
+            width: 20px;
+            height: 30px;
             background-color: var(--flap-bg);
             color: var(--text-white);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 14px;
+            font-size: 18px;
             font-weight: bold;
             font-family: 'Courier New', Courier, monospace;
             border-radius: 2px;
@@ -132,10 +139,7 @@
             border: 1px solid #000;
         }
 
-        /* Ankunftsort (4. Spalte) in Gelb */
-        .flight-row div:nth-child(4) .flap {
-            color: var(--text-yellow);
-        }
+        .flight-row div:nth-child(4) .flap { color: var(--text-yellow); }
 
         .flap::after {
             content: ''; position: absolute; top: 50%; left: 0;
@@ -160,17 +164,8 @@
 
     <div class="content-container">
         <div id="departure-board">
-            <div class="board-title">
-                DEPARTURES ✈
-            </div>
-            
-            <div class="board-header">
-                <div>Datum</div>
-                <div>Flug</div>
-                <div>Abflug</div>
-                <div>Ankunft</div>
-                <div>Airline</div>
-            </div>
+            <div class="board-title">DEPARTURES ✈</div>
+            <div id="board-header-row" class="board-header"></div>
             <div id="rows-container"></div>
         </div>
     </div>
@@ -179,12 +174,43 @@
     const CHARS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:.";
     
     const travelData = [
-        { date: "15.04.26", flight: "EK046", from: "DUS", to: "DUBAI", airline: "EMIRATES" },
-        { date: "10.06.26", flight: "SK638", from: "DUS", to: "STOCKHOLM", airline: "SAS" },
-        { date: "05.07.26", flight: "UA122", from: "FRA", to: "NEW YORK", airline: "UNITED" },
-        { date: "12.08.26", flight: "MK011", from: "CDG", to: "MAURITIUS", airline: "AIR MAURIT" },
-        { date: "20.09.26", flight: "LH184", from: "CGN", to: "COPENHAGEN", airline: "LUFTHANSA" }
+        { date: "15.04.26", flight: "EK046", from: "DUESSELDORF", to: "DUBAI", airline: "EMIRATES" },
+        { date: "10.06.26", flight: "SK638", from: "DUESSELDORF", to: "STOCKHOLM", airline: "SAS" },
+        { date: "05.07.26", flight: "UA122", from: "FRANKFURT", to: "NEW YORK", airline: "UNITED" },
+        { date: "12.08.26", flight: "MK011", from: "PARIS", to: "MAURITIUS", airline: "AIR MAURITIUS" },
+        { date: "20.09.26", flight: "LH184", from: "KOELN", to: "COPENHAGEN", airline: "LUFTHANSA" }
     ];
+
+    const keys = ["date", "flight", "from", "to", "airline"];
+    const labels = ["Datum", "Flug", "Abflug", "Ankunft", "Airline"];
+    
+    // Berechne maximale Länge pro Spalte
+    const colLengths = keys.map((key, i) => {
+        const maxDataLen = Math.max(...travelData.map(d => d[key].length));
+        return Math.max(maxDataLen, labels[i].length);
+    });
+
+    function initBoard() {
+        const headerRow = document.getElementById('board-header-row');
+        const rowsContainer = document.getElementById('rows-container');
+        const gridTemplate = colLengths.map(l => `calc(${l} * 22px)`).join(" ");
+        
+        headerRow.style.gridTemplateColumns = gridTemplate;
+        
+        labels.forEach(label => {
+            const div = document.createElement('div');
+            div.textContent = label;
+            headerRow.appendChild(div);
+        });
+
+        travelData.forEach(() => {
+            const row = document.createElement('div');
+            row.className = 'flight-row';
+            row.style.gridTemplateColumns = gridTemplate;
+            colLengths.forEach(len => row.appendChild(createFlapGroup(len)));
+            rowsContainer.appendChild(row);
+        });
+    }
 
     function createFlapGroup(length) {
         const group = document.createElement('div');
@@ -196,20 +222,6 @@
             group.appendChild(flap);
         }
         return group;
-    }
-
-    function initBoard() {
-        const container = document.getElementById('rows-container');
-        travelData.forEach(() => {
-            const row = document.createElement('div');
-            row.className = 'flight-row';
-            row.appendChild(createFlapGroup(8));  // Datum
-            row.appendChild(createFlapGroup(6));  // Flug
-            row.appendChild(createFlapGroup(10)); // Abflug
-            row.appendChild(createFlapGroup(10)); // Ankunft
-            row.appendChild(createFlapGroup(10)); // Airline
-            container.appendChild(row);
-        });
     }
 
     async function animateFlap(flap, targetChar) {
@@ -232,17 +244,10 @@
     async function updateRow(rowIndex, data) {
         const row = document.getElementsByClassName('flight-row')[rowIndex];
         const groups = row.getElementsByClassName('flap-group');
-        const values = [
-            data.date.padEnd(8),
-            data.flight.padEnd(6),
-            data.from.padEnd(10),
-            data.to.padEnd(10),
-            data.airline.padEnd(10)
-        ];
 
         for (let g = 0; g < groups.length; g++) {
             const flaps = groups[g].getElementsByClassName('flap');
-            const targetStr = values[g].toUpperCase();
+            const targetStr = data[keys[g]].toUpperCase().padEnd(colLengths[g]);
             for (let f = 0; f < flaps.length; f++) {
                 animateFlap(flaps[f], targetStr[f]);
                 await new Promise(r => setTimeout(r, 20));
