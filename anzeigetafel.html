@@ -2,121 +2,162 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Airport Departure Board</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Departures</title>
     <style>
         :root {
-            --bg-color: #0a0a0a;
+            --bg-color: #0f172a;
+            --header-bg: rgba(15, 23, 42, 0.9);
+            --header-text: #fdb813; /* Flughafen-Gelb */
+            --header-border: #1e293b;
             --board-bg: #1a1a1a;
             --flap-bg: #222;
-            --text-color: #fdb813; /* Typisches Flughafen-Gelb */
-            --font-size: 24px;
+            --text-white: #ffffff;
+            --text-yellow: #fdb813;
         }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            background-color: var(--bg-color);
+            background: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            position: fixed; top: 0; width: 100%; z-index: 100;
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--header-bg);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--header-border);
+        }
+
+        header h1 { 
+            color: var(--header-text); 
+            font-size: 1.15rem; 
+            font-weight: 800; 
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .back-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 12px;
+            background: #1e293b; border: 1px solid #2d3f55;
+            text-decoration: none; color: #f1f5f9;
+        }
+
+        /* Board Styling */
+        .board-container {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
-            font-family: 'Courier New', Courier, monospace;
+            padding-top: 80px;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         #departure-board {
             background-color: var(--board-bg);
-            padding: 40px;
-            border: 10px solid #333;
-            border-radius: 8px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            padding: 25px;
+            border: 6px solid #333;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            width: fit-content;
         }
 
-        .header {
+        .board-header {
             display: grid;
-            grid-template-columns: 100px 250px 150px 100px 200px;
-            gap: 10px;
-            margin-bottom: 20px;
-            color: #666;
-            font-size: 14px;
+            grid-template-columns: 100px 80px 160px 160px 140px;
+            gap: 8px;
+            margin-bottom: 15px;
+            color: #555;
+            font-size: 11px;
+            font-family: "SF Pro Text", sans-serif;
             text-transform: uppercase;
             letter-spacing: 2px;
-            padding-left: 5px;
+            font-weight: 700;
         }
 
         .flight-row {
             display: grid;
-            grid-template-columns: 100px 250px 150px 100px 200px;
-            gap: 10px;
-            margin-bottom: 10px;
+            grid-template-columns: 100px 80px 160px 160px 140px;
+            gap: 8px;
+            margin-bottom: 6px;
         }
 
-        .flap-group {
-            display: flex;
-            gap: 2px;
-        }
+        .flap-group { display: flex; gap: 2px; }
 
         .flap {
-            width: 24px;
-            height: 36px;
+            width: 18px;
+            height: 28px;
             background-color: var(--flap-bg);
-            color: var(--text-color);
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: var(--font-size);
+            font-size: 16px;
             font-weight: bold;
-            border-radius: 3px;
+            font-family: 'Courier New', Courier, monospace;
+            border-radius: 2px;
             position: relative;
             overflow: hidden;
             border: 1px solid #000;
         }
 
-        /* Effekt für den mechanischen Trennstrich in der Mitte */
+        /* Standard Textfarbe Weiß */
+        .flap { color: var(--text-white); }
+        /* Ankunftsort (4. Gruppe) Textfarbe Gelb */
+        .flight-row div:nth-child(4) .flap { color: var(--text-yellow); }
+
         .flap::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: rgba(0,0,0,0.5);
+            content: ''; position: absolute; top: 50%; left: 0;
+            width: 100%; height: 1px; background: rgba(0,0,0,0.6);
             z-index: 2;
         }
 
-        /* Animation für das Durchrollen */
         @keyframes flip {
             0% { transform: rotateX(0deg); }
             100% { transform: rotateX(-360deg); }
         }
 
-        .flipping {
-            animation: flip 0.15s ease-in-out infinite;
-        }
+        .flipping { animation: flip 0.1s ease-in-out infinite; }
     </style>
 </head>
 <body>
 
-<div id="departure-board">
-    <div class="header">
-        <div>Zeit</div>
-        <div>Ziel</div>
-        <div>Flug</div>
-        <div>Gate</div>
-        <div>Status</div>
+    <header>
+        <a href="index.html" class="back-btn">←</a>
+        <h1>Departures ✈</h1>
+    </header>
+
+    <div class="board-container">
+        <div id="departure-board">
+            <div class="board-header">
+                <div>Datum</div>
+                <div>Flug</div>
+                <div>Abflugort</div>
+                <div>Ankunftort</div>
+                <div>Airline</div>
+            </div>
+            <div id="rows-container"></div>
+        </div>
     </div>
-    <div id="rows-container"></div>
-</div>
 
 <script>
-    const ROWS_COUNT = 5;
-    const CHARS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-    const exampleData = [
-        { time: "10:45", destination: "DUBAI", flight: "EK046", gate: "B12", status: "BOARDING" },
-        { time: "11:20", destination: "STOCKHOLM", flight: "SK638", gate: "A05", status: "ON TIME" },
-        { time: "12:05", destination: "MAURITIUS", flight: "MK011", gate: "C18", status: "DELAYED" },
-        { time: "13:30", destination: "NEW YORK", flight: "UA122", gate: "B02", status: "ON TIME" },
-        { time: "15:10", destination: "COPENHAGEN", flight: "LH184", gate: "A12", status: "ON TIME" }
+    const CHARS = " ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:.";
+    
+    // Deine Reise-Historie (Beispielwerte)
+    const travelData = [
+        { date: "15.04.26", flight: "EK046", from: "DUSSELDORF", to: "DUBAI", airline: "EMIRATES" },
+        { date: "10.06.26", flight: "SK638", from: "DUSSELDORF", to: "STOCKHOLM", airline: "SAS" },
+        { date: "05.07.26", flight: "UA122", from: "FRANKFURT", to: "NEW YORK", airline: "UNITED" },
+        { date: "12.08.26", flight: "MK011", from: "PARIS", to: "MAURITIUS", airline: "AIR MAURIT" },
+        { date: "20.09.26", flight: "LH184", from: "COLOGNE", to: "COPENHAGEN", airline: "LUFTHANSA" }
     ];
 
     function createFlapGroup(length) {
@@ -133,74 +174,62 @@
 
     function initBoard() {
         const container = document.getElementById('rows-container');
-        for (let i = 0; i < ROWS_COUNT; i++) {
+        travelData.forEach(() => {
             const row = document.createElement('div');
             row.className = 'flight-row';
-            
-            row.appendChild(createFlapGroup(5));  // Zeit
-            row.appendChild(createFlapGroup(12)); // Ziel
+            row.appendChild(createFlapGroup(8));  // Datum
             row.appendChild(createFlapGroup(6));  // Flug
-            row.appendChild(createFlapGroup(3));  // Gate
-            row.appendChild(createFlapGroup(10)); // Status
-            
+            row.appendChild(createFlapGroup(12)); // Abflugort
+            row.appendChild(createFlapGroup(12)); // Ankunftort
+            row.appendChild(createFlapGroup(10)); // Airline
             container.appendChild(row);
-        }
+        });
     }
 
     async function animateFlap(flap, targetChar) {
         let currentIndex = 0;
         flap.classList.add('flipping');
-
         return new Promise(resolve => {
             const interval = setInterval(() => {
                 const char = CHARS[currentIndex];
                 flap.textContent = char;
-
                 if (char === targetChar) {
                     clearInterval(interval);
                     flap.classList.remove('flipping');
                     resolve();
                 }
-
                 currentIndex = (currentIndex + 1) % CHARS.length;
-            }, 50);
+            }, 30);
         });
     }
 
     async function updateRow(rowIndex, data) {
         const row = document.getElementsByClassName('flight-row')[rowIndex];
         const groups = row.getElementsByClassName('flap-group');
-        
         const values = [
-            data.time.padEnd(5),
-            data.destination.padEnd(12),
+            data.date.padEnd(8),
             data.flight.padEnd(6),
-            data.gate.padEnd(3),
-            data.status.padEnd(10)
+            data.from.padEnd(12),
+            data.to.padEnd(12),
+            data.airline.padEnd(10)
         ];
 
         for (let g = 0; g < groups.length; g++) {
             const flaps = groups[g].getElementsByClassName('flap');
             const targetStr = values[g].toUpperCase();
-            
             for (let f = 0; f < flaps.length; f++) {
                 animateFlap(flaps[f], targetStr[f]);
-                // Kleiner Delay zwischen den Buchstaben für natürlichen Look
-                await new Promise(r => setTimeout(r, 30));
+                await new Promise(r => setTimeout(r, 20));
             }
         }
     }
 
-    // Startsequenz
     initBoard();
-    
-    // Board nach kurzem Delay mit Daten füllen
     setTimeout(() => {
-        exampleData.forEach((data, index) => {
-            setTimeout(() => updateRow(index, data), index * 500);
+        travelData.forEach((data, index) => {
+            setTimeout(() => updateRow(index, data), index * 400);
         });
-    }, 1000);
-
+    }, 800);
 </script>
 
 </body>
