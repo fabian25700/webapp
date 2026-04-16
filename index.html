@@ -70,7 +70,12 @@
             color: var(--text-primary);
         }
 
-        #snake-start {
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        #snake-start, .test-link-btn {
             background: var(--snake-btn-bg);
             border: 1.5px solid var(--snake-btn-border);
             color: var(--snake-btn-color);
@@ -82,9 +87,12 @@
             cursor: pointer;
             z-index: 110;
             transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
         }
 
-        #snake-start:active { transform: scale(0.94); opacity: 0.8; }
+        #snake-start:active, .test-link-btn:active { transform: scale(0.94); opacity: 0.8; }
 
         .menu-container {
             display: flex;
@@ -180,7 +188,10 @@
 <body>
     <header>
         <div class="header-title">FABIANS APP</div>
-        <button id="snake-start" onclick="toggleGame()">🐍 SNAKE</button>
+        <div class="header-buttons">
+            <a href="test.html" class="test-link-btn">TEST</a>
+            <button id="snake-start" onclick="toggleGame()">🐍 SNAKE</button>
+        </div>
     </header>
 
     <div id="score-display"><span id="current-score">0</span></div>
