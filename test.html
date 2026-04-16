@@ -70,13 +70,12 @@
             color: var(--text-primary);
         }
 
-        /* Gruppierung der Header-Buttons */
-        .header-actions {
+        .header-buttons {
             display: flex;
             gap: 8px;
         }
 
-        #snake-start, .header-btn {
+        #snake-start, .test-link-btn {
             background: var(--snake-btn-bg);
             border: 1.5px solid var(--snake-btn-border);
             color: var(--snake-btn-color);
@@ -93,7 +92,7 @@
             align-items: center;
         }
 
-        #snake-start:active, .header-btn:active { transform: scale(0.94); opacity: 0.8; }
+        #snake-start:active, .test-link-btn:active { transform: scale(0.94); opacity: 0.8; }
 
         .menu-container {
             display: flex;
@@ -127,6 +126,7 @@
         .title { font-weight: 600; color: var(--text-primary); font-size: 1.05rem; flex-grow: 1; }
         .arrow { color: var(--arrow-color); font-size: 1rem; }
 
+        /* Snake Game Layout */
         #game-canvas {
             position: fixed;
             top: 0; left: 0;
@@ -187,3 +187,185 @@
 </head>
 <body>
     <header>
+        <div class="header-title">FABIANS APP</div>
+        <div class="header-buttons">
+            <a href="test.html" class="test-link-btn">TEST</a>
+            <button id="snake-start" onclick="toggleGame()">🐍 SNAKE</button>
+        </div>
+    </header>
+
+    <div id="score-display"><span id="current-score">0</span></div>
+
+    <div class="menu-container" id="main-menu">
+        <a href="reise_stats.html" class="menu-card">
+            <span class="icon">🌍</span>
+            <span class="title">Reisen</span>
+            <span class="arrow">→</span>
+        </a>
+        <a href="alltag.html" class="menu-card">
+            <span class="icon">🏠</span>
+            <span class="title">Alltag</span>
+            <span class="arrow">→</span>
+        </a>
+    </div>
+
+    <div id="instructions">
+        <div class="instr-box" id="instr-content"></div>
+    </div>
+
+    <canvas id="game-canvas"></canvas>
+
+    <script>
+        const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+        const canvas = document.getElementById("game-canvas");
+        const ctx = canvas.getContext("2d");
+        const scoreDisplay = document.getElementById("score-display");
+        const scoreVal = document.getElementById("current-score");
+        const instrEl = document.getElementById("instructions");
+        const instrContent = document.getElementById("instr-content");
+
+        let gameActive = false;
+        let snake, direction, nextDirection, food;
+        let score = 0;
+
+        const laender = (typeof MEINE_REISEN !== 'undefined')
+            ? MEINE_REISEN.map(r => r.flagge || "📍")
+            : ["🇩🇪","🇮🇹","🇺🇸"];
+
+        const GRID = 32;
+        const SPEED_START = 110;
+        const SPEED_MIN = 45;
+        const SPEED_STEP = 5;
+
+        function toggleGame() {
+            if (!gameActive) showInstructions();
+            else stopGame();
+        }
+
+        function showInstructions() {
+            if (!isTouchDevice) {
+                instrContent.innerHTML = `<h2>🐍 Snake</h2><p>Pfeiltasten zum Steuern</p><p><span class="instr-key">↑</span> <span class="instr-key">↓</span> <span class="instr-key">←</span> <span class="instr-key">→</span></p>`;
+            } else {
+                instrContent.innerHTML = `<h2>🐍 Snake</h2><div class="instr-touch">👈 &nbsp;&nbsp;&nbsp; 👉</div><p>Links tippen = Links-Drehung<br>Rechts tippen = Rechts-Drehung</p>`;
+            }
+            instrEl.classList.add("visible");
+            setTimeout(() => { instrEl.classList.remove("visible"); startGame(); }, 2500);
+        }
+
+        function startGame() {
+            gameActive = true;
+            canvas.style.display = "block";
+            scoreDisplay.style.display = "block";
+            document.getElementById("snake-start").innerText = "■ STOP";
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            score = 0;
+            scoreVal.innerText = score;
+
+            const startX = Math.floor(canvas.width / 2 / GRID) * GRID;
+            const startY = Math.floor(canvas.height / 2 / GRID) * GRID;
+            snake = [{ x: startX, y: startY }, { x: startX - GRID, y: startY }, { x: startX - GRID * 2, y: startY }];
+            direction = { x: GRID, y: 0 };
+            nextDirection = { x: GRID, y: 0 };
+            spawnFood();
+            runLoop();
+        }
+
+        function runLoop() {
+            if (!gameActive) return;
+            draw();
+            setTimeout(runLoop, Math.max(SPEED_MIN, SPEED_START - score * SPEED_STEP));
+        }
+
+        function stopGame() {
+            gameActive = false;
+            canvas.style.display = "none";
+            scoreDisplay.style.display = "none";
+            document.getElementById("snake-start").innerText = "🐍 SNAKE";
+        }
+
+        function spawnFood() {
+            const cols = Math.floor(canvas.width / GRID);
+            const rows = Math.floor(canvas.height / GRID);
+            let pos;
+            do {
+                pos = { x: Math.floor(Math.random() * cols) * GRID, y: Math.floor(Math.random() * rows) * GRID };
+            } while (snake.some(s => s.x === pos.x && s.y === pos.y));
+            food = { ...pos, symbol: laender[Math.floor(Math.random() * laender.length)] };
+        }
+
+        function draw() {
+            direction = nextDirection;
+            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+
+            if (head.x < 0) head.x = Math.floor((canvas.width - 1) / GRID) * GRID;
+            if (head.x >= canvas.width) head.x = 0;
+            if (head.y < 0) head.y = Math.floor((canvas.height - 1) / GRID) * GRID;
+            if (head.y >= canvas.height) head.y = 0;
+
+            if (snake.some(s => s.x === head.x && s.y === head.y)) { gameOver(); return; }
+
+            snake.unshift(head);
+            if (head.x === food.x && head.y === food.y) { score++; scoreVal.innerText = score; spawnFood(); }
+            else { snake.pop(); }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            ctx.fillStyle = isDark ? "rgba(15,23,42,0.7)" : "rgba(240,242,245,0.7)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.font = `${GRID - 4}px sans-serif`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(food.symbol, food.x + GRID / 2, food.y + GRID / 2);
+
+            snake.forEach((s, i) => {
+                ctx.fillStyle = i === 0 ? "#2ecc71" : `rgba(46, 204, 113, ${Math.max(0.3, 1 - i * 0.05)})`;
+                ctx.beginPath();
+                ctx.roundRect(s.x + 2, s.y + 2, GRID - 4, GRID - 4, 8);
+                ctx.fill();
+            });
+        }
+
+        function gameOver() {
+            ctx.fillStyle = "#e74c3c";
+            ctx.font = "bold 32px -apple-system";
+            ctx.textAlign = "center";
+            ctx.fillText(`💀 ${score} Länder`, canvas.width / 2, canvas.height / 2);
+            setTimeout(stopGame, 1500);
+        }
+
+        // ── Tastatur (Mac/Laptop) ──
+        window.addEventListener("keydown", (e) => {
+            if (!gameActive) return;
+            const d = direction;
+            if ((e.key === "ArrowUp" || e.key === "w") && d.y === 0) nextDirection = { x: 0, y: -GRID };
+            if ((e.key === "ArrowDown" || e.key === "s") && d.y === 0) nextDirection = { x: 0, y: GRID };
+            if ((e.key === "ArrowLeft" || e.key === "a") && d.x === 0) nextDirection = { x: -GRID, y: 0 };
+            if ((e.key === "ArrowRight" || e.key === "d") && d.x === 0) nextDirection = { x: GRID, y: 0 };
+        });
+
+        // ── Touch (iPhone - Tap Rotation) ──
+        window.addEventListener("touchstart", (e) => {
+            if (!gameActive) return;
+            const touchX = e.touches[0].clientX;
+            const screenWidth = window.innerWidth;
+            const d = direction;
+
+            if (touchX < screenWidth / 2) {
+                // Linker Bereich -> Drehung gegen Uhrzeigersinn
+                if (d.x > 0) nextDirection = { x: 0, y: -GRID };
+                else if (d.x < 0) nextDirection = { x: 0, y: GRID };
+                else if (d.y > 0) nextDirection = { x: GRID, y: 0 };
+                else if (d.y < 0) nextDirection = { x: -GRID, y: 0 };
+            } else {
+                // Rechter Bereich -> Drehung im Uhrzeigersinn
+                if (d.x > 0) nextDirection = { x: 0, y: GRID };
+                else if (d.x < 0) nextDirection = { x: 0, y: -GRID };
+                else if (d.y > 0) nextDirection = { x: -GRID, y: 0 };
+                else if (d.y < 0) nextDirection = { x: GRID, y: 0 };
+            }
+        }, { passive: true });
+    </script>
+</body>
+</html>
