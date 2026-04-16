@@ -3,369 +3,317 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Fabians App</title>
-    <script src="daten.js"></script>
+    <title>Kanada 2026 | Roadmap</title>
     <style>
         :root {
-            --primary: #2ecc71;
-            --primary-dark: #27ae60;
-            --secondary: #3498db;
+            --accent: #fdb813; 
             --bg: #f0f2f5;
-            --surface: rgba(255, 255, 255, 0.95);
+            --surface: #ffffff;
             --text-primary: #1e293b;
             --text-secondary: #64748b;
-            --border: rgba(203, 213, 225, 0.8);
-            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            --card-hover: rgba(240, 240, 240, 0.95);
-            --snake-btn-bg: white;
-            --snake-btn-border: #cbd5e1;
-            --snake-btn-color: #64748b;
-            --arrow-color: #cbd5e1;
+            --border: #e2e8f0;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg: #0f172a;
-                --surface: rgba(30, 41, 59, 0.95);
+                --surface: #1e293b;
                 --text-primary: #f1f5f9;
                 --text-secondary: #94a3b8;
-                --border: rgba(51, 65, 85, 0.8);
-                --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-                --card-hover: rgba(51, 65, 85, 0.95);
-                --snake-btn-bg: #1e293b;
-                --snake-btn-border: #334155;
-                --snake-btn-color: #94a3b8;
-                --arrow-color: #475569;
+                --border: #2d3f55;
             }
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
             background: var(--bg);
-            margin: 0;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            -webkit-tap-highlight-color: transparent;
-            transition: background 0.3s ease;
+            color: var(--text-primary);
+            line-height: 1.5;
         }
 
         header {
-            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px 20px;
+            background: var(--surface);
+            padding: calc(env(safe-area-inset-top) + 20px) 20px 10px;
+            text-align: center;
+        }
+
+        header h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
+        header p { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-top: 4px; }
+
+        /* Haupt-Reiter (Fix / Offen) */
+        .main-nav {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
+            background: var(--surface);
+            padding: 10px 20px;
+            gap: 10px;
         }
 
-        .header-title {
-            font-weight: 800;
-            font-size: 1.1rem;
-            letter-spacing: 0.04em;
-            color: var(--text-primary);
-        }
-
-        .header-buttons {
-            display: flex;
-            gap: 8px;
-        }
-
-        #snake-start, .test-link-btn {
-            background: var(--snake-btn-bg);
-            border: 1.5px solid var(--snake-btn-border);
-            color: var(--snake-btn-color);
-            padding: 8px 16px;
+        .main-nav-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--border);
+            background: transparent;
             border-radius: 12px;
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
+            font-weight: 800;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
             cursor: pointer;
-            z-index: 110;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
+            text-transform: uppercase;
         }
 
-        #snake-start:active, .test-link-btn:active { transform: scale(0.94); opacity: 0.8; }
+        .main-nav-btn.active {
+            border-color: var(--accent);
+            color: var(--text-primary);
+            background: rgba(253, 184, 19, 0.1);
+        }
 
-        .menu-container {
+        /* Unter-Navigation */
+        nav {
             display: flex;
-            flex-direction: column;
-            gap: 13px;
-            width: 85%;
-            max-width: 360px;
-            margin: auto;
-            z-index: 10;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        .menu-card {
             background: var(--surface);
-            padding: 18px 22px;
-            border-radius: 20px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            transition: transform 0.12s ease, background 0.2s ease;
-            border: 1px solid var(--border);
-        }
-
-        .menu-card:active { transform: scale(0.96); background: var(--card-hover); }
-
-        .icon { font-size: 1.35rem; line-height: 1; }
-        .title { font-weight: 600; color: var(--text-primary); font-size: 1.05rem; flex-grow: 1; }
-        .arrow { color: var(--arrow-color); font-size: 1rem; }
-
-        /* Snake Game Layout */
-        #game-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 1;
-            display: none;
-        }
-
-        #score-display {
-            position: fixed;
-            top: 80px;
-            width: 100%;
-            text-align: center;
-            font-weight: 900;
-            color: var(--primary);
-            display: none;
+            padding: 0 10px 10px;
+            position: sticky;
+            top: 0;
             z-index: 100;
-            font-size: 2.2rem;
-            opacity: 0.5;
-            pointer-events: none;
+            border-bottom: 1px solid var(--border);
+            gap: 8px;
+            overflow-x: auto;
         }
 
-        #instructions {
-            position: fixed;
-            inset: 0;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 200;
-            pointer-events: none;
+        .nav-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: var(--bg);
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            white-space: nowrap;
+            display: none; /* Initial versteckt */
         }
 
-        #instructions.visible { display: flex; }
+        .nav-btn.active {
+            background: var(--accent);
+            color: #000;
+        }
 
-        .instr-box {
+        .content-section { display: none; padding: 20px 16px; max-width: 600px; margin: 0 auto; }
+        .content-section.active { display: block; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .card {
             background: var(--surface);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
             border: 1px solid var(--border);
-            border-radius: 22px;
-            padding: 26px 32px;
-            max-width: 300px;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            animation: fadeInScale 0.35s ease;
+            box-shadow: var(--shadow);
         }
 
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.88); }
-            to   { opacity: 1; transform: scale(1); }
+        .card-title { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 12px; display: block; }
+
+        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { font-size: 0.9rem; color: var(--text-secondary); }
+        .info-value { font-size: 0.9rem; font-weight: 700; }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 24px;
+            border-left: 2px solid var(--border);
         }
 
-        .instr-box h2 { margin: 0 0 10px 0; font-size: 1.2rem; font-weight: 800; color: var(--text-primary); }
-        .instr-box p { margin: 0 0 6px 0; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; }
-        .instr-key { display: inline-block; background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; padding: 3px 8px; font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin: 2px; }
-        .instr-touch { font-size: 1.6rem; margin: 6px 0; }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -7px; top: 0;
+            width: 12px; height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .time-badge { font-size: 0.7rem; font-weight: 800; background: var(--accent); color: #000; padding: 2px 8px; border-radius: 6px; margin-bottom: 4px; display: inline-block; }
+        .timeline-date { font-weight: 800; font-size: 1rem; display: block; }
+        .timeline-desc { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; }
+        .timeline-event { color: var(--accent); font-weight: 700; font-size: 0.85rem; margin-top: 4px; display: block; }
+
+        .logistics-footer { background: #000; color: white; border-radius: 16px; padding: 15px; margin-top: 10px; border: 1px solid var(--accent); }
+        .logistics-footer h3 { font-size: 0.7rem; text-transform: uppercase; margin-bottom: 8px; color: var(--accent); }
+        .logistics-footer p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 4px; }
+        
+        .empty-state { text-align: center; color: var(--text-secondary); padding: 40px 20px; font-style: italic; font-size: 0.9rem; }
     </style>
 </head>
 <body>
+
     <header>
-        <div class="header-title">FABIANS APP</div>
-        <div class="header-buttons">
-            <a href="test.html" class="test-link-btn">TEST</a>
-            <button id="snake-start" onclick="toggleGame()">🐍 SNAKE</button>
-        </div>
+        <h1>Kanada 2026</h1>
+        <p>Montreal • Québec • Ottawa</p>
     </header>
 
-    <div id="score-display"><span id="current-score">0</span></div>
-
-    <div class="menu-container" id="main-menu">
-        <a href="reise_stats.html" class="menu-card">
-            <span class="icon">🌍</span>
-            <span class="title">Reisen</span>
-            <span class="arrow">→</span>
-        </a>
-        <a href="alltag.html" class="menu-card">
-            <span class="icon">🏠</span>
-            <span class="title">Alltag</span>
-            <span class="arrow">→</span>
-        </a>
+    <div class="main-nav">
+        <button class="main-nav-btn active" onclick="switchMode('fix')">Fix</button>
+        <button class="main-nav-btn" onclick="switchMode('offen')">Offen</button>
     </div>
 
-    <div id="instructions">
-        <div class="instr-box" id="instr-content"></div>
-    </div>
+    <nav id="sub-nav">
+        <button class="nav-btn fix-btn active" onclick="showTab('flights')">REISEN</button>
+        <button class="nav-btn fix-btn" onclick="showTab('hotels')">HOTELS</button>
+        <button class="nav-btn fix-btn" onclick="showTab('activities')">AKTIVITÄTEN</button>
+        
+        <button class="nav-btn offen-btn" onclick="showTab('plan')">KALENDER</button>
+        <button class="nav-btn offen-btn" onclick="showTab('todos')">TODOS</button>
+        <button class="nav-btn offen-btn" onclick="showTab('ideas')">IDEEN</button>
+    </nav>
 
-    <canvas id="game-canvas"></canvas>
+    <main id="flights" class="content-section active">
+        <div class="card">
+            <span class="card-title">Hinflug (FRA → YUL)</span>
+            <div class="info-row"><span class="info-label">Datum</span><span class="info-value">24.09.2026</span></div>
+            <div class="info-row"><span class="info-label">Abflug</span><span class="info-value">09:55 Uhr</span></div>
+            <div class="info-row"><span class="info-label">Ankunft</span><span class="info-value">12:00 Uhr</span></div>
+        </div>
+        <div class="card">
+            <span class="card-title">Rückflug (YUL → FRA)</span>
+            <div class="info-row"><span class="info-label">Datum</span><span class="info-value">02.10.2026</span></div>
+            <div class="info-row"><span class="info-label">Abflug</span><span class="info-value">16:35 Uhr</span></div>
+            <div class="info-row"><span class="info-label">Ankunft FRA</span><span class="info-value">06:00 Uhr (+1)</span></div>
+            <div class="logistics-footer" style="margin-top: 15px;">
+                <h3>Strategischer Hinweis</h3>
+                <p><strong>Letzte Deadline:</strong> Spätestens 11:00 Uhr Abfahrt in Ottawa!</p>
+                <p>Puffer für: Verkehr, Tanken, Mietwagen-Return und Lounge-Besuch (YUL).</p>
+            </div>
+        </div>
+        <div class="card">
+            <span class="card-title">Mietwagen</span>
+            <div class="info-row"><span class="info-label">Pick-up</span><span class="info-value">28.09. | 15:00 (Montreal City)</span></div>
+            <div class="info-row"><span class="info-label">Drop-off</span><span class="info-value">02.10. | 13:30 (Flughafen)</span></div>
+            <div class="info-row"><span class="info-label">Kategorie</span><span class="info-value">Midsize</span></div>
+        </div>
+    </main>
+
+    <main id="hotels" class="content-section">
+        <div class="card">
+            <span class="card-title">Montreal (5 Nächte)</span>
+            <div class="info-row"><span class="info-label">Zeitraum</span><span class="info-value">24.09. – 28.09.</span></div>
+            <div class="info-row"><span class="info-label">Status</span><span class="info-value">offen</span></div>
+        </div>
+        <div class="card">
+            <span class="card-title">Québec City (1 Nacht)</span>
+            <div class="info-row"><span class="info-label">Zeitraum</span><span class="info-value">28.09. – 29.09.</span></div>
+            <div class="info-row"><span class="info-label">Status</span><span class="info-value">offen</span></div>
+        </div>
+        <div class="card">
+            <span class="card-title">Ottawa (2 Nächte)</span>
+            <div class="info-row"><span class="info-label">Zeitraum</span><span class="info-value">30.09. – 02.10.</span></div>
+            <div class="info-row"><span class="info-label">Status</span><span class="info-value">offen</span></div>
+        </div>
+    </main>
+
+    <main id="activities" class="content-section">
+        <div class="empty-state">Noch keine fixen Aktivitäten geplant.</div>
+    </main>
+
+    <main id="plan" class="content-section">
+        <div class="timeline-item">
+            <span class="timeline-date">Do, 24. Sept. | Ankunft YUL</span>
+            <span class="time-badge">09:55 - 12:00</span>
+            <span class="timeline-desc">Flug FRA → YUL. Transfer & Hotel Check-in Montreal.</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">Fr, 25. Sept. | Montreal Focus</span>
+            <span class="timeline-desc">Erkundung Plateau Mont-Royal / Altstadt.</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">Sa, 26. Sept. | Matchday Montreal</span>
+            <span class="time-badge">19:30 Anpfiff</span>
+            <span class="timeline-event">⚽️ CF Montréal vs. [Gegner]</span>
+            <span class="timeline-desc">Stade Saputo. Vormittags: Mount Royal Park Hike.</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">So, 27. Sept. | Montreal</span>
+            <span class="timeline-desc">Hafenviertel / Zeit für Erholung oder Training.</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">Mo, 28. Sept. | Roadtrip Start</span>
+            <span class="time-badge">15:00 Rental</span>
+            <span class="timeline-desc">Auto-Abholung Montreal City. Fahrt nach Québec (260km).</span>
+            <span class="time-badge">18:00 Arrival</span>
+            <span class="timeline-desc">Check-in Québec City & Dinner in der Altstadt.</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">Di, 29. Sept. | Québec City Focus</span>
+            <span class="timeline-desc">Château Frontenac & Wasserfälle (Montmorency).</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">Mi, 30. Sept. | Ottawa Matchday</span>
+            <span class="time-badge">09:00 Departure</span>
+            <span class="timeline-desc">Fahrt nach Ottawa (ca. 440km).</span>
+            <span class="time-badge">19:00 Anpfiff</span>
+            <span class="timeline-event">⚽️ Atlético Ottawa vs. [Gegner]</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">Do, 01. Okt. | Ottawa Culture</span>
+            <span class="timeline-desc">Parlamentshügel / ByWard Market.</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">Fr, 02. Okt. | Rückflug</span>
+            <span class="time-badge">11:00 Departure</span>
+            <span class="timeline-desc">Fahrt Ottawa → YUL Airport (190km).</span>
+            <span class="time-badge">16:35 Takeoff</span>
+            <span class="timeline-desc">Abflug nach FRA (Ankunft 06:00+1).</span>
+        </div>
+    </main>
+
+    <main id="todos" class="content-section">
+        <div class="empty-state">Keine offenen Todos vorhanden.</div>
+    </main>
+
+    <main id="ideas" class="content-section">
+        <div class="empty-state">Keine Ideen gespeichert.</div>
+    </main>
 
     <script>
-        const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-        const canvas = document.getElementById("game-canvas");
-        const ctx = canvas.getContext("2d");
-        const scoreDisplay = document.getElementById("score-display");
-        const scoreVal = document.getElementById("current-score");
-        const instrEl = document.getElementById("instructions");
-        const instrContent = document.getElementById("instr-content");
+        function switchMode(mode) {
+            // Header Buttons stylen
+            document.querySelectorAll('.main-nav-btn').forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
 
-        let gameActive = false;
-        let snake, direction, nextDirection, food;
-        let score = 0;
+            // Unter-Nav Buttons filtern
+            document.querySelectorAll('.nav-btn').forEach(b => b.style.display = 'none');
+            const subButtons = document.querySelectorAll('.' + mode + '-btn');
+            subButtons.forEach(b => b.style.display = 'block');
 
-        const laender = (typeof MEINE_REISEN !== 'undefined')
-            ? MEINE_REISEN.map(r => r.flagge || "📍")
-            : ["🇩🇪","🇮🇹","🇺🇸"];
-
-        const GRID = 32;
-        const SPEED_START = 110;
-        const SPEED_MIN = 45;
-        const SPEED_STEP = 5;
-
-        function toggleGame() {
-            if (!gameActive) showInstructions();
-            else stopGame();
+            // Den ersten Button im neuen Modus aktivieren und Tab anzeigen
+            subButtons[0].click();
         }
 
-        function showInstructions() {
-            if (!isTouchDevice) {
-                instrContent.innerHTML = `<h2>🐍 Snake</h2><p>Pfeiltasten zum Steuern</p><p><span class="instr-key">↑</span> <span class="instr-key">↓</span> <span class="instr-key">←</span> <span class="instr-key">→</span></p>`;
-            } else {
-                instrContent.innerHTML = `<h2>🐍 Snake</h2><div class="instr-touch">👈 &nbsp;&nbsp;&nbsp; 👉</div><p>Links tippen = Links-Drehung<br>Rechts tippen = Rechts-Drehung</p>`;
+        function showTab(tabId) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            const targetContent = document.getElementById(tabId);
+            if(targetContent) targetContent.classList.add('active');
+            
+            // Den geklickten Button aktiv setzen
+            if(event && event.currentTarget && event.currentTarget.classList.contains('nav-btn')) {
+                event.currentTarget.classList.add('active');
             }
-            instrEl.classList.add("visible");
-            setTimeout(() => { instrEl.classList.remove("visible"); startGame(); }, 2500);
+            
+            window.scrollTo(0,0);
         }
 
-        function startGame() {
-            gameActive = true;
-            canvas.style.display = "block";
-            scoreDisplay.style.display = "block";
-            document.getElementById("snake-start").innerText = "■ STOP";
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            score = 0;
-            scoreVal.innerText = score;
-
-            const startX = Math.floor(canvas.width / 2 / GRID) * GRID;
-            const startY = Math.floor(canvas.height / 2 / GRID) * GRID;
-            snake = [{ x: startX, y: startY }, { x: startX - GRID, y: startY }, { x: startX - GRID * 2, y: startY }];
-            direction = { x: GRID, y: 0 };
-            nextDirection = { x: GRID, y: 0 };
-            spawnFood();
-            runLoop();
-        }
-
-        function runLoop() {
-            if (!gameActive) return;
-            draw();
-            setTimeout(runLoop, Math.max(SPEED_MIN, SPEED_START - score * SPEED_STEP));
-        }
-
-        function stopGame() {
-            gameActive = false;
-            canvas.style.display = "none";
-            scoreDisplay.style.display = "none";
-            document.getElementById("snake-start").innerText = "🐍 SNAKE";
-        }
-
-        function spawnFood() {
-            const cols = Math.floor(canvas.width / GRID);
-            const rows = Math.floor(canvas.height / GRID);
-            let pos;
-            do {
-                pos = { x: Math.floor(Math.random() * cols) * GRID, y: Math.floor(Math.random() * rows) * GRID };
-            } while (snake.some(s => s.x === pos.x && s.y === pos.y));
-            food = { ...pos, symbol: laender[Math.floor(Math.random() * laender.length)] };
-        }
-
-        function draw() {
-            direction = nextDirection;
-            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
-
-            if (head.x < 0) head.x = Math.floor((canvas.width - 1) / GRID) * GRID;
-            if (head.x >= canvas.width) head.x = 0;
-            if (head.y < 0) head.y = Math.floor((canvas.height - 1) / GRID) * GRID;
-            if (head.y >= canvas.height) head.y = 0;
-
-            if (snake.some(s => s.x === head.x && s.y === head.y)) { gameOver(); return; }
-
-            snake.unshift(head);
-            if (head.x === food.x && head.y === food.y) { score++; scoreVal.innerText = score; spawnFood(); }
-            else { snake.pop(); }
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            ctx.fillStyle = isDark ? "rgba(15,23,42,0.7)" : "rgba(240,242,245,0.7)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.font = `${GRID - 4}px sans-serif`;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(food.symbol, food.x + GRID / 2, food.y + GRID / 2);
-
-            snake.forEach((s, i) => {
-                ctx.fillStyle = i === 0 ? "#2ecc71" : `rgba(46, 204, 113, ${Math.max(0.3, 1 - i * 0.05)})`;
-                ctx.beginPath();
-                ctx.roundRect(s.x + 2, s.y + 2, GRID - 4, GRID - 4, 8);
-                ctx.fill();
-            });
-        }
-
-        function gameOver() {
-            ctx.fillStyle = "#e74c3c";
-            ctx.font = "bold 32px -apple-system";
-            ctx.textAlign = "center";
-            ctx.fillText(`💀 ${score} Länder`, canvas.width / 2, canvas.height / 2);
-            setTimeout(stopGame, 1500);
-        }
-
-        // ── Tastatur (Mac/Laptop) ──
-        window.addEventListener("keydown", (e) => {
-            if (!gameActive) return;
-            const d = direction;
-            if ((e.key === "ArrowUp" || e.key === "w") && d.y === 0) nextDirection = { x: 0, y: -GRID };
-            if ((e.key === "ArrowDown" || e.key === "s") && d.y === 0) nextDirection = { x: 0, y: GRID };
-            if ((e.key === "ArrowLeft" || e.key === "a") && d.x === 0) nextDirection = { x: -GRID, y: 0 };
-            if ((e.key === "ArrowRight" || e.key === "d") && d.x === 0) nextDirection = { x: GRID, y: 0 };
-        });
-
-        // ── Touch (iPhone - Tap Rotation) ──
-        window.addEventListener("touchstart", (e) => {
-            if (!gameActive) return;
-            const touchX = e.touches[0].clientX;
-            const screenWidth = window.innerWidth;
-            const d = direction;
-
-            if (touchX < screenWidth / 2) {
-                // Linker Bereich -> Drehung gegen Uhrzeigersinn
-                if (d.x > 0) nextDirection = { x: 0, y: -GRID };
-                else if (d.x < 0) nextDirection = { x: 0, y: GRID };
-                else if (d.y > 0) nextDirection = { x: GRID, y: 0 };
-                else if (d.y < 0) nextDirection = { x: -GRID, y: 0 };
-            } else {
-                // Rechter Bereich -> Drehung im Uhrzeigersinn
-                if (d.x > 0) nextDirection = { x: 0, y: GRID };
-                else if (d.x < 0) nextDirection = { x: 0, y: -GRID };
-                else if (d.y > 0) nextDirection = { x: -GRID, y: 0 };
-                else if (d.y < 0) nextDirection = { x: GRID, y: 0 };
-            }
-        }, { passive: true });
+        // Initialer Start: Fix-Modus aktivieren
+        window.onload = () => {
+            document.querySelectorAll('.fix-btn').forEach(b => b.style.display = 'block');
+        };
     </script>
 </body>
 </html>
