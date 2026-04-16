@@ -40,10 +40,20 @@
             text-align: center;
         }
 
+        /* Secret Link Design */
+        .secret-link {
+            text-decoration: none;
+            color: inherit;
+            cursor: default;
+        }
+
+        @media (hover: hover) {
+            .secret-link { cursor: pointer; }
+        }
+
         header h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
         header p { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-top: 4px; }
 
-        /* Haupt-Reiter (Fix / Offen) */
         .main-nav {
             display: flex;
             background: var(--surface);
@@ -70,7 +80,6 @@
             background: rgba(253, 184, 19, 0.1);
         }
 
-        /* Unter-Navigation */
         nav {
             display: flex;
             background: var(--surface);
@@ -94,7 +103,7 @@
             color: var(--text-secondary);
             cursor: pointer;
             white-space: nowrap;
-            display: none; /* Initial versteckt */
+            display: none;
         }
 
         .nav-btn.active {
@@ -123,6 +132,15 @@
         .info-label { font-size: 0.9rem; color: var(--text-secondary); }
         .info-value { font-size: 0.9rem; font-weight: 700; }
 
+        /* Angepasster strategischer Hinweis */
+        .hint-clean {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--border);
+        }
+        .hint-clean h3 { font-size: 0.7rem; text-transform: uppercase; margin-bottom: 6px; color: var(--accent); letter-spacing: 0.05em; }
+        .hint-clean p { font-size: 0.85rem; color: var(--text-secondary); }
+
         .timeline-item {
             position: relative;
             padding-left: 30px;
@@ -143,10 +161,6 @@
         .timeline-date { font-weight: 800; font-size: 1rem; display: block; }
         .timeline-desc { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; }
         .timeline-event { color: var(--accent); font-weight: 700; font-size: 0.85rem; margin-top: 4px; display: block; }
-
-        .logistics-footer { background: #000; color: white; border-radius: 16px; padding: 15px; margin-top: 10px; border: 1px solid var(--accent); }
-        .logistics-footer h3 { font-size: 0.7rem; text-transform: uppercase; margin-bottom: 8px; color: var(--accent); }
-        .logistics-footer p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 4px; }
         
         .empty-state { text-align: center; color: var(--text-secondary); padding: 40px 20px; font-style: italic; font-size: 0.9rem; }
     </style>
@@ -154,7 +168,7 @@
 <body>
 
     <header>
-        <h1>Kanada 2026</h1>
+        <a href="index.html" class="secret-link" id="header-link"><h1>Kanada 2026</h1></a>
         <p>Montreal • Québec • Ottawa</p>
     </header>
 
@@ -185,7 +199,7 @@
             <div class="info-row"><span class="info-label">Datum</span><span class="info-value">02.10.2026</span></div>
             <div class="info-row"><span class="info-label">Abflug</span><span class="info-value">16:35 Uhr</span></div>
             <div class="info-row"><span class="info-label">Ankunft FRA</span><span class="info-value">06:00 Uhr (+1)</span></div>
-            <div class="logistics-footer" style="margin-top: 15px;">
+            <div class="hint-clean">
                 <h3>Strategischer Hinweis</h3>
                 <p><strong>Letzte Deadline:</strong> Spätestens 11:00 Uhr Abfahrt in Ottawa!</p>
                 <p>Puffer für: Verkehr, Tanken, Mietwagen-Return und Lounge-Besuch (YUL).</p>
@@ -281,17 +295,21 @@
     </main>
 
     <script>
+        // Deaktiviere Header Link auf Touch-Geräten
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            document.getElementById('header-link').addEventListener('click', function(e) {
+                e.preventDefault();
+            });
+        }
+
         function switchMode(mode) {
-            // Header Buttons stylen
             document.querySelectorAll('.main-nav-btn').forEach(b => b.classList.remove('active'));
             event.currentTarget.classList.add('active');
 
-            // Unter-Nav Buttons filtern
             document.querySelectorAll('.nav-btn').forEach(b => b.style.display = 'none');
             const subButtons = document.querySelectorAll('.' + mode + '-btn');
             subButtons.forEach(b => b.style.display = 'block');
 
-            // Den ersten Button im neuen Modus aktivieren und Tab anzeigen
             subButtons[0].click();
         }
 
@@ -302,7 +320,6 @@
             const targetContent = document.getElementById(tabId);
             if(targetContent) targetContent.classList.add('active');
             
-            // Den geklickten Button aktiv setzen
             if(event && event.currentTarget && event.currentTarget.classList.contains('nav-btn')) {
                 event.currentTarget.classList.add('active');
             }
@@ -310,7 +327,6 @@
             window.scrollTo(0,0);
         }
 
-        // Initialer Start: Fix-Modus aktivieren
         window.onload = () => {
             document.querySelectorAll('.fix-btn').forEach(b => b.style.display = 'block');
         };
