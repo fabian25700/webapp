@@ -6,7 +6,7 @@
     <title>Kanada 2026 | Roadmap</title>
     <style>
         :root {
-            --accent: #fdb813; /* Original Reise-Stats Orange/Gelb */
+            --accent: #fdb813; 
             --bg: #f0f2f5;
             --surface: #ffffff;
             --text-primary: #1e293b;
@@ -36,18 +36,54 @@
 
         header {
             background: var(--surface);
-            padding: calc(env(safe-area-inset-top) + 20px) 20px 20px;
-            border-bottom: 1px solid var(--border);
+            padding: calc(env(safe-area-inset-top) + 20px) 20px 10px;
             text-align: center;
+        }
+
+        /* Secret Link Design */
+        .secret-link {
+            text-decoration: none;
+            color: inherit;
+            cursor: default;
+        }
+
+        @media (hover: hover) {
+            .secret-link { cursor: pointer; }
         }
 
         header h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
         header p { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-top: 4px; }
 
+        .main-nav {
+            display: flex;
+            background: var(--surface);
+            padding: 10px 20px;
+            gap: 10px;
+        }
+
+        .main-nav-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid var(--border);
+            background: transparent;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .main-nav-btn.active {
+            border-color: var(--accent);
+            color: var(--text-primary);
+            background: rgba(253, 184, 19, 0.1);
+        }
+
         nav {
             display: flex;
             background: var(--surface);
-            padding: 10px;
+            padding: 0 10px 10px;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -58,15 +94,16 @@
 
         .nav-btn {
             flex: 1;
-            padding: 12px;
+            padding: 10px;
             border: none;
             background: var(--bg);
-            border-radius: 12px;
+            border-radius: 10px;
             font-weight: 700;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-secondary);
             cursor: pointer;
             white-space: nowrap;
+            display: none;
         }
 
         .nav-btn.active {
@@ -95,6 +132,15 @@
         .info-label { font-size: 0.9rem; color: var(--text-secondary); }
         .info-value { font-size: 0.9rem; font-weight: 700; }
 
+        /* Angepasster strategischer Hinweis */
+        .hint-clean {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--border);
+        }
+        .hint-clean h3 { font-size: 0.7rem; text-transform: uppercase; margin-bottom: 6px; color: var(--accent); letter-spacing: 0.05em; }
+        .hint-clean p { font-size: 0.85rem; color: var(--text-secondary); }
+
         .timeline-item {
             position: relative;
             padding-left: 30px;
@@ -115,104 +161,50 @@
         .timeline-date { font-weight: 800; font-size: 1rem; display: block; }
         .timeline-desc { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; }
         .timeline-event { color: var(--accent); font-weight: 700; font-size: 0.85rem; margin-top: 4px; display: block; }
-
-        .logistics-footer { background: #000; color: white; border-radius: 16px; padding: 15px; margin-top: 10px; border: 1px solid var(--accent); }
-        .logistics-footer h3 { font-size: 0.7rem; text-transform: uppercase; margin-bottom: 8px; color: var(--accent); }
-        .logistics-footer p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 4px; }
+        
+        .empty-state { text-align: center; color: var(--text-secondary); padding: 40px 20px; font-style: italic; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
     <header>
-        <h1>Kanada 2026</h1>
+        <a href="index.html" class="secret-link" id="header-link"><h1>Kanada 2026</h1></a>
         <p>Montreal • Québec • Ottawa</p>
     </header>
 
-    <nav>
-        <button class="nav-btn active" onclick="showTab('plan')">KALENDER</button>
-        <button class="nav-btn" onclick="showTab('flights')">REISEN</button>
-        <button class="nav-btn" onclick="showTab('hotels')">HOTELS</button>
+    <div class="main-nav">
+        <button class="main-nav-btn active" onclick="switchMode('fix')">Fix</button>
+        <button class="main-nav-btn" onclick="switchMode('offen')">Offen</button>
+    </div>
+
+    <nav id="sub-nav">
+        <button class="nav-btn fix-btn active" onclick="showTab('flights')">REISEN</button>
+        <button class="nav-btn fix-btn" onclick="showTab('hotels')">HOTELS</button>
+        <button class="nav-btn fix-btn" onclick="showTab('activities')">AKTIVITÄTEN</button>
+        
+        <button class="nav-btn offen-btn" onclick="showTab('plan')">KALENDER</button>
+        <button class="nav-btn offen-btn" onclick="showTab('todos')">TODOS</button>
+        <button class="nav-btn offen-btn" onclick="showTab('ideas')">IDEEN</button>
     </nav>
 
-    <main id="plan" class="content-section active">
-        <div class="timeline-item">
-            <span class="timeline-date">Do, 24. Sept. | Ankunft YUL</span>
-            <span class="time-badge">09:55 - 12:00</span>
-            <span class="timeline-desc">Flug FRA → YUL. Transfer & Hotel Check-in Montreal.</span>
-        </div>
-
-        <div class="timeline-item">
-            <span class="timeline-date">Fr, 25. Sept. | Montreal Focus</span>
-            <span class="timeline-desc">Erkundung Plateau Mont-Royal / Altstadt.</span>
-        </div>
-
-        <div class="timeline-item">
-            <span class="timeline-date">Sa, 26. Sept. | Matchday Montreal</span>
-            <span class="time-badge">19:30 Anpfiff</span>
-            <span class="timeline-event">⚽️ CF Montréal vs. [Gegner]</span>
-            <span class="timeline-desc">Stade Saputo. Vormittags: Mount Royal Park Hike.</span>
-        </div>
-
-        <div class="timeline-item">
-            <span class="timeline-date">So, 27. Sept. | Montreal</span>
-            <span class="timeline-desc">Hafenviertel / Zeit für Erholung oder Training.</span>
-        </div>
-
-        <div class="timeline-item">
-            <span class="timeline-date">Mo, 28. Sept. | Roadtrip Start</span>
-            <span class="time-badge">15:00 Rental</span>
-            <span class="timeline-desc">Auto-Abholung Montreal City. Fahrt nach Québec (260km).</span>
-            <span class="time-badge">18:00 Arrival</span>
-            <span class="timeline-desc">Check-in Québec City & Dinner in der Altstadt.</span>
-        </div>
-
-        <div class="timeline-item">
-            <span class="timeline-date">Di, 29. Sept. | Québec City Focus</span>
-            <span class="timeline-desc">Château Frontenac & Wasserfälle (Montmorency).</span>
-        </div>
-
-        <div class="timeline-item">
-            <span class="timeline-date">Mi, 30. Sept. | Ottawa Matchday</span>
-            <span class="time-badge">09:00 Departure</span>
-            <span class="timeline-desc">Fahrt nach Ottawa (ca. 440km).</span>
-            <span class="time-badge">19:00 Anpfiff</span>
-            <span class="timeline-event">⚽️ Atlético Ottawa vs. [Gegner]</span>
-        </div>
-
-        <div class="timeline-item">
-            <span class="timeline-date">Do, 01. Okt. | Ottawa Culture</span>
-            <span class="timeline-desc">Parlamentshügel / ByWard Market.</span>
-        </div>
-
-        <div class="timeline-item">
-            <span class="timeline-date">Fr, 02. Okt. | Rückflug</span>
-            <span class="time-badge">11:00 Departure</span>
-            <span class="timeline-desc">Fahrt Ottawa → YUL Airport (190km).</span>
-            <span class="time-badge">16:35 Takeoff</span>
-            <span class="timeline-desc">Abflug nach FRA (Ankunft 06:00+1).</span>
-        </div>
-    </main>
-
-    <main id="flights" class="content-section">
+    <main id="flights" class="content-section active">
         <div class="card">
             <span class="card-title">Hinflug (FRA → YUL)</span>
             <div class="info-row"><span class="info-label">Datum</span><span class="info-value">24.09.2026</span></div>
             <div class="info-row"><span class="info-label">Abflug</span><span class="info-value">09:55 Uhr</span></div>
             <div class="info-row"><span class="info-label">Ankunft</span><span class="info-value">12:00 Uhr</span></div>
         </div>
-
         <div class="card">
             <span class="card-title">Rückflug (YUL → FRA)</span>
             <div class="info-row"><span class="info-label">Datum</span><span class="info-value">02.10.2026</span></div>
             <div class="info-row"><span class="info-label">Abflug</span><span class="info-value">16:35 Uhr</span></div>
             <div class="info-row"><span class="info-label">Ankunft FRA</span><span class="info-value">06:00 Uhr (+1)</span></div>
-            <div class="logistics-footer" style="margin-top: 15px;">
+            <div class="hint-clean">
                 <h3>Strategischer Hinweis</h3>
                 <p><strong>Letzte Deadline:</strong> Spätestens 11:00 Uhr Abfahrt in Ottawa!</p>
                 <p>Puffer für: Verkehr, Tanken, Mietwagen-Return und Lounge-Besuch (YUL).</p>
             </div>
         </div>
-
         <div class="card">
             <span class="card-title">Mietwagen</span>
             <div class="info-row"><span class="info-label">Pick-up</span><span class="info-value">28.09. | 15:00 (Montreal City)</span></div>
@@ -239,14 +231,105 @@
         </div>
     </main>
 
+    <main id="activities" class="content-section">
+        <div class="empty-state">Noch keine fixen Aktivitäten geplant.</div>
+    </main>
+
+    <main id="plan" class="content-section">
+        <div class="timeline-item">
+            <span class="timeline-date">Do, 24. Sept. | Ankunft YUL</span>
+            <span class="time-badge">09:55 - 12:00</span>
+            <span class="timeline-desc">Flug FRA → YUL. Transfer & Hotel Check-in Montreal.</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">Fr, 25. Sept. | Montreal Focus</span>
+            <span class="timeline-desc">Erkundung Plateau Mont-Royal / Altstadt.</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">Sa, 26. Sept. | Matchday Montreal</span>
+            <span class="time-badge">19:30 Anpfiff</span>
+            <span class="timeline-event">⚽️ CF Montréal vs. [Gegner]</span>
+            <span class="timeline-desc">Stade Saputo. Vormittags: Mount Royal Park Hike.</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">So, 27. Sept. | Montreal</span>
+            <span class="timeline-desc">Hafenviertel / Zeit für Erholung oder Training.</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">Mo, 28. Sept. | Roadtrip Start</span>
+            <span class="time-badge">15:00 Rental</span>
+            <span class="timeline-desc">Auto-Abholung Montreal City. Fahrt nach Québec (260km).</span>
+            <span class="time-badge">18:00 Arrival</span>
+            <span class="timeline-desc">Check-in Québec City & Dinner in der Altstadt.</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">Di, 29. Sept. | Québec City Focus</span>
+            <span class="timeline-desc">Château Frontenac & Wasserfälle (Montmorency).</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">Mi, 30. Sept. | Ottawa Matchday</span>
+            <span class="time-badge">09:00 Departure</span>
+            <span class="timeline-desc">Fahrt nach Ottawa (ca. 440km).</span>
+            <span class="time-badge">19:00 Anpfiff</span>
+            <span class="timeline-event">⚽️ Atlético Ottawa vs. [Gegner]</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">Do, 01. Okt. | Ottawa Culture</span>
+            <span class="timeline-desc">Parlamentshügel / ByWard Market.</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">Fr, 02. Okt. | Rückflug</span>
+            <span class="time-badge">11:00 Departure</span>
+            <span class="timeline-desc">Fahrt Ottawa → YUL Airport (190km).</span>
+            <span class="time-badge">16:35 Takeoff</span>
+            <span class="timeline-desc">Abflug nach FRA (Ankunft 06:00+1).</span>
+        </div>
+    </main>
+
+    <main id="todos" class="content-section">
+        <div class="empty-state">Keine offenen Todos vorhanden.</div>
+    </main>
+
+    <main id="ideas" class="content-section">
+        <div class="empty-state">Keine Ideen gespeichert.</div>
+    </main>
+
     <script>
+        // Deaktiviere Header Link auf Touch-Geräten
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            document.getElementById('header-link').addEventListener('click', function(e) {
+                e.preventDefault();
+            });
+        }
+
+        function switchMode(mode) {
+            document.querySelectorAll('.main-nav-btn').forEach(b => b.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            document.querySelectorAll('.nav-btn').forEach(b => b.style.display = 'none');
+            const subButtons = document.querySelectorAll('.' + mode + '-btn');
+            subButtons.forEach(b => b.style.display = 'block');
+
+            subButtons[0].click();
+        }
+
         function showTab(tabId) {
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            event.currentTarget.classList.add('active');
+            
+            const targetContent = document.getElementById(tabId);
+            if(targetContent) targetContent.classList.add('active');
+            
+            if(event && event.currentTarget && event.currentTarget.classList.contains('nav-btn')) {
+                event.currentTarget.classList.add('active');
+            }
+            
             window.scrollTo(0,0);
         }
+
+        window.onload = () => {
+            document.querySelectorAll('.fix-btn').forEach(b => b.style.display = 'block');
+        };
     </script>
 </body>
 </html>
