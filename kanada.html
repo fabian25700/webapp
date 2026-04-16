@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kanada 2026 | Roadmap</title>
+    <style>
+        :root {
+            --accent: #c0392b; /* Kanada Rot */
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: #2d3f55;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        /* Header */
+        header {
+            background: var(--surface);
+            padding: calc(env(safe-area-inset-top) + 20px) 20px 20px;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+
+        header h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
+        header p { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-top: 4px; }
+
+        /* Navigation Tabs */
+        nav {
+            display: flex;
+            background: var(--surface);
+            padding: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+            gap: 8px;
+            overflow-x: auto;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: var(--bg);
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .nav-btn.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* Content Sections */
+        .content-section { display: none; padding: 20px 16px; max-width: 600px; margin: 0 auto; }
+        .content-section.active { display: block; animation: fadeIn 0.3s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Cards & Timeline */
+        .card {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .card-title { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 12px; display: block; }
+
+        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { font-size: 0.9rem; color: var(--text-secondary); }
+        .info-value { font-size: 0.9rem; font-weight: 700; }
+
+        /* Timeline Items */
+        .timeline-item {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 24px;
+            border-left: 2px solid var(--border);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -7px; top: 0;
+            width: 12px; height: 12px;
+            background: var(--accent);
+            border-radius: 50%;
+        }
+
+        .time-badge { font-size: 0.7rem; font-weight: 800; background: var(--accent); color: white; padding: 2px 8px; border-radius: 6px; margin-bottom: 4px; display: inline-block; }
+        .timeline-date { font-weight: 800; font-size: 1rem; display: block; }
+        .timeline-desc { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; }
+        .timeline-event { color: var(--accent); font-weight: 700; font-size: 0.85rem; margin-top: 4px; display: block; }
+
+        /* Logistics Footer */
+        .logistics-footer { background: var(--accent); color: white; border-radius: 16px; padding: 15px; margin-top: 10px; }
+        .logistics-footer h3 { font-size: 0.8rem; text-transform: uppercase; margin-bottom: 8px; }
+        .logistics-footer p { font-size: 0.85rem; opacity: 0.9; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Kanada 2026</h1>
+        <p>Montreal • Québec • Ottawa</p>
+    </header>
+
+    <nav>
+        <button class="nav-btn active" onclick="showTab('plan')">KALENDER</button>
+        <button class="nav-btn" onclick="showTab('flights')">LOGISTIK</button>
+        <button class="nav-btn" onclick="showTab('hotels')">HOTELS</button>
+    </nav>
+
+    <main id="plan" class="content-section active">
+        <div class="timeline-item">
+            <span class="time-badge">09:55 - 12:00</span>
+            <span class="timeline-date">Do, 24. Sept. | Ankunft</span>
+            <span class="timeline-desc">Flug FRA → YUL. Transfer zum Hotel in Montreal.</span>
+        </div>
+
+        <div class="timeline-item">
+            <span class="timeline-date">Fr, 25. Sept. | Montreal</span>
+            <span class="timeline-desc">Stadtaufenthalt & Sightseeing.</span>
+        </div>
+
+        <div class="timeline-item">
+            <span class="time-badge">19:30</span>
+            <span class="timeline-date">Sa, 26. Sept. | Matchday</span>
+            <span class="timeline-event">⚽️ Fussballspiel in Montreal</span>
+        </div>
+
+        <div class="timeline-item">
+            <span class="timeline-date">So, 27. Sept. | Montreal</span>
+            <span class="timeline-desc">Letzter voller Tag in Montreal (ohne Auto).</span>
+        </div>
+
+        <div class="timeline-item">
+            <span class="time-badge">15:00</span>
+            <span class="timeline-date">Mo, 28. Sept. | Roadtrip Start</span>
+            <span class="timeline-desc">Mietwagen-Abholung Montreal. Fahrt nach Québec (3h).</span>
+            <span class="time-badge" style="background:var(--text-secondary)">18:00</span>
+            <span class="timeline-desc">Check-In Québec City.</span>
+        </div>
+
+        <div class="timeline-item">
+            <span class="timeline-date">Di, 29. Sept. | Québec City</span>
+            <span class="timeline-desc">Ganztägiger Aufenthalt.</span>
+        </div>
+
+        <div class="timeline-item">
+            <span class="time-badge">19:00</span>
+            <span class="timeline-date">Mi, 30. Sept. | Ottawa Match</span>
+            <span class="timeline-desc">Fahrt nach Ottawa (4.5h).</span>
+            <span class="timeline-event">⚽️ Fussballspiel in Ottawa</span>
+        </div>
+
+        <div class="timeline-item">
+            <span class="timeline-date">Do, 01. Okt. | Ottawa</span>
+            <span class="timeline-desc">Zusätzlicher Tag für Sightseeing oder Entspannung.</span>
+        </div>
+
+        <div class="timeline-item">
+            <span class="time-badge">11:00</span>
+            <span class="timeline-date">Fr, 02. Okt. | Abreise</span>
+            <span class="timeline-desc">Start in Ottawa → YUL (2h Fahrt). Mietwagen-Rückgabe.</span>
+            <span class="time-badge">16:35</span>
+            <span class="timeline-desc">Abflug YUL → FRA (Ankunft 06:00).</span>
+        </div>
+    </main>
+
+    <main id="flights" class="content-section">
+        <div class="card">
+            <span class="card-title">Flüge (Hinflug)</span>
+            <div class="info-row"><span class="info-label">Start</span><span class="info-value">FRA 09:55</span></div>
+            <div class="info-row"><span class="info-label">Ziel</span><span class="info-value">YUL 12:00</span></div>
+            <div class="info-row"><span class="info-label">Datum</span><span class="info-value">24.09.2026</span></div>
+        </div>
+
+        <div class="card">
+            <span class="card-title">Mietwagen (Hertz/Sixt)</span>
+            <div class="info-row"><span class="info-label">Abholung</span><span class="info-value">28.09. | 15:00</span></div>
+            <div class="info-row"><span class="info-label">Rückgabe</span><span class="info-value">02.10. | 13:30</span></div>
+            <div class="info-row"><span class="info-label">Dauer</span><span class="info-value">4 Tage</span></div>
+            <div class="info-row"><span class="info-label">Station</span><span class="info-value">Montreal City → YUL</span></div>
+        </div>
+
+        <div class="logistics-footer">
+            <h3>Strategischer Hinweis</h3>
+            <p><strong>Deadline Ottawa:</strong> Abfahrt 11:00 Uhr, um Puffer für Verkehr, Tanken und Lounge-Besuch zu haben.</p>
+        </div>
+    </main>
+
+    <main id="hotels" class="content-section">
+        <div class="card">
+            <span class="card-title">Montreal (5 Nächte)</span>
+            <div class="info-row"><span class="info-label">Check-In</span><span class="info-value">24.09.</span></div>
+            <div class="info-row"><span class="info-label">Check-Out</span><span class="info-value">28.09.</span></div>
+        </div>
+        <div class="card">
+            <span class="card-title">Québec City (1 Nacht)</span>
+            <div class="info-row"><span class="info-label">Check-In</span><span class="info-value">28.09.</span></div>
+            <div class="info-row"><span class="info-label">Check-Out</span><span class="info-value">29.09.</span></div>
+        </div>
+        <div class="card">
+            <span class="card-title">Ottawa (2 Nächte)</span>
+            <div class="info-row"><span class="info-label">Check-In</span><span class="info-value">30.09.</span></div>
+            <div class="info-row"><span class="info-label">Check-Out</span><span class="info-value">02.10.</span></div>
+        </div>
+    </main>
+
+    <script>
+        function showTab(tabId) {
+            // Remove active from all sections and buttons
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            
+            // Activate selected
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+            
+            // Scroll top
+            window.scrollTo(0,0);
+        }
+    </script>
+</body>
+</html>
