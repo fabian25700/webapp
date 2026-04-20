@@ -40,7 +40,6 @@
             text-align: center;
         }
 
-        /* Secret Link Design */
         .secret-link {
             text-decoration: none;
             color: inherit;
@@ -130,9 +129,13 @@
         .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
         .info-row:last-child { border-bottom: none; }
         .info-label { font-size: 0.9rem; color: var(--text-secondary); }
-        .info-value { font-size: 0.9rem; font-weight: 700; }
+        .info-value { font-size: 0.9rem; font-weight: 700; text-align: right; margin-left: 10px; }
 
-        /* Angepasster strategischer Hinweis */
+        .todo-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+        .todo-item:last-child { border-bottom: none; }
+        .todo-checkbox { width: 18px; height: 18px; border: 2px solid var(--accent); border-radius: 4px; margin-right: 12px; flex-shrink: 0; }
+        .todo-text { font-size: 0.9rem; font-weight: 600; }
+
         .hint-clean {
             margin-top: 15px;
             padding-top: 15px;
@@ -215,19 +218,19 @@
 
     <main id="hotels" class="content-section">
         <div class="card">
-            <span class="card-title">Montreal (5 Nächte)</span>
+            <span class="card-title">Montreal (4 Nächte)</span>
             <div class="info-row"><span class="info-label">Zeitraum</span><span class="info-value">24.09. – 28.09.</span></div>
-            <div class="info-row"><span class="info-label">Status</span><span class="info-value">offen</span></div>
+            <div class="info-row"><span class="info-label">Unterkunft</span><span class="info-value">Tru By Hilton Montréal centre-ville</span></div>
         </div>
         <div class="card">
-            <span class="card-title">Québec City (1 Nacht)</span>
-            <div class="info-row"><span class="info-label">Zeitraum</span><span class="info-value">28.09. – 29.09.</span></div>
-            <div class="info-row"><span class="info-label">Status</span><span class="info-value">offen</span></div>
+            <span class="card-title">Québec City (2 Nächte)</span>
+            <div class="info-row"><span class="info-label">Zeitraum</span><span class="info-value">28.09. – 30.09.</span></div>
+            <div class="info-row"><span class="info-label">Unterkunft</span><span class="info-value">C3- Hotel Art De Vivre</span></div>
         </div>
         <div class="card">
             <span class="card-title">Ottawa (2 Nächte)</span>
             <div class="info-row"><span class="info-label">Zeitraum</span><span class="info-value">30.09. – 02.10.</span></div>
-            <div class="info-row"><span class="info-label">Status</span><span class="info-value">offen</span></div>
+            <div class="info-row"><span class="info-label">Unterkunft</span><span class="info-value">ByWard Blue Inn</span></div>
         </div>
     </main>
 
@@ -287,7 +290,14 @@
     </main>
 
     <main id="todos" class="content-section">
-        <div class="empty-state">Keine offenen Todos vorhanden.</div>
+        <div class="card">
+            <span class="card-title">Offene Erledigungen</span>
+            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Recherche Auto</span></div>
+            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Parkplatz Ottawa & Quebec Hotel buchen</span></div>
+            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Einreise Visa (eTA) beantragen</span></div>
+            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Tage planen und strukturieren</span></div>
+            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Benefits Flug herausfinden und planen</span></div>
+        </div>
     </main>
 
     <main id="ideas" class="content-section">
@@ -295,11 +305,9 @@
     </main>
 
     <script>
-        // Deaktiviere Header Link auf Touch-Geräten
         if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-            document.getElementById('header-link').addEventListener('click', function(e) {
-                e.preventDefault();
-            });
+            const link = document.getElementById('header-link');
+            if(link) link.addEventListener('click', (e) => e.preventDefault());
         }
 
         function switchMode(mode) {
@@ -323,7 +331,6 @@
             if(event && event.currentTarget && event.currentTarget.classList.contains('nav-btn')) {
                 event.currentTarget.classList.add('active');
             }
-            
             window.scrollTo(0,0);
         }
 
