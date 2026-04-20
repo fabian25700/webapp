@@ -68,6 +68,34 @@
 
         .nav-btn.active { background: var(--accent); color: #000; }
 
+        /* Switch für Todos/Ideen */
+        .toggle-container {
+            display: flex;
+            background: var(--bg);
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-switch {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            transition: 0.2s;
+        }
+
+        .toggle-switch.active {
+            background: var(--surface);
+            color: var(--text-primary);
+            box-shadow: var(--shadow);
+        }
+
         .content-section { display: none; padding: 20px 16px; max-width: 600px; margin: 0 auto; }
         .content-section.active { display: block; animation: fadeIn 0.3s ease; }
 
@@ -88,11 +116,8 @@
         .todo-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
         .todo-item:last-child { border-bottom: none; }
         .todo-checkbox { width: 18px; height: 18px; border: 2px solid var(--accent); border-radius: 4px; margin-right: 12px; flex-shrink: 0; }
+        .idea-bullet { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; color: var(--accent); margin-right: 12px; flex-shrink: 0; font-weight: 800; }
         .todo-text { font-size: 0.9rem; font-weight: 600; }
-
-        details { margin-top: 15px; border-top: 1px dashed var(--border); padding-top: 10px; }
-        summary { font-size: 0.75rem; font-weight: 800; color: var(--accent); text-transform: uppercase; list-style: none; cursor: pointer; }
-        .ideas-content { padding: 10px 0; font-size: 0.85rem; color: var(--text-secondary); line-height: 1.6; }
 
         .timeline-item { position: relative; padding-left: 30px; margin-bottom: 24px; border-left: 2px solid var(--border); }
         .timeline-item::before {
@@ -191,91 +216,58 @@
             <span class="timeline-desc">Check-in Montreal (Tru By Hilton).</span>
         </div>
         <div class="timeline-item">
-            <span class="timeline-date">Fr, 25. Sept. | Montreal</span>
-            <span class="timeline-desc">Montreal Fokus: Plateau / Downtown.</span>
-        </div>
-        <div class="timeline-item">
-            <span class="timeline-date">Sa, 26. Sept. | Matchday Montreal</span>
-            <span class="time-badge">19:30 Anpfiff</span>
-            <span class="timeline-event">⚽️ CF Montréal vs. FC Cincinnati</span>
-            <span class="timeline-desc">Ort: Stade Saputo.</span>
-        </div>
-        <div class="timeline-item">
-            <span class="timeline-date">So, 27. Sept. | Montreal</span>
-            <span class="timeline-desc">Hafenviertel & Mount Royal Park.</span>
-        </div>
-        <div class="timeline-item">
             <span class="timeline-date">Mo, 28. Sept. | Roadtrip Start</span>
-            <span class="time-badge">15:00 Mietwagen</span>
             <span class="time-badge">~ 2h 45m Fahrt (260km)</span>
             <span class="timeline-desc">Fahrt nach Québec City. Check-in C3 Hotel.</span>
         </div>
         <div class="timeline-item">
-            <span class="timeline-date">Di, 29. Sept. | Québec City</span>
-            <span class="timeline-desc">Altstadt & Montmorency-Falls.</span>
-        </div>
-        <div class="timeline-item">
             <span class="timeline-date">Mi, 30. Sept. | Ottawa Matchday</span>
-            <span class="time-badge">09:00 Abfahrt</span>
             <span class="time-badge">~ 4h 30m Fahrt (440km)</span>
-            <span class="time-badge">19:00 Anpfiff</span>
             <span class="timeline-event">⚽️ Atlético Ottawa vs. Cavalry FC</span>
-            <span class="timeline-desc">Ort: Stadium at TD Place. Check-in Blue Inn.</span>
-        </div>
-        <div class="timeline-item">
-            <span class="timeline-date">Do, 01. Okt. | Ottawa</span>
-            <span class="timeline-desc">Parlamentshügel & ByWard Market.</span>
-        </div>
-        <div class="timeline-item">
-            <span class="timeline-date">Fr, 02. Okt. | Rückreise</span>
-            <span class="time-badge">11:00 Abfahrt Ottawa</span>
-            <span class="time-badge">~ 2h Fahrt (190km)</span>
-            <span class="time-badge">16:35 Takeoff YUL</span>
-            <span class="timeline-desc">Mietwagen-Return & Rückflug nach FRA.</span>
         </div>
     </main>
 
     <main id="todos" class="content-section">
-        <div class="card">
+        <div class="toggle-container">
+            <div id="btn-todos" class="toggle-switch active" onclick="switchList('todos')">Todos</div>
+            <div id="btn-ideen" class="toggle-switch" onclick="switchList('ideen')">Ideen</div>
+        </div>
+
+        <div id="list-todos" class="card">
             <span class="card-title">Offene Erledigungen</span>
             <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Recherche Auto</span></div>
             <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Parkplatz Ottawa & Québec buchen</span></div>
             <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Einreise Visa (eTA) beantragen</span></div>
             <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Tage planen und strukturieren</span></div>
             <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Benefits Flug herausfinden und planen</span></div>
-            
-            <details>
-                <summary>Ideen-Speicher (Toggle)</summary>
-                <div class="ideas-content">
-                    • Mont-Royal Hike in Montreal<br>
-                    • Château Frontenac Besichtigung<br>
-                    • Poutine-Vergleich Québec vs. Montreal<br>
-                    • National Gallery in Ottawa
-                </div>
-            </details>
+        </div>
+
+        <div id="list-ideen" class="card" style="display: none;">
+            <span class="card-title">Ideen-Speicher</span>
+            <div class="todo-item"><div class="idea-bullet">⚡</div><span class="todo-text">Mont-Royal Hike in Montreal</span></div>
+            <div class="todo-item"><div class="idea-bullet">⚡</div><span class="todo-text">Château Frontenac Besichtigung</span></div>
+            <div class="todo-item"><div class="idea-bullet">⚡</div><span class="todo-text">Poutine-Vergleich Québec vs. Montreal</span></div>
+            <div class="todo-item"><div class="idea-bullet">⚡</div><span class="todo-text">National Gallery in Ottawa</span></div>
         </div>
     </main>
 
     <main id="map" class="content-section">
         <div class="card">
-            <span class="card-title">Reisekarte | Unterkünfte & Stadien</span>
+            <span class="card-title">Reisekarte | Unterkünfte</span>
             <div class="map-container">
                 <iframe 
                     width="100%" 
                     height="100%" 
                     frameborder="0" 
                     style="border:0" 
-                    src="https://www.google.com/maps/embed?pb=!1m12!1m8!1m3!1d1430000!2d-73.5!3d45.5!3m2!1i1024!2i768!4f13.1!2m1!1sTru%20By%20Hilton%20Montreal%2C%20C3%20Hotel%20Quebec%2C%20ByWard%20Blue%20Inn%20Ottawa%2C%20Stade%20Saputo%2C%20TD%20Place!5e0!3m2!1sde!2sde!4v1710000000000!5m2!1sde!2sde" 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1430.7027582236162!2d-73.56358172924806!3d45.5011707!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x4cc91b293370335b%3A0xc48c035661b17b88!2sTru%20by%20Hilton%20Montreal%20Centre-Ville!5e0!3m2!1sde!2sde!4v1711234567890!5m2!1sde!2sde" 
                     allowfullscreen>
                 </iframe>
             </div>
             <div style="margin-top: 12px; font-size: 0.8rem; color: var(--text-secondary);">
-                📍 <strong>Markierte Orte:</strong><br>
+                📍 <strong>Markierte Unterkünfte:</strong><br>
                 • Tru By Hilton Montréal<br>
-                • C3- Hotel Art De Vivre Québec<br>
-                • ByWard Blue Inn Ottawa<br>
-                • Stade Saputo (Montreal)<br>
-                • Stadium at TD Place (Ottawa)
+                • C3- Hotel Art De Vivre Québec
             </div>
         </div>
     </main>
@@ -299,6 +291,15 @@
                 event.currentTarget.classList.add('active');
             }
             window.scrollTo(0,0);
+        }
+
+        function switchList(type) {
+            const isTodo = type === 'todos';
+            document.getElementById('list-todos').style.display = isTodo ? 'block' : 'none';
+            document.getElementById('list-ideen').style.display = isTodo ? 'none' : 'block';
+            
+            document.getElementById('btn-todos').classList.toggle('active', isTodo);
+            document.getElementById('btn-ideen').classList.toggle('active', !isTodo);
         }
 
         window.onload = () => {
