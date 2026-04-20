@@ -164,8 +164,6 @@
         .timeline-date { font-weight: 800; font-size: 1rem; display: block; }
         .timeline-desc { font-size: 0.85rem; color: var(--text-secondary); margin-top: 4px; }
         .timeline-event { color: var(--accent); font-weight: 700; font-size: 0.85rem; margin-top: 4px; display: block; }
-        
-        .empty-state { text-align: center; color: var(--text-secondary); padding: 40px 20px; font-style: italic; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -235,57 +233,49 @@
     </main>
 
     <main id="activities" class="content-section">
-        <div class="empty-state">Noch keine fixen Aktivitäten geplant.</div>
+        <div class="card">
+            <span class="card-title">Fußball | MLS</span>
+            <div class="info-row"><span class="info-label">Match</span><span class="info-value">CF Montréal vs. FC Cincinnati</span></div>
+            <div class="info-row"><span class="info-label">Datum</span><span class="info-value">Sa, 26.09.2026 | 19:30</span></div>
+            <div class="info-row"><span class="info-label">Stadion</span><span class="info-value">Stade Saputo, Montréal</span></div>
+        </div>
+        <div class="card">
+            <span class="card-title">Fußball | CPL</span>
+            <div class="info-row"><span class="info-label">Match</span><span class="info-value">Atlético Ottawa vs. Cavalry FC</span></div>
+            <div class="info-row"><span class="info-label">Datum</span><span class="info-value">Mi, 30.09.2026 | 19:00</span></div>
+            <div class="info-row"><span class="info-label">Stadion</span><span class="info-value">The Stadium at TD Place, Ottawa</span></div>
+        </div>
     </main>
 
     <main id="plan" class="content-section">
         <div class="timeline-item">
             <span class="timeline-date">Do, 24. Sept. | Ankunft YUL</span>
-            <span class="time-badge">09:55 - 12:00</span>
-            <span class="timeline-desc">Flug FRA → YUL. Transfer & Hotel Check-in Montreal.</span>
-        </div>
-        <div class="timeline-item">
-            <span class="timeline-date">Fr, 25. Sept. | Montreal Focus</span>
-            <span class="timeline-desc">Erkundung Plateau Mont-Royal / Altstadt.</span>
+            <span class="time-badge">12:00 Arrival</span>
+            <span class="timeline-desc">Check-in Montreal.</span>
         </div>
         <div class="timeline-item">
             <span class="timeline-date">Sa, 26. Sept. | Matchday Montreal</span>
             <span class="time-badge">19:30 Anpfiff</span>
-            <span class="timeline-event">⚽️ CF Montréal vs. [Gegner]</span>
-            <span class="timeline-desc">Stade Saputo. Vormittags: Mount Royal Park Hike.</span>
-        </div>
-        <div class="timeline-item">
-            <span class="timeline-date">So, 27. Sept. | Montreal</span>
-            <span class="timeline-desc">Hafenviertel / Zeit für Erholung oder Training.</span>
+            <span class="timeline-event">⚽️ CF Montréal vs. FC Cincinnati</span>
+            <span class="timeline-desc">Ort: Stade Saputo.</span>
         </div>
         <div class="timeline-item">
             <span class="timeline-date">Mo, 28. Sept. | Roadtrip Start</span>
             <span class="time-badge">15:00 Rental</span>
-            <span class="timeline-desc">Auto-Abholung Montreal City. Fahrt nach Québec (260km).</span>
-            <span class="time-badge">18:00 Arrival</span>
-            <span class="timeline-desc">Check-in Québec City & Dinner in der Altstadt.</span>
-        </div>
-        <div class="timeline-item">
-            <span class="timeline-date">Di, 29. Sept. | Québec City Focus</span>
-            <span class="timeline-desc">Château Frontenac & Wasserfälle (Montmorency).</span>
+            <span class="timeline-desc">Fahrt nach Québec (260km).</span>
         </div>
         <div class="timeline-item">
             <span class="timeline-date">Mi, 30. Sept. | Ottawa Matchday</span>
             <span class="time-badge">09:00 Departure</span>
-            <span class="timeline-desc">Fahrt nach Ottawa (ca. 440km).</span>
+            <span class="timeline-desc">Fahrt nach Ottawa (440km).</span>
             <span class="time-badge">19:00 Anpfiff</span>
-            <span class="timeline-event">⚽️ Atlético Ottawa vs. [Gegner]</span>
-        </div>
-        <div class="timeline-item">
-            <span class="timeline-date">Do, 01. Okt. | Ottawa Culture</span>
-            <span class="timeline-desc">Parlamentshügel / ByWard Market.</span>
+            <span class="timeline-event">⚽️ Atlético Ottawa vs. Cavalry FC</span>
+            <span class="timeline-desc">Ort: Stadium at TD Place.</span>
         </div>
         <div class="timeline-item">
             <span class="timeline-date">Fr, 02. Okt. | Rückflug</span>
-            <span class="time-badge">11:00 Departure</span>
-            <span class="timeline-desc">Fahrt Ottawa → YUL Airport (190km).</span>
             <span class="time-badge">16:35 Takeoff</span>
-            <span class="timeline-desc">Abflug nach FRA (Ankunft 06:00+1).</span>
+            <span class="timeline-desc">Ottawa → YUL → FRA.</span>
         </div>
     </main>
 
@@ -313,21 +303,17 @@
         function switchMode(mode) {
             document.querySelectorAll('.main-nav-btn').forEach(b => b.classList.remove('active'));
             event.currentTarget.classList.add('active');
-
             document.querySelectorAll('.nav-btn').forEach(b => b.style.display = 'none');
             const subButtons = document.querySelectorAll('.' + mode + '-btn');
             subButtons.forEach(b => b.style.display = 'block');
-
             subButtons[0].click();
         }
 
         function showTab(tabId) {
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            
             const targetContent = document.getElementById(tabId);
             if(targetContent) targetContent.classList.add('active');
-            
             if(event && event.currentTarget && event.currentTarget.classList.contains('nav-btn')) {
                 event.currentTarget.classList.add('active');
             }
