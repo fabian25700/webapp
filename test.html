@@ -131,6 +131,11 @@
         .info-label { font-size: 0.9rem; color: var(--text-secondary); }
         .info-value { font-size: 0.9rem; font-weight: 700; text-align: right; margin-left: 10px; }
 
+        .todo-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+        .todo-item:last-child { border-bottom: none; }
+        .todo-checkbox { width: 18px; height: 18px; border: 2px solid var(--accent); border-radius: 4px; margin-right: 12px; flex-shrink: 0; }
+        .todo-text { font-size: 0.9rem; font-weight: 600; }
+
         .hint-clean {
             margin-top: 15px;
             padding-top: 15px;
@@ -285,7 +290,14 @@
     </main>
 
     <main id="todos" class="content-section">
-        <div class="empty-state">Keine offenen Todos vorhanden.</div>
+        <div class="card">
+            <span class="card-title">Offene Erledigungen</span>
+            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Recherche Auto</span></div>
+            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Parkplatz Ottawa & Quebec Hotel buchen</span></div>
+            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Einreise Visa (eTA) beantragen</span></div>
+            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Tage planen und strukturieren</span></div>
+            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Benefits Flug herausfinden und planen</span></div>
+        </div>
     </main>
 
     <main id="ideas" class="content-section">
