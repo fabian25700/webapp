@@ -44,7 +44,7 @@
 
         .header-nav-link { text-decoration: none; color: inherit; cursor: pointer; }
         
-        /* Anpassung 1: Link auf Handy deaktivieren */
+        /* 1. Link auf Handy deaktivieren */
         @media (max-width: 768px) {
             .header-nav-link {
                 pointer-events: none;
@@ -55,12 +55,12 @@
         header h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
         header p { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-top: 4px; }
 
-        /* Anpassung 2: Hintergrund auf --bg (grau) geändert statt weiß */
+        /* 2. Desktop Nav: Hintergrund grau wie Body */
         .nav-container {
             display: flex;
             justify-content: center;
             background: var(--bg); 
-            padding: 15px 20px;
+            padding: 10px 20px;
             gap: 10px;
             max-width: 1000px;
             margin: 0 auto;
@@ -223,15 +223,15 @@
     </main>
 
     <main id="plan" class="content-section">
-        <div class="timeline-item"><span class="timeline-date">Do, 24. Sept. | Ankunft</span><span class="time-badge">12:00 Ankunft YUL</span><span class="timeline-desc">Check-in Montreal (Tru By Hilton). Erste Stadterkundung Downtown.</span></div>
+        <div class="timeline-item"><span class="timeline-date">Do, 24. Sept. | Ankunft</span><span class="time-badge">12:00 Ankunft YUL</span><span class="timeline-desc">Check-in Montreal. Erste Stadterkundung Downtown.</span></div>
         <div class="timeline-item"><span class="timeline-date">Fr, 25. Sept. | Montreal</span><span class="timeline-desc">Plateau Mont-Royal & Downtown.</span></div>
         <div class="timeline-item"><span class="timeline-date">Sa, 26. Sept. | Matchday Montreal</span><span class="time-badge">19:30 Match</span><span class="timeline-event">⚽️ CF Montréal vs. FC Cincinnati</span><span class="timeline-desc">Stade Saputo.</span></div>
-        <div class="timeline-item"><span class="timeline-date">So, 27. Sept. | Montreal</span><span class="timeline-desc">Hafenviertel & Mount Royal Park (Viewpoint).</span></div>
-        <div class="timeline-item"><span class="timeline-date">Mo, 28. Sept. | Roadtrip Start</span><span class="time-badge">15:00 Mietwagen</span><span class="time-badge">~ 2h 45m Fahrt (260km)</span><span class="timeline-desc">Fahrt nach Québec City. Check-in C3 Hotel.</span></div>
-        <div class="timeline-item"><span class="timeline-date">Di, 29. Sept. | Québec City</span><span class="timeline-desc">Altstadt (Vieux-Québec) & Montmorency-Falls.</span></div>
-        <div class="timeline-item"><span class="timeline-date">Mi, 30. Sept. | Ottawa Matchday</span><span class="time-badge">09:00 Abfahrt</span><span class="time-badge">~ 4h 30m Fahrt (440km)</span><span class="time-badge">19:00 Match</span><span class="timeline-event">⚽️ Atlético Ottawa vs. Cavalry FC</span></div>
+        <div class="timeline-item"><span class="timeline-date">So, 27. Sept. | Montreal</span><span class="timeline-desc">Hafenviertel & Mount Royal Park.</span></div>
+        <div class="timeline-item"><span class="timeline-date">Mo, 28. Sept. | Roadtrip Start</span><span class="time-badge">15:00 Mietwagen</span><span class="time-badge">~ 2h 45m Fahrt</span><span class="timeline-desc">Fahrt nach Québec City.</span></div>
+        <div class="timeline-item"><span class="timeline-date">Di, 29. Sept. | Québec City</span><span class="timeline-desc">Altstadt & Montmorency-Falls.</span></div>
+        <div class="timeline-item"><span class="timeline-date">Mi, 30. Sept. | Ottawa Matchday</span><span class="time-badge">09:00 Abfahrt</span><span class="time-badge">19:00 Match</span><span class="timeline-event">⚽️ Atlético Ottawa vs. Cavalry FC</span></div>
         <div class="timeline-item"><span class="timeline-date">Do, 01. Okt. | Ottawa</span><span class="timeline-desc">Parlamentshügel & ByWard Market.</span></div>
-        <div class="timeline-item"><span class="timeline-date">Fr, 02. Okt. | Rückreise</span><span class="time-badge">11:00 Abfahrt Ottawa</span><span class="time-badge">~ 2h Fahrt (190km)</span><span class="time-badge">16:35 Abflug</span><span class="timeline-desc">Mietwagen-Return & Rückflug FRA.</span></div>
+        <div class="timeline-item"><span class="timeline-date">Fr, 02. Okt. | Rückreise</span><span class="time-badge">16:35 Abflug</span><span class="timeline-desc">Rückflug FRA.</span></div>
     </main>
 
     <main id="todos" class="content-section">
@@ -257,31 +257,45 @@
             
             <div id="ideen-m" class="city-content">
                 <div class="card">
-                    <span class="card-title">Montreal Entdeckungen</span>
-                    <button class="accordion-btn" onclick="toggleAcc('m-s')">Sehenswürdigkeit <span>▼</span></button>
-                    <div id="acc-m-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Mont-Royal Hike (Aussichtspunkt)</span></div></div>
-                    <button class="accordion-btn" onclick="toggleAcc('m-r')">Restaurant <span>▼</span></button>
-                    <div id="acc-m-r" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Poutine-Vergleich (La Banquise)</span></div></div>
+                    <span class="card-title">Montreal Gastro & Entdeckungen</span>
+                    <button class="accordion-btn" onclick="toggleAcc('m-k')">Klassiker <span>▼</span></button>
+                    <div id="acc-m-k" class="accordion-content">
+                        <div class="todo-item"><span class="idea-bullet">🥯</span><span class="todo-text">St-Viateur Bagel</span></div>
+                        <div class="todo-item"><span class="idea-bullet">🥩</span><span class="todo-text">Schwartz’s Smoked Meat</span></div>
+                        <div class="todo-item"><span class="idea-bullet">🍟</span><span class="todo-text">Poutine (Squeaky Cheese)</span></div>
+                    </div>
+                    <button class="accordion-btn" onclick="toggleAcc('m-a')">Alternative <span>▼</span></button>
+                    <div id="acc-m-a" class="accordion-content">
+                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">L'Avenue (Bester Brunch)</span></div>
+                    </div>
                 </div>
             </div>
 
             <div id="ideen-q" class="city-content" style="display:none;">
                 <div class="card">
-                    <span class="card-title">Québec City Entdeckungen</span>
-                    <button class="accordion-btn" onclick="toggleAcc('q-s')">Sehenswürdigkeit <span>▼</span></button>
-                    <div id="acc-q-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Château Frontenac Besichtigung</span></div></div>
-                    <button class="accordion-btn" onclick="toggleAcc('q-r')">Restaurant <span>▼</span></button>
-                    <div id="acc-q-r" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Vieux-Québec Gastronomie Tour</span></div></div>
+                    <span class="card-title">Québec Gastro & Entdeckungen</span>
+                    <button class="accordion-btn" onclick="toggleAcc('q-k')">Quick-Stop <span>▼</span></button>
+                    <div id="acc-q-k" class="accordion-content">
+                        <div class="todo-item"><span class="idea-bullet">☕</span><span class="todo-text">Tim Hortons (Double-Double)</span></div>
+                    </div>
+                    <button class="accordion-btn" onclick="toggleAcc('q-a')">Alternative <span>▼</span></button>
+                    <div id="acc-q-a" class="accordion-content">
+                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Bello Ristorante (Altstadt)</span></div>
+                    </div>
                 </div>
             </div>
 
             <div id="ideen-o" class="city-content" style="display:none;">
                 <div class="card">
-                    <span class="card-title">Ottawa Entdeckungen</span>
-                    <button class="accordion-btn" onclick="toggleAcc('o-s')">Sehenswürdigkeit <span>▼</span></button>
-                    <div id="acc-o-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">National Gallery of Canada</span></div></div>
-                    <button class="accordion-btn" onclick="toggleAcc('o-r')">Restaurant <span>▼</span></button>
-                    <div id="acc-o-r" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">ByWard Market Food Stalls</span></div></div>
+                    <span class="card-title">Ottawa Gastro & Entdeckungen</span>
+                    <button class="accordion-btn" onclick="toggleAcc('o-k')">Klassiker <span>▼</span></button>
+                    <div id="acc-o-k" class="accordion-content">
+                        <div class="todo-item"><span class="idea-bullet">🍩</span><span class="todo-text">BeaverTails (ByWard Market)</span></div>
+                    </div>
+                    <button class="accordion-btn" onclick="toggleAcc('o-a')">Alternative <span>▼</span></button>
+                    <div id="acc-o-a" class="accordion-content">
+                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">The Shore Club (Steak/Fisch)</span></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -289,8 +303,8 @@
 
     <main id="map" class="content-section">
         <div class="card">
-            <span class="card-title">Unterkünfte</span>
-            <div class="map-container"><iframe width="100%" height="100%" frameborder="0" src="https://www.google.com/maps?q=Tru+By+Hilton+Montreal+Centre-Ville&output=embed"></iframe></div>
+            <span class="card-title">Unterkünfte & Route</span>
+            <div class="map-container"><iframe width="100%" height="100%" frameborder="0" src="about:blank"></iframe></div>
         </div>
     </main>
 
