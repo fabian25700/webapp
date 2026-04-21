@@ -97,7 +97,7 @@
         .todo-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
         .todo-item:last-child { border-bottom: none; }
         .todo-checkbox { width: 18px; height: 18px; border: 2px solid var(--accent); border-radius: 5px; margin-right: 12px; flex-shrink: 0; }
-        .idea-bullet { color: var(--accent); margin-right: 12px; font-weight: 900; font-size: 1rem; width: 25px; text-align: center; }
+        .idea-bullet { color: var(--accent); margin-right: 12px; font-weight: 900; font-size: 1.1rem; width: 25px; text-align: center; }
         .todo-text { font-size: 0.9rem; font-weight: 600; }
 
         .timeline-item { position: relative; padding-left: 30px; margin-bottom: 24px; border-left: 2px solid var(--border); }
@@ -180,15 +180,15 @@
     <main id="activities" class="content-section">
         <div class="card">
             <span class="card-title">Match 1: MLS</span>
-            <div class="info-row"><span class="info-label">Spiel</span><span class="info-value">CF Montréal vs. Cincinnati</span></div>
             <div class="info-row"><span class="info-label">Datum</span><span class="info-value">Sa, 26.09. | 19:30</span></div>
-            <div class="info-row"><span class="info-label">Stadion</span><span class="info-value">Stade Saputo (4750 Sherbrooke St E)</span></div>
+            <div class="info-row"><span class="info-label">Spiel</span><span class="info-value">CF Montréal vs. Cincinnati</span></div>
+            <div class="info-row"><span class="info-label">Stadion</span><span class="info-value">Stade Saputo</span></div>
         </div>
         <div class="card">
             <span class="card-title">Match 2: CPL</span>
-            <div class="info-row"><span class="info-label">Spiel</span><span class="info-value">Atlético Ottawa vs. Cavalry FC</span></div>
             <div class="info-row"><span class="info-label">Datum</span><span class="info-value">Mi, 30.09. | 19:00</span></div>
-            <div class="info-row"><span class="info-label">Stadion</span><span class="info-value">TD Place Stadium (1015 Bank St)</span></div>
+            <div class="info-row"><span class="info-label">Spiel</span><span class="info-value">Atlético Ottawa vs. Cavalry FC</span></div>
+            <div class="info-row"><span class="info-label">Stadion</span><span class="info-value">TD Place Stadium</span></div>
         </div>
     </main>
 
@@ -196,38 +196,49 @@
         <div class="timeline-item">
             <span class="timeline-date">Do, 24. Sept. | Ankunft</span>
             <span class="time-badge">12:00 Ankunft YUL</span>
-            <span class="timeline-desc">Check-in Montreal (Tru By Hilton). Erste Stadterkundung Downtown.</span>
+            <span class="timeline-desc">Check-in Montreal (Tru By Hilton). Erste Stadterkundung.</span>
         </div>
         <div class="timeline-item">
             <span class="timeline-date">Fr, 25. Sept. | Montreal</span>
-            <span class="timeline-desc">Plateau Mont-Royal & Mount Royal Park.</span>
+            <span class="timeline-desc">Plateau Mont-Royal & Downtown.</span>
         </div>
         <div class="timeline-item">
-            <span class="timeline-date">Sa, 26. Sept. | Matchday Montreal</span>
+            <span class="timeline-date">Sa, 26. Sept. | Montreal & Match</span>
             <span class="time-badge">19:30 Match</span>
             <span class="timeline-event">⚽️ CF Montréal vs. FC Cincinnati</span>
-            <span class="timeline-desc">Stade Saputo. Anreise via Metro Linie 1.</span>
+            <span class="timeline-desc">Stade Saputo.</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">So, 27. Sept. | Montreal</span>
+            <span class="timeline-desc">Hafenviertel & Mount Royal Park (Viewpoint).</span>
         </div>
         <div class="timeline-item">
             <span class="timeline-date">Mo, 28. Sept. | Roadtrip Start</span>
             <span class="time-badge">15:00 Mietwagen</span>
             <span class="time-badge">~ 2h 45m Fahrt (260km)</span>
-            <span class="timeline-desc">Fahrt nach Québec City. Check-in C3 Hotel Art De Vivre.</span>
+            <span class="timeline-desc">Fahrt nach Québec City. Check-in C3 Hotel.</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">Di, 29. Sept. | Québec City</span>
+            <span class="timeline-desc">Altstadt (Vieux-Québec) & Montmorency-Falls.</span>
         </div>
         <div class="timeline-item">
             <span class="timeline-date">Mi, 30. Sept. | Ottawa Matchday</span>
-            <span class="time-badge">09:00 Abfahrt QC</span>
+            <span class="time-badge">09:00 Abfahrt</span>
             <span class="time-badge">~ 4h 30m Fahrt (440km)</span>
             <span class="time-badge">19:00 Match</span>
             <span class="timeline-event">⚽️ Atlético Ottawa vs. Cavalry FC</span>
-            <span class="timeline-desc">TD Place Stadium Ottawa.</span>
+        </div>
+        <div class="timeline-item">
+            <span class="timeline-date">Do, 01. Okt. | Ottawa</span>
+            <span class="timeline-desc">Parlamentshügel & ByWard Market.</span>
         </div>
         <div class="timeline-item">
             <span class="timeline-date">Fr, 02. Okt. | Rückreise</span>
             <span class="time-badge">11:00 Abfahrt Ottawa</span>
             <span class="time-badge">~ 2h Fahrt (190km)</span>
-            <span class="time-badge">16:35 Abflug YUL</span>
-            <span class="timeline-desc">Mietwagen-Return am Flughafen & Rückflug FRA.</span>
+            <span class="time-badge">16:35 Abflug</span>
+            <span class="timeline-desc">Mietwagen-Return & Rückflug FRA.</span>
         </div>
     </main>
 
@@ -241,27 +252,28 @@
 
         <div id="list-t" class="card">
             <span class="card-title">Offene Erledigungen</span>
-            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">eTA Visum beantragen</span></div>
+            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Recherche Mietwagen (Details)</span></div>
             <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Parkplätze (Ottawa & Québec) prüfen</span></div>
-            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Mietwagen-Konditionen finalisieren</span></div>
+            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">eTA Visum beantragen</span></div>
+            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Flug-Benefits (Lounge/Upgrade) prüfen</span></div>
         </div>
 
         <div id="list-m" class="card" style="display:none;">
             <span class="card-title">Ideen Montreal</span>
-            <div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Mont-Royal Hike (Belvédère Kondiaronk)</span></div>
-            <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Schwartz's Deli (Original Smoked Meat)</span></div>
+            <div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Mont-Royal Hike (Aussichtspunkt)</span></div>
+            <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Poutine-Vergleich (La Banquise)</span></div>
         </div>
 
         <div id="list-q" class="card" style="display:none;">
             <span class="card-title">Ideen Québec</span>
-            <div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Château Frontenac & Altstadt-Spaziergang</span></div>
-            <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Chez Ashton (Klassische Poutine-Instanz)</span></div>
+            <div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Château Frontenac Besichtigung</span></div>
+            <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Vieux-Québec Gastronomie Tour</span></div>
         </div>
 
         <div id="list-o" class="card" style="display:none;">
             <span class="card-title">Ideen Ottawa</span>
-            <div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Parliament Hill & ByWard Market</span></div>
-            <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">The Whalesbone (Beste Seafood-Adresse)</span></div>
+            <div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">National Gallery of Canada</span></div>
+            <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">ByWard Market Food Stalls</span></div>
         </div>
     </main>
 
