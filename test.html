@@ -36,91 +36,110 @@
 
         header {
             background: var(--surface);
-            padding: calc(env(safe-area-inset-top) + 20px) 20px 10px;
+            padding: calc(env(safe-area-inset-top) + 20px) 20px 20px;
             text-align: center;
+            position: relative;
+            border-bottom: 1px solid var(--border);
         }
 
         .header-nav-link { text-decoration: none; color: inherit; }
-
         header h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
         header p { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-top: 4px; }
 
-        .main-nav { display: flex; background: var(--surface); padding: 10px 20px; gap: 10px; }
-
-        .main-nav-btn {
-            flex: 1; padding: 10px; border: 2px solid var(--border); background: transparent;
-            border-radius: 12px; font-weight: 800; font-size: 0.8rem; color: var(--text-secondary);
-            cursor: pointer; text-transform: uppercase;
-        }
-
-        .main-nav-btn.active { border-color: var(--accent); color: var(--text-primary); background: rgba(253, 184, 19, 0.1); }
-
-        nav {
-            display: flex; background: var(--surface); padding: 0 10px 10px; position: sticky;
-            top: 0; z-index: 100; border-bottom: 1px solid var(--border); gap: 8px; overflow-x: auto;
+        /* Desktop Nav: Alle 6 Buttons nebeneinander */
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            background: var(--surface);
+            padding: 10px 20px;
+            gap: 10px;
+            max-width: 1000px;
+            margin: 0 auto;
         }
 
         .nav-btn {
-            flex: 1; padding: 10px; border: none; background: var(--bg); border-radius: 10px;
-            font-weight: 700; font-size: 0.7rem; color: var(--text-secondary); cursor: pointer;
-            white-space: nowrap; display: none;
+            flex: 1;
+            padding: 12px 8px;
+            border: 2px solid var(--border);
+            background: transparent;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.2s;
         }
 
-        .nav-btn.active { background: var(--accent); color: #000; }
+        .nav-btn.active {
+            border-color: var(--accent);
+            color: var(--text-primary);
+            background: rgba(253, 184, 19, 0.1);
+        }
+
+        /* Mobile Hamburger Icon */
+        .menu-icon {
+            display: none;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            cursor: pointer;
+            background: none; border: none; color: var(--text-primary);
+            z-index: 1001;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                display: none;
+                position: fixed;
+                top: 0; left: 0; width: 100%; height: 100%;
+                background: var(--surface);
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            }
+            .nav-container.open { display: flex; }
+            .nav-btn { width: 80%; flex: none; margin-bottom: 15px; font-size: 1rem; padding: 15px; }
+            .menu-icon { display: block; }
+        }
 
         .content-section { display: none; padding: 20px 16px; max-width: 600px; margin: 0 auto; }
         .content-section.active { display: block; animation: fadeIn 0.3s ease; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .card {
-            background: var(--surface); border-radius: 20px; padding: 20px;
-            margin-bottom: 16px; border: 1px solid var(--border); box-shadow: var(--shadow);
-        }
-
+        /* Card & Content Styles */
+        .card { background: var(--surface); border-radius: 20px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); }
         .card-title { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 12px; display: block; }
-
         .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
         .info-row:last-child { border-bottom: none; }
         .info-label { font-size: 0.9rem; color: var(--text-secondary); }
         .info-value { font-size: 0.9rem; font-weight: 700; text-align: right; }
 
         /* Toggles & Accordions */
-        .toggle-container {
-            display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin-bottom: 12px; border: 1px solid var(--border); gap: 4px;
-        }
-        .toggle-switch {
-            flex: 1; padding: 10px; text-align: center; font-size: 0.65rem; font-weight: 800;
-            text-transform: uppercase; cursor: pointer; border-radius: 9px; color: var(--text-secondary); transition: 0.2s;
-        }
+        .toggle-container { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin-bottom: 12px; border: 1px solid var(--border); gap: 4px; }
+        .toggle-switch { flex: 1; padding: 10px; text-align: center; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; cursor: pointer; border-radius: 9px; color: var(--text-secondary); transition: 0.2s; }
         .toggle-switch.active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow); }
 
-        .accordion-btn {
-            width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border);
-            border-radius: 10px; text-align: left; font-size: 0.8rem; font-weight: 800;
-            color: var(--text-primary); cursor: pointer; margin-bottom: 8px; display: flex; justify-content: space-between;
-        }
-
+        .accordion-btn { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; text-align: left; font-size: 0.8rem; font-weight: 800; color: var(--text-primary); cursor: pointer; margin-bottom: 8px; display: flex; justify-content: space-between; }
         .accordion-content { display: none; padding: 4px 12px 12px; }
 
-        /* List Items */
         .todo-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
         .todo-item:last-child { border-bottom: none; }
         .todo-checkbox { width: 18px; height: 18px; border: 2px solid var(--accent); border-radius: 5px; margin-right: 12px; flex-shrink: 0; }
-        .idea-bullet { color: var(--accent); margin-right: 12px; font-weight: 900; font-size: 1rem; width: 25px; text-align: center; }
+        .idea-bullet { color: var(--accent); margin-right: 12px; font-weight: 900; font-size: 1.1rem; width: 25px; text-align: center; }
         .todo-text { font-size: 0.9rem; font-weight: 600; }
 
         /* Timeline */
         .timeline-item { position: relative; padding-left: 30px; margin-bottom: 24px; border-left: 2px solid var(--border); }
-        .timeline-item::before {
-            content: ''; position: absolute; left: -7px; top: 0;
-            width: 12px; height: 12px; background: var(--accent); border-radius: 50%;
-        }
+        .timeline-item::before { content: ''; position: absolute; left: -7px; top: 0; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; }
         .time-badge { font-size: 0.7rem; font-weight: 800; background: var(--accent); color: #000; padding: 2px 8px; border-radius: 6px; margin-bottom: 4px; display: table; }
         .timeline-date { font-weight: 800; font-size: 1rem; display: block; margin-bottom: 4px; }
         .timeline-desc { font-size: 0.85rem; color: var(--text-secondary); display: block; }
         .timeline-event { color: var(--accent); font-weight: 700; font-size: 0.85rem; margin-top: 2px; display: block; }
-
         .map-container { width: 100%; height: 450px; border-radius: 15px; overflow: hidden; border: 1px solid var(--border); }
     </style>
 </head>
@@ -129,21 +148,17 @@
     <header>
         <a href="index.html" class="header-nav-link"><h1>Kanada 2026</h1></a>
         <p>Montreal • Québec • Ottawa</p>
+        <button class="menu-icon" onclick="toggleMenu()">☰</button>
     </header>
 
-    <div class="main-nav">
-        <button class="main-nav-btn active" onclick="switchMode('fix')">Fix</button>
-        <button class="main-nav-btn" onclick="switchMode('offen')">Offen</button>
+    <div id="main-nav" class="nav-container">
+        <button class="nav-btn active" onclick="showTab('flights')">Reisen</button>
+        <button class="nav-btn" onclick="showTab('hotels')">Hotels</button>
+        <button class="nav-btn" onclick="showTab('activities')">Aktivitäten</button>
+        <button class="nav-btn" onclick="showTab('plan')">Kalender</button>
+        <button class="nav-btn" onclick="showTab('todos')">Todos/Ideen</button>
+        <button class="nav-btn" onclick="showTab('map')">Karte</button>
     </div>
-
-    <nav id="sub-nav">
-        <button class="nav-btn fix-btn active" onclick="showTab('flights')">REISEN</button>
-        <button class="nav-btn fix-btn" onclick="showTab('hotels')">HOTELS</button>
-        <button class="nav-btn fix-btn" onclick="showTab('activities')">AKTIVITÄTEN</button>
-        <button class="nav-btn offen-btn" onclick="showTab('plan')">KALENDER</button>
-        <button class="nav-btn offen-btn" onclick="showTab('todos')">TODOS/IDEEN</button>
-        <button class="nav-btn offen-btn" onclick="showTab('map')">KARTE</button>
-    </nav>
 
     <main id="flights" class="content-section active">
         <div class="card">
@@ -203,53 +218,15 @@
     </main>
 
     <main id="plan" class="content-section">
-        <div class="timeline-item">
-            <span class="timeline-date">Do, 24. Sept. | Ankunft</span>
-            <span class="time-badge">12:00 Ankunft YUL</span>
-            <span class="timeline-desc">Check-in Montreal (Tru By Hilton). Erste Stadterkundung.</span>
-        </div>
-        <div class="timeline-item">
-            <span class="timeline-date">Fr, 25. Sept. | Montreal</span>
-            <span class="timeline-desc">Plateau Mont-Royal & Downtown.</span>
-        </div>
-        <div class="timeline-item">
-            <span class="timeline-date">Sa, 26. Sept. | Montreal & Match</span>
-            <span class="time-badge">19:30 Match</span>
-            <span class="timeline-event">⚽️ CF Montréal vs. FC Cincinnati</span>
-            <span class="timeline-desc">Stade Saputo.</span>
-        </div>
-        <div class="timeline-item">
-            <span class="timeline-date">So, 27. Sept. | Montreal</span>
-            <span class="timeline-desc">Hafenviertel & Mount Royal Park (Viewpoint).</span>
-        </div>
-        <div class="timeline-item">
-            <span class="timeline-date">Mo, 28. Sept. | Roadtrip Start</span>
-            <span class="time-badge">15:00 Mietwagen</span>
-            <span class="time-badge">~ 2h 45m Fahrt (260km)</span>
-            <span class="timeline-desc">Fahrt nach Québec City. Check-in C3 Hotel.</span>
-        </div>
-        <div class="timeline-item">
-            <span class="timeline-date">Di, 29. Sept. | Québec City</span>
-            <span class="timeline-desc">Altstadt (Vieux-Québec) & Montmorency-Falls.</span>
-        </div>
-        <div class="timeline-item">
-            <span class="timeline-date">Mi, 30. Sept. | Ottawa Matchday</span>
-            <span class="time-badge">09:00 Abfahrt</span>
-            <span class="time-badge">~ 4h 30m Fahrt (440km)</span>
-            <span class="time-badge">19:00 Match</span>
-            <span class="timeline-event">⚽️ Atlético Ottawa vs. Cavalry FC</span>
-        </div>
-        <div class="timeline-item">
-            <span class="timeline-date">Do, 01. Okt. | Ottawa</span>
-            <span class="timeline-desc">Parlamentshügel & ByWard Market.</span>
-        </div>
-        <div class="timeline-item">
-            <span class="timeline-date">Fr, 02. Okt. | Rückreise</span>
-            <span class="time-badge">11:00 Abfahrt Ottawa</span>
-            <span class="time-badge">~ 2h Fahrt (190km)</span>
-            <span class="time-badge">16:35 Abflug</span>
-            <span class="timeline-desc">Mietwagen-Return & Rückflug FRA.</span>
-        </div>
+        <div class="timeline-item"><span class="timeline-date">Do, 24. Sept. | Ankunft</span><span class="time-badge">12:00 Ankunft YUL</span><span class="timeline-desc">Check-in Montreal (Tru By Hilton). Erste Stadterkundung Downtown.</span></div>
+        <div class="timeline-item"><span class="timeline-date">Fr, 25. Sept. | Montreal</span><span class="timeline-desc">Plateau Mont-Royal & Downtown.</span></div>
+        <div class="timeline-item"><span class="timeline-date">Sa, 26. Sept. | Matchday Montreal</span><span class="time-badge">19:30 Match</span><span class="timeline-event">⚽️ CF Montréal vs. FC Cincinnati</span><span class="timeline-desc">Stade Saputo.</span></div>
+        <div class="timeline-item"><span class="timeline-date">So, 27. Sept. | Montreal</span><span class="timeline-desc">Hafenviertel & Mount Royal Park (Viewpoint).</span></div>
+        <div class="timeline-item"><span class="timeline-date">Mo, 28. Sept. | Roadtrip Start</span><span class="time-badge">15:00 Mietwagen</span><span class="time-badge">~ 2h 45m Fahrt (260km)</span><span class="timeline-desc">Fahrt nach Québec City. Check-in C3 Hotel.</span></div>
+        <div class="timeline-item"><span class="timeline-date">Di, 29. Sept. | Québec City</span><span class="timeline-desc">Altstadt (Vieux-Québec) & Montmorency-Falls.</span></div>
+        <div class="timeline-item"><span class="timeline-date">Mi, 30. Sept. | Ottawa Matchday</span><span class="time-badge">09:00 Abfahrt</span><span class="time-badge">~ 4h 30m Fahrt (440km)</span><span class="time-badge">19:00 Match</span><span class="timeline-event">⚽️ Atlético Ottawa vs. Cavalry FC</span></div>
+        <div class="timeline-item"><span class="timeline-date">Do, 01. Okt. | Ottawa</span><span class="timeline-desc">Parlamentshügel & ByWard Market.</span></div>
+        <div class="timeline-item"><span class="timeline-date">Fr, 02. Okt. | Rückreise</span><span class="time-badge">11:00 Abfahrt Ottawa</span><span class="time-badge">~ 2h Fahrt (190km)</span><span class="time-badge">16:35 Abflug</span><span class="timeline-desc">Mietwagen-Return & Rückflug FRA.</span></div>
     </main>
 
     <main id="todos" class="content-section">
@@ -272,18 +249,14 @@
                 <div id="city-q" class="toggle-switch" onclick="citySwitch('q')">Québec</div>
                 <div id="city-o" class="toggle-switch" onclick="citySwitch('o')">Ottawa</div>
             </div>
-
+            
             <div id="ideen-m" class="city-content">
                 <div class="card">
                     <span class="card-title">Montreal Entdeckungen</span>
                     <button class="accordion-btn" onclick="toggleAcc('m-s')">Sehenswürdigkeit <span>▼</span></button>
-                    <div id="acc-m-s" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Mont-Royal Hike (Aussichtspunkt)</span></div>
-                    </div>
+                    <div id="acc-m-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Mont-Royal Hike (Aussichtspunkt)</span></div></div>
                     <button class="accordion-btn" onclick="toggleAcc('m-r')">Restaurant <span>▼</span></button>
-                    <div id="acc-m-r" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Poutine-Vergleich (La Banquise)</span></div>
-                    </div>
+                    <div id="acc-m-r" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Poutine-Vergleich (La Banquise)</span></div></div>
                 </div>
             </div>
 
@@ -291,13 +264,9 @@
                 <div class="card">
                     <span class="card-title">Québec City Entdeckungen</span>
                     <button class="accordion-btn" onclick="toggleAcc('q-s')">Sehenswürdigkeit <span>▼</span></button>
-                    <div id="acc-q-s" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Château Frontenac Besichtigung</span></div>
-                    </div>
+                    <div id="acc-q-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Château Frontenac Besichtigung</span></div></div>
                     <button class="accordion-btn" onclick="toggleAcc('q-r')">Restaurant <span>▼</span></button>
-                    <div id="acc-q-r" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Vieux-Québec Gastronomie Tour</span></div>
-                    </div>
+                    <div id="acc-q-r" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Vieux-Québec Gastronomie Tour</span></div></div>
                 </div>
             </div>
 
@@ -305,13 +274,9 @@
                 <div class="card">
                     <span class="card-title">Ottawa Entdeckungen</span>
                     <button class="accordion-btn" onclick="toggleAcc('o-s')">Sehenswürdigkeit <span>▼</span></button>
-                    <div id="acc-o-s" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">National Gallery of Canada</span></div>
-                    </div>
+                    <div id="acc-o-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">National Gallery of Canada</span></div></div>
                     <button class="accordion-btn" onclick="toggleAcc('o-r')">Restaurant <span>▼</span></button>
-                    <div id="acc-o-r" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">ByWard Market Food Stalls</span></div>
-                    </div>
+                    <div id="acc-o-r" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">ByWard Market Food Stalls</span></div></div>
                 </div>
             </div>
         </div>
@@ -320,31 +285,24 @@
     <main id="map" class="content-section">
         <div class="card">
             <span class="card-title">Unterkünfte</span>
-            <div class="map-container">
-                <iframe width="100%" height="100%" frameborder="0" style="border:0" 
-                src="https://www.google.com/maps?q=Tru+By+Hilton+Montreal+Centre-Ville&output=embed" allowfullscreen></iframe>
-            </div>
+            <div class="map-container"><iframe width="100%" height="100%" frameborder="0" src="https://www.google.com/maps?q=Tru+By+Hilton+Montreal+Centre-Ville&output=embed"></iframe></div>
         </div>
     </main>
 
     <script>
-        function switchMode(m) {
-            document.querySelectorAll('.main-nav-btn').forEach(b => b.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.style.display = 'none');
-            const sub = document.querySelectorAll('.' + m + '-btn');
-            sub.forEach(b => b.style.display = 'block');
-            sub[0].click();
-        }
+        function toggleMenu() { document.getElementById('main-nav').classList.toggle('open'); }
+
         function showTab(t) {
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(t).classList.add('active');
-            if(event && event.currentTarget && event.currentTarget.classList.contains('nav-btn')) event.currentTarget.classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('active');
+                if(b.getAttribute('onclick').includes(t)) b.classList.add('active');
+            });
+            document.getElementById('main-nav').classList.remove('open');
             window.scrollTo(0,0);
         }
-        
-        // Neu: Main Toggle (Todo vs Idee)
+
         function mainListSwitch(x) {
             document.getElementById('content-todos').style.display = (x === 't') ? 'block' : 'none';
             document.getElementById('content-ideen').style.display = (x === 'i') ? 'block' : 'none';
@@ -352,22 +310,16 @@
             document.getElementById('main-i').classList.toggle('active', x === 'i');
         }
 
-        // Neu: Stadt Toggle innerhalb Ideen
         function citySwitch(c) {
             document.querySelectorAll('.city-content').forEach(div => div.style.display = 'none');
             document.getElementById('ideen-' + c).style.display = 'block';
-            ['m', 'q', 'o'].forEach(city => {
-                document.getElementById('city-' + city).classList.toggle('active', city === c);
-            });
+            ['m', 'q', 'o'].forEach(city => document.getElementById('city-' + city).classList.toggle('active', city === c));
         }
 
-        // Neu: Accordion Toggle
         function toggleAcc(id) {
             const content = document.getElementById('acc-' + id);
             content.style.display = (content.style.display === 'block') ? 'none' : 'block';
         }
-
-        window.onload = () => document.querySelectorAll('.fix-btn').forEach(b => b.style.display = 'block');
     </script>
 </body>
 </html>
