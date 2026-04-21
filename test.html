@@ -40,6 +40,13 @@
             text-align: center;
         }
 
+        /* Laptop-Style Link in Header */
+        .header-nav-link { 
+            text-decoration: none; 
+            color: inherit; 
+            display: inline-block;
+        }
+
         header h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
         header p { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-top: 4px; }
 
@@ -83,7 +90,6 @@
         .info-label { font-size: 0.9rem; color: var(--text-secondary); }
         .info-value { font-size: 0.9rem; font-weight: 700; text-align: right; }
 
-        /* Switcher Styles */
         .toggle-container {
             display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin-bottom: 15px; border: 1px solid var(--border);
         }
@@ -116,7 +122,7 @@
 <body>
 
     <header>
-        <h1>Kanada 2026</h1>
+        <a href="index.html" class="header-nav-link"><h1>Kanada 2026</h1></a>
         <p>Montreal • Québec • Ottawa</p>
     </header>
 
@@ -157,17 +163,17 @@
 
     <main id="hotels" class="content-section">
         <div class="card">
-            <span class="card-title">Montreal (4 Nächte)</span>
+            <span class="card-title">Montreal (24.09. – 28.09.)</span>
             <div class="info-row"><span class="info-label">Hotel</span><span class="info-value">Tru By Hilton Montréal centre-ville</span></div>
             <div class="info-row"><span class="info-label">Adresse</span><span class="info-value">1025 Blvd René-Lévesque O</span></div>
         </div>
         <div class="card">
-            <span class="card-title">Québec City (2 Nächte)</span>
+            <span class="card-title">Québec City (28.09. – 30.09.)</span>
             <div class="info-row"><span class="info-label">Hotel</span><span class="info-value">C3- Hotel Art De Vivre</span></div>
             <div class="info-row"><span class="info-label">Adresse</span><span class="info-value">170 Grande Allée O</span></div>
         </div>
         <div class="card">
-            <span class="card-title">Ottawa (2 Nächte)</span>
+            <span class="card-title">Ottawa (30.09. – 02.10.)</span>
             <div class="info-row"><span class="info-label">Hotel</span><span class="info-value">ByWard Blue Inn</span></div>
             <div class="info-row"><span class="info-label">Adresse</span><span class="info-value">157 Clarence St</span></div>
         </div>
@@ -178,11 +184,13 @@
             <span class="card-title">Match 1: MLS</span>
             <div class="info-row"><span class="info-label">Datum</span><span class="info-value">Sa, 26.09. | 19:30</span></div>
             <div class="info-row"><span class="info-label">Spiel</span><span class="info-value">CF Montréal vs. Cincinnati</span></div>
+            <div class="info-row"><span class="info-label">Stadion</span><span class="info-value">Stade Saputo</span></div>
         </div>
         <div class="card">
             <span class="card-title">Match 2: CPL</span>
             <div class="info-row"><span class="info-label">Datum</span><span class="info-value">Mi, 30.09. | 19:00</span></div>
             <div class="info-row"><span class="info-label">Spiel</span><span class="info-value">Atlético Ottawa vs. Cavalry FC</span></div>
+            <div class="info-row"><span class="info-label">Stadion</span><span class="info-value">TD Place Stadium</span></div>
         </div>
     </main>
 
@@ -204,7 +212,7 @@
         </div>
         <div class="timeline-item">
             <span class="timeline-date">So, 27. Sept. | Montreal</span>
-            <span class="timeline-desc">Hafenviertel & Mount Royal Park (Viewpoint).</span>
+            <span class="timeline-desc">Hafenviertel & Mount Royal Park.</span>
         </div>
         <div class="timeline-item">
             <span class="timeline-date">Mo, 28. Sept. | Roadtrip Start</span>
