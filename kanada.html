@@ -85,8 +85,9 @@
         .info-label { font-size: 0.9rem; color: var(--text-secondary); }
         .info-value { font-size: 0.9rem; font-weight: 700; text-align: right; }
 
+        /* Toggles & Accordions */
         .toggle-container {
-            display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin-bottom: 15px; border: 1px solid var(--border); gap: 4px;
+            display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin-bottom: 12px; border: 1px solid var(--border); gap: 4px;
         }
         .toggle-switch {
             flex: 1; padding: 10px; text-align: center; font-size: 0.65rem; font-weight: 800;
@@ -94,18 +95,27 @@
         }
         .toggle-switch.active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow); }
 
-        .todo-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+        .accordion-btn {
+            width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 10px; text-align: left; font-size: 0.8rem; font-weight: 800;
+            color: var(--text-primary); cursor: pointer; margin-bottom: 8px; display: flex; justify-content: space-between;
+        }
+
+        .accordion-content { display: none; padding: 4px 12px 12px; }
+
+        /* List Items */
+        .todo-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
         .todo-item:last-child { border-bottom: none; }
         .todo-checkbox { width: 18px; height: 18px; border: 2px solid var(--accent); border-radius: 5px; margin-right: 12px; flex-shrink: 0; }
-        .idea-bullet { color: var(--accent); margin-right: 12px; font-weight: 900; font-size: 1.1rem; width: 25px; text-align: center; }
+        .idea-bullet { color: var(--accent); margin-right: 12px; font-weight: 900; font-size: 1rem; width: 25px; text-align: center; }
         .todo-text { font-size: 0.9rem; font-weight: 600; }
 
+        /* Timeline */
         .timeline-item { position: relative; padding-left: 30px; margin-bottom: 24px; border-left: 2px solid var(--border); }
         .timeline-item::before {
             content: ''; position: absolute; left: -7px; top: 0;
             width: 12px; height: 12px; background: var(--accent); border-radius: 50%;
         }
-
         .time-badge { font-size: 0.7rem; font-weight: 800; background: var(--accent); color: #000; padding: 2px 8px; border-radius: 6px; margin-bottom: 4px; display: table; }
         .timeline-date { font-weight: 800; font-size: 1rem; display: block; margin-bottom: 4px; }
         .timeline-desc { font-size: 0.85rem; color: var(--text-secondary); display: block; }
@@ -244,13 +254,11 @@
 
     <main id="todos" class="content-section">
         <div class="toggle-container">
-            <div id="btn-t" class="toggle-switch active" onclick="listSwitch('t')">Todos</div>
-            <div id="btn-m" class="toggle-switch" onclick="listSwitch('m')">Montreal</div>
-            <div id="btn-q" class="toggle-switch" onclick="listSwitch('q')">Québec</div>
-            <div id="btn-o" class="toggle-switch" onclick="listSwitch('o')">Ottawa</div>
+            <div id="main-t" class="toggle-switch active" onclick="mainListSwitch('t')">Todos</div>
+            <div id="main-i" class="toggle-switch" onclick="mainListSwitch('i')">Ideen</div>
         </div>
 
-        <div id="list-t" class="card">
+        <div id="content-todos" class="card">
             <span class="card-title">Offene Erledigungen</span>
             <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Recherche Mietwagen (Details)</span></div>
             <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Parkplätze (Ottawa & Québec) prüfen</span></div>
@@ -258,22 +266,54 @@
             <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Flug-Benefits (Lounge/Upgrade) prüfen</span></div>
         </div>
 
-        <div id="list-m" class="card" style="display:none;">
-            <span class="card-title">Ideen Montreal</span>
-            <div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Mont-Royal Hike (Aussichtspunkt)</span></div>
-            <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Poutine-Vergleich (La Banquise)</span></div>
-        </div>
+        <div id="content-ideen" style="display:none;">
+            <div class="toggle-container">
+                <div id="city-m" class="toggle-switch active" onclick="citySwitch('m')">Montreal</div>
+                <div id="city-q" class="toggle-switch" onclick="citySwitch('q')">Québec</div>
+                <div id="city-o" class="toggle-switch" onclick="citySwitch('o')">Ottawa</div>
+            </div>
 
-        <div id="list-q" class="card" style="display:none;">
-            <span class="card-title">Ideen Québec</span>
-            <div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Château Frontenac Besichtigung</span></div>
-            <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Vieux-Québec Gastronomie Tour</span></div>
-        </div>
+            <div id="ideen-m" class="city-content">
+                <div class="card">
+                    <span class="card-title">Montreal Entdeckungen</span>
+                    <button class="accordion-btn" onclick="toggleAcc('m-s')">Sehenswürdigkeit <span>▼</span></button>
+                    <div id="acc-m-s" class="accordion-content">
+                        <div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Mont-Royal Hike (Aussichtspunkt)</span></div>
+                    </div>
+                    <button class="accordion-btn" onclick="toggleAcc('m-r')">Restaurant <span>▼</span></button>
+                    <div id="acc-m-r" class="accordion-content">
+                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Poutine-Vergleich (La Banquise)</span></div>
+                    </div>
+                </div>
+            </div>
 
-        <div id="list-o" class="card" style="display:none;">
-            <span class="card-title">Ideen Ottawa</span>
-            <div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">National Gallery of Canada</span></div>
-            <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">ByWard Market Food Stalls</span></div>
+            <div id="ideen-q" class="city-content" style="display:none;">
+                <div class="card">
+                    <span class="card-title">Québec City Entdeckungen</span>
+                    <button class="accordion-btn" onclick="toggleAcc('q-s')">Sehenswürdigkeit <span>▼</span></button>
+                    <div id="acc-q-s" class="accordion-content">
+                        <div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Château Frontenac Besichtigung</span></div>
+                    </div>
+                    <button class="accordion-btn" onclick="toggleAcc('q-r')">Restaurant <span>▼</span></button>
+                    <div id="acc-q-r" class="accordion-content">
+                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Vieux-Québec Gastronomie Tour</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ideen-o" class="city-content" style="display:none;">
+                <div class="card">
+                    <span class="card-title">Ottawa Entdeckungen</span>
+                    <button class="accordion-btn" onclick="toggleAcc('o-s')">Sehenswürdigkeit <span>▼</span></button>
+                    <div id="acc-o-s" class="accordion-content">
+                        <div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">National Gallery of Canada</span></div>
+                    </div>
+                    <button class="accordion-btn" onclick="toggleAcc('o-r')">Restaurant <span>▼</span></button>
+                    <div id="acc-o-r" class="accordion-content">
+                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">ByWard Market Food Stalls</span></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -303,13 +343,30 @@
             if(event && event.currentTarget && event.currentTarget.classList.contains('nav-btn')) event.currentTarget.classList.add('active');
             window.scrollTo(0,0);
         }
-        function listSwitch(x) {
-            const keys = ['t', 'm', 'q', 'o'];
-            keys.forEach(k => {
-                document.getElementById('list-' + k).style.display = (k === x) ? 'block' : 'none';
-                document.getElementById('btn-' + k).classList.toggle('active', k === x);
+        
+        // Neu: Main Toggle (Todo vs Idee)
+        function mainListSwitch(x) {
+            document.getElementById('content-todos').style.display = (x === 't') ? 'block' : 'none';
+            document.getElementById('content-ideen').style.display = (x === 'i') ? 'block' : 'none';
+            document.getElementById('main-t').classList.toggle('active', x === 't');
+            document.getElementById('main-i').classList.toggle('active', x === 'i');
+        }
+
+        // Neu: Stadt Toggle innerhalb Ideen
+        function citySwitch(c) {
+            document.querySelectorAll('.city-content').forEach(div => div.style.display = 'none');
+            document.getElementById('ideen-' + c).style.display = 'block';
+            ['m', 'q', 'o'].forEach(city => {
+                document.getElementById('city-' + city).classList.toggle('active', city === c);
             });
         }
+
+        // Neu: Accordion Toggle
+        function toggleAcc(id) {
+            const content = document.getElementById('acc-' + id);
+            content.style.display = (content.style.display === 'block') ? 'none' : 'block';
+        }
+
         window.onload = () => document.querySelectorAll('.fix-btn').forEach(b => b.style.display = 'block');
     </script>
 </body>
