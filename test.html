@@ -46,12 +46,12 @@
         header h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
         header p { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-top: 4px; }
 
-        /* Desktop Nav: Grau hinterlegt */
+        /* Navigation: Container jetzt transparent/grau passend zur Seite */
         .nav-container {
             display: flex;
             justify-content: center;
-            background: var(--surface);
-            padding: 10px 20px;
+            background: transparent; 
+            padding: 20px 20px 10px;
             gap: 10px;
             max-width: 1000px;
             margin: 0 auto;
@@ -60,8 +60,8 @@
         .nav-btn {
             flex: 1;
             padding: 12px 8px;
-            border: 2px solid var(--border);
-            background: var(--bg); /* Buttons jetzt grau wie die Seite */
+            border: 1px solid var(--border);
+            background: var(--surface); /* Buttons wieder weiß */
             border-radius: 12px;
             font-weight: 800;
             font-size: 0.75rem;
@@ -69,13 +69,15 @@
             cursor: pointer;
             text-transform: uppercase;
             transition: 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
         }
 
         .nav-btn.active {
             border-color: var(--accent);
             color: var(--text-primary);
-            background: var(--surface); /* Nur aktiver Button ist weiß */
+            background: var(--surface);
             box-shadow: var(--shadow);
+            border-width: 2px;
         }
 
         /* Mobile Hamburger Icon */
@@ -101,13 +103,14 @@
                 justify-content: center;
                 align-items: center;
                 z-index: 1000;
+                padding: 0;
             }
             .nav-container.open { display: flex; }
-            .nav-btn { width: 80%; flex: none; margin-bottom: 15px; font-size: 1rem; padding: 15px; background: var(--bg); }
+            .nav-btn { width: 80%; flex: none; margin-bottom: 15px; font-size: 1rem; padding: 15px; }
             .menu-icon { display: block; }
         }
 
-        .content-section { display: none; padding: 20px 16px; max-width: 600px; margin: 0 auto; }
+        .content-section { display: none; padding: 10px 16px 40px; max-width: 600px; margin: 0 auto; }
         .content-section.active { display: block; animation: fadeIn 0.3s ease; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -216,7 +219,7 @@
     </main>
 
     <main id="plan" class="content-section">
-        <div class="timeline-item"><span class="timeline-date">Do, 24. Sept. | Ankunft</span><span class="time-badge">12:00 Ankunft YUL</span><span class="timeline-desc">Check-in Montreal (Tru By Hilton). Stadterkundung.</span></div>
+        <div class="timeline-item"><span class="timeline-date">Do, 24. Sept. | Ankunft</span><span class="time-badge">12:00 Ankunft YUL</span><span class="timeline-desc">Check-in Montreal. Stadterkundung Downtown.</span></div>
         <div class="timeline-item"><span class="timeline-date">Fr, 25. Sept. | Montreal</span><span class="timeline-desc">Plateau Mont-Royal & Downtown.</span></div>
         <div class="timeline-item"><span class="timeline-date">Sa, 26. Sept. | Matchday Montreal</span><span class="time-badge">19:30 Match</span><span class="timeline-event">⚽️ CF Montréal vs. FC Cincinnati</span></div>
         <div class="timeline-item"><span class="timeline-date">So, 27. Sept. | Montreal</span><span class="timeline-desc">Hafenviertel & Mount Royal Park.</span></div>
@@ -236,9 +239,9 @@
         <div id="content-todos" class="card">
             <span class="card-title">Offene Erledigungen</span>
             <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Recherche Mietwagen (Details)</span></div>
-            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Parkplätze (Ottawa & Québec) prüfen</span></div>
+            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Parkplätze prüfen</span></div>
             <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">eTA Visum beantragen</span></div>
-            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Flug-Benefits (Lounge/Upgrade) prüfen</span></div>
+            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Flug-Benefits prüfen</span></div>
         </div>
 
         <div id="content-ideen" style="display:none;">
@@ -247,49 +250,18 @@
                 <div id="city-q" class="toggle-switch" onclick="citySwitch('q')">Québec</div>
                 <div id="city-o" class="toggle-switch" onclick="citySwitch('o')">Ottawa</div>
             </div>
-            
-            <div id="ideen-m" class="city-content">
-                <div class="card">
-                    <span class="card-title">Montreal Entdeckungen</span>
-                    <button class="accordion-btn" onclick="toggleAcc('m-s')">Sehenswürdigkeit <span>▼</span></button>
-                    <div id="acc-m-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Mont-Royal Hike (Aussichtspunkt)</span></div></div>
-                    <button class="accordion-btn" onclick="toggleAcc('m-r')">Restaurant <span>▼</span></button>
-                    <div id="acc-m-r" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Poutine-Vergleich (La Banquise)</span></div></div>
-                </div>
-            </div>
-
-            <div id="ideen-q" class="city-content" style="display:none;">
-                <div class="card">
-                    <span class="card-title">Québec City Entdeckungen</span>
-                    <button class="accordion-btn" onclick="toggleAcc('q-s')">Sehenswürdigkeit <span>▼</span></button>
-                    <div id="acc-q-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Château Frontenac Besichtigung</span></div></div>
-                    <button class="accordion-btn" onclick="toggleAcc('q-r')">Restaurant <span>▼</span></button>
-                    <div id="acc-q-r" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Vieux-Québec Gastronomie Tour</span></div></div>
-                </div>
-            </div>
-
-            <div id="ideen-o" class="city-content" style="display:none;">
-                <div class="card">
-                    <span class="card-title">Ottawa Entdeckungen</span>
-                    <button class="accordion-btn" onclick="toggleAcc('o-s')">Sehenswürdigkeit <span>▼</span></button>
-                    <div id="acc-o-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">National Gallery of Canada</span></div></div>
-                    <button class="accordion-btn" onclick="toggleAcc('o-r')">Restaurant <span>▼</span></button>
-                    <div id="acc-o-r" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">ByWard Market Food Stalls</span></div></div>
-                </div>
-            </div>
+            <div id="ideen-m" class="city-content"><div class="card"><span class="card-title">Montreal</span><button class="accordion-btn" onclick="toggleAcc('m-s')">Sehenswürdigkeit <span>▼</span></button><div id="acc-m-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Mont-Royal Hike</span></div></div></div></div>
+            <div id="ideen-q" class="city-content" style="display:none;"><div class="card"><span class="card-title">Québec</span><button class="accordion-btn" onclick="toggleAcc('q-s')">Sehenswürdigkeit <span>▼</span></button><div id="acc-q-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Château Frontenac</span></div></div></div></div>
+            <div id="ideen-o" class="city-content" style="display:none;"><div class="card"><span class="card-title">Ottawa</span><button class="accordion-btn" onclick="toggleAcc('o-s')">Sehenswürdigkeit <span>▼</span></button><div id="acc-o-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">National Gallery</span></div></div></div></div>
         </div>
     </main>
 
     <main id="map" class="content-section">
-        <div class="card">
-            <span class="card-title">Unterkünfte</span>
-            <div class="map-container"><iframe width="100%" height="100%" frameborder="0" src="https://www.google.com/maps?q=Tru+By+Hilton+Montreal+Centre-Ville&output=embed"></iframe></div>
-        </div>
+        <div class="card"><span class="card-title">Unterkünfte</span><div class="map-container"><iframe width="100%" height="100%" frameborder="0" src="https://www.google.com/maps?q=Tru+By+Hilton+Montreal+Centre-Ville&output=embed"></iframe></div></div>
     </main>
 
     <script>
         function toggleMenu() { document.getElementById('main-nav').classList.toggle('open'); }
-
         function showTab(t) {
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             document.getElementById(t).classList.add('active');
@@ -300,20 +272,17 @@
             document.getElementById('main-nav').classList.remove('open');
             window.scrollTo(0,0);
         }
-
         function mainListSwitch(x) {
             document.getElementById('content-todos').style.display = (x === 't') ? 'block' : 'none';
             document.getElementById('content-ideen').style.display = (x === 'i') ? 'block' : 'none';
             document.getElementById('main-t').classList.toggle('active', x === 't');
             document.getElementById('main-i').classList.toggle('active', x === 'i');
         }
-
         function citySwitch(c) {
             document.querySelectorAll('.city-content').forEach(div => div.style.display = 'none');
             document.getElementById('ideen-' + c).style.display = 'block';
             ['m', 'q', 'o'].forEach(city => document.getElementById('city-' + city).classList.toggle('active', city === c));
         }
-
         function toggleAcc(id) {
             const content = document.getElementById('acc-' + id);
             content.style.display = (content.style.display === 'block') ? 'none' : 'block';
