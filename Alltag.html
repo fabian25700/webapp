@@ -3,313 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kanada 2026 | Roadmap</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Alltag</title>
     <style>
         :root {
-            --accent: #fdb813; 
+            --accent: #e67e22;
+            --accent-soft: rgba(230, 126, 34, 0.1);
             --bg: #f0f2f5;
             --surface: #ffffff;
+            --surface-2: #f8fafc;
             --text-primary: #1e293b;
             --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
             --border: #e2e8f0;
-            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg: #0f172a;
                 --surface: #1e293b;
+                --surface-2: #162032;
                 --text-primary: #f1f5f9;
                 --text-secondary: #94a3b8;
+                --text-tertiary: #64748b;
                 --border: #2d3f55;
+                --border-light: #253347;
+                --shadow: 0 2px 8px rgba(0,0,0,0.3);
             }
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
             background: var(--bg);
             color: var(--text-primary);
-            line-height: 1.5;
+            min-height: 100vh;
+            padding-bottom: calc(env(safe-area-inset-bottom) + 32px);
+            -webkit-font-smoothing: antialiased;
         }
 
         header {
-            background: var(--surface);
-            padding: calc(env(safe-area-inset-top) + 20px) 20px 20px;
-            text-align: center;
-            position: relative;
-            border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; z-index: 50;
+            background: var(--bg);
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         }
 
-        .header-nav-link { text-decoration: none; color: inherit; cursor: pointer; }
-        
-        /* 1. Link auf Handy deaktivieren */
-        @media (max-width: 768px) {
-            .header-nav-link {
-                pointer-events: none;
-                cursor: default;
-            }
+        header h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; }
+
+        .date-display { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); }
+
+        main { padding: 20px 16px 0; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+        .section-label {
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.07em; color: var(--text-tertiary); padding: 0 4px;
+            margin-top: 16px;
         }
 
-        header h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
-        header p { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-top: 4px; }
-
-        /* 2. Nav-Container Hintergrund auf Grau (Desktop) */
-        .nav-container {
-            display: flex;
-            justify-content: center;
-            background: var(--bg); 
-            padding: 15px 20px;
-            gap: 10px;
-            max-width: 1000px;
-            margin: 0 auto;
+        .nav-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 18px; box-shadow: var(--shadow);
+            text-decoration: none; display: flex; align-items: center;
+            gap: 14px; padding: 16px 18px; position: relative; overflow: hidden;
+            transition: transform 0.12s ease; -webkit-tap-highlight-color: transparent;
         }
 
-        .nav-btn {
-            flex: 1;
-            padding: 12px 8px;
-            border: 2px solid var(--border);
-            background: var(--surface);
-            border-radius: 12px;
-            font-weight: 800;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: 0.2s;
+        .nav-card:active { transform: scale(0.97); }
+
+        .nav-icon {
+            font-size: 1.25rem; width: 42px; height: 42px;
+            display: flex; align-items: center; justify-content: center;
+            background: var(--accent-soft); border-radius: 12px;
         }
 
-        .nav-btn.active {
-            border-color: var(--accent);
-            color: var(--text-primary);
-            background: rgba(253, 184, 19, 0.1);
-        }
+        .nav-text { flex: 1; }
+        .nav-title { font-weight: 700; font-size: 1rem; color: var(--text-primary); }
+        .nav-sub { font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px; }
+        .nav-arrow { color: var(--text-tertiary); font-size: 1rem; }
 
-        .menu-icon {
-            display: none;
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.5rem;
-            cursor: pointer;
-            background: none; border: none; color: var(--text-primary);
-            z-index: 1001;
-        }
-
-        @media (max-width: 768px) {
-            .nav-container {
-                display: none;
-                position: fixed;
-                top: 0; left: 0; width: 100%; height: 100%;
-                background: var(--surface);
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                z-index: 1000;
-            }
-            .nav-container.open { display: flex; }
-            .nav-btn { width: 80%; flex: none; margin-bottom: 15px; font-size: 1rem; padding: 15px; }
-            .menu-icon { display: block; }
-        }
-
-        .content-section { display: none; padding: 20px 16px; max-width: 600px; margin: 0 auto; }
-        .content-section.active { display: block; animation: fadeIn 0.3s ease; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-        .card { background: var(--surface); border-radius: 20px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); }
-        .card-title { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 12px; display: block; }
-        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
-        .info-row:last-child { border-bottom: none; }
-        .info-label { font-size: 0.9rem; color: var(--text-secondary); }
-        .info-value { font-size: 0.9rem; font-weight: 700; text-align: right; }
-
-        .toggle-container { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin-bottom: 12px; border: 1px solid var(--border); gap: 4px; }
-        .toggle-switch { flex: 1; padding: 10px; text-align: center; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; cursor: pointer; border-radius: 9px; color: var(--text-secondary); transition: 0.2s; }
-        .toggle-switch.active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow); }
-
-        .accordion-btn { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; text-align: left; font-size: 0.8rem; font-weight: 800; color: var(--text-primary); cursor: pointer; margin-bottom: 8px; display: flex; justify-content: space-between; }
-        .accordion-content { display: none; padding: 4px 12px 12px; }
-
-        .todo-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
-        .todo-item:last-child { border-bottom: none; }
-        .todo-checkbox { width: 18px; height: 18px; border: 2px solid var(--accent); border-radius: 5px; margin-right: 12px; flex-shrink: 0; }
-        .idea-bullet { color: var(--accent); margin-right: 12px; font-weight: 900; font-size: 1.1rem; width: 25px; text-align: center; }
-        .todo-text { font-size: 0.9rem; font-weight: 600; }
-
-        .timeline-item { position: relative; padding-left: 30px; margin-bottom: 24px; border-left: 2px solid var(--border); }
-        .timeline-item::before { content: ''; position: absolute; left: -7px; top: 0; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; }
-        .time-badge { font-size: 0.7rem; font-weight: 800; background: var(--accent); color: #000; padding: 2px 8px; border-radius: 6px; margin-bottom: 4px; display: table; }
-        .timeline-date { font-weight: 800; font-size: 1rem; display: block; margin-bottom: 4px; }
-        .timeline-desc { font-size: 0.85rem; color: var(--text-secondary); display: block; }
-        .timeline-event { color: var(--accent); font-weight: 700; font-size: 0.85rem; margin-top: 2px; display: block; }
-        .map-container { width: 100%; height: 450px; border-radius: 15px; overflow: hidden; border: 1px solid var(--border); }
+        /* Highlight für aktive Projekte */
+        .active-border { border-left: 4px solid var(--accent); }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="index.html" class="header-nav-link"><h1>Kanada 2026</h1></a>
-        <p>Montreal • Québec • Ottawa</p>
-        <button class="menu-icon" onclick="toggleMenu()">☰</button>
+        <h1>Alltag</h1>
+        <div class="date-display" id="current-date"></div>
     </header>
 
-    <div id="main-nav" class="nav-container">
-        <button class="nav-btn active" onclick="showTab('flights')">Reisen</button>
-        <button class="nav-btn" onclick="showTab('hotels')">Hotels</button>
-        <button class="nav-btn" onclick="showTab('activities')">Aktivitäten</button>
-        <button class="nav-btn" onclick="showTab('plan')">Kalender</button>
-        <button class="nav-btn" onclick="showTab('todos')">Todos/Ideen</button>
-        <button class="nav-btn" onclick="showTab('map')">Karte</button>
-    </div>
+    <main>
+        <div class="section-label">Fokus & Leistung</div>
 
-    <main id="flights" class="content-section active">
-        <div class="card">
-            <span class="card-title">Hinflug (FRA → YUL)</span>
-            <div class="info-row"><span class="info-label">Datum</span><span class="info-value">24.09.2026</span></div>
-            <div class="info-row"><span class="info-label">Abflug FRA</span><span class="info-value">09:55 Uhr</span></div>
-            <div class="info-row"><span class="info-label">Ankunft YUL</span><span class="info-value">12:00 Uhr</span></div>
-        </div>
-        <div class="card">
-            <span class="card-title">Rückflug (YUL → FRA)</span>
-            <div class="info-row"><span class="info-label">Datum</span><span class="info-value">02.10.2026</span></div>
-            <div class="info-row"><span class="info-label">Abflug YUL</span><span class="info-value">16:35 Uhr</span></div>
-            <div class="info-row"><span class="info-label">Ankunft FRA</span><span class="info-value">06:00 Uhr (+1)</span></div>
-        </div>
-    </main>
-
-    <main id="hotels" class="content-section">
-        <div class="card">
-            <span class="card-title">Montreal (4 Nächte)</span>
-            <div class="info-row"><span class="info-label">Hotel</span><span class="info-value">Tru By Hilton Montréal centre-ville</span></div>
-            <div class="info-row"><span class="info-label">Adresse</span><span class="info-value">1025 Blvd René-Lévesque O</span></div>
-        </div>
-        <div class="card">
-            <span class="card-title">Québec City (2 Nächte)</span>
-            <div class="info-row"><span class="info-label">Hotel</span><span class="info-value">C3- Hotel Art De Vivre</span></div>
-        </div>
-    </main>
-
-    <main id="activities" class="content-section">
-        <div class="card">
-            <span class="card-title">Match 1: MLS</span>
-            <div class="info-row"><span class="info-label">Datum</span><span class="info-value">Sa, 26.09. | 19:30</span></div>
-            <div class="info-row"><span class="info-label">Spiel</span><span class="info-value">CF Montréal vs. Cincinnati</span></div>
-        </div>
-    </main>
-
-    <main id="plan" class="content-section">
-        <div class="timeline-item">
-            <span class="timeline-date">Do, 24. Sept. | Ankunft</span>
-            <span class="timeline-desc">Check-in Montreal. Stadterkundung.</span>
-        </div>
-    </main>
-
-    <main id="todos" class="content-section">
-        <div class="toggle-container">
-            <div id="main-t" class="toggle-switch active" onclick="mainListSwitch('t')">Todos</div>
-            <div id="main-i" class="toggle-switch" onclick="mainListSwitch('i')">Ideen</div>
-        </div>
-
-        <div id="content-todos" class="card">
-            <span class="card-title">Offene Erledigungen</span>
-            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">eTA Visum beantragen</span></div>
-            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Parkplätze prüfen</span></div>
-        </div>
-
-        <div id="content-ideen" style="display:none;">
-            <div class="toggle-container">
-                <div id="city-m" class="toggle-switch active" onclick="citySwitch('m')">Montreal</div>
-                <div id="city-q" class="toggle-switch" onclick="citySwitch('q')">Québec</div>
-                <div id="city-o" class="toggle-switch" onclick="citySwitch('o')">Ottawa</div>
+        <a href="reisen.html" class="nav-card">
+            <div class="nav-icon">🌎</div>
+            <div class="nav-text">
+                <div class="nav-title">Reisen</div>
+                <div class="nav-sub">Länder, Stats & Abenteuer</div>
             </div>
-            
-            <div id="ideen-m" class="city-content">
-                <div class="card">
-                    <span class="card-title">Montreal Gastro</span>
-                    <button class="accordion-btn" onclick="toggleAcc('m-k')">Klassiker <span>▼</span></button>
-                    <div id="acc-m-k" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">🥯</span><span class="todo-text">St-Viateur Bagel</span></div>
-                        <div class="todo-item"><span class="idea-bullet">🥩</span><span class="todo-text">Schwartz’s Smoked Meat</span></div>
-                        <div class="todo-item"><span class="idea-bullet">🍟</span><span class="todo-text">Klassische Poutine</span></div>
-                    </div>
-                    <button class="accordion-btn" onclick="toggleAcc('m-a')">Alternative <span>▼</span></button>
-                    <div id="acc-m-a" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">L'Avenue (Bester Brunch)</span></div>
-                    </div>
-                </div>
-            </div>
+            <div class="nav-arrow">→</div>
+        </a>
 
-            <div id="ideen-q" class="city-content" style="display:none;">
-                <div class="card">
-                    <span class="card-title">Québec Gastro</span>
-                    <button class="accordion-btn" onclick="toggleAcc('q-k')">Quick-Stop <span>▼</span></button>
-                    <div id="acc-q-k" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">☕</span><span class="todo-text">Tim Hortons (Double-Double)</span></div>
-                    </div>
-                    <button class="accordion-btn" onclick="toggleAcc('q-a')">Alternative <span>▼</span></button>
-                    <div id="acc-q-a" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Bello Ristorante (Altstadt)</span></div>
-                    </div>
-                </div>
+        <a href="fitness.html" class="nav-card">
+            <div class="nav-icon">🏃‍♂️</div>
+            <div class="nav-text">
+                <div class="nav-title">Fitness</div>
+                <div class="nav-sub">Training & Performance</div>
             </div>
+            <div class="nav-arrow">→</div>
+        </a>
 
-            <div id="ideen-o" class="city-content" style="display:none;">
-                <div class="card">
-                    <span class="card-title">Ottawa Gastro</span>
-                    <button class="accordion-btn" onclick="toggleAcc('o-k')">Klassiker <span>▼</span></button>
-                    <div id="acc-o-k" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">🍩</span><span class="todo-text">BeaverTails (ByWard Market)</span></div>
-                    </div>
-                    <button class="accordion-btn" onclick="toggleAcc('o-a')">Alternative <span>▼</span></button>
-                    <div id="acc-o-a" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">The Shore Club (Steak/Fisch)</span></div>
-                    </div>
-                </div>
+        <div class="section-label">Management</div>
+
+        <a href="finanzen.html" class="nav-card">
+            <div class="nav-icon">📈</div>
+            <div class="nav-text">
+                <div class="nav-title">Finanzen</div>
+                <div class="nav-sub">Asset Management & Cashflow</div>
             </div>
-        </div>
-    </main>
+            <div class="nav-arrow">→</div>
+        </a>
 
-    <main id="map" class="content-section">
-        <div class="card">
-            <span class="card-title">Karte</span>
-            <div class="map-container"><iframe width="100%" height="100%" frameborder="0" src="about:blank"></iframe></div>
-        </div>
+        <a href="immobilien.html" class="nav-card active-border">
+            <div class="nav-icon">🏗️</div>
+            <div class="nav-text">
+                <div class="nav-title">Projektentwicklung</div>
+                <div class="nav-sub">Immobilien & Asset Steuerung</div>
+            </div>
+            <div class="nav-arrow">→</div>
+        </a>
+
+        <div class="section-label">System</div>
+
+        <a href="minimalismus.html" class="nav-card">
+            <div class="nav-icon">🌿</div>
+            <div class="nav-text">
+                <div class="nav-title">Minimalismus</div>
+                <div class="nav-sub">Fokus & Ordnung</div>
+            </div>
+            <div class="nav-arrow">→</div>
+        </a>
+
+        <a href="codierung.html" class="nav-card">
+            <div class="nav-icon">💻</div>
+            <div class="nav-text">
+                <div class="nav-title">Systembau</div>
+                <div class="nav-sub">Skripte & Automatisierung</div>
+            </div>
+            <div class="nav-arrow">→</div>
+        </a>
     </main>
 
     <script>
-        function toggleMenu() { document.getElementById('main-nav').classList.toggle('open'); }
-
-        function showTab(t) {
-            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-            document.getElementById(t).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => {
-                b.classList.remove('active');
-                if(b.getAttribute('onclick').includes(t)) b.classList.add('active');
-            });
-            document.getElementById('main-nav').classList.remove('open');
-            window.scrollTo(0,0);
-        }
-
-        function mainListSwitch(x) {
-            document.getElementById('content-todos').style.display = (x === 't') ? 'block' : 'none';
-            document.getElementById('content-ideen').style.display = (x === 'i') ? 'block' : 'none';
-            document.getElementById('main-t').classList.toggle('active', x === 't');
-            document.getElementById('main-i').classList.toggle('active', x === 'i');
-        }
-
-        function citySwitch(c) {
-            document.querySelectorAll('.city-content').forEach(div => div.style.display = 'none');
-            document.getElementById('ideen-' + c).style.display = 'block';
-            ['m', 'q', 'o'].forEach(city => document.getElementById('city-' + city).classList.toggle('active', city === c));
-        }
-
-        function toggleAcc(id) {
-            const content = document.getElementById('acc-' + id);
-            content.style.display = (content.style.display === 'block') ? 'none' : 'block';
-        }
+        const options = { weekday: 'long', day: 'numeric', month: 'long' };
+        document.getElementById('current-date').textContent = new Date().toLocaleDateString('de-DE', options);
     </script>
 </body>
 </html>
