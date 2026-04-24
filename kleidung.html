@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kleidung</title>
+    <style>
+        /* ... (CSS wie oben) ... */
+        :root { --bg: #f0f2f5; --surface: #ffffff; --surface-2: #f8fafc; --text-primary: #1e293b; --text-secondary: #64748b; --text-tertiary: #94a3b8; --border: #e2e8f0; --border-light: #f1f5f9; --shadow: 0 2px 8px rgba(0,0,0,0.06); --accent: #3498db; --accent-soft: rgba(52, 152, 219, 0.1); --toggle-track: #e2e8f0; --toggle-thumb: #ffffff; --toggle-active: #3498db; }
+        @media (prefers-color-scheme: dark) { :root { --bg: #0f172a; --surface: #1e293b; --surface-2: #162032; --text-primary: #f1f5f9; --text-secondary: #94a3b8; --text-tertiary: #64748b; --border: #2d3f55; --border-light: #253347; --shadow: 0 2px 8px rgba(0,0,0,0.3); --toggle-track: #334155; --toggle-thumb: #f1f5f9; } }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; }
+        header { position: sticky; top: 0; z-index: 50; background: var(--bg); padding: 16px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-light); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .back-btn { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); text-decoration: none; color: var(--text-primary); box-shadow: var(--shadow); flex-shrink: 0; }
+        header h1 { font-size: 1.1rem; font-weight: 800; }
+        main { padding: 20px 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+        .toggle-card { background: var(--surface); border-radius: 18px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+        .toggle-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .toggle-header-left { display: flex; align-items: center; gap: 12px; }
+        .toggle-icon { font-size: 1.25rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--accent-soft); border-radius: 11px; }
+        .toggle-title { font-weight: 700; font-size: 1rem; }
+        .switch { position: relative; width: 50px; height: 30px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; inset: 0; background: var(--toggle-track); border-radius: 30px; transition: 0.25s; cursor: pointer; }
+        .slider::before { content: ""; position: absolute; height: 24px; width: 24px; left: 3px; top: 3px; background: var(--toggle-thumb); border-radius: 50%; transition: 0.25s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+        input:checked + .slider { background: var(--toggle-active); }
+        input:checked + .slider::before { transform: translateX(20px); }
+        .toggle-panel { display: none; border-top: 1px solid var(--border-light); padding: 16px 20px; }
+        .toggle-panel.open { display: block; }
+        .info-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border-light); }
+        .info-row:last-child { border-bottom: none; }
+        .info-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 6px; }
+        .info-text { font-size: 0.88rem; line-height: 1.5; color: var(--text-secondary); }
+        .info-text strong { color: var(--text-primary); }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="Alltag.html" class="back-btn">←</a>
+        <h1>Kleidung</h1>
+    </header>
+    <main>
+        <div class="toggle-card">
+            <div class="toggle-header" onclick="togglePanel('waschmaschine')">
+                <div class="toggle-header-left">
+                    <div class="toggle-icon">🫧</div>
+                    <div class="toggle-title">Waschmaschine</div>
+                </div>
+                <label class="switch" onclick="event.stopPropagation()">
+                    <input type="checkbox" id="toggle-waschmaschine" onchange="syncToggle('waschmaschine')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="toggle-panel" id="panel-waschmaschine">
+                <div class="info-row"><div class="info-dot"></div><div class="info-text"><strong>Bettwäsche/Handtücher:</strong> 60 °C</div></div>
+                <div class="info-row"><div class="info-dot"></div><div class="info-text"><strong>Alltag:</strong> 30–40 °C (Energiesparend)</div></div>
+                <div class="info-row"><div class="info-dot"></div><div class="info-text"><strong>Sortieren:</strong> Hell, Dunkel, Bunt trennen.</div></div>
+                <div class="info-row"><div class="info-dot"></div><div class="info-text"><strong>Pflege:</strong> Tür nach dem Waschen offen lassen (Schimmelprävention).</div></div>
+            </div>
+        </div>
+
+        <div class="toggle-card">
+            <div class="toggle-header" onclick="togglePanel('trockner')">
+                <div class="toggle-header-left">
+                    <div class="toggle-icon">💨</div>
+                    <div class="toggle-title">Trockner</div>
+                </div>
+                <label class="switch" onclick="event.stopPropagation()">
+                    <input type="checkbox" id="toggle-trockner" onchange="syncToggle('trockner')">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="toggle-panel" id="panel-trockner">
+                <div class="info-row"><div class="info-dot"></div><div class="info-text"><strong>Wolle/Seide:</strong> Nie in den Trockner.</div></div>
+                <div class="info-row"><div class="info-dot"></div><div class="info-text"><strong>Flusensieb:</strong> Nach jedem Gang leeren (Brandgefahr).</div></div>
+                <div class="info-row"><div class="info-dot"></div><div class="info-text"><strong>Behälter:</strong> Kondenswasser nach jedem Gang leeren.</div></div>
+            </div>
+        </div>
+    </main>
+    <script>
+        function togglePanel(name) {
+            const panel = document.getElementById('panel-' + name);
+            const checkbox = document.getElementById('toggle-' + name);
+            const isOpen = panel.classList.contains('open');
+            panel.classList.toggle('open', !isOpen);
+            checkbox.checked = !isOpen;
+        }
+        function syncToggle(name) {
+            const panel = document.getElementById('panel-' + name);
+            const checkbox = document.getElementById('toggle-' + name);
+            panel.classList.toggle('open', checkbox.checked);
+        }
+    </script>
+</body>
+</html>
