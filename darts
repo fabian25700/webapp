@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricket Darts - Focus</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --surface: #1e1e1e;
+            --primary: #ffffff;
+            --accent: #00ff88;
+            --border: #333;
+            --text-muted: #888;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--primary);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            color: var(--text-muted);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 15px 10px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: #252525;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .target-cell {
+            font-weight: bold;
+            background: #252525;
+            width: 50px;
+        }
+
+        .score-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--primary);
+            width: 45px;
+            height: 45px;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .score-btn.closed {
+            background: var(--accent);
+            color: var(--bg);
+            border-color: var(--accent);
+        }
+
+        .points-display {
+            display: block;
+            font-size: 0.7rem;
+            margin-top: 5px;
+            color: var(--accent);
+        }
+
+        .total-score {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .reset-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Cricket Symbole */
+        .sym-1 { content: "/"; }
+        .sym-2 { content: "X"; }
+        .sym-3 { content: "⦻"; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>CRICKET</h1>
+
+        <div class="table-wrapper">
+            <table id="dartsTable">
+                <thead>
+                    <tr id="headerRow">
+                        <th>Target</th>
+                        </tr>
+                </thead>
+                <tbody id="gameBody">
+                    </tbody>
+                <tfoot>
+                    <tr id="scoreRow">
+                        <td class="target-cell">Punkte</td>
+                        </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="controls">
+            <button class="reset-btn" onclick="resetGame()">Spiel zurücksetzen</button>
+        </div>
+    </div>
+
+    <script>
+        const players = ["Spieler 1", "Spieler 2", "Spieler 3", "Spieler 4", "Spieler 5"];
+        const targets = [20, 19, 18, 17, 16, 15, 25]; // 25 ist Bullseye
+        
+        let gameState = JSON.parse(localStorage.getItem('cricketState')) || {};
+
+        function initGame() {
+            const headerRow = document.getElementById('headerRow');
+            const gameBody = document.getElementById('gameBody');
+            const scoreRow = document.getElementById('scoreRow');
+
+            // Header & Footer initialisieren
+            players.forEach((p, idx) => {
+                headerRow.innerHTML += `<th>${p}</th>`;
+                scoreRow.innerHTML += `<td id="total-${idx}" class="total-score">0</td>`;
+            });
+
+            // Spielfeld erzeugen
+            targets.forEach(target => {
+                let row = `<tr><td class="target-cell">${target === 25 ? 'BULL' : target}</td>`;
+                players.forEach((_, pIdx) => {
+                    const key = `${target}-${pIdx}`;
+                    if (!gameState[key]) gameState[key] = { hits: 0, points: 0 };
+                    
+                    row += `<td>
+                        <button class="score-btn" id="btn-${key}" onclick="hit('${key}', ${target}, ${pIdx})">
+                            ${getSymbol(gameState[key].hits)}
+                        </button>
+                        <span class="points-display" id="pts-${key}">${gameState[key].points > 0 ? '+' + gameState[key].points : ''}</span>
+                    </td>`;
+                });
+                row += `</tr>`;
+                gameBody.innerHTML += row;
+            });
+            updateTotalScores();
+        }
+
+        function getSymbol(hits) {
+            if (hits === 0) return "";
+            if (hits === 1) return "/";
+            if (hits === 2) return "X";
+            return "⦻";
+        }
+
+        function hit(key, value, pIdx) {
+            let cell = gameState[key];
+            
+            if (cell.hits < 3) {
+                cell.hits++;
+                document.getElementById(`btn-${key}`).innerText = getSymbol(cell.hits);
+                if (cell.hits === 3) {
+                    document.getElementById(`btn-${key}`).classList.add('closed');
+                }
+            } else {
+                // Prüfen, ob andere Spieler die Zahl noch offen haben
+                const isClosedByAll = players.every((_, idx) => gameState[`${value}-${idx}`].hits >= 3);
+                
+                if (!isClosedByAll) {
+                    cell.points += value;
+                    document.getElementById(`pts-${key}`).innerText = '+' + cell.points;
+                }
+            }
+            
+            saveAndRefresh();
+        }
+
+        function updateTotalScores() {
+            players.forEach((_, pIdx) => {
+                let total = 0;
+                targets.forEach(t => {
+                    total += gameState[`${t}-${pIdx}`].points;
+                });
+                document.getElementById(`total-${pIdx}`).innerText = total;
+            });
+        }
+
+        function saveAndRefresh() {
+            localStorage.setItem('cricketState', JSON.stringify(gameState));
+            updateTotalScores();
+        }
+
+        function resetGame() {
+            if (confirm("Neues Spiel starten? Alle Stände werden gelöscht.")) {
+                localStorage.removeItem('cricketState');
+                location.reload();
+            }
+        }
+
+        initGame();
+    </script>
+</body>
+</html>
