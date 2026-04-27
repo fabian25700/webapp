@@ -3,334 +3,427 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kanada 2026 | Roadmap</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Fabians App</title>
+    <script src="daten.js"></script>
     <style>
         :root {
-            --accent: #fdb813; 
+            --primary: #2ecc71;
+            --primary-dark: #27ae60;
+            --secondary: #3498db;
             --bg: #f0f2f5;
-            --surface: #ffffff;
+            --surface: rgba(255, 255, 255, 0.95);
             --text-primary: #1e293b;
             --text-secondary: #64748b;
-            --border: #e2e8f0;
-            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --border: rgba(203, 213, 225, 0.8);
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --card-hover: rgba(240, 240, 240, 0.95);
+            --snake-btn-bg: white;
+            --snake-btn-border: #cbd5e1;
+            --snake-btn-color: #64748b;
+            --arrow-color: #cbd5e1;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg: #0f172a;
-                --surface: #1e293b;
+                --surface: rgba(30, 41, 59, 0.95);
                 --text-primary: #f1f5f9;
                 --text-secondary: #94a3b8;
-                --border: #2d3f55;
+                --border: rgba(51, 65, 85, 0.8);
+                --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+                --card-hover: rgba(51, 65, 85, 0.95);
+                --snake-btn-bg: #1e293b;
+                --snake-btn-border: #334155;
+                --snake-btn-color: #94a3b8;
+                --arrow-color: #475569;
             }
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        * { box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
             background: var(--bg);
-            color: var(--text-primary);
-            line-height: 1.5;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.3s ease;
         }
 
         header {
-            background: var(--surface);
-            padding: calc(env(safe-area-inset-top) + 20px) 20px 20px;
-            text-align: center;
-            position: relative;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .header-nav-link { text-decoration: none; color: inherit; }
-        header h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
-        header p { font-size: 0.8rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 700; margin-top: 4px; }
-
-        /* Desktop Nav: Container jetzt transparent statt weiß */
-        .nav-container {
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px 20px;
             display: flex;
             justify-content: center;
-            background: transparent;
-            padding: 10px 20px;
-            gap: 10px;
-            max-width: 1000px;
-            margin: 0 auto;
+            align-items: center;
+            z-index: 100;
         }
 
-        .nav-btn {
-            flex: 1;
-            padding: 12px 8px;
-            border: 2px solid var(--border);
-            background: var(--surface);
-            border-radius: 12px;
+        .header-title {
             font-weight: 800;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: 0.2s;
-        }
-
-        .nav-btn.active {
-            border-color: var(--accent);
+            font-size: 1.1rem;
+            letter-spacing: 0.04em;
             color: var(--text-primary);
-            background: rgba(253, 184, 19, 0.1);
         }
 
-        /* Mobile Hamburger Icon */
-        .menu-icon {
-            display: none;
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.5rem;
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+            width: 85%;
+            max-width: 360px;
+            margin: auto;
+            z-index: 10;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .menu-card {
+            background: var(--surface);
+            padding: 18px 22px;
+            border-radius: 20px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: transform 0.12s ease, background 0.2s ease;
+            border: 1px solid var(--border);
             cursor: pointer;
-            background: none; border: none; color: var(--text-primary);
-            z-index: 1001;
         }
 
-        @media (max-width: 768px) {
-            .nav-container {
-                display: none;
-                position: fixed;
-                top: 0; left: 0; width: 100%; height: 100%;
-                background: var(--surface);
-                flex-direction: column;
-                justify-content: center;
-                align-items: center;
-                z-index: 1000;
-            }
-            .nav-container.open { display: flex; }
-            .nav-btn { width: 80%; flex: none; margin-bottom: 15px; font-size: 1rem; padding: 15px; }
-            .menu-icon { display: block; }
+        .menu-card:active { transform: scale(0.96); background: var(--card-hover); }
+
+        .icon { font-size: 1.35rem; line-height: 1; }
+        .title { font-weight: 600; color: var(--text-primary); font-size: 1.05rem; flex-grow: 1; }
+        .arrow { color: var(--arrow-color); font-size: 1rem; }
+
+        /* Overlay Styles */
+        #games-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
+            animation: fadeIn 0.2s ease;
         }
 
-        .content-section { display: none; padding: 20px 16px; max-width: 600px; margin: 0 auto; }
-        .content-section.active { display: block; animation: fadeIn 0.3s ease; }
+        .overlay-content {
+            width: 85%;
+            max-width: 320px;
+            background: var(--surface);
+            border-radius: 24px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .overlay-item {
+            background: var(--bg);
+            padding: 16px;
+            border-radius: 16px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-primary);
+            font-weight: 600;
+            border: 1px solid var(--border);
+        }
 
-        /* Card & Content Styles */
-        .card { background: var(--surface); border-radius: 20px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); box-shadow: var(--shadow); }
-        .card-title { font-size: 0.7rem; font-weight: 800; color: var(--accent); text-transform: uppercase; margin-bottom: 12px; display: block; }
-        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
-        .info-row:last-child { border-bottom: none; }
-        .info-label { font-size: 0.9rem; color: var(--text-secondary); }
-        .info-value { font-size: 0.9rem; font-weight: 700; text-align: right; }
+        .overlay-item:active { transform: scale(0.97); }
 
-        /* Toggles & Accordions */
-        .toggle-container { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin-bottom: 12px; border: 1px solid var(--border); gap: 4px; }
-        .toggle-switch { flex: 1; padding: 10px; text-align: center; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; cursor: pointer; border-radius: 9px; color: var(--text-secondary); transition: 0.2s; }
-        .toggle-switch.active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow); }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
 
-        .accordion-btn { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; text-align: left; font-size: 0.8rem; font-weight: 800; color: var(--text-primary); cursor: pointer; margin-bottom: 8px; display: flex; justify-content: space-between; }
-        .accordion-content { display: none; padding: 4px 12px 12px; }
+        /* Snake Game Layout */
+        #game-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            display: none;
+        }
 
-        .todo-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
-        .todo-item:last-child { border-bottom: none; }
-        .todo-checkbox { width: 18px; height: 18px; border: 2px solid var(--accent); border-radius: 5px; margin-right: 12px; flex-shrink: 0; }
-        .idea-bullet { color: var(--accent); margin-right: 12px; font-weight: 900; font-size: 1.1rem; width: 25px; text-align: center; }
-        .todo-text { font-size: 0.9rem; font-weight: 600; }
+        #score-display {
+            position: fixed;
+            top: 80px;
+            width: 100%;
+            text-align: center;
+            font-weight: 900;
+            color: var(--primary);
+            display: none;
+            z-index: 100;
+            font-size: 2.2rem;
+            opacity: 0.5;
+            pointer-events: none;
+        }
 
-        /* Timeline */
-        .timeline-item { position: relative; padding-left: 30px; margin-bottom: 24px; border-left: 2px solid var(--border); }
-        .timeline-item::before { content: ''; position: absolute; left: -7px; top: 0; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; }
-        .time-badge { font-size: 0.7rem; font-weight: 800; background: var(--accent); color: #000; padding: 2px 8px; border-radius: 6px; margin-bottom: 4px; display: table; }
-        .timeline-date { font-weight: 800; font-size: 1rem; display: block; margin-bottom: 4px; }
-        .timeline-desc { font-size: 0.85rem; color: var(--text-secondary); display: block; }
-        .timeline-event { color: var(--accent); font-weight: 700; font-size: 0.85rem; margin-top: 2px; display: block; }
-        .map-container { width: 100%; height: 450px; border-radius: 15px; overflow: hidden; border: 1px solid var(--border); }
+        #instructions {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 400;
+            pointer-events: none;
+        }
+
+        #instructions.visible { display: flex; }
+
+        .instr-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 26px 32px;
+            max-width: 300px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            animation: fadeInScale 0.35s ease;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.88); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        .instr-box h2 { margin: 0 0 10px 0; font-size: 1.2rem; font-weight: 800; color: var(--text-primary); }
+        .instr-box p { margin: 0 0 6px 0; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; }
+        .instr-key { display: inline-block; background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; padding: 3px 8px; font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin: 2px; }
+        .instr-touch { font-size: 1.6rem; margin: 6px 0; }
+
+        #stop-btn {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 16px);
+            right: 20px;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            z-index: 500;
+            display: none;
+        }
     </style>
 </head>
 <body>
-
     <header>
-        <a href="index.html" class="header-nav-link"><h1>Kanada 2026</h1></a>
-        <p>Montreal • Québec • Ottawa</p>
-        <button class="menu-icon" onclick="toggleMenu()">☰</button>
+        <div class="header-title">FABIANS APP</div>
     </header>
 
-    <div id="main-nav" class="nav-container">
-        <button class="nav-btn active" onclick="showTab('flights')">Reisen</button>
-        <button class="nav-btn" onclick="showTab('hotels')">Hotels</button>
-        <button class="nav-btn" onclick="showTab('activities')">Aktivitäten</button>
-        <button class="nav-btn" onclick="showTab('plan')">Kalender</button>
-        <button class="nav-btn" onclick="showTab('todos')">Todos/Ideen</button>
-        <button class="nav-btn" onclick="showTab('map')">Karte</button>
+    <button id="stop-btn" onclick="stopGame()">■ STOP</button>
+
+    <div id="score-display"><span id="current-score">0</span></div>
+
+    <div class="menu-container" id="main-menu">
+        <a href="reise_stats.html" class="menu-card">
+            <span class="icon">🌍</span>
+            <span class="title">Reisen</span>
+            <span class="arrow">→</span>
+        </a>
+        <a href="Alltag.html" class="menu-card">
+            <span class="icon">🏠</span>
+            <span class="title">Alltag</span>
+            <span class="arrow">→</span>
+        </a>
+        <div class="menu-card" onclick="toggleOverlay(true)">
+            <span class="icon">🎮</span>
+            <span class="title">Spiele</span>
+            <span class="arrow">→</span>
+        </div>
     </div>
 
-    <main id="flights" class="content-section active">
-        <div class="card">
-            <span class="card-title">Hinflug (FRA → YUL)</span>
-            <div class="info-row"><span class="info-label">Datum</span><span class="info-value">24.09.2026</span></div>
-            <div class="info-row"><span class="info-label">Abflug FRA</span><span class="info-value">09:55 Uhr</span></div>
-            <div class="info-row"><span class="info-label">Ankunft YUL</span><span class="info-value">12:00 Uhr</span></div>
-        </div>
-        <div class="card">
-            <span class="card-title">Rückflug (YUL → FRA)</span>
-            <div class="info-row"><span class="info-label">Datum</span><span class="info-value">02.10.2026</span></div>
-            <div class="info-row"><span class="info-label">Abflug YUL</span><span class="info-value">16:35 Uhr</span></div>
-            <div class="info-row"><span class="info-label">Ankunft FRA</span><span class="info-value">06:00 Uhr (+1)</span></div>
-        </div>
-        <div class="card">
-            <span class="card-title">Mietwagen</span>
-            <div class="info-row"><span class="info-label">Pick-up Montreal</span><span class="info-value">28.09. | 15:00 Uhr</span></div>
-            <div class="info-row"><span class="info-label">Drop-off YUL</span><span class="info-value">02.10. | 13:30 Uhr</span></div>
-            <div class="info-row"><span class="info-label">Kategorie</span><span class="info-value">Mittelklasse</span></div>
-        </div>
-    </main>
-
-    <main id="hotels" class="content-section">
-        <div class="card">
-            <span class="card-title">Montreal (4 Nächte)</span>
-            <div class="info-row"><span class="info-label">Zeitraum</span><span class="info-value">24.09. – 28.09.</span></div>
-            <div class="info-row"><span class="info-label">Hotel</span><span class="info-value">Tru By Hilton Montréal centre-ville</span></div>
-            <div class="info-row"><span class="info-label">Adresse</span><span class="info-value">1025 Blvd René-Lévesque O</span></div>
-        </div>
-        <div class="card">
-            <span class="card-title">Québec City (2 Nächte)</span>
-            <div class="info-row"><span class="info-label">Zeitraum</span><span class="info-value">28.09. – 30.09.</span></div>
-            <div class="info-row"><span class="info-label">Hotel</span><span class="info-value">C3- Hotel Art De Vivre</span></div>
-            <div class="info-row"><span class="info-label">Adresse</span><span class="info-value">170 Grande Allée O</span></div>
-        </div>
-        <div class="card">
-            <span class="card-title">Ottawa (2 Nächte)</span>
-            <div class="info-row"><span class="info-label">Zeitraum</span><span class="info-value">30.09. – 02.10.</span></div>
-            <div class="info-row"><span class="info-label">Hotel</span><span class="info-value">ByWard Blue Inn</span></div>
-            <div class="info-row"><span class="info-label">Adresse</span><span class="info-value">157 Clarence St</span></div>
-        </div>
-    </main>
-
-    <main id="activities" class="content-section">
-        <div class="card">
-            <span class="card-title">Match 1: MLS</span>
-            <div class="info-row"><span class="info-label">Datum</span><span class="info-value">Sa, 26.09. | 19:30</span></div>
-            <div class="info-row"><span class="info-label">Spiel</span><span class="info-value">CF Montréal vs. FC Cincinnati</span></div>
-            <div class="info-row"><span class="info-label">Stadion</span><span class="info-value">Stade Saputo</span></div>
-        </div>
-        <div class="card">
-            <span class="card-title">Match 2: CPL</span>
-            <div class="info-row"><span class="info-label">Datum</span><span class="info-value">Mi, 30.09. | 19:00</span></div>
-            <div class="info-row"><span class="info-label">Spiel</span><span class="info-value">Atlético Ottawa vs. Cavalry FC</span></div>
-            <div class="info-row"><span class="info-label">Stadion</span><span class="info-value">TD Place Stadium</span></div>
-        </div>
-    </main>
-
-    <main id="plan" class="content-section">
-        <div class="timeline-item"><span class="timeline-date">Do, 24. Sept. | Ankunft</span><span class="time-badge">12:00 Ankunft YUL</span><span class="timeline-desc">Check-in Montreal (Tru By Hilton). Erste Stadterkundung Downtown.</span></div>
-        <div class="timeline-item"><span class="timeline-date">Fr, 25. Sept. | Montreal</span><span class="timeline-desc">Plateau Mont-Royal & Downtown.</span></div>
-        <div class="timeline-item"><span class="timeline-date">Sa, 26. Sept. | Matchday Montreal</span><span class="time-badge">19:30 Match</span><span class="timeline-event">⚽️ CF Montréal vs. FC Cincinnati</span><span class="timeline-desc">Stade Saputo.</span></div>
-        <div class="timeline-item"><span class="timeline-date">So, 27. Sept. | Montreal</span><span class="timeline-desc">Hafenviertel & Mount Royal Park (Viewpoint).</span></div>
-        <div class="timeline-item"><span class="timeline-date">Mo, 28. Sept. | Roadtrip Start</span><span class="time-badge">15:00 Mietwagen</span><span class="time-badge">~ 2h 45m Fahrt (260km)</span><span class="timeline-desc">Fahrt nach Québec City. Check-in C3 Hotel.</span></div>
-        <div class="timeline-item"><span class="timeline-date">Di, 29. Sept. | Québec City</span><span class="timeline-desc">Altstadt (Vieux-Québec) & Montmorency-Falls.</span></div>
-        <div class="timeline-item"><span class="timeline-date">Mi, 30. Sept. | Ottawa Matchday</span><span class="time-badge">09:00 Abfahrt</span><span class="time-badge">~ 4h 30m Fahrt (440km)</span><span class="time-badge">19:00 Match</span><span class="timeline-event">⚽️ Atlético Ottawa vs. Cavalry FC</span></div>
-        <div class="timeline-item"><span class="timeline-date">Do, 01. Okt. | Ottawa</span><span class="timeline-desc">Parlamentshügel & ByWard Market.</span></div>
-        <div class="timeline-item"><span class="timeline-date">Fr, 02. Okt. | Rückreise</span><span class="time-badge">11:00 Abfahrt Ottawa</span><span class="time-badge">~ 2h Fahrt (190km)</span><span class="time-badge">16:35 Abflug</span><span class="timeline-desc">Mietwagen-Return & Rückflug FRA.</span></div>
-    </main>
-
-    <main id="todos" class="content-section">
-        <div class="toggle-container">
-            <div id="main-t" class="toggle-switch active" onclick="mainListSwitch('t')">Todos</div>
-            <div id="main-i" class="toggle-switch" onclick="mainListSwitch('i')">Ideen</div>
-        </div>
-
-        <div id="content-todos" class="card">
-            <span class="card-title">Offene Erledigungen</span>
-            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Recherche Mietwagen (Details)</span></div>
-            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Parkplätze (Ottawa & Québec) buchen</span></div>
-            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">eTA Visum beantragen</span></div>
-            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Flug-Benefits (Lounge/Upgrade) prüfen</span></div>
-        </div>
-
-        <div id="content-ideen" style="display:none;">
-            <div class="toggle-container">
-                <div id="city-m" class="toggle-switch active" onclick="citySwitch('m')">Montreal</div>
-                <div id="city-q" class="toggle-switch" onclick="citySwitch('q')">Québec</div>
-                <div id="city-o" class="toggle-switch" onclick="citySwitch('o')">Ottawa</div>
+    <div id="games-overlay" onclick="toggleOverlay(false)">
+        <div class="overlay-content" onclick="event.stopPropagation()">
+            <h2 style="margin: 0 0 10px 0; color: var(--text-primary); text-align: center;">Spiele</h2>
+            <div class="overlay-item" onclick="toggleOverlay(false); toggleGame();">
+                <span class="icon">🐍</span> Snake
             </div>
-            
-            <div id="ideen-m" class="city-content">
-                <div class="card">
-                    <span class="card-title">Montreal Entdeckungen</span>
-                    <button class="accordion-btn" onclick="toggleAcc('m-s')">Sehenswürdigkeit <span>▼</span></button>
-                    <div id="acc-m-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Mont-Royal Hike (Aussichtspunkt)</span></div></div>
-                    <button class="accordion-btn" onclick="toggleAcc('m-r')">Restaurant <span>▼</span></button>
-                    <div id="acc-m-r" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">🥯</span><span class="todo-text">St-Viateur Bagel</span></div>
-                        <div class="todo-item"><span class="idea-bullet">🥩</span><span class="todo-text">Schwartz's Smoked Meat</span></div>
-                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">La Banquise (Poutine)</span></div>
-                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">L'Avenue (Brunch)</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="ideen-q" class="city-content" style="display:none;">
-                <div class="card">
-                    <span class="card-title">Québec City Entdeckungen</span>
-                    <button class="accordion-btn" onclick="toggleAcc('q-s')">Sehenswürdigkeit <span>▼</span></button>
-                    <div id="acc-q-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Château Frontenac Besichtigung</span></div></div>
-                    <button class="accordion-btn" onclick="toggleAcc('q-r')">Restaurant <span>▼</span></button>
-                    <div id="acc-q-r" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">☕</span><span class="todo-text">Tim Hortons (Quick-Stop)</span></div>
-                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Bello Ristorante (Pasta)</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="ideen-o" class="city-content" style="display:none;">
-                <div class="card">
-                    <span class="card-title">Ottawa Entdeckungen</span>
-                    <button class="accordion-btn" onclick="toggleAcc('o-s')">Sehenswürdigkeit <span>▼</span></button>
-                    <div id="acc-o-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">National Gallery of Canada</span></div></div>
-                    <button class="accordion-btn" onclick="toggleAcc('o-r')">Restaurant <span>▼</span></button>
-                    <div id="acc-o-r" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">🍩</span><span class="todo-text">BeaverTails (ByWard Market)</span></div>
-                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">The Shore Club (Steak/Fisch)</span></div>
-                    </div>
-                </div>
-            </div>
+            <a href="darts.html" class="overlay-item">
+                <span class="icon">🎯</span> Darts
+            </a>
+            <a href="test.html" class="overlay-item">
+                <span class="icon">🧪</span> Test
+            </a>
+            <button onclick="toggleOverlay(false)" style="margin-top: 10px; background: none; border: none; color: var(--text-secondary); font-weight: 600;">Schließen</button>
         </div>
-    </main>
+    </div>
 
-    <main id="map" class="content-section">
-        <div class="card">
-            <span class="card-title">Unterkünfte</span>
-            <div class="map-container"><iframe width="100%" height="100%" frameborder="0" src="https://www.google.com/maps?q=Tru+By+Hilton+Montreal+Centre-Ville&output=embed"></iframe></div>
-        </div>
-    </main>
+    <div id="instructions">
+        <div class="instr-box" id="instr-content"></div>
+    </div>
+
+    <canvas id="game-canvas"></canvas>
 
     <script>
-        function toggleMenu() { document.getElementById('main-nav').classList.toggle('open'); }
+        const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+        const canvas = document.getElementById("game-canvas");
+        const ctx = canvas.getContext("2d");
+        const scoreDisplay = document.getElementById("score-display");
+        const scoreVal = document.getElementById("current-score");
+        const instrEl = document.getElementById("instructions");
+        const instrContent = document.getElementById("instr-content");
+        const stopBtn = document.getElementById("stop-btn");
 
-        function showTab(t) {
-            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-            document.getElementById(t).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => {
-                b.classList.remove('active');
-                if(b.getAttribute('onclick').includes(t)) b.classList.add('active');
+        let gameActive = false;
+        let snake, direction, nextDirection, food;
+        let score = 0;
+
+        const laender = (typeof MEINE_REISEN !== 'undefined')
+            ? MEINE_REISEN.map(r => r.flagge || "📍")
+            : ["🇩🇪","🇮🇹","🇺🇸"];
+
+        const GRID = 32;
+        const SPEED_START = 110;
+        const SPEED_MIN = 45;
+        const SPEED_STEP = 5;
+
+        function toggleOverlay(show) {
+            document.getElementById('games-overlay').style.display = show ? 'flex' : 'none';
+        }
+
+        function toggleGame() {
+            if (!gameActive) showInstructions();
+            else stopGame();
+        }
+
+        function showInstructions() {
+            if (!isTouchDevice) {
+                instrContent.innerHTML = `<h2>🐍 Snake</h2><p>Pfeiltasten zum Steuern</p><p><span class="instr-key">↑</span> <span class="instr-key">↓</span> <span class="instr-key">←</span> <span class="instr-key">→</span></p>`;
+            } else {
+                instrContent.innerHTML = `<h2>🐍 Snake</h2><div class="instr-touch">👈 &nbsp;&nbsp;&nbsp; 👉</div><p>Links tippen = Links-Drehung<br>Rechts tippen = Rechts-Drehung</p>`;
+            }
+            instrEl.classList.add("visible");
+            setTimeout(() => { instrEl.classList.remove("visible"); startGame(); }, 2500);
+        }
+
+        function startGame() {
+            gameActive = true;
+            canvas.style.display = "block";
+            scoreDisplay.style.display = "block";
+            stopBtn.style.display = "block";
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            score = 0;
+            scoreVal.innerText = score;
+
+            const startX = Math.floor(canvas.width / 2 / GRID) * GRID;
+            const startY = Math.floor(canvas.height / 2 / GRID) * GRID;
+            snake = [{ x: startX, y: startY }, { x: startX - GRID, y: startY }, { x: startX - GRID * 2, y: startY }];
+            direction = { x: GRID, y: 0 };
+            nextDirection = { x: GRID, y: 0 };
+            spawnFood();
+            runLoop();
+        }
+
+        function runLoop() {
+            if (!gameActive) return;
+            draw();
+            setTimeout(runLoop, Math.max(SPEED_MIN, SPEED_START - score * SPEED_STEP));
+        }
+
+        function stopGame() {
+            gameActive = false;
+            canvas.style.display = "none";
+            scoreDisplay.style.display = "none";
+            stopBtn.style.display = "none";
+        }
+
+        function spawnFood() {
+            const cols = Math.floor(canvas.width / GRID);
+            const rows = Math.floor(canvas.height / GRID);
+            let pos;
+            do {
+                pos = { x: Math.floor(Math.random() * cols) * GRID, y: Math.floor(Math.random() * rows) * GRID };
+            } while (snake.some(s => s.x === pos.x && s.y === pos.y));
+            food = { ...pos, symbol: laender[Math.floor(Math.random() * laender.length)] };
+        }
+
+        function draw() {
+            direction = nextDirection;
+            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+
+            if (head.x < 0) head.x = Math.floor((canvas.width - 1) / GRID) * GRID;
+            if (head.x >= canvas.width) head.x = 0;
+            if (head.y < 0) head.y = Math.floor((canvas.height - 1) / GRID) * GRID;
+            if (head.y >= canvas.height) head.y = 0;
+
+            if (snake.some(s => s.x === head.x && s.y === head.y)) { gameOver(); return; }
+
+            snake.unshift(head);
+            if (head.x === food.x && head.y === food.y) { score++; scoreVal.innerText = score; spawnFood(); }
+            else { snake.pop(); }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            ctx.fillStyle = isDark ? "rgba(15,23,42,0.7)" : "rgba(240,242,245,0.7)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.font = `${GRID - 4}px sans-serif`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(food.symbol, food.x + GRID / 2, food.y + GRID / 2);
+
+            snake.forEach((s, i) => {
+                ctx.fillStyle = i === 0 ? "#2ecc71" : `rgba(46, 204, 113, ${Math.max(0.3, 1 - i * 0.05)})`;
+                ctx.beginPath();
+                ctx.roundRect(s.x + 2, s.y + 2, GRID - 4, GRID - 4, 8);
+                ctx.fill();
             });
-            document.getElementById('main-nav').classList.remove('open');
-            window.scrollTo(0,0);
         }
 
-        function mainListSwitch(x) {
-            document.getElementById('content-todos').style.display = (x === 't') ? 'block' : 'none';
-            document.getElementById('content-ideen').style.display = (x === 'i') ? 'block' : 'none';
-            document.getElementById('main-t').classList.toggle('active', x === 't');
-            document.getElementById('main-i').classList.toggle('active', x === 'i');
+        function gameOver() {
+            ctx.fillStyle = "#e74c3c";
+            ctx.font = "bold 32px -apple-system";
+            ctx.textAlign = "center";
+            ctx.fillText(`💀 ${score} Länder`, canvas.width / 2, canvas.height / 2);
+            setTimeout(stopGame, 1500);
         }
 
-        function citySwitch(c) {
-            document.querySelectorAll('.city-content').forEach(div => div.style.display = 'none');
-            document.getElementById('ideen-' + c).style.display = 'block';
-            ['m', 'q', 'o'].forEach(city => document.getElementById('city-' + city).classList.toggle('active', city === c));
-        }
+        window.addEventListener("keydown", (e) => {
+            if (!gameActive) return;
+            const d = direction;
+            if ((e.key === "ArrowUp" || e.key === "w") && d.y === 0) nextDirection = { x: 0, y: -GRID };
+            if ((e.key === "ArrowDown" || e.key === "s") && d.y === 0) nextDirection = { x: 0, y: GRID };
+            if ((e.key === "ArrowLeft" || e.key === "a") && d.x === 0) nextDirection = { x: -GRID, y: 0 };
+            if ((e.key === "ArrowRight" || e.key === "d") && d.x === 0) nextDirection = { x: GRID, y: 0 };
+        });
 
-        function toggleAcc(id) {
-            const content = document.getElementById('acc-' + id);
-            content.style.display = (content.style.display === 'block') ? 'none' : 'block';
-        }
+        window.addEventListener("touchstart", (e) => {
+            if (!gameActive) return;
+            const touchX = e.touches[0].clientX;
+            const screenWidth = window.innerWidth;
+            const d = direction;
+
+            if (touchX < screenWidth / 2) {
+                if (d.x > 0) nextDirection = { x: 0, y: -GRID };
+                else if (d.x < 0) nextDirection = { x: 0, y: GRID };
+                else if (d.y > 0) nextDirection = { x: GRID, y: 0 };
+                else if (d.y < 0) nextDirection = { x: -GRID, y: 0 };
+            } else {
+                if (d.x > 0) nextDirection = { x: 0, y: GRID };
+                else if (d.x < 0) nextDirection = { x: 0, y: -GRID };
+                else if (d.y > 0) nextDirection = { x: -GRID, y: 0 };
+                else if (d.y < 0) nextDirection = { x: GRID, y: 0 };
+            }
+        }, { passive: true });
     </script>
 </body>
 </html>
