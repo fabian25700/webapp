@@ -46,7 +46,6 @@
         .header-link { text-decoration: none; color: inherit; cursor: default; }
         h1 { margin: 10px 0; font-weight: 800; color: var(--accent); font-size: 1.2rem; }
 
-        /* Screens */
         .setup-container {
             display: flex; flex-direction: column; justify-content: center;
             height: 85%; width: 90%; max-width: 400px;
@@ -69,7 +68,6 @@
             padding: 5px; flex-direction: column; 
         }
 
-        /* Cricket Table */
         .table-container {
             background: var(--surface); border-radius: 20px; overflow: hidden;
             box-shadow: var(--shadow); border: 1px solid var(--border); flex-grow: 1; display: flex;
@@ -87,7 +85,6 @@
         .hit-btn.closed { background: var(--accent); color: white; border: none; }
         .points-label { font-size: 0.7rem; color: var(--primary); font-weight: 700; height: 12px; }
 
-        /* X01 Layout */
         .x01-header {
             display: flex; justify-content: space-around; background: var(--surface);
             padding: 10px; border-radius: 20px; margin-bottom: 8px; border: 1px solid var(--border);
@@ -110,6 +107,9 @@
         }
         .win-box { background: var(--surface); padding: 25px; border-radius: 32px; text-align: center; width: 85%; }
         .main-btn { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 16px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+        
+        .footer-controls { display: flex; justify-content: center; gap: 20px; margin-top: 5px; }
+        .control-btn { color: var(--text-secondary); font-size: 0.75rem; font-weight: 600; cursor: pointer; padding: 5px; }
     </style>
 </head>
 <body>
@@ -148,7 +148,10 @@
 
     <div id="gameScreen">
         <div id="gameArea" style="flex-grow:1; display:flex; flex-direction:column;"></div>
-        <p onclick="location.reload()" style="text-align:center; color:var(--text-secondary); margin: 5px; font-size:0.7rem;">Reset</p>
+        <div class="footer-controls">
+            <span class="control-btn" onclick="undo()">↩ Zurück</span>
+            <span class="control-btn" onclick="location.reload()">✖ Reset</span>
+        </div>
     </div>
 
     <div id="winPopup">
@@ -164,7 +167,7 @@
         const names = { "Beate": "BGL", "Michael": "MG", "Niclas": "NG", "Fabian": "FG", "Sally": "SH" };
         const checks = { 170:"T20 T20 BE", 167:"T20 T19 BE", 164:"T20 T18 BE", 161:"T20 T17 BE", 160:"T20 T20 D20", 100:"T20 D20", 80:"T20 D10", 60:"20 D20", 50:"BE", 40:"D20", 32:"D16", 16:"D8", 8:"D4", 4:"D2", 2:"D1" };
         const bad = [179, 178, 176, 175, 173, 172, 169, 166, 163];
-        let mode = 'cricket', players = [], state = { data: {}, stats: {}, idx: 0, input: "" };
+        let mode = 'cricket', players = [], state = { data: {}, stats: {}, idx: 0, input: "" }, history = [];
 
         function selM(m) {
             mode = m;
@@ -176,6 +179,21 @@
         function toPlayers() {
             document.getElementById('screenMode').style.display = 'none';
             document.getElementById('screenPlayers').style.display = 'flex';
+        }
+
+        function saveHistory() {
+            history.push(JSON.stringify({data: state.data, stats: state.stats, idx: state.idx}));
+            if(history.length > 50) history.shift();
+        }
+
+        function undo() {
+            if(!history.length) return;
+            const last = JSON.parse(history.pop());
+            state.data = last.data;
+            state.stats = last.stats;
+            state.idx = last.idx;
+            state.input = "";
+            render();
         }
 
         function start() {
@@ -248,6 +266,7 @@
         }
 
         function hitC(t, i) {
+            saveHistory();
             const c = state.data[`${t}-${i}`];
             if(c.h < 3) c.h++; else if(players.some((_,idx) => state.data[`${t}-${idx}`].h < 3)) c.p += t;
             render(); checkC();
@@ -264,6 +283,7 @@
             const cur = state.data[state.idx], nxt = cur - v, s = state.stats[state.idx];
             if(nxt < 0 || (state.conf.do && nxt === 1)) { alert("BUST!"); }
             else {
+                saveHistory();
                 state.data[state.idx] = nxt;
                 s.r++; s.d += 3; s.t += v;
                 if(v > s.h) s.h = v;
