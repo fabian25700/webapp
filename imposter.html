@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Imposter Game</title>
+    <script src="woerter.js"></script>
     <style>
         :root {
             --bg: #f0f2f5;
@@ -165,18 +166,8 @@
     </div>
 
     <script>
-       const wordPairs = [
-    ["Apfel", "Birne"], ["Auto", "LKW"], ["Strand", "Pool"],
-    ["Kaffee", "Tee"], ["Hund", "Wolf"], ["Pizza", "Pasta"],
-    ["Sonne", "Mond"], ["Berlin", "München"], ["Fußball", "Handball"],
-    ["Schokolade", "Keks"], ["Flugzeug", "Hubschrauber"], ["Fahrrad", "Motorrad"],
-    ["Eis", "Sorbet"], ["Regen", "Schnee"], ["Brot", "Brötchen"],
-    ["Wald", "Park"], ["See", "Meer"], ["Löwe", "Tiger"],
-    ["Gitarre", "Klavier"], ["Smartphone", "Tablet"], ["Kino", "Theater"],
-    ["U-Bahn", "Straßenbahn"], ["Tisch", "Stuhl"], ["Hemd", "T-Shirt"],
-    ["Zitrone", "Limette"], ["Ketchup", "Senf"], ["Gold", "Silber"],
-    ["Berg", "Hügel"], ["Schule", "Universität"]
-];
+        // Fallback, falls die Datei mal nicht lädt
+        const wordPairs = (typeof IMPOSTER_LISTE !== 'undefined') ? IMPOSTER_LISTE : [["Fehler", "Datei fehlt"]];
 
         let players = [];
         let roles = [];
@@ -190,9 +181,13 @@
             
             if(players.length < 3) return alert("Wähle mindestens 3 Spieler aus!");
 
+            // Zufälliges Paar wählen
             const pair = wordPairs[Math.floor(Math.random() * wordPairs.length)];
-            const normalWord = pair[0];
-            const imposterWord = pair[1];
+            
+            // Zufällig entscheiden, welches Wort Gruppe und welches Imposter ist
+            const swap = Math.random() > 0.5;
+            const normalWord = swap ? pair[1] : pair[0];
+            const imposterWord = swap ? pair[0] : pair[1];
 
             const imposterIdx = Math.floor(Math.random() * players.length);
             imposterName = players[imposterIdx];
@@ -230,7 +225,7 @@
             } else {
                 w.style.display = 'none';
                 p.style.display = 'block';
-                b.style.display = 'none'; // Verstecke den Toggle-Button, damit man nur noch bestätigen kann
+                b.style.display = 'none';
                 c.style.display = 'block';
             }
         }
