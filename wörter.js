@@ -1,0 +1,22 @@
+const IMPOSTER_LISTE = [
+    ["Apfel", "Birne"], ["Auto", "LKW"], ["Strand", "Pool"], ["Kaffee", "Tee"], ["Hund", "Wolf"],
+    ["Pizza", "Pasta"], ["Sonne", "Mond"], ["Berlin", "München"], ["Fußball", "Handball"], ["Schokolade", "Keks"],
+    ["Flugzeug", "Hubschrauber"], ["Fahrrad", "Motorrad"], ["Eis", "Sorbet"], ["Regen", "Schnee"], ["Brot", "Brötchen"],
+    ["Wald", "Park"], ["See", "Meer"], ["Löwe", "Tiger"], ["Gitarre", "Klavier"], ["Smartphone", "Tablet"],
+    ["Kino", "Theater"], ["U-Bahn", "Straßenbahn"], ["Tisch", "Stuhl"], ["Hemd", "T-Shirt"], ["Zitrone", "Limette"],
+    ["Ketchup", "Senf"], ["Gold", "Silber"], ["Berg", "Hügel"], ["Schule", "Universität"], ["Kühlschrank", "Gefriertruhe"],
+    ["Fernseher", "Beamer"], ["Laptop", "PC"], ["Kopfhörer", "Lautsprecher"], ["Brille", "Kontaktlinsen"], ["Burger", "Sandwich"],
+    ["Milch", "Sahne"], ["Cola", "Fanta"], ["Döner", "Gyros"], ["Sushi", "Bowl"], ["Pfannkuchen", "Waffel"],
+    ["Salz", "Pfeffer"], ["Dorf", "Stadt"], ["Wüste", "Dschungel"], ["Garten", "Balkon"], ["Fluss", "Bach"],
+    ["Island", "Grönland"], ["Mallorca", "Ibiza"], ["Hotel", "Campingplatz"], ["Höhle", "Tunnel"], ["Pferd", "Esel"],
+    ["Katze", "Luchs"], ["Adler", "Falke"], ["Hai", "Walfisch"], ["Biene", "Wespe"], ["Spinne", "Skorpion"],
+    ["Elefant", "Nashorn"], ["Maus", "Ratte"], ["Tennis", "Badminton"], ["Laufen", "Wandern"], ["Ski", "Snowboard"],
+    ["Schach", "Dame"], ["Poker", "Blackjack"], ["Comic", "Roman"], ["Zeitung", "Magazin"], ["Sofa", "Sessel"],
+    ["Tasche", "Rucksack"], ["Uhr", "Smartwatch"], ["Kerze", "Lampe"], ["Spiegel", "Fenster"], ["Kissen", "Decke"],
+    ["Seife", "Shampoo"], ["Zahnbürste", "Zahnpasta"], ["Löffel", "Gabel"], ["Messer", "Schere"], ["Topf", "Pfanne"],
+    ["Jacke", "Mantel"], ["Hose", "Jeans"], ["Schuh", "Stiefel"], ["Mütze", "Hut"], ["Handschuh", "Fäustling"],
+    ["Bier", "Wein"], ["Whisky", "Wodka"], ["Apfelsaft", "Orangensaft"], ["Honig", "Marmelade"], ["Käse", "Wurst"],
+    ["Zucker", "Süßstoff"], ["Essig", "Öl"], ["Kartoffel", "Reis"], ["Gurke", "Zucchini"], ["Erdbeere", "Himbeere"],
+    ["Banane", "Ananas"], ["Paprika", "Tomate"], ["Ei", "Omelett"], ["Schinken", "Speck"], ["Affe", "Schimpanse"],
+    ["Krokodil", "Alligator"], ["Pinguin", "Eisbär"], ["Känguru", "Koala"], ["Schaf", "Ziege"], ["Huhn", "Ente"]
+];
