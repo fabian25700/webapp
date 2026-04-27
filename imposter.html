@@ -40,129 +40,127 @@
             align-items: center;
         }
 
-        h1 { margin: 20px 0; font-weight: 800; color: var(--accent); font-size: 1.5rem; letter-spacing: 0.1em; }
+        .header-link { text-decoration: none; color: inherit; cursor: default; }
+        h1 { margin: 20px 0; font-weight: 800; color: var(--accent); font-size: 1.5rem; letter-spacing: 0.1em; cursor: pointer; }
 
         .container {
             width: 90%;
-            max-width: 450px;
+            max-width: 400px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            height: 80%;
+            height: 85%;
         }
 
         .card {
             background: var(--surface);
-            padding: 30px;
-            border-radius: 28px;
+            padding: 25px;
+            border-radius: 24px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
             text-align: center;
         }
 
-        .input-field {
-            width: 100%;
+        .menu-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
             padding: 15px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
+            margin-bottom: 10px;
             background: var(--bg);
-            color: var(--text-primary);
-            font-size: 1rem;
-            margin-bottom: 20px;
-            outline: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            border: 2px solid transparent;
+            text-align: left;
         }
 
         .main-btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 18px;
+            padding: 16px;
             border-radius: 16px;
             font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
             width: 100%;
-            transition: transform 0.1s;
+            margin-top: 10px;
         }
 
         .main-btn:active { transform: scale(0.98); }
 
-        .reveal-btn {
-            background: var(--accent);
-            user-select: none;
-            -webkit-user-select: none;
-            margin: 20px 0;
+        .player-info {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
         }
 
         .word-box {
             background: var(--bg);
-            padding: 25px;
-            border-radius: 16px;
+            padding: 30px;
+            border-radius: 20px;
             margin: 20px 0;
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 900;
             color: var(--accent);
+            border: 3px solid var(--accent);
             display: none;
-            border: 2px dashed var(--accent);
         }
 
-        .player-info {
-            font-size: 1.2rem;
-            font-weight: 700;
+        .word-hidden-placeholder {
+            background: var(--border);
+            padding: 30px;
+            border-radius: 20px;
+            margin: 20px 0;
+            font-size: 1rem;
             color: var(--text-secondary);
-            margin-bottom: 10px;
+            font-weight: 600;
         }
 
         .result-text {
-            font-size: 1.4rem;
-            font-weight: 800;
+            font-size: 1.5rem;
+            font-weight: 900;
             color: var(--primary);
-            margin-top: 20px;
-        }
-
-        .footer-note {
-            margin-top: 20px;
-            font-size: 0.8rem;
-            color: var(--text-secondary);
+            margin: 20px 0;
         }
     </style>
 </head>
 <body>
 
-    <h1>IMPOSTER</h1>
+    <a href="index.html" class="header-link"><h1>IMPOSTER</h1></a>
 
     <div class="container">
         <div id="setupScreen" class="card">
-            <h2 style="font-size: 1.1rem; margin-top: 0;">Spieler eintragen</h2>
-            <input type="text" id="playerInput" class="input-field" value="Beate, Michael, Niclas, Fabian, Sally">
-            <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 20px;">Namen mit Komma trennen</p>
-            <button class="main-btn" onclick="initGame()">SPIEL STARTEN</button>
+            <h2 style="font-size:1.1rem; margin-top:0">Spieler auswählen</h2>
+            <div id="pList">
+                <label class="menu-option"><input type="checkbox" value="Beate" checked> Beate</label>
+                <label class="menu-option"><input type="checkbox" value="Michael" checked> Michael</label>
+                <label class="menu-option"><input type="checkbox" value="Niclas" checked> Niclas</label>
+                <label class="menu-option"><input type="checkbox" value="Fabian" checked> Fabian</label>
+                <label class="menu-option"><input type="checkbox" value="Sally" checked> Sally</label>
+            </div>
+            <button class="main-btn" onclick="startGame()">START</button>
         </div>
 
         <div id="gameScreen" class="card" style="display:none;">
             <div id="currentPlayer" class="player-info">---</div>
-            <p>Halte den Button gedrückt, um dein Wort zu sehen!</p>
             
-            <button class="main-btn reveal-btn" 
-                onmousedown="showWord()" onmouseup="hideWord()" 
-                ontouchstart="showWord()" ontouchend="hideWord()">
-                WORT ANZEIGEN
-            </button>
-
+            <div id="placeholder" class="word-hidden-placeholder">Wort ist versteckt</div>
             <div id="wordDisplay" class="word-box">---</div>
 
-            <button id="nextBtn" class="main-btn" style="display:none; background: var(--text-primary);" onclick="nextStep()">
-                VERSTANDEN
-            </button>
-            <p class="footer-note">Achte darauf, dass keiner zuschaut!</p>
+            <button id="toggleBtn" class="main-btn" style="background: var(--accent);" onclick="toggleWord()">WORT ANZEIGEN</button>
+            
+            <button id="confirmBtn" class="main-btn" style="display:none; background: var(--text-primary);" onclick="nextPlayer()">VERSTANDEN (NÄCHSTER)</button>
         </div>
 
-        <div id="resultScreen" class="card" style="display:none;">
+        <div id="discussScreen" class="card" style="display:none;">
             <h2 style="margin-top:0">Diskussion!</h2>
-            <p>Beschreibt euer Wort mit nur einem Begriff. Der Imposter versucht zu tarnen.</p>
-            <button class="main-btn" onclick="revealImposter()">WER WAR ES?</button>
-            <div id="imposterResult" class="result-text"></div>
-            <button class="main-btn" style="margin-top:30px; background: var(--text-secondary);" onclick="location.reload()">NEUE RUNDE</button>
+            <p style="color: var(--text-secondary)">Beschreibt eure Wörter der Reihe nach.</p>
+            <button class="main-btn" onclick="showImposter()">IMPOSTER ENTLARVEN</button>
+            <div id="finalResult" class="result-text"></div>
+            <button class="main-btn" style="background: var(--text-secondary); margin-top: 20px;" onclick="location.reload()">NEUSTART</button>
         </div>
     </div>
 
@@ -170,7 +168,6 @@
         const wordPairs = [
             ["Apfel", "Birne"], ["Auto", "LKW"], ["Strand", "Pool"],
             ["Kaffee", "Tee"], ["Hund", "Wolf"], ["Pizza", "Pasta"],
-            ["Flugzeug", "Hubschrauber"], ["Fahrrad", "Motorrad"],
             ["Sonne", "Mond"], ["Berlin", "München"], ["Fußball", "Handball"]
         ];
 
@@ -178,58 +175,71 @@
         let roles = [];
         let curIdx = 0;
         let imposterName = "";
+        let isShowing = false;
 
-        function initGame() {
-            const input = document.getElementById('playerInput').value;
-            players = input.split(',').map(s => s.trim()).filter(s => s !== "");
+        function startGame() {
+            const sel = document.querySelectorAll('#pList input:checked');
+            players = Array.from(sel).map(c => c.value);
             
-            if(players.length < 3) return alert("Ihr braucht mindestens 3 Spieler!");
+            if(players.length < 3) return alert("Wähle mindestens 3 Spieler aus!");
 
-            // Zufallswort-Paar
             const pair = wordPairs[Math.floor(Math.random() * wordPairs.length)];
             const normalWord = pair[0];
             const imposterWord = pair[1];
 
-            // Imposter bestimmen
             const imposterIdx = Math.floor(Math.random() * players.length);
             imposterName = players[imposterIdx];
 
-            // Rollen zuweisen
             roles = players.map((p, i) => i === imposterIdx ? imposterWord : normalWord);
 
             document.getElementById('setupScreen').style.display = 'none';
             document.getElementById('gameScreen').style.display = 'block';
-            updateUI();
+            renderPlayer();
         }
 
-        function updateUI() {
+        function renderPlayer() {
+            isShowing = false;
             document.getElementById('currentPlayer').innerText = players[curIdx];
             document.getElementById('wordDisplay').innerText = roles[curIdx];
             document.getElementById('wordDisplay').style.display = 'none';
-            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('placeholder').style.display = 'block';
+            document.getElementById('toggleBtn').innerText = "WORT ANZEIGEN";
+            document.getElementById('toggleBtn').style.display = 'block';
+            document.getElementById('confirmBtn').style.display = 'none';
         }
 
-        function showWord() {
-            document.getElementById('wordDisplay').style.display = 'block';
-        }
+        function toggleWord() {
+            isShowing = !isShowing;
+            const w = document.getElementById('wordDisplay');
+            const p = document.getElementById('placeholder');
+            const b = document.getElementById('toggleBtn');
+            const c = document.getElementById('confirmBtn');
 
-        function hideWord() {
-            document.getElementById('wordDisplay').style.display = 'none';
-            document.getElementById('nextBtn').style.display = 'block';
-        }
-
-        function nextStep() {
-            curIdx++;
-            if(curIdx < players.length) {
-                updateUI();
+            if(isShowing) {
+                w.style.display = 'block';
+                p.style.display = 'none';
+                b.innerText = "WORT VERDECKEN";
+                c.style.display = 'none';
             } else {
-                document.getElementById('gameScreen').style.display = 'none';
-                document.getElementById('resultScreen').style.display = 'block';
+                w.style.display = 'none';
+                p.style.display = 'block';
+                b.style.display = 'none'; // Verstecke den Toggle-Button, damit man nur noch bestätigen kann
+                c.style.display = 'block';
             }
         }
 
-        function revealImposter() {
-            document.getElementById('imposterResult').innerText = "Der Imposter war: " + imposterName;
+        function nextPlayer() {
+            curIdx++;
+            if(curIdx < players.length) {
+                renderPlayer();
+            } else {
+                document.getElementById('gameScreen').style.display = 'none';
+                document.getElementById('discussScreen').style.display = 'block';
+            }
+        }
+
+        function showImposter() {
+            document.getElementById('finalResult').innerText = "Imposter: " + imposterName;
         }
     </script>
 </body>
