@@ -3,321 +3,451 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Darts Cricket & X01</title>
+    <title>Cricket Darts</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg-warm: #FFF9F1;
-            --card-bg: #FFFFFF;
-            --primary: #2D2D2D;
+            --bg: #f0f2f5;
+            --surface: rgba(255, 255, 255, 0.95);
+            --primary: #2ecc71;
             --accent: #D97706;
-            --success: #059669;
-            --border: #E5E7EB;
-            --text-light: #6B7280;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: rgba(203, 213, 225, 0.8);
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
         }
 
-        * { 
-            box-sizing: border-box; 
-            -webkit-tap-highlight-color: transparent; 
-            touch-action: manipulation;
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: rgba(30, 41, 59, 0.95);
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: rgba(51, 65, 85, 0.8);
+                --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            }
         }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-warm);
-            color: var(--primary);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-primary);
             margin: 0;
             height: 100vh;
             width: 100vw;
-            overflow: hidden; /* Verhindert Wischen/Scrollen */
+            overflow: hidden; /* Verhindert jegliches Scrollen */
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        /* Laptop-Link Logik */
         .header-link { text-decoration: none; color: inherit; cursor: default; }
-        @media (min-width: 1024px) { 
-            .header-link { cursor: pointer; } 
-            .header-link:hover { opacity: 0.7; }
+        h1 { margin: 10px 0; font-weight: 800; letter-spacing: 0.05em; color: var(--accent); font-size: 1.2rem; }
+        @media (min-width: 1024px) { .header-link { cursor: pointer; } .header-link:hover { opacity: 0.7; } }
+
+        /* Setup Screens */
+        #setupScreen, #modeScreen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 80%;
+            width: 90%;
+            max-width: 400px;
         }
 
-        h1 { margin: 10px 0; font-weight: 800; color: var(--accent); font-size: 1.2rem; }
-
-        /* Screens */
-        .screen { display: none; width: 90%; max-width: 400px; flex-direction: column; }
-        .active-screen { display: flex; }
+        #setupScreen { display: none; }
 
         .card {
-            background: var(--card-bg);
+            background: var(--surface);
             padding: 20px;
-            border-radius: 20px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
             border: 1px solid var(--border);
         }
 
-        .menu-btn {
-            background: var(--bg-warm);
-            border: 2px solid var(--border);
-            padding: 15px;
-            margin-bottom: 10px;
+        .player-choice, .mode-choice {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: var(--bg);
             border-radius: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            text-align: left;
-        }
-        .menu-btn.selected { border-color: var(--accent); background: #FEF3C7; }
-
-        button.main-btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
+            font-weight: 600;
         }
 
-        /* Cricket Board */
-        #gameScreen { width: 100%; height: 100%; max-width: 100%; padding: 5px; }
-        .table-container { background: white; border-radius: 15px; overflow: hidden; border: 1px solid var(--border); flex-grow: 1; }
+        input[type="checkbox"], input[type="radio"] { transform: scale(1.5); }
+
+        /* Game Screen */
+        #gameScreen { 
+            display: none; 
+            width: 100%; 
+            height: calc(100vh - 50px); 
+            padding: 5px; 
+            flex-direction: column; 
+        }
+
+        .table-container {
+            background: var(--surface);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            flex-grow: 1;
+            display: flex;
+        }
+
         table { width: 100%; border-collapse: collapse; table-layout: fixed; height: 100%; }
-        th, td { border-bottom: 1px solid var(--border); text-align: center; vertical-align: middle; }
-        
-        .name-cell { font-size: 0.7rem; font-weight: 800; color: var(--text-light); padding-top: 4px; }
-        .total-score-top { font-size: 1.2rem; font-weight: 900; color: var(--accent); padding-bottom: 4px; }
-        .target-col { width: 45px; font-weight: 900; background: var(--primary); color: white; font-size: 1.1rem; }
-        
+
+        th, td { border-bottom: 1px solid var(--border); vertical-align: middle; padding: 0; text-align: center; }
+
+        .name-cell { font-size: 0.7rem; font-weight: 800; color: var(--text-secondary); padding-top: 5px; }
+        .total-score { font-size: 1.1rem; font-weight: 900; color: var(--accent); padding-bottom: 5px; }
+
+        .target-col {
+            width: 45px;
+            font-weight: 900;
+            background: var(--text-primary);
+            color: var(--bg);
+            font-size: 1.1rem;
+        }
+
         .hit-btn {
-            width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border);
-            background: #F9FAFB; font-size: 1.4rem; font-weight: bold; display: flex;
-            align-items: center; justify-content: center; margin: 0 auto;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
         }
+
         .hit-btn.closed { background: var(--accent); color: white; border: none; }
-        .pts-label { font-size: 0.7rem; color: var(--success); font-weight: bold; height: 12px; }
+        .points-label { font-size: 0.7rem; color: var(--primary); font-weight: 700; height: 12px; }
 
-        /* X01 Board */
-        .x01-container { text-align: center; padding: 20px; }
-        .x01-big-score { font-size: 4rem; font-weight: 900; color: var(--accent); margin: 10px 0; }
-        .num-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
-        .num-btn { background: white; border: 1px solid var(--border); padding: 15px; border-radius: 10px; font-size: 1.3rem; font-weight: bold; }
+        /* X01 spezifisch */
+        .x01-input-area { padding: 15px; text-align: center; }
+        .x01-display { font-size: 3rem; font-weight: 900; color: var(--accent); margin: 10px 0; }
+        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .num-btn { background: var(--bg); border: 1px solid var(--border); padding: 15px; border-radius: 12px; font-weight: bold; font-size: 1.2rem; }
 
-        /* PopUp */
         #winPopup {
-            display: none; position: fixed; inset: 0; background: rgba(255,249,241,0.95);
-            z-index: 1000; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center;
         }
-        .stats-table { width: 100%; margin-top: 15px; font-size: 0.9rem; }
+
+        .win-box {
+            background: var(--surface); padding: 30px; border-radius: 32px;
+            text-align: center; width: 80%; border: 1px solid var(--border);
+        }
+
+        .main-btn {
+            background: var(--primary); color: white; border: none; padding: 15px;
+            border-radius: 16px; font-size: 1rem; font-weight: 700; cursor: pointer;
+        }
+
+        .stats-text { font-size: 0.8rem; color: var(--text-secondary); margin-top: 10px; text-align: left; }
     </style>
 </head>
 <body>
 
-    <a href="index.html" class="header-link"><h1>CRICKET & X01</h1></a>
+    <a href="index.html" class="header-link"><h1>CRICKET</h1></a>
 
-    <div id="screenMode" class="screen active-screen">
+    <div id="modeScreen">
         <div class="card">
-            <h2 style="margin-top:0">Spielmodus</h2>
-            <div class="menu-btn selected" id="optCricket" onclick="setMode('cricket')">Cricket (20-15, Bull)</div>
-            <div class="menu-btn" id="optX01" onclick="setMode('x01')">Normales Darts (X01)</div>
+            <h2 style="font-size:1rem; margin-top:0">Spielmodus wählen</h2>
+            <div class="mode-choice"><input type="radio" name="mType" value="cricket" checked onchange="toggleX01Opt(false)"> Cricket</div>
+            <div class="mode-choice"><input type="radio" name="mType" value="x01" onchange="toggleX01Opt(true)"> Normales Darts (X01)</div>
             
-            <div id="x01Config" style="display:none; padding:10px; border-left:3px solid var(--accent); margin-bottom:15px;">
-                <label><input type="radio" name="x01Points" value="301" checked> 301</label>
-                <label style="margin-left:15px"><input type="radio" name="x01Points" value="501"> 501</label>
-                <br><br>
-                <label><input type="checkbox" id="doubleOut"> Double Out (Doppel Aus)</label>
+            <div id="x01Options" style="display:none; margin-top:10px; padding-left:20px;">
+                <label><input type="radio" name="xVal" value="301" checked> 301</label>
+                <label style="margin-left:15px"><input type="radio" name="xVal" value="501"> 501</label>
+                <div style="margin-top:10px">
+                    <label><input type="checkbox" id="doubleOut"> Double Out</label>
+                </div>
             </div>
             
-            <button class="main-btn" onclick="showPlayerSelection()">WEITER</button>
+            <button class="main-btn" style="width:100%; margin-top:15px;" onclick="showPlayers()">WEITER</button>
         </div>
     </div>
 
-    <div id="screenPlayers" class="screen">
+    <div id="setupScreen">
         <div class="card">
-            <h2 style="margin-top:0">Wer spielt?</h2>
+            <h2 style="font-size:1rem; margin-top:0">Wer spielt mit?</h2>
             <div id="playerList">
-                <label class="menu-btn" style="display:block"><input type="checkbox" value="Beate" checked> Beate</label>
-                <label class="menu-btn" style="display:block"><input type="checkbox" value="Michael" checked> Michael</label>
-                <label class="menu-btn" style="display:block"><input type="checkbox" value="Niclas" checked> Niclas</label>
-                <label class="menu-btn" style="display:block"><input type="checkbox" value="Fabian" checked> Fabian</label>
-                <label class="menu-btn" style="display:block"><input type="checkbox" value="Sally" checked> Sally</label>
+                <label class="player-choice"><input type="checkbox" value="Beate" checked> Beate</label>
+                <label class="player-choice"><input type="checkbox" value="Michael" checked> Michael</label>
+                <label class="player-choice"><input type="checkbox" value="Niclas" checked> Niclas</label>
+                <label class="player-choice"><input type="checkbox" value="Fabian" checked> Fabian</label>
+                <label class="player-choice"><input type="checkbox" value="Sally" checked> Sally</label>
             </div>
-            <button class="main-btn" onclick="initGame()">SPIEL STARTEN</button>
+            <button class="main-btn" style="width:100%; margin-top:15px;" onclick="startGame()">SPIEL STARTEN</button>
         </div>
     </div>
 
-    <div id="gameScreen" class="screen"></div>
+    <div id="gameScreen">
+        <div class="table-container" id="boardContainer">
+            </div>
+        <p id="resetBtn" onclick="confirmReset()" style="text-align:center; color:var(--text-secondary); margin: 5px; font-size:0.7rem;">Reset</p>
+    </div>
 
     <div id="winPopup">
-        <h2 style="margin:0; color:var(--text-light)">GEWINNER</h2>
-        <h1 id="winnerName" style="font-size:3.5rem; color:var(--accent); margin:10px 0">---</h1>
-        <div class="card" style="width:100%">
-            <h3 style="margin-top:0">Statistik</h3>
-            <div id="statsBox"></div>
+        <div class="win-box">
+            <h1 id="winnerName" style="font-size:3rem; color:var(--accent)">---</h1>
+            <p style="color:var(--text-secondary)">hat gewonnen!</p>
+            <div id="statsDisplay" class="stats-text"></div>
+            <button class="main-btn" style="width:100%; margin-top:20px;" onclick="location.reload()">NEUSTART</button>
         </div>
-        <button class="main-btn" style="margin-top:20px" onclick="location.reload()">NEUSTART</button>
     </div>
 
     <script>
-        const nameMap = { "Beate": "BGL", "Michael": "MG", "Niclas": "NG", "Fabian": "FG", "Sally": "SH" };
+        const nameMapping = { "Beate": "BGL", "Michael": "MG", "Niclas": "NG", "Fabian": "FG", "Sally": "SH" };
         const targets = [20, 19, 18, 17, 16, 15, 25];
-        let currentMode = 'cricket';
-        let players = [];
+        let activePlayers = [];
+        let gameState = JSON.parse(localStorage.getItem('dartsCricketState')) || null;
+        let currentX01Input = "";
         let currentPlayerIdx = 0;
-        let gameState = { data: {}, stats: {} };
-        let x01Input = "";
 
-        function setMode(m) {
-            currentMode = m;
-            document.getElementById('optCricket').classList.toggle('selected', m === 'cricket');
-            document.getElementById('optX01').classList.toggle('selected', m === 'x01');
-            document.getElementById('x01Config').style.display = m === 'x01' ? 'block' : 'none';
+        function toggleX01Opt(show) {
+            document.getElementById('x01Options').style.display = show ? 'block' : 'none';
+            document.querySelector('h1').innerText = show ? 'X01 DARTS' : 'CRICKET';
         }
 
-        function showPlayerSelection() {
-            document.getElementById('screenMode').classList.remove('active-screen');
-            document.getElementById('screenPlayers').classList.add('active-screen');
+        function showPlayers() {
+            document.getElementById('modeScreen').style.display = 'none';
+            document.getElementById('setupScreen').style.display = 'flex';
         }
 
-        function initGame() {
-            const checked = document.querySelectorAll('#playerList input:checked');
-            players = Array.from(checked).map(c => c.value);
-            if(players.length === 0) return alert("Wähle Spieler!");
+        function startGame() {
+            if(!gameState) {
+                const checkboxes = document.querySelectorAll('#playerList input:checked');
+                activePlayers = Array.from(checkboxes).map(cb => cb.value);
+                if(activePlayers.length === 0) return alert("Wähle mind. einen Spieler");
+                
+                const mode = document.querySelector('input[name="mType"]:checked').value;
+                
+                gameState = { 
+                    players: activePlayers, 
+                    data: {}, 
+                    mode: mode, 
+                    stats: playersStatsInit(activePlayers)
+                };
 
-            document.getElementById('screenPlayers').classList.remove('active-screen');
-            document.getElementById('gameScreen').classList.add('active-screen');
+                if(mode === 'cricket') {
+                    targets.forEach(t => {
+                        activePlayers.forEach((_, pIdx) => {
+                            gameState.data[`${t}-${pIdx}`] = { hits: 0, points: 0 };
+                        });
+                    });
+                } else {
+                    const startScore = parseInt(document.querySelector('input[name="xVal"]:checked').value);
+                    const isDoubleOut = document.getElementById('doubleOut').checked;
+                    gameState.x01Conf = { start: startScore, doubleOut: isDoubleOut };
+                    activePlayers.forEach((_, pIdx) => {
+                        gameState.data[pIdx] = startScore;
+                    });
+                }
+            }
+            renderBoard();
+        }
 
-            if(currentMode === 'cricket') {
-                players.forEach((p, i) => {
-                    targets.forEach(t => gameState.data[`${t}-${i}`] = { hits: 0, points: 0 });
-                    gameState.stats[i] = { clicks: 0 };
-                });
-                renderCricket();
+        function playersStatsInit(pList) {
+            let s = {};
+            pList.forEach((p, i) => s[i] = { rounds: 0, totalThrown: 0 });
+            return s;
+        }
+
+        function renderBoard() {
+            document.getElementById('setupScreen').style.display = 'none';
+            document.getElementById('modeScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'flex';
+            
+            const container = document.getElementById('boardContainer');
+            
+            if(gameState.mode === 'cricket') {
+                renderCricket(container);
             } else {
-                const startPts = parseInt(document.querySelector('input[name="x01Points"]:checked').value);
-                players.forEach((p, i) => {
-                    gameState.data[i] = startPts;
-                    gameState.stats[i] = { rounds: 0, lastScores: [] };
-                });
-                renderX01();
+                renderX01(container);
             }
         }
 
-        // --- CRICKET ---
-        function renderCricket() {
-            let html = `<div class="table-container"><table><thead><tr><th class="target-col">🎯</th>`;
-            players.forEach((p, i) => {
-                html += `<th><div class="name-cell">${nameMap[p]}</div><div id="sc-${i}" class="total-score-top">0</div></th>`;
+        function renderCricket(container) {
+            let html = `<table><thead><tr id="headerNames"><th class="target-col" rowspan="2">🎯</th>`;
+            gameState.players.forEach((p, i) => {
+                html += `<th class="name-cell">${nameMapping[p] || p}</th>`;
             });
-            html += `</tr></thead><tbody>`;
+            html += `</tr><tr id="headerScores">`;
+            gameState.players.forEach((_, i) => {
+                html += `<th id="total-${i}" class="total-score">0</th>`;
+            });
+            html += `</tr></thead><tbody id="gameBody">`;
+
             targets.forEach(t => {
                 html += `<tr><td class="target-col">${t === 25 ? 'B' : t}</td>`;
-                players.forEach((_, pIdx) => {
-                    const d = gameState.data[`${t}-${pIdx}`];
-                    html += `<td onclick="hitCricket(${t}, ${pIdx})">
-                        <div class="pts-label">${d.points > 0 ? '+' + d.points : ''}</div>
-                        <div class="hit-btn ${d.hits >= 3 ? 'closed' : ''}">${getSym(d.hits)}</div>
+                gameState.players.forEach((_, pIdx) => {
+                    const key = `${t}-${pIdx}`;
+                    const cell = gameState.data[key];
+                    html += `<td onclick="registerHit(${t}, ${pIdx})">
+                        <div class="points-label">${cell.points > 0 ? '+' + cell.points : ''}</div>
+                        <div class="hit-btn ${cell.hits >= 3 ? 'closed' : ''}">${getSym(cell.hits)}</div>
                     </td>`;
                 });
                 html += `</tr>`;
             });
-            html += `</tbody></table></div><div style="text-align:center; padding:10px" onclick="location.reload()">Reset</div>`;
-            document.getElementById('gameScreen').innerHTML = html;
-            updateCricketScores();
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+            updateScores();
         }
 
-        function getSym(h) { return h===1?"/":h===2?"X":h>=3?"⦻":""; }
-
-        function hitCricket(t, pIdx) {
-            const d = gameState.data[`${t}-${pIdx}`];
-            if(d.hits < 3) d.hits++;
-            else if(players.some((_, i) => gameState.data[`${t}-${i}`].hits < 3)) d.points += t;
-            gameState.stats[pIdx].clicks++;
-            renderCricket();
-            checkWinCricket();
-        }
-
-        function updateCricketScores() {
-            players.forEach((_, i) => {
-                let s = targets.reduce((acc, t) => acc + gameState.data[`${t}-${i}`].points, 0);
-                document.getElementById(`sc-${i}`).innerText = s;
-            });
-        }
-
-        function checkWinCricket() {
-            players.forEach((p, i) => {
-                const allClosed = targets.every(t => gameState.data[`${t}-${i}`].hits >= 3);
-                const scores = players.map((_, idx) => targets.reduce((acc, t) => acc + gameState.data[`${t}-${idx}`].points, 0));
-                if(allClosed && scores[i] === Math.max(...scores)) triggerWin(p, 'cricket', i);
-            });
-        }
-
-        // --- X01 ---
-        function renderX01() {
-            const p = players[currentPlayerIdx];
+        function renderX01(container) {
+            const pName = gameState.players[currentPlayerIdx];
             const score = gameState.data[currentPlayerIdx];
-            document.getElementById('gameScreen').innerHTML = `
-                <div class="x01-container card">
-                    <div style="font-weight:bold; color:var(--text-light)">${p} (Am Zug)</div>
-                    <div class="x01-big-score">${score}</div>
-                    <div style="font-size:1.5rem; height:2rem; color:var(--accent)">${x01Input || "---"}</div>
-                    <div class="num-pad">
-                        ${[1,2,3,4,5,6,7,8,9].map(n => `<div class="num-btn" onclick="pressX01(${n})">${n}</div>`).join('')}
-                        <div class="num-btn" style="color:red" onclick="pressX01('C')">C</div>
-                        <div class="num-btn" onclick="pressX01(0)">0</div>
-                        <div class="num-btn" style="color:green" onclick="pressX01('E')">OK</div>
-                    </div>
-                    <div style="margin-top:20px; display:flex; justify-content:center; gap:10px; font-size:0.8rem">
-                        ${players.map((name, i) => `<div style="padding:5px; border-radius:5px; ${i===currentPlayerIdx?'background:#FEF3C7; border:1px solid var(--accent)':''}">${nameMap[name]}: ${gameState.data[i]}</div>`).join('')}
-                    </div>
-                </div>
-            `;
-        }
-
-        function pressX01(val) {
-            if(val === 'C') x01Input = "";
-            else if(val === 'E') {
-                if(x01Input === "") return;
-                const thrown = parseInt(x01Input);
-                const oldScore = gameState.data[currentPlayerIdx];
-                const doubleOut = document.getElementById('doubleOut').checked;
-                
-                if(thrown > 180) { alert("Max 180!"); x01Input = ""; renderX01(); return; }
-                
-                let newScore = oldScore - thrown;
-                
-                // Bust Logik
-                if(newScore < 0 || (doubleOut && newScore === 1) || (newScore === 0 && doubleOut && thrown % 2 !== 0)) {
-                    alert("BUST! (Überworfen)");
-                } else {
-                    gameState.data[currentPlayerIdx] = newScore;
-                    gameState.stats[currentPlayerIdx].rounds++;
-                    if(newScore === 0) { triggerWin(players[currentPlayerIdx], 'x01', currentPlayerIdx); return; }
-                }
-                currentPlayerIdx = (currentPlayerIdx + 1) % players.length;
-                x01Input = "";
-            } else {
-                if(x01Input.length < 3) x01Input += val;
-            }
-            renderX01();
-        }
-
-        function triggerWin(name, mode, pIdx) {
-            document.getElementById('winnerName').innerText = name;
-            document.getElementById('winPopup').style.display = 'flex';
             
-            // Statistik
-            let stats = "";
-            if(mode === 'cricket') {
-                stats = `<div class="stats-table">Total Klicks: ${gameState.stats[pIdx].clicks}</div>`;
-            } else {
-                stats = `<div class="stats-table">Benötigte Runden: ${gameState.stats[pIdx].rounds}</div>`;
-            }
-            document.getElementById('statsBox').innerHTML = stats;
+            let html = `
+                <div style="width:100%; display:flex; flex-direction:column;">
+                    <div style="display:flex; justify-content:space-around; padding:10px; border-bottom:1px solid var(--border);">
+                        ${gameState.players.map((p, i) => `
+                            <div style="text-align:center; opacity:${i===currentPlayerIdx?1:0.4}">
+                                <div class="name-cell">${nameMapping[p] || p}</div>
+                                <div class="total-score">${gameState.data[i]}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="x01-input-area">
+                        <div style="color:var(--text-secondary); font-size:0.8rem;">${pName} ist dran</div>
+                        <div class="x01-display" id="currentInputDisp">${currentX01Input || "0"}</div>
+                        <div class="numpad">
+                            ${[1,2,3,4,5,6,7,8,9].map(n => `<div class="num-btn" onclick="pressNum(${n})">${n}</div>`).join('')}
+                            <div class="num-btn" style="color:red" onclick="pressNum('C')">C</div>
+                            <div class="num-btn" onclick="pressNum(0)">0</div>
+                            <div class="num-btn" style="color:var(--primary)" onclick="submitX01()">OK</div>
+                        </div>
+                    </div>
+                </div>`;
+            container.innerHTML = html;
+        }
 
-            // Konfetti
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#D97706', '#2D2D2D', '#FFF9F1'] });
+        function pressNum(n) {
+            if(n === 'C') currentX01Input = "";
+            else if(currentX01Input.length < 3) currentX01Input += n;
+            document.getElementById('currentInputDisp').innerText = currentX01Input || "0";
+        }
+
+        function submitX01() {
+            const val = parseInt(currentX01Input) || 0;
+            if(val > 180) { alert("Maximal 180 möglich!"); currentX01Input = ""; return renderBoard(); }
+            
+            const currentScore = gameState.data[currentPlayerIdx];
+            const isDoubleOut = gameState.x01Conf.doubleOut;
+            let newScore = currentScore - val;
+
+            gameState.stats[currentPlayerIdx].rounds++;
+            gameState.stats[currentPlayerIdx].totalThrown += val;
+
+            if(newScore === 0) {
+                if(isDoubleOut && val % 2 !== 0) {
+                    alert("Double Out erforderlich!"); // Vereinfachte Double-Prüfung
+                } else {
+                    gameState.data[currentPlayerIdx] = 0;
+                    renderBoard();
+                    checkWinner();
+                    return;
+                }
+            } else if(newScore < 0 || (isDoubleOut && newScore === 1)) {
+                alert("BUST! Überworfen.");
+            } else {
+                gameState.data[currentPlayerIdx] = newScore;
+            }
+
+            currentPlayerIdx = (currentPlayerIdx + 1) % gameState.players.length;
+            currentX01Input = "";
+            localStorage.setItem('dartsCricketState', JSON.stringify(gameState));
+            renderBoard();
+        }
+
+        function getSym(h) {
+            if (h === 1) return "/";
+            if (h === 2) return "X";
+            if (h >= 3) return "⦻";
+            return "";
+        }
+
+        function registerHit(target, pIdx) {
+            const key = `${target}-${pIdx}`;
+            const cell = gameState.data[key];
+            if (cell.hits < 3) {
+                cell.hits++;
+            } else {
+                const othersOpen = gameState.players.some((_, i) => gameState.data[`${target}-${i}`].hits < 3);
+                if (othersOpen) cell.points += target;
+            }
+            gameState.stats[pIdx].rounds++; // Bei Cricket zählen wir Klicks als Aktivität
+            localStorage.setItem('dartsCricketState', JSON.stringify(gameState));
+            renderBoard();
+            checkWinner();
+        }
+
+        function updateScores() {
+            if(gameState.mode !== 'cricket') return;
+            gameState.players.forEach((_, pIdx) => {
+                let sum = 0;
+                targets.forEach(t => sum += gameState.data[`${t}-${pIdx}`].points);
+                const el = document.getElementById(`total-${pIdx}`);
+                if(el) el.innerText = sum;
+            });
+        }
+
+        function checkWinner() {
+            gameState.players.forEach((p, pIdx) => {
+                let isWin = false;
+                if(gameState.mode === 'cricket') {
+                    const allClosed = targets.every(t => gameState.data[`${t}-${pIdx}`].hits >= 3);
+                    const scores = gameState.players.map((_, i) => targets.reduce((s, t) => s + gameState.data[`${t}-${i}`].points, 0));
+                    if (allClosed && scores[pIdx] === Math.max(...scores)) isWin = true;
+                } else {
+                    if(gameState.data[pIdx] === 0) isWin = true;
+                }
+
+                if (isWin) {
+                    // Konfetti auslösen
+                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                    
+                    document.getElementById('winnerName').innerText = p;
+                    
+                    // Statistik Text
+                    const stats = gameState.stats[pIdx];
+                    let statsHtml = "";
+                    if(gameState.mode === 'x01') {
+                        const avg = (gameState.x01Conf.start / stats.rounds).toFixed(1);
+                        statsHtml = `Runden: ${stats.rounds}<br>Schnitt pro Runde: ${avg}`;
+                    } else {
+                        statsHtml = `Klicks benötigt: ${stats.rounds}`;
+                    }
+                    document.getElementById('statsDisplay').innerHTML = statsHtml;
+                    
+                    document.getElementById('winPopup').style.display = 'flex';
+                    localStorage.removeItem('dartsCricketState');
+                }
+            });
+        }
+
+        function confirmReset() {
+            if(confirm("Spiel zurücksetzen?")) {
+                localStorage.removeItem('dartsCricketState');
+                location.reload();
+            }
+        }
+
+        if(localStorage.getItem('dartsCricketState')) {
+            gameState = JSON.parse(localStorage.getItem('dartsCricketState'));
+            startGame();
         }
     </script>
 </body>
