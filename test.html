@@ -3,210 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fabians Darts</title>
+    <title>Darts Cricket & X01</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg: #0f172a;
-            --surface: rgba(30, 41, 59, 0.95);
-            --primary: #2ecc71;
+            --bg-warm: #FFF9F1;
+            --card-bg: #FFFFFF;
+            --primary: #2D2D2D;
             --accent: #D97706;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --border: rgba(51, 65, 85, 0.8);
-            --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            --success: #059669;
+            --border: #E5E7EB;
+            --text-light: #6B7280;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            touch-action: manipulation;
+        }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
-            background-color: var(--bg);
-            color: var(--text-primary);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-warm);
+            color: var(--primary);
             margin: 0;
             height: 100vh;
             width: 100vw;
-            overflow: hidden;
+            overflow: hidden; /* Verhindert Wischen/Scrollen */
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        .header-link { text-decoration: none; color: inherit; cursor: pointer; }
-        h1 { margin: 10px 0; font-weight: 800; letter-spacing: 0.05em; color: var(--accent); font-size: 1.2rem; }
+        /* Laptop-Link Logik */
+        .header-link { text-decoration: none; color: inherit; cursor: default; }
+        @media (min-width: 1024px) { 
+            .header-link { cursor: pointer; } 
+            .header-link:hover { opacity: 0.7; }
+        }
+
+        h1 { margin: 10px 0; font-weight: 800; color: var(--accent); font-size: 1.2rem; }
 
         /* Screens */
-        .screen { display: none; width: 90%; max-width: 400px; height: 85%; flex-direction: column; justify-content: center; }
+        .screen { display: none; width: 90%; max-width: 400px; flex-direction: column; }
         .active-screen { display: flex; }
 
         .card {
-            background: var(--surface);
+            background: var(--card-bg);
             padding: 20px;
-            border-radius: 24px;
-            box-shadow: var(--shadow);
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             border: 1px solid var(--border);
         }
 
-        .menu-option {
-            display: flex;
-            align-items: center;
-            gap: 15px;
+        .menu-btn {
+            background: var(--bg-warm);
+            border: 2px solid var(--border);
             padding: 15px;
             margin-bottom: 10px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 16px;
+            border-radius: 12px;
+            font-weight: bold;
             cursor: pointer;
-            border: 1px solid transparent;
+            text-align: left;
         }
-        .menu-option.selected { border-color: var(--primary); background: rgba(46, 204, 113, 0.1); }
+        .menu-btn.selected { border-color: var(--accent); background: #FEF3C7; }
 
-        .main-btn {
-            background: var(--primary); color: white; border: none; padding: 15px;
-            border-radius: 16px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 10px;
+        button.main-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
         }
 
-        /* Game Board Styles */
-        #gameScreen { width: 100vw; height: 100vh; max-width: none; padding: 5px; }
-        .table-container {
-            background: var(--surface); border-radius: 20px; overflow: hidden;
-            border: 1px solid var(--border); flex-grow: 1; display: flex;
-        }
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th, td { border-bottom: 1px solid var(--border); text-align: center; }
+        /* Cricket Board */
+        #gameScreen { width: 100%; height: 100%; max-width: 100%; padding: 5px; }
+        .table-container { background: white; border-radius: 15px; overflow: hidden; border: 1px solid var(--border); flex-grow: 1; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; height: 100%; }
+        th, td { border-bottom: 1px solid var(--border); text-align: center; vertical-align: middle; }
         
-        .target-col { width: 45px; font-weight: 900; background: #1e293b; color: white; }
+        .name-cell { font-size: 0.7rem; font-weight: 800; color: var(--text-light); padding-top: 4px; }
+        .total-score-top { font-size: 1.2rem; font-weight: 900; color: var(--accent); padding-bottom: 4px; }
+        .target-col { width: 45px; font-weight: 900; background: var(--primary); color: white; font-size: 1.1rem; }
+        
         .hit-btn {
-            width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--border);
-            background: #1e293b; color: white; font-size: 1.2rem; display: flex;
+            width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--border);
+            background: #F9FAFB; font-size: 1.4rem; font-weight: bold; display: flex;
             align-items: center; justify-content: center; margin: 0 auto;
         }
-        .hit-btn.closed { background: var(--accent); border: none; }
-        
-        /* X01 Styles */
-        .x01-score { font-size: 2.5rem; font-weight: 900; color: var(--primary); }
-        .input-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
-        .num-btn { background: var(--surface); border: 1px solid var(--border); color: white; padding: 15px; border-radius: 12px; font-size: 1.2rem; }
+        .hit-btn.closed { background: var(--accent); color: white; border: none; }
+        .pts-label { font-size: 0.7rem; color: var(--success); font-weight: bold; height: 12px; }
 
+        /* X01 Board */
+        .x01-container { text-align: center; padding: 20px; }
+        .x01-big-score { font-size: 4rem; font-weight: 900; color: var(--accent); margin: 10px 0; }
+        .num-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .num-btn { background: white; border: 1px solid var(--border); padding: 15px; border-radius: 10px; font-size: 1.3rem; font-weight: bold; }
+
+        /* PopUp */
         #winPopup {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            display: none; position: fixed; inset: 0; background: rgba(255,249,241,0.95);
             z-index: 1000; flex-direction: column; align-items: center; justify-content: center; padding: 20px;
         }
-
-        .stat-line { display: flex; justify-content: space-between; width: 100%; margin: 5px 0; font-size: 0.9rem; }
+        .stats-table { width: 100%; margin-top: 15px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
-    <a href="index.html" class="header-link"><h1>DARTS</h1></a>
+    <a href="index.html" class="header-link"><h1>CRICKET & X01</h1></a>
 
-    <div id="modeScreen" class="screen active-screen">
+    <div id="screenMode" class="screen active-screen">
         <div class="card">
-            <h2 style="margin-top:0">Modus wählen</h2>
-            <div class="menu-option selected" onclick="selectMode('cricket', this)">
-                <span style="font-size:1.5rem">🎯</span>
-                <div><strong>Cricket</strong><br><small>20 bis Bull schießen</small></div>
+            <h2 style="margin-top:0">Spielmodus</h2>
+            <div class="menu-btn selected" id="optCricket" onclick="setMode('cricket')">Cricket (20-15, Bull)</div>
+            <div class="menu-btn" id="optX01" onclick="setMode('x01')">Normales Darts (X01)</div>
+            
+            <div id="x01Config" style="display:none; padding:10px; border-left:3px solid var(--accent); margin-bottom:15px;">
+                <label><input type="radio" name="x01Points" value="301" checked> 301</label>
+                <label style="margin-left:15px"><input type="radio" name="x01Points" value="501"> 501</label>
+                <br><br>
+                <label><input type="checkbox" id="doubleOut"> Double Out (Doppel Aus)</label>
             </div>
-            <div class="menu-option" onclick="selectMode('x01', this)">
-                <span style="font-size:1.5rem">🔢</span>
-                <div><strong>X01</strong><br><small>301 / 501 Punkte</small></div>
-            </div>
-            <div id="x01-options" style="display:none; margin-left:20px; padding:10px; border-left:2px solid var(--border)">
-                <label><input type="radio" name="points" value="301" checked> 301</label>
-                <label style="margin-left:15px"><input type="radio" name="points" value="501"> 501</label><br><br>
-                <label><input type="checkbox" id="doubleOut"> Double Out</label>
-            </div>
-            <button class="main-btn" style="width:100%" onclick="nextStep(2)">WEITER</button>
+            
+            <button class="main-btn" onclick="showPlayerSelection()">WEITER</button>
         </div>
     </div>
 
-    <div id="playerScreen" class="screen">
+    <div id="screenPlayers" class="screen">
         <div class="card">
             <h2 style="margin-top:0">Wer spielt?</h2>
             <div id="playerList">
-                <label class="menu-option"><input type="checkbox" value="Beate" checked> Beate</label>
-                <label class="menu-option"><input type="checkbox" value="Michael" checked> Michael</label>
-                <label class="menu-option"><input type="checkbox" value="Niclas" checked> Niclas</label>
-                <label class="menu-option"><input type="checkbox" value="Fabian" checked> Fabian</label>
-                <label class="menu-option"><input type="checkbox" value="Sally" checked> Sally</label>
+                <label class="menu-btn" style="display:block"><input type="checkbox" value="Beate" checked> Beate</label>
+                <label class="menu-btn" style="display:block"><input type="checkbox" value="Michael" checked> Michael</label>
+                <label class="menu-btn" style="display:block"><input type="checkbox" value="Niclas" checked> Niclas</label>
+                <label class="menu-btn" style="display:block"><input type="checkbox" value="Fabian" checked> Fabian</label>
+                <label class="menu-btn" style="display:block"><input type="checkbox" value="Sally" checked> Sally</label>
             </div>
-            <button class="main-btn" style="width:100%" onclick="startGame()">SPIEL STARTEN</button>
+            <button class="main-btn" onclick="initGame()">SPIEL STARTEN</button>
         </div>
     </div>
 
-    <div id="gameScreen" class="screen">
-        </div>
+    <div id="gameScreen" class="screen"></div>
 
     <div id="winPopup">
-        <h1 id="winnerTitle" style="font-size:3rem; color:var(--primary); margin-bottom:0">SIEG!</h1>
-        <h2 id="winnerName" style="color:white; margin-bottom:30px">Fabian</h2>
-        
-        <div class="card" style="width:100%; max-width:300px">
+        <h2 style="margin:0; color:var(--text-light)">GEWINNER</h2>
+        <h1 id="winnerName" style="font-size:3.5rem; color:var(--accent); margin:10px 0">---</h1>
+        <div class="card" style="width:100%">
             <h3 style="margin-top:0">Statistik</h3>
-            <div id="statsContent"></div>
+            <div id="statsBox"></div>
         </div>
-        
-        <button class="main-btn" style="width:200px; margin-top:20px" onclick="location.reload()">NEUES SPIEL</button>
+        <button class="main-btn" style="margin-top:20px" onclick="location.reload()">NEUSTART</button>
     </div>
 
     <script>
-        let gameMode = 'cricket';
+        const nameMap = { "Beate": "BGL", "Michael": "MG", "Niclas": "NG", "Fabian": "FG", "Sally": "SH" };
+        const targets = [20, 19, 18, 17, 16, 15, 25];
+        let currentMode = 'cricket';
         let players = [];
         let currentPlayerIdx = 0;
         let gameState = { data: {}, stats: {} };
-        const nameMapping = { "Beate": "BGL", "Michael": "MG", "Niclas": "NG", "Fabian": "FG", "Sally": "SH" };
+        let x01Input = "";
 
-        function selectMode(mode, el) {
-            gameMode = mode;
-            document.querySelectorAll('.menu-option').forEach(opt => opt.classList.remove('selected'));
-            el.classList.add('selected');
-            document.getElementById('x01-options').style.display = mode === 'x01' ? 'block' : 'none';
+        function setMode(m) {
+            currentMode = m;
+            document.getElementById('optCricket').classList.toggle('selected', m === 'cricket');
+            document.getElementById('optX01').classList.toggle('selected', m === 'x01');
+            document.getElementById('x01Config').style.display = m === 'x01' ? 'block' : 'none';
         }
 
-        function nextStep(step) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-            if(step === 2) document.getElementById('playerScreen').classList.add('active-screen');
+        function showPlayerSelection() {
+            document.getElementById('screenMode').classList.remove('active-screen');
+            document.getElementById('screenPlayers').classList.add('active-screen');
         }
 
-        function startGame() {
+        function initGame() {
             const checked = document.querySelectorAll('#playerList input:checked');
             players = Array.from(checked).map(c => c.value);
-            if(players.length === 0) return;
+            if(players.length === 0) return alert("Wähle Spieler!");
 
-            nextStep(3);
+            document.getElementById('screenPlayers').classList.remove('active-screen');
             document.getElementById('gameScreen').classList.add('active-screen');
 
-            if(gameMode === 'cricket') initCricket();
-            else initX01();
+            if(currentMode === 'cricket') {
+                players.forEach((p, i) => {
+                    targets.forEach(t => gameState.data[`${t}-${i}`] = { hits: 0, points: 0 });
+                    gameState.stats[i] = { clicks: 0 };
+                });
+                renderCricket();
+            } else {
+                const startPts = parseInt(document.querySelector('input[name="x01Points"]:checked').value);
+                players.forEach((p, i) => {
+                    gameState.data[i] = startPts;
+                    gameState.stats[i] = { rounds: 0, lastScores: [] };
+                });
+                renderX01();
+            }
         }
 
-        // --- CRICKET LOGIC ---
-        function initCricket() {
-            const targets = [20, 19, 18, 17, 16, 15, 25];
-            players.forEach((p, pIdx) => {
-                targets.forEach(t => gameState.data[`${t}-${pIdx}`] = { hits: 0, points: 0 });
-                gameState.stats[pIdx] = { totalHits: 0 };
-            });
-            renderCricket();
-        }
-
+        // --- CRICKET ---
         function renderCricket() {
-            const targets = [20, 19, 18, 17, 16, 15, 25];
             let html = `<div class="table-container"><table><thead><tr><th class="target-col">🎯</th>`;
-            players.forEach(p => html += `<th style="font-size:0.7rem; padding:10px 0">${nameMapping[p]}<br><span id="sc-${players.indexOf(p)}" style="color:var(--accent); font-size:1.1rem">0</span></th>`);
+            players.forEach((p, i) => {
+                html += `<th><div class="name-cell">${nameMap[p]}</div><div id="sc-${i}" class="total-score-top">0</div></th>`;
+            });
             html += `</tr></thead><tbody>`;
-            
             targets.forEach(t => {
                 html += `<tr><td class="target-col">${t === 25 ? 'B' : t}</td>`;
                 players.forEach((_, pIdx) => {
                     const d = gameState.data[`${t}-${pIdx}`];
                     html += `<td onclick="hitCricket(${t}, ${pIdx})">
-                        <div style="font-size:0.6rem; color:var(--primary); height:10px">${d.points > 0 ? '+'+d.points : ''}</div>
-                        <div class="hit-btn ${d.hits>=3?'closed':''}">${getSym(d.hits)}</div>
+                        <div class="pts-label">${d.points > 0 ? '+' + d.points : ''}</div>
+                        <div class="hit-btn ${d.hits >= 3 ? 'closed' : ''}">${getSym(d.hits)}</div>
                     </td>`;
                 });
                 html += `</tr>`;
             });
-            html += `</tbody></table></div><p onclick="location.reload()" style="text-align:center; font-size:0.7rem; color:var(--text-secondary)">Reset</p>`;
+            html += `</tbody></table></div><div style="text-align:center; padding:10px" onclick="location.reload()">Reset</div>`;
             document.getElementById('gameScreen').innerHTML = html;
             updateCricketScores();
         }
@@ -217,99 +233,91 @@
             const d = gameState.data[`${t}-${pIdx}`];
             if(d.hits < 3) d.hits++;
             else if(players.some((_, i) => gameState.data[`${t}-${i}`].hits < 3)) d.points += t;
-            
-            gameState.stats[pIdx].totalHits++;
+            gameState.stats[pIdx].clicks++;
             renderCricket();
-            checkCricketWin();
+            checkWinCricket();
         }
 
         function updateCricketScores() {
             players.forEach((_, i) => {
-                let s = 0;
-                [20, 19, 18, 17, 16, 15, 25].forEach(t => s += gameState.data[`${t}-${i}`].points);
+                let s = targets.reduce((acc, t) => acc + gameState.data[`${t}-${i}`].points, 0);
                 document.getElementById(`sc-${i}`).innerText = s;
             });
         }
 
-        function checkCricketWin() {
+        function checkWinCricket() {
             players.forEach((p, i) => {
-                const allClosed = [20, 19, 18, 17, 16, 15, 25].every(t => gameState.data[`${t}-${i}`].hits >= 3);
-                const scores = players.map((_, idx) => {
-                    let s = 0;
-                    [20, 19, 18, 17, 16, 15, 25].forEach(t => s += gameState.data[`${t}-${idx}`].points);
-                    return s;
-                });
-                if(allClosed && scores[i] === Math.max(...scores)) showWin(p, i);
+                const allClosed = targets.every(t => gameState.data[`${t}-${i}`].hits >= 3);
+                const scores = players.map((_, idx) => targets.reduce((acc, t) => acc + gameState.data[`${t}-${idx}`].points, 0));
+                if(allClosed && scores[i] === Math.max(...scores)) triggerWin(p, 'cricket', i);
             });
         }
 
-        // --- X01 LOGIC ---
-        let x01Score = 301;
-        let isDoubleOut = false;
-        function initX01() {
-            x01Score = parseInt(document.querySelector('input[name="points"]:checked').value);
-            isDoubleOut = document.getElementById('doubleOut').checked;
-            players.forEach((p, i) => {
-                gameState.data[i] = x01Score;
-                gameState.stats[i] = { throws: 0, bestScore: 0 };
-            });
-            renderX01();
-        }
-
+        // --- X01 ---
         function renderX01() {
             const p = players[currentPlayerIdx];
             const score = gameState.data[currentPlayerIdx];
             document.getElementById('gameScreen').innerHTML = `
-                <div class="card" style="text-align:center">
-                    <h2 style="color:var(--text-secondary); margin:0">${p} am Zug</h2>
-                    <div class="x01-score">${score}</div>
-                    <input type="number" id="dartInput" placeholder="Punkte eingeben" style="width:100%; padding:15px; border-radius:12px; border:none; text-align:center; font-size:1.5rem">
-                    <button class="main-btn" style="width:100%" onclick="submitX01()">OK</button>
-                    <div style="margin-top:20px; display:flex; justify-content:space-around; font-size:0.8rem">
-                        ${players.map((name, i) => `<div style="${i===currentPlayerIdx?'color:var(--primary); font-weight:bold':''}">${nameMapping[name]}: ${gameState.data[i]}</div>`).join('')}
+                <div class="x01-container card">
+                    <div style="font-weight:bold; color:var(--text-light)">${p} (Am Zug)</div>
+                    <div class="x01-big-score">${score}</div>
+                    <div style="font-size:1.5rem; height:2rem; color:var(--accent)">${x01Input || "---"}</div>
+                    <div class="num-pad">
+                        ${[1,2,3,4,5,6,7,8,9].map(n => `<div class="num-btn" onclick="pressX01(${n})">${n}</div>`).join('')}
+                        <div class="num-btn" style="color:red" onclick="pressX01('C')">C</div>
+                        <div class="num-btn" onclick="pressX01(0)">0</div>
+                        <div class="num-btn" style="color:green" onclick="pressX01('E')">OK</div>
+                    </div>
+                    <div style="margin-top:20px; display:flex; justify-content:center; gap:10px; font-size:0.8rem">
+                        ${players.map((name, i) => `<div style="padding:5px; border-radius:5px; ${i===currentPlayerIdx?'background:#FEF3C7; border:1px solid var(--accent)':''}">${nameMap[name]}: ${gameState.data[i]}</div>`).join('')}
                     </div>
                 </div>
             `;
-            setTimeout(() => document.getElementById('dartInput').focus(), 100);
         }
 
-        function submitX01() {
-            const input = document.getElementById('dartInput');
-            const val = parseInt(input.value) || 0;
-            if(val > 180) return alert("Max 180!");
-            
-            const oldScore = gameState.data[currentPlayerIdx];
-            const newScore = oldScore - val;
-
-            // Bust Logik
-            if(newScore < 0 || (isDoubleOut && newScore === 1)) {
-                alert("Überworfen!");
+        function pressX01(val) {
+            if(val === 'C') x01Input = "";
+            else if(val === 'E') {
+                if(x01Input === "") return;
+                const thrown = parseInt(x01Input);
+                const oldScore = gameState.data[currentPlayerIdx];
+                const doubleOut = document.getElementById('doubleOut').checked;
+                
+                if(thrown > 180) { alert("Max 180!"); x01Input = ""; renderX01(); return; }
+                
+                let newScore = oldScore - thrown;
+                
+                // Bust Logik
+                if(newScore < 0 || (doubleOut && newScore === 1) || (newScore === 0 && doubleOut && thrown % 2 !== 0)) {
+                    alert("BUST! (Überworfen)");
+                } else {
+                    gameState.data[currentPlayerIdx] = newScore;
+                    gameState.stats[currentPlayerIdx].rounds++;
+                    if(newScore === 0) { triggerWin(players[currentPlayerIdx], 'x01', currentPlayerIdx); return; }
+                }
+                currentPlayerIdx = (currentPlayerIdx + 1) % players.length;
+                x01Input = "";
             } else {
-                gameState.data[currentPlayerIdx] = newScore;
-                if(val > gameState.stats[currentPlayerIdx].bestScore) gameState.stats[currentPlayerIdx].bestScore = val;
-                if(newScore === 0) return showWin(players[currentPlayerIdx], currentPlayerIdx);
+                if(x01Input.length < 3) x01Input += val;
             }
-
-            currentPlayerIdx = (currentPlayerIdx + 1) % players.length;
             renderX01();
         }
 
-        // --- FINALE ---
-        function showWin(name, idx) {
+        function triggerWin(name, mode, pIdx) {
             document.getElementById('winnerName').innerText = name;
             document.getElementById('winPopup').style.display = 'flex';
             
-            // Konfetti!
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#2ecc71', '#D97706', '#ffffff'] });
-
-            // Statistik generieren
-            let statsHtml = '';
-            if(gameMode === 'cricket') {
-                statsHtml = `<div class="stat-line"><span>Gesamt-Treffer:</span> <strong>${gameState.stats[idx].totalHits}</strong></div>`;
+            // Statistik
+            let stats = "";
+            if(mode === 'cricket') {
+                stats = `<div class="stats-table">Total Klicks: ${gameState.stats[pIdx].clicks}</div>`;
             } else {
-                statsHtml = `<div class="stat-line"><span>Bester Score:</span> <strong>${gameState.stats[idx].bestScore}</strong></div>`;
+                stats = `<div class="stats-table">Benötigte Runden: ${gameState.stats[pIdx].rounds}</div>`;
             }
-            document.getElementById('statsContent').innerHTML = statsHtml;
+            document.getElementById('statsBox').innerHTML = stats;
+
+            // Konfetti
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#D97706', '#2D2D2D', '#FFF9F1'] });
         }
     </script>
 </body>
