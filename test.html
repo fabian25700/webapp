@@ -44,382 +44,260 @@
         }
 
         .header-link { text-decoration: none; color: inherit; cursor: default; }
-        h1 { margin: 10px 0; font-weight: 800; letter-spacing: 0.05em; color: var(--accent); font-size: 1.2rem; }
+        h1 { margin: 10px 0; font-weight: 800; color: var(--accent); font-size: 1.2rem; }
 
-        /* NEU: Zentrierter Modus-Screen */
-        #modeScreen {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            width: 100%;
-        }
-
-        #setupScreen {
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            height: 80%;
-            width: 90%;
-            max-width: 400px;
+        /* Screens */
+        .setup-container {
+            display: flex; flex-direction: column; justify-content: center;
+            height: 85%; width: 90%; max-width: 400px;
         }
 
         .card {
-            background: var(--surface);
-            padding: 20px;
-            border-radius: 24px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            width: 90%;
-            max-width: 400px;
+            background: var(--surface); padding: 20px; border-radius: 24px;
+            box-shadow: var(--shadow); border: 1px solid var(--border);
         }
 
-        /* Modus Auswahl Design */
-        .mode-text {
-            font-size: 2rem;
-            font-weight: 800;
-            margin: 15px 0;
-            cursor: pointer;
-            color: var(--text-secondary);
-            transition: color 0.2s;
+        .menu-option {
+            display: flex; align-items: center; gap: 10px; padding: 15px;
+            margin-bottom: 10px; background: var(--bg); border-radius: 12px;
+            font-weight: 700; cursor: pointer; border: 2px solid transparent;
         }
-        .mode-text:hover, .mode-text.active {
-            color: var(--accent);
-        }
+        .menu-option.active { border-color: var(--accent); background: var(--surface); }
 
-        .player-choice {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 12px;
-            margin-bottom: 8px;
-            background: var(--bg);
-            border-radius: 12px;
-            font-weight: 600;
-        }
-
-        input[type="checkbox"] { transform: scale(1.5); }
-
-        /* Game Screen */
         #gameScreen { 
-            display: none; 
-            width: 100%; 
-            height: calc(100vh - 50px); 
-            padding: 5px; 
-            flex-direction: column; 
+            display: none; width: 100%; height: calc(100vh - 50px); 
+            padding: 5px; flex-direction: column; 
         }
 
+        /* Cricket Table */
         .table-container {
-            background: var(--surface);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-            flex-grow: 1;
-            display: flex;
+            background: var(--surface); border-radius: 20px; overflow: hidden;
+            box-shadow: var(--shadow); border: 1px solid var(--border); flex-grow: 1; display: flex;
         }
-
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; height: 100%; }
-        th, td { border-bottom: 1px solid var(--border); vertical-align: middle; padding: 0; }
-
-        .name-cell { font-size: 0.7rem; font-weight: 800; color: var(--text-secondary); padding-top: 5px; }
-        .total-score { font-size: 1.1rem; font-weight: 900; color: var(--accent); padding-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+        th, td { border-bottom: 1px solid var(--border); vertical-align: middle; text-align: center; }
+        .name-cell { font-size: 0.7rem; font-weight: 800; color: var(--text-secondary); padding-top: 4px; }
+        .total-score { font-size: 1.1rem; font-weight: 900; color: var(--accent); padding-bottom: 4px; }
         .target-col { width: 45px; font-weight: 900; background: var(--text-primary); color: var(--bg); font-size: 1.1rem; }
-
         .hit-btn {
             width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--border);
-            background: var(--bg); color: var(--text-primary); font-size: 1.2rem; font-weight: bold;
-            display: flex; align-items: center; justify-content: center; margin: 0 auto;
+            background: var(--bg); font-size: 1.2rem; font-weight: bold; display: flex;
+            align-items: center; justify-content: center; margin: 0 auto;
         }
-
         .hit-btn.closed { background: var(--accent); color: white; border: none; }
         .points-label { font-size: 0.7rem; color: var(--primary); font-weight: 700; height: 12px; }
 
-        /* X01 spezifisch */
-        .x01-top-grid {
-            display: flex;
-            justify-content: space-around;
-            background: var(--surface);
-            border-radius: 20px;
-            padding: 15px;
-            margin-bottom: 10px;
-            border: 1px solid var(--border);
+        /* X01 Layout */
+        .x01-header {
+            display: flex; justify-content: space-around; background: var(--surface);
+            padding: 10px; border-radius: 20px; margin-bottom: 8px; border: 1px solid var(--border);
         }
-        .x01-stat-card { text-align: center; }
-        .x01-stat-card.active { border-bottom: 3px solid var(--accent); }
-        .x01-big-pts { font-size: 1.8rem; font-weight: 900; color: var(--accent); }
-        .checkout-path { font-size: 0.6rem; color: var(--primary); font-weight: bold; min-height: 12px; }
+        .x01-p-card { text-align: center; padding: 5px; border-radius: 10px; flex: 1; }
+        .x01-p-card.active { background: rgba(217, 119, 6, 0.1); border: 1px solid var(--accent); }
+        .x01-score-big { font-size: 1.6rem; font-weight: 900; color: var(--accent); line-height: 1; }
+        .x01-avg { font-size: 0.6rem; color: var(--text-secondary); margin-top: 2px; }
+        .checkout-hint { font-size: 0.7rem; color: var(--primary); font-weight: 800; min-height: 14px; margin-top: 2px; }
 
-        .numpad {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .num-btn {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            padding: 20px;
-            border-radius: 15px;
-            font-size: 1.2rem;
-            font-weight: 800;
-            color: var(--text-primary);
+        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+        .num-btn { 
+            background: var(--surface); border: 1px solid var(--border); padding: 18px; 
+            border-radius: 15px; font-weight: 800; font-size: 1.2rem; color: var(--text-primary);
         }
 
-        /* Win Popup */
         #winPopup {
             display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(10px); z-index: 10000; align-items: center; justify-content: center;
+            z-index: 10000; align-items: center; justify-content: center;
         }
-
-        .win-box {
-            background: var(--surface); padding: 30px; border-radius: 32px;
-            text-align: center; width: 85%; border: 1px solid var(--border);
-        }
-
-        .main-btn {
-            background: var(--primary); color: white; border: none; padding: 15px;
-            border-radius: 16px; font-size: 1rem; font-weight: 700; cursor: pointer;
-        }
-
-        .stat-line {
-            display: flex; justify-content: space-between; font-size: 0.85rem;
-            margin: 5px 0; border-bottom: 1px dashed var(--border);
-        }
+        .win-box { background: var(--surface); padding: 25px; border-radius: 32px; text-align: center; width: 85%; }
+        .main-btn { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 16px; font-size: 1rem; font-weight: 700; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <a href="index.html" class="header-link"><h1 id="gameTitle">DARTS</h1></a>
+    <a href="index.html" class="header-link"><h1 id="title">DARTS</h1></a>
 
-    <div id="modeScreen">
-        <div class="mode-text" onclick="selectMode('cricket')">CRICKET</div>
-        <div class="mode-text" onclick="selectMode('x01')">X01</div>
-        
-        <div id="x01Settings" style="display:none; text-align:center; margin-top:20px;">
-            <label><input type="radio" name="xStart" value="301" checked> 301</label>
-            <label style="margin-left:20px"><input type="radio" name="xStart" value="501"> 501</label>
-            <br><br>
-            <label><input type="checkbox" id="doubleOutCheck"> Double Out</label>
+    <div id="screenMode" class="setup-container">
+        <div class="card">
+            <h2 style="font-size:1rem; margin-top:0">Spielmodus</h2>
+            <div class="menu-option active" id="optCricket" onclick="selM('cricket')">CRICKET</div>
+            <div class="menu-option" id="optX01" onclick="selM('x01')">X01 DARTS</div>
+            
+            <div id="xSetup" style="display:none; padding:10px; background:var(--bg); border-radius:12px; margin-bottom:10px;">
+                <label><input type="radio" name="xS" value="301" checked> 301</label>
+                <label style="margin-left:15px"><input type="radio" name="xS" value="501"> 501</label>
+                <br><br>
+                <label><input type="checkbox" id="xDO"> Double Out</label>
+            </div>
+            <button class="main-btn" style="width:100%" onclick="toPlayers()">WEITER</button>
         </div>
-        
-        <button class="main-btn" style="margin-top:40px; width:200px" onclick="toPlayers()">WEITER</button>
     </div>
 
-    <div id="setupScreen">
+    <div id="screenPlayers" class="setup-container" style="display:none">
         <div class="card">
-            <h2 style="font-size:1rem; margin-top:0">Wer spielt mit?</h2>
-            <div id="playerList">
-                <label class="player-choice"><input type="checkbox" value="Beate" checked> Beate</label>
-                <label class="player-choice"><input type="checkbox" value="Michael" checked> Michael</label>
-                <label class="player-choice"><input type="checkbox" value="Niclas" checked> Niclas</label>
-                <label class="player-choice"><input type="checkbox" value="Fabian" checked> Fabian</label>
-                <label class="player-choice"><input type="checkbox" value="Sally" checked> Sally</label>
+            <h2 style="font-size:1rem; margin-top:0">Spieler</h2>
+            <div id="pList">
+                <label class="menu-option"><input type="checkbox" value="Beate" checked> Beate</label>
+                <label class="menu-option"><input type="checkbox" value="Michael" checked> Michael</label>
+                <label class="menu-option"><input type="checkbox" value="Niclas" checked> Niclas</label>
+                <label class="menu-option"><input type="checkbox" value="Fabian" checked> Fabian</label>
+                <label class="menu-option"><input type="checkbox" value="Sally" checked> Sally</label>
             </div>
-            <button class="main-btn" style="width:100%; margin-top:15px;" onclick="startGame()">SPIEL STARTEN</button>
+            <button class="main-btn" style="width:100%; margin-top:10px;" onclick="start()">START</button>
         </div>
     </div>
 
     <div id="gameScreen">
-        <div id="gameContent" style="flex-grow:1; display:flex; flex-direction:column;">
-            </div>
-        <p onclick="confirmReset()" style="text-align:center; color:var(--text-secondary); margin: 5px; font-size:0.7rem;">Reset</p>
+        <div id="gameArea" style="flex-grow:1; display:flex; flex-direction:column;"></div>
+        <p onclick="location.reload()" style="text-align:center; color:var(--text-secondary); margin: 5px; font-size:0.7rem;">Reset</p>
     </div>
 
     <div id="winPopup">
         <div class="win-box">
-            <h1 id="winnerName" style="font-size:2.5rem; color:var(--accent); margin-bottom:5px;">---</h1>
-            <p style="color:var(--text-secondary)">hat gewonnen!</p>
-            <div id="finalStats" style="margin: 20px 0; text-align:left;"></div>
-            <button class="main-btn" style="width:100%" onclick="location.reload()">NEUSTART</button>
+            <h1 id="winN" style="font-size:2.2rem; color:var(--accent); margin:0;">---</h1>
+            <p style="color:var(--text-secondary); margin-bottom:15px;">GEWONNEN!</p>
+            <div id="winStats" style="text-align:left; background:var(--bg); padding:15px; border-radius:15px; font-size:0.85rem;"></div>
+            <button class="main-btn" style="width:100%; margin-top:15px;" onclick="location.reload()">NEUSTART</button>
         </div>
     </div>
 
     <script>
-        const nameMapping = { "Beate": "BGL", "Michael": "MG", "Niclas": "NG", "Fabian": "FG", "Sally": "SH" };
-        const checkoutTable = { 170: "T20 T20 BE", 167: "T20 T19 BE", 164: "T20 T18 BE", 161: "T20 T17 BE", 160: "T20 T20 D20", 100: "T20 D20", 60: "20 D20", 50: "BE", 40: "D20", 36: "D18", 32: "D16", 24: "D12", 16: "D8", 8: "D4", 4: "D2", 2: "D1" };
-        const blockedX01 = [179, 178, 176, 175, 173, 172, 169, 166, 163];
+        const names = { "Beate": "BGL", "Michael": "MG", "Niclas": "NG", "Fabian": "FG", "Sally": "SH" };
+        const checks = { 170:"T20 T20 BE", 167:"T20 T19 BE", 164:"T20 T18 BE", 161:"T20 T17 BE", 160:"T20 T20 D20", 100:"T20 D20", 80:"T20 D10", 60:"20 D20", 50:"BE", 40:"D20", 32:"D16", 16:"D8", 8:"D4", 4:"D2", 2:"D1" };
+        const bad = [179, 178, 176, 175, 173, 172, 169, 166, 163];
+        let mode = 'cricket', players = [], state = { data: {}, stats: {}, idx: 0, input: "" };
 
-        let selectedMode = 'cricket';
-        let activePlayers = [];
-        let gameState = { data: {}, stats: {}, curIdx: 0, x01Input: "" };
-
-        function selectMode(m) {
-            selectedMode = m;
-            document.querySelectorAll('.mode-text').forEach(el => el.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById('x01Settings').style.display = (m === 'x01') ? 'block' : 'none';
+        function selM(m) {
+            mode = m;
+            document.getElementById('optCricket').classList.toggle('active', m==='cricket');
+            document.getElementById('optX01').classList.toggle('active', m==='x01');
+            document.getElementById('xSetup').style.display = m==='x01' ? 'block' : 'none';
         }
 
         function toPlayers() {
-            document.getElementById('modeScreen').style.display = 'none';
-            document.getElementById('setupScreen').style.display = 'flex';
-            document.getElementById('gameTitle').innerText = selectedMode.toUpperCase();
+            document.getElementById('screenMode').style.display = 'none';
+            document.getElementById('screenPlayers').style.display = 'flex';
         }
 
-        function startGame() {
-            const checkboxes = document.querySelectorAll('#playerList input:checked');
-            activePlayers = Array.from(checkboxes).map(cb => cb.value);
-            if(activePlayers.length === 0) return alert("Wähle Spieler!");
-
-            document.getElementById('setupScreen').style.display = 'none';
+        function start() {
+            const sel = document.querySelectorAll('#pList input:checked');
+            players = Array.from(sel).map(c => c.value);
+            if(!players.length) return alert("Spieler?");
+            
+            document.getElementById('screenPlayers').style.display = 'none';
             document.getElementById('gameScreen').style.display = 'flex';
+            document.getElementById('title').innerText = mode.toUpperCase();
 
-            if(selectedMode === 'cricket') {
-                [20, 19, 18, 17, 16, 15, 25].forEach(t => {
-                    activePlayers.forEach((_, i) => gameState.data[`${t}-${i}`] = {hits:0, points:0});
-                });
+            if(mode === 'cricket') {
+                [20,19,18,17,16,15,25].forEach(t => players.forEach((_,i) => state.data[`${t}-${i}`] = {h:0, p:0}));
             } else {
-                const startPts = parseInt(document.querySelector('input[name="xStart"]:checked').value);
-                gameState.x01Config = { start: startPts, doubleOut: document.getElementById('doubleOutCheck').checked };
-                activePlayers.forEach((_, i) => {
-                    gameState.data[i] = startPts;
-                    gameState.stats[i] = { darts: 0, totalScore: 0, highest: 0, rounds: 0 };
+                const s = parseInt(document.querySelector('input[name="xS"]:checked').value);
+                state.conf = { s, do: document.getElementById('xDO').checked };
+                players.forEach((_,i) => {
+                    state.data[i] = s;
+                    state.stats[i] = { d: 0, t: 0, h: 0, r: 0 };
                 });
             }
-            renderGame();
+            render();
         }
 
-        function renderGame() {
-            const container = document.getElementById('gameContent');
-            if(selectedMode === 'cricket') {
-                renderCricket(container);
-            } else {
-                renderX01(container);
-            }
-        }
-
-        function renderCricket(container) {
-            let html = `<div class="table-container"><table><thead><tr><th class="target-col" rowspan="2">🎯</th>`;
-            activePlayers.forEach((p, i) => html += `<th class="name-cell">${nameMapping[p]}</th>`);
-            html += `</tr><tr>`;
-            activePlayers.forEach((_, i) => html += `<th id="total-${i}" class="total-score">0</th>`);
-            html += `</tr></thead><tbody>`;
-
-            [20, 19, 18, 17, 16, 15, 25].forEach(t => {
-                html += `<tr><td class="target-col">${t === 25 ? 'B' : t}</td>`;
-                activePlayers.forEach((_, i) => {
-                    const cell = gameState.data[`${t}-${i}`];
-                    html += `<td onclick="hitCricket(${t}, ${i})">
-                        <div class="points-label">${cell.points > 0 ? '+' + cell.points : ''}</div>
-                        <div class="hit-btn ${cell.hits >= 3 ? 'closed' : ''}">${getSym(cell.hits)}</div>
-                    </td>`;
+        function render() {
+            const area = document.getElementById('gameArea');
+            if(mode === 'cricket') {
+                let h = `<div class="table-container"><table><thead><tr><th class="target-col" rowspan="2">🎯</th>`;
+                players.forEach((p, i) => h += `<th class="name-cell">${names[p]}</th>`);
+                h += `</tr><tr>`;
+                players.forEach((_, i) => h += `<th id="sc-${i}" class="total-score">0</th>`);
+                h += `</tr></thead><tbody>`;
+                [20,19,18,17,16,15,25].forEach(t => {
+                    h += `<tr><td class="target-col">${t==25?'B':t}</td>`;
+                    players.forEach((_, i) => {
+                        const cell = state.data[`${t}-${i}`];
+                        h += `<td onclick="hitC(${t},${i})"><div class="points-label">${cell.p>0?'+'+cell.p:''}</div><div class="hit-btn ${cell.h>=3?'closed':''}">${cell.h==1?'/':cell.h==2?'X':cell.h>=3?'⦻':''}</div></td>`;
+                    });
+                    h += `</tr>`;
                 });
-                html += `</tr>`;
-            });
-            container.innerHTML = html + `</tbody></table></div>`;
-            updateCricketScores();
-        }
-
-        function getSym(h) { return h === 1 ? "/" : h === 2 ? "X" : h >= 3 ? "⦻" : ""; }
-
-        function hitCricket(t, i) {
-            const cell = gameState.data[`${t}-${i}`];
-            if(cell.hits < 3) cell.hits++;
-            else if(activePlayers.some((_, idx) => gameState.data[`${t}-${idx}`].hits < 3)) cell.points += t;
-            renderGame();
-            checkWinCricket();
-        }
-
-        function updateCricketScores() {
-            activePlayers.forEach((_, i) => {
-                let sum = [20,19,18,17,16,15,25].reduce((a, t) => a + gameState.data[`${t}-${i}`].points, 0);
-                const el = document.getElementById(`total-${i}`);
-                if(el) el.innerText = sum;
-            });
-        }
-
-        function renderX01(container) {
-            let html = `<div class="x01-top-grid">`;
-            activePlayers.forEach((p, i) => {
-                const pts = gameState.data[i];
-                html += `<div class="x01-stat-card ${i === gameState.curIdx ? 'active' : ''}">
-                    <div class="name-cell">${nameMapping[p]}</div>
-                    <div class="x01-big-pts">${pts}</div>
-                    <div class="checkout-path">${checkoutTable[pts] || (pts <= 158 ? "Checkbar" : "")}</div>
+                area.innerHTML = h + `</tbody></table></div>`;
+                players.forEach((_,i) => {
+                    let sum = [20,19,18,17,16,15,25].reduce((a, t) => a + state.data[`${t}-${i}`].p, 0);
+                    document.getElementById(`sc-${i}`).innerText = sum;
+                });
+            } else {
+                let h = `<div class="x01-header">`;
+                players.forEach((p, i) => {
+                    const pts = state.data[i];
+                    const avg = state.stats[i].r > 0 ? (state.stats[i].t / state.stats[i].r).toFixed(1) : "0.0";
+                    h += `<div class="x01-p-card ${i===state.idx?'active':''}">
+                        <div class="name-cell">${names[p]}</div>
+                        <div class="x01-score-big">${pts}</div>
+                        <div class="x01-avg">Ø ${avg}</div>
+                        <div class="checkout-hint">${checks[pts] || (pts<=158?"Checkbar":"")}</div>
+                    </div>`;
+                });
+                h += `</div><div class="card" style="margin:5px auto; text-align:center; width:100%">
+                    <div style="font-size:0.7rem; color:var(--text-secondary)">Am Zug: ${players[state.idx]}</div>
+                    <div style="font-size:2.5rem; font-weight:900; height:3rem;">${state.input || "0"}</div>
+                    <div class="numpad">
+                        ${[1,2,3,4,5,6,7,8,9].map(n => `<button class="num-btn" onclick="press(${n})">${n}</button>`).join('')}
+                        <button class="num-btn" style="color:red" onclick="press('C')">C</button>
+                        <button class="num-btn" onclick="press(0)">0</button>
+                        <button class="num-btn" style="color:var(--primary)" onclick="sub()">OK</button>
+                    </div>
                 </div>`;
+                area.innerHTML = h;
+            }
+        }
+
+        function hitC(t, i) {
+            const c = state.data[`${t}-${i}`];
+            if(c.h < 3) c.h++; else if(players.some((_,idx) => state.data[`${t}-${idx}`].h < 3)) c.p += t;
+            render(); checkC();
+        }
+
+        function press(v) {
+            if(v==='C') state.input = ""; else if(state.input.length < 3) state.input += v;
+            render();
+        }
+
+        function sub() {
+            const v = parseInt(state.input) || 0;
+            if(v > 180 || bad.includes(v)) { alert("Ungültig!"); state.input = ""; return render(); }
+            const cur = state.data[state.idx], nxt = cur - v, s = state.stats[state.idx];
+            if(nxt < 0 || (state.conf.do && nxt === 1)) { alert("BUST!"); }
+            else {
+                state.data[state.idx] = nxt;
+                s.r++; s.d += 3; s.t += v;
+                if(v > s.h) s.h = v;
+                if(nxt === 0) return win(players[state.idx], state.idx);
+            }
+            state.idx = (state.idx + 1) % players.length;
+            state.input = ""; render();
+        }
+
+        function checkC() {
+            players.forEach((p, i) => {
+                const closed = [20,19,18,17,16,15,25].every(t => state.data[`${t}-${i}`].h >= 3);
+                const scores = players.map((_, idx) => [20,19,18,17,16,15,25].reduce((a,t) => a + state.data[`${t}-${idx}`].p, 0));
+                if(closed && scores[i] === Math.max(...scores)) win(p, i);
             });
-            html += `</div>`;
-            
-            html += `<div class="card" style="margin: 10px auto; text-align:center;">
-                <div style="font-size: 0.8rem; color: var(--text-secondary)">${activePlayers[gameState.curIdx]} wirft</div>
-                <div style="font-size: 3rem; font-weight: 900; height: 4rem;">${gameState.x01Input || "0"}</div>
-                <div class="numpad">
-                    ${[1,2,3,4,5,6,7,8,9].map(n => `<button class="num-btn" onclick="pressX(${n})">${n}</button>`).join('')}
-                    <button class="num-btn" style="color:red" onclick="pressX('C')">C</button>
-                    <button class="num-btn" onclick="pressX(0)">0</button>
-                    <button class="num-btn" style="color:var(--primary)" onclick="submitX()">OK</button>
-                </div>
-            </div>`;
-            container.innerHTML = html;
         }
 
-        function pressX(val) {
-            if(val === 'C') gameState.x01Input = "";
-            else if(gameState.x01Input.length < 3) gameState.x01Input += val;
-            renderGame();
-        }
-
-        function submitX() {
-            const val = parseInt(gameState.x01Input) || 0;
-            if(val > 180 || blockedX01.includes(val)) { alert("Ungültiger Score!"); gameState.x01Input = ""; return renderGame(); }
-            
-            const curScore = gameState.data[gameState.curIdx];
-            const nextScore = curScore - val;
-            const st = gameState.stats[gameState.curIdx];
-
-            if(nextScore < 0 || (gameState.x01Config.doubleOut && nextScore === 1)) {
-                alert("BUST!");
-            } else {
-                gameState.data[gameState.curIdx] = nextScore;
-                st.rounds++; st.darts += 3; st.totalScore += val;
-                if(val > st.highest) st.highest = val;
-                if(nextScore === 0) return triggerWin(activePlayers[gameState.curIdx], gameState.curIdx);
-            }
-            gameState.curIdx = (gameState.curIdx + 1) % activePlayers.length;
-            gameState.x01Input = "";
-            renderGame();
-        }
-
-        function triggerWin(name, idx) {
-            document.getElementById('winnerName').innerText = name;
-            const statsDiv = document.getElementById('finalStats');
-            let sHtml = "";
-
-            if(selectedMode === 'x01') {
-                const s = gameState.stats[idx];
-                sHtml = `
-                    <div class="stat-line"><span>Average:</span><b>${(s.totalScore / s.rounds).toFixed(2)}</b></div>
-                    <div class="stat-line"><span>Anzahl Würfe:</span><b>${s.darts}</b></div>
-                    <div class="stat-line"><span>Höchster Wurf:</span><b>${s.highest}</b></div>
-                    <div class="stat-line"><span>Runden:</span><b>${s.rounds}</b></div>
-                `;
-            } else {
-                sHtml = `<p>Alle Felder geschlossen und höchste Punktzahl erreicht!</p>`;
-            }
-
-            statsDiv.innerHTML = sHtml;
+        function win(p, i) {
+            document.getElementById('winN').innerText = p;
+            let h = "";
+            if(mode === 'x01') {
+                const s = state.stats[i];
+                h = `<b>Average:</b> ${(s.t/s.r).toFixed(2)}<br><b>Darts:</b> ${s.d}<br><b>High Score:</b> ${s.h}<br><b>Runden:</b> ${s.r}`;
+            } else { h = "Alle Felder zu & meiste Punkte!"; }
+            document.getElementById('winStats').innerHTML = h;
             document.getElementById('winPopup').style.display = 'flex';
-
-            // Konfetti Explosion
-            const end = Date.now() + 4000;
-            (function frame() {
-                confetti({ particleCount: 7, angle: 60, spread: 55, origin: { x: 0 }, zIndex: 10001 });
-                confetti({ particleCount: 7, angle: 120, spread: 55, origin: { x: 1 }, zIndex: 10001 });
-                if (Date.now() < end) requestAnimationFrame(frame);
+            
+            const end = Date.now() + 2000;
+            (function f() {
+                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, zIndex: 10001 });
+                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, zIndex: 10001 });
+                if (Date.now() < end) requestAnimationFrame(f);
             }());
         }
-
-        function checkWinCricket() {
-            activePlayers.forEach((p, i) => {
-                const closed = [20,19,18,17,16,15,25].every(t => gameState.data[`${t}-${i}`].hits >= 3);
-                const scores = activePlayers.map((_, idx) => [20,19,18,17,16,15,25].reduce((a,t) => a + gameState.data[`${t}-${idx}`].points, 0));
-                if(closed && scores[i] === Math.max(...scores)) triggerWin(p, i);
-            });
-        }
-
-        function confirmReset() { if(confirm("Spiel abbrechen?")) location.reload(); }
     </script>
 </body>
 </html>
