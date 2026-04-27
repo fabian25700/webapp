@@ -6,225 +6,204 @@
     <title>Cricket Darts</title>
     <style>
         :root {
-            --bg-warm: #FFF9F1;
-            --card-bg: #FFFFFF;
-            --primary: #2D2D2D;
-            --accent: #D97706; /* Warmes Bernstein */
-            --success: #059669;
-            --border: #E5E7EB;
-            --text-light: #6B7280;
+            --bg: #f0f2f5;
+            --surface: rgba(255, 255, 255, 0.95);
+            --primary: #2ecc71;
+            --accent: #D97706;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: rgba(203, 213, 225, 0.8);
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: rgba(30, 41, 59, 0.95);
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: rgba(51, 65, 85, 0.8);
+                --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            }
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-warm);
-            color: var(--primary);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-primary);
             margin: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden; /* Verhindert jegliches Scrollen */
             display: flex;
             flex-direction: column;
             align-items: center;
-            min-height: 100vh;
         }
+
+        .header-link { text-decoration: none; color: inherit; cursor: default; }
+        h1 { margin: 10px 0; font-weight: 800; letter-spacing: 0.05em; color: var(--accent); font-size: 1.2rem; }
+        @media (min-width: 1024px) { .header-link { cursor: pointer; } .header-link:hover { opacity: 0.7; } }
 
         /* Setup Screen */
         #setupScreen {
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            padding: 40px 20px;
-            width: 100%;
+            justify-content: center;
+            height: 80%;
+            width: 90%;
             max-width: 400px;
-            text-align: center;
         }
 
-        .input-group {
-            background: var(--card-bg);
+        .card {
+            background: var(--surface);
             padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            border-radius: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .player-choice {
             display: flex;
-            flex-direction: column;
+            align-items: center;
             gap: 10px;
-        }
-
-        input {
             padding: 12px;
-            font-size: 1.2rem;
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            text-align: center;
-            text-transform: uppercase;
+            margin-bottom: 8px;
+            background: var(--bg);
+            border-radius: 12px;
+            font-weight: 600;
         }
 
-        button.main-btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-        }
+        input[type="checkbox"] { transform: scale(1.5); }
 
         /* Game Screen */
-        #gameScreen { display: none; width: 100%; padding: 10px; }
-
-        .scoreboard-container {
-            overflow-x: auto;
-            width: 100%;
-            background: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        #gameScreen { 
+            display: none; 
+            width: 100%; 
+            height: calc(100vh - 50px); 
+            padding: 5px; 
+            flex-direction: column; 
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
+        .table-container {
+            background: var(--surface);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            flex-grow: 1;
+            display: flex;
         }
 
-        th, td {
-            padding: 12px 5px;
-            text-align: center;
-            border-bottom: 1px solid var(--border);
-            vertical-align: middle;
-        }
+        table { width: 100%; border-collapse: collapse; table-layout: fixed; height: 100%; }
 
-        th {
-            font-size: 1.1rem;
-            background: #F3F4F6;
-            color: var(--primary);
-        }
+        th, td { border-bottom: 1px solid var(--border); vertical-align: middle; padding: 0; }
+
+        .name-cell { font-size: 0.7rem; font-weight: 800; color: var(--text-secondary); padding-top: 5px; }
+        .total-score { font-size: 1.1rem; font-weight: 900; color: var(--accent); padding-bottom: 5px; }
 
         .target-col {
-            width: 60px;
+            width: 45px;
             font-weight: 900;
-            background: var(--primary);
-            color: white;
-            font-size: 1.3rem;
+            background: var(--text-primary);
+            color: var(--bg);
+            font-size: 1.1rem;
         }
 
-        /* Darts Symbole & Buttons */
         .hit-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: 2px solid var(--border);
-            background: #F9FAFB;
-            font-size: 1.5rem;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text-primary);
+            font-size: 1.2rem;
             font-weight: bold;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto;
-            cursor: pointer;
-            transition: transform 0.1s;
         }
 
-        .hit-btn:active { transform: scale(0.9); }
-        .hit-btn.closed { background: var(--accent); color: white; border-color: var(--accent); }
+        .hit-btn.closed { background: var(--accent); color: white; border: none; }
+        .points-label { font-size: 0.7rem; color: var(--primary); font-weight: 700; height: 12px; }
 
-        .points-label {
-            font-size: 0.8rem;
-            color: var(--success);
-            font-weight: bold;
-            height: 15px;
-            display: block;
-            margin-top: 4px;
-        }
-
-        .total-score {
-            font-size: 1.4rem;
-            font-weight: 900;
-            color: var(--accent);
-        }
-
-        .footer-controls {
-            margin-top: 20px;
-            display: flex;
-            justify-content: center;
-        }
-
-        /* PopUp */
         #winPopup {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            z-index: 100;
-            text-align: center;
-            width: 80%;
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center;
+        }
+
+        .win-box {
+            background: var(--surface); padding: 30px; border-radius: 32px;
+            text-align: center; width: 80%; border: 1px solid var(--border);
+        }
+
+        .main-btn {
+            background: var(--primary); color: white; border: none; padding: 15px;
+            border-radius: 16px; font-size: 1rem; font-weight: 700; cursor: pointer;
         }
     </style>
 </head>
 <body>
 
+    <a href="index.html" class="header-link"><h1>CRICKET</h1></a>
+
     <div id="setupScreen">
-        <h1 style="color: var(--accent)">CRICKET</h1>
-        <div class="input-group">
-            <label>Anzahl Spieler (1-5):</label>
-            <input type="number" id="playerCount" value="2" min="1" max="5">
-            <div id="nameInputs"></div>
+        <div class="card">
+            <h2 style="font-size:1rem; margin-top:0">Wer spielt mit?</h2>
+            <div id="playerList">
+                <label class="player-choice"><input type="checkbox" value="Beate" checked> Beate</label>
+                <label class="player-choice"><input type="checkbox" value="Michael" checked> Michael</label>
+                <label class="player-choice"><input type="checkbox" value="Niclas" checked> Niclas</label>
+                <label class="player-choice"><input type="checkbox" value="Fabian" checked> Fabian</label>
+                <label class="player-choice"><input type="checkbox" value="Sally" checked> Sally</label>
+            </div>
+            <button class="main-btn" style="width:100%; margin-top:15px;" onclick="startGame()">SPIEL STARTEN</button>
         </div>
-        <button class="main-btn" onclick="startGame()">SPIEL STARTEN</button>
     </div>
 
     <div id="gameScreen">
-        <div class="scoreboard-container">
+        <div class="table-container">
             <table>
-                <thead><tr id="headerRow"><th class="target-col">🎯</th></tr></thead>
+                <thead>
+                    <tr id="headerNames">
+                        <th class="target-col" rowspan="2">🎯</th>
+                        </tr>
+                    <tr id="headerScores">
+                        </tr>
+                </thead>
                 <tbody id="gameBody"></tbody>
-                <tfoot><tr id="footerRow"><td class="target-col">Σ</td></tr></tfoot>
             </table>
         </div>
-        <div class="footer-controls">
-            <button onclick="confirmReset()" style="background:none; border:none; color:var(--text-light); text-decoration:underline;">Neues Spiel</button>
-        </div>
+        <p onclick="confirmReset()" style="text-align:center; color:var(--text-secondary); margin: 5px; font-size:0.7rem;">Reset</p>
     </div>
 
     <div id="winPopup">
-        <h2 style="font-size: 2rem">🏆 SIEGER!</h2>
-        <h1 id="winnerName" style="font-size: 4rem; color: var(--accent)">---</h1>
-        <button class="main-btn" onclick="location.reload()">Neustart</button>
+        <div class="win-box">
+            <h1 id="winnerName" style="font-size:3rem; color:var(--accent)">---</h1>
+            <p style="color:var(--text-secondary)">hat gewonnen!</p>
+            <button class="main-btn" style="width:100%" onclick="location.reload()">NEUSTART</button>
+        </div>
     </div>
 
     <script>
-        let players = [];
+        const nameMapping = {
+            "Beate": "BGL", "Michael": "MG", "Niclas": "NG", "Fabian": "FG", "Sally": "SH"
+        };
         const targets = [20, 19, 18, 17, 16, 15, 25];
+        let activePlayers = [];
         let gameState = JSON.parse(localStorage.getItem('dartsCricketState')) || null;
 
-        // Namen-Inputs generieren
-        document.getElementById('playerCount').addEventListener('input', updateNameInputs);
-        function updateNameInputs() {
-            const count = document.getElementById('playerCount').value;
-            const container = document.getElementById('nameInputs');
-            container.innerHTML = '';
-            for(let i=0; i<Math.min(count, 5); i++) {
-                container.innerHTML += `<input type="text" placeholder="P${i+1}" maxlength="3" class="name-in" id="name-${i}">`;
-            }
-        }
-        updateNameInputs();
-
         function startGame() {
-            const count = document.getElementById('playerCount').value;
-            players = [];
-            for(let i=0; i<count; i++) {
-                const val = document.getElementById(`name-${i}`).value || `P${i+1}`;
-                players.push(val.toUpperCase());
-            }
-            
             if(!gameState) {
-                gameState = { players: players, data: {} };
+                const checkboxes = document.querySelectorAll('#playerList input:checked');
+                activePlayers = Array.from(checkboxes).map(cb => cb.value);
+                if(activePlayers.length === 0) return alert("Wähle mind. einen Spieler");
+                
+                gameState = { players: activePlayers, data: {} };
                 targets.forEach(t => {
-                    players.forEach((_, pIdx) => {
+                    activePlayers.forEach((_, pIdx) => {
                         gameState.data[`${t}-${pIdx}`] = { hits: 0, points: 0 };
                     });
                 });
@@ -234,19 +213,19 @@
 
         function renderBoard() {
             document.getElementById('setupScreen').style.display = 'none';
-            document.getElementById('gameScreen').style.display = 'block';
+            document.getElementById('gameScreen').style.display = 'flex';
             
-            const header = document.getElementById('headerRow');
-            const footer = document.getElementById('footerRow');
+            const hNames = document.getElementById('headerNames');
+            const hScores = document.getElementById('headerScores');
             const body = document.getElementById('gameBody');
             
-            header.innerHTML = '<th class="target-col">🎯</th>';
-            footer.innerHTML = '<td class="target-col">Σ</td>';
+            hNames.innerHTML = '<th class="target-col" rowspan="2">🎯</th>';
+            hScores.innerHTML = '';
             body.innerHTML = '';
 
             gameState.players.forEach((p, i) => {
-                header.innerHTML += `<th>${p}</th>`;
-                footer.innerHTML += `<td id="total-${i}" class="total-score">0</td>`;
+                hNames.innerHTML += `<th class="name-cell">${nameMapping[p] || p}</th>`;
+                hScores.innerHTML += `<th id="total-${i}" class="total-score">0</th>`;
             });
 
             targets.forEach(t => {
@@ -254,11 +233,9 @@
                 gameState.players.forEach((_, pIdx) => {
                     const key = `${t}-${pIdx}`;
                     const cell = gameState.data[key];
-                    row += `<td>
-                        <div class="hit-btn ${cell.hits >= 3 ? 'closed' : ''}" onclick="registerHit(${t}, ${pIdx})">
-                            ${getSym(cell.hits)}
-                        </div>
-                        <span class="points-label" id="pts-${key}">${cell.points > 0 ? '+' + cell.points : ''}</span>
+                    row += `<td onclick="registerHit(${t}, ${pIdx})">
+                        <div class="points-label">${cell.points > 0 ? '+' + cell.points : ''}</div>
+                        <div class="hit-btn ${cell.hits >= 3 ? 'closed' : ''}">${getSym(cell.hits)}</div>
                     </td>`;
                 });
                 body.innerHTML += row + `</tr>`;
@@ -276,17 +253,12 @@
         function registerHit(target, pIdx) {
             const key = `${target}-${pIdx}`;
             const cell = gameState.data[key];
-
             if (cell.hits < 3) {
                 cell.hits++;
             } else {
-                // Check if others still open
                 const othersOpen = gameState.players.some((_, i) => gameState.data[`${target}-${i}`].hits < 3);
-                if (othersOpen) {
-                    cell.points += target;
-                }
+                if (othersOpen) cell.points += target;
             }
-            
             localStorage.setItem('dartsCricketState', JSON.stringify(gameState));
             renderBoard();
             checkWinner();
@@ -303,29 +275,25 @@
         function checkWinner() {
             gameState.players.forEach((_, pIdx) => {
                 const allClosed = targets.every(t => gameState.data[`${t}-${pIdx}`].hits >= 3);
-                const currentScore = Array.from(targets).reduce((s, t) => s + gameState.data[`${t}-${pIdx}`].points, 0);
-                
-                const scores = gameState.players.map((_, i) => 
-                    targets.reduce((s, t) => s + gameState.data[`${t}-${i}`].points, 0)
-                );
+                const scores = gameState.players.map((_, i) => targets.reduce((s, t) => s + gameState.data[`${t}-${i}`].points, 0));
+                const currentScore = scores[pIdx];
                 const maxScore = Math.max(...scores);
 
                 if (allClosed && currentScore === maxScore) {
                     document.getElementById('winnerName').innerText = gameState.players[pIdx];
-                    document.getElementById('winPopup').style.display = 'block';
+                    document.getElementById('winPopup').style.display = 'flex';
                     localStorage.removeItem('dartsCricketState');
                 }
             });
         }
 
         function confirmReset() {
-            if(confirm("Spiel wirklich abbrechen?")) {
+            if(confirm("Spiel zurücksetzen?")) {
                 localStorage.removeItem('dartsCricketState');
                 location.reload();
             }
         }
 
-        // Falls Daten im Speicher, direkt zum Spiel
         if(localStorage.getItem('dartsCricketState')) {
             gameState = JSON.parse(localStorage.getItem('dartsCricketState'));
             startGame();
