@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Startseite</title>
+    <style>
+        :root {
+            --primary: #2ecc71;
+            --primary-dark: #27ae60;
+            --secondary: #3498db;
+            --bg: #f0f2f5;
+            --surface: rgba(255, 255, 255, 0.95);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: rgba(203, 213, 225, 0.8);
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --card-hover: rgba(240, 240, 240, 0.95);
+            --arrow-color: #cbd5e1;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: rgba(30, 41, 59, 0.95);
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: rgba(51, 65, 85, 0.8);
+                --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+                --card-hover: rgba(51, 65, 85, 0.95);
+                --arrow-color: #475569;
+            }
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.3s ease;
+        }
+
+        header {
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .header-title {
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 0.04em;
+            color: var(--text-primary);
+        }
+
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+            width: 85%;
+            max-width: 360px;
+            margin: auto;
+            z-index: 10;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .menu-card {
+            background: var(--surface);
+            padding: 18px 22px;
+            border-radius: 20px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: transform 0.12s ease, background 0.2s ease;
+            border: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        .menu-card:active { transform: scale(0.96); background: var(--card-hover); }
+
+        .icon { font-size: 1.35rem; line-height: 1; }
+        .title { font-weight: 600; color: var(--text-primary); font-size: 1.05rem; flex-grow: 1; }
+        .arrow { color: var(--arrow-color); font-size: 1rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-title">FAMILIEN APP</div>
+    </header>
+
+    <div class="menu-container" id="main-menu">
+        <a href="kanada.html" class="menu-card">
+            <span class="icon">🇨🇦</span>
+            <span class="title">Kanada</span>
+            <span class="arrow">→</span>
+        </a>
+
+        <a href="darts.html" class="menu-card">
+            <span class="icon">🎯</span>
+            <span class="title">Darts</span>
+            <span class="arrow">→</span>
+        </a>
+
+        <a href="imposter.html" class="menu-card">
+            <span class="icon">🕵️‍♂️</span>
+            <span class="title">Imposter</span>
+            <span class="arrow">→</span>
+        </a>
+
+        <a href="https://gastspiel.notion.site/Gastspiel-2026-2defa991a819811aa6e8f25552af74a5" class="menu-card" target="_blank">
+            <span class="icon">⚽</span>
+            <span class="title">Fabians Fußball Magazin</span>
+            <span class="arrow">→</span>
+        </a>
+    </div>
+</body>
+</html>
