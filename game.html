@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Influencer Rope Cut</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #f0f2f5; /* Clean & White Style */
+            font-family: 'Segoe UI', sans-serif;
+        }
+        #ui {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            pointer-events: none;
+            color: #4a4a4a;
+        }
+        .msg { font-weight: bold; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <div class="msg">Schneide das Seil!</div>
+        <div id="status">Füttere den Follower</div>
+    </div>
+
+    <script>
+        // Matter.js Module laden
+        const { Engine, Render, Runner, Composite, Composites, Constraint, MouseConstraint, Mouse, Bodies, Vector } = Matter;
+
+        // Engine & Setup
+        const engine = Engine.create();
+        const world = engine.world;
+        const render = Render.create({
+            element: document.body,
+            engine: engine,
+            options: {
+                width: window.innerWidth,
+                height: window.innerHeight,
+                wireframes: false,
+                background: '#f0f2f5'
+            }
+        });
+
+        Render.run(render);
+        const runner = Runner.create();
+        Runner.run(runner, engine);
+
+        // 1. Der "Follower" (Das Ziel - Unten)
+        const goal = Bodies.circle(window.innerWidth / 2, window.innerHeight - 80, 40, {
+            isStatic: true,
+            label: 'goal',
+            render: { fillStyle: '#ff6b6b' } // Influencer-Rot
+        });
+
+        // 2. Das "Candy" (Das Icon - schwingt am Seil)
+        const candy = Bodies.circle(window.innerWidth / 2 + 100, 200, 25, {
+            restitution: 0.5,
+            friction: 0.01,
+            label: 'candy',
+            render: { fillStyle: '#ffd700', strokeStyle: '#000', lineWidth: 2 }
+        });
+
+        // 3. Das Seil erstellen
+        const group = Body.nextGroup(true);
+        const ropeParts = Composites.stack(window.innerWidth / 2, 50, 8, 1, 0, 0, (x, y) => {
+            return Bodies.rectangle(x, y, 20, 5, { 
+                collisionFilter: { group: group },
+                render: { fillStyle: '#4a4a4a' }
+            });
+        });
+
+        Composites.chain(ropeParts, 0.5, 0, -0.5, 0, { stiffness: 0.8, length: 2 });
+        
+        // Seil am Anker oben befestigen
+        const anchor = { x: window.innerWidth / 2, y: 50 };
+        const topConstraint = Constraint.create({
+            pointA: anchor,
+            bodyB: ropeParts.bodies[0],
+            stiffness: 0.8
+        });
+
+        // Candy am Ende des Seils befestigen
+        const candyConstraint = Constraint.create({
+            bodyA: ropeParts.bodies[ropeParts.bodies.length - 1],
+            bodyB: candy,
+            stiffness: 0.8,
+            length: 10
+        });
+
+        Composite.add(world, [goal, candy, ropeParts, topConstraint, candyConstraint]);
+
+        // --- SCHNEIDE MECHANIK ---
+        const mouse = Mouse.create(render.canvas);
+        
+        // Event: Wenn die Maus bewegt wird (oder Touch)
+        document.addEventListener('mousemove', () => {
+            if (mouse.button === 0) { // Linke Maustaste gedrückt
+                cutRope();
+            }
+        });
+
+        // Touch Support
+        document.addEventListener('touchmove', (e) => {
+            cutRope(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: false });
+
+        function cutRope(tX, tY) {
+            const x = tX || mouse.position.x;
+            const y = tY || mouse.position.y;
+            
+            // Prüfe alle Verbindungen im Seil
+            const constraints = Composite.allConstraints(ropeParts);
+            constraints.push(candyConstraint); // Auch die Verbindung zum Candy prüfen
+
+            constraints.forEach(constraint => {
+                if (constraint.bodyA && constraint.bodyB) {
+                    const posA = constraint.bodyA.position;
+                    const posB = constraint.bodyB.position;
+                    
+                    // Berechne Distanz zwischen Maus und Seil-Glied
+                    const dist = Vector.magnitude(Vector.sub({x, y}, posA));
+                    
+                    if (dist < 20) { // Wenn Maus nah genug am Seil
+                        Composite.remove(world, constraint);
+                    }
+                }
+            });
+        }
+
+        // --- GEWINN LOGIK ---
+        Matter.Events.on(engine, 'collisionStart', (event) => {
+            event.pairs.forEach(pair => {
+                if ((pair.bodyA.label === 'candy' && pair.bodyB.label === 'goal') ||
+                    (pair.bodyB.label === 'candy' && pair.bodyA.label === 'goal')) {
+                    document.getElementById('status').innerText = "🎉 GEWONNEN! Neuer Follower!";
+                    document.getElementById('status').style.color = "#4caf50";
+                    setTimeout(() => location.reload(), 2000); // Neustart nach 2 Sek.
+                }
+            });
+        });
+
+        // Canvas an Fenstergröße anpassen
+        window.onresize = () => {
+            render.canvas.width = window.innerWidth;
+            render.canvas.height = window.innerHeight;
+        };
+
+    </script>
+</body>
+</html>
