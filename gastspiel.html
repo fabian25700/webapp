@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Gastspiel</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --header-bg: rgba(240, 242, 245, 0.9);
+            --header-text: #1e293b;
+            --header-border: #e2e8f0;
+            --btn-bg: #ffffff;
+            --btn-border: #e2e8f0;
+            --btn-text: #1e293b;
+            --passport-green-soft: #e8f2e9;
+            --border-page: #d1ddd2;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0f172a;
+                --header-bg: rgba(15, 23, 42, 0.9);
+                --header-text: #f1f5f9;
+                --header-border: #1e293b;
+                --btn-bg: #1e293b;
+                --btn-border: #2d3f55;
+                --btn-text: #f1f5f9;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Verhindert Scrollen der Hauptseite */
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--header-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--header-border);
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--btn-bg);
+            border: 1px solid var(--btn-border);
+            text-decoration: none;
+            color: var(--btn-text);
+            font-size: 1.2rem;
+            transition: transform 0.1s active;
+        }
+
+        .back-btn:active { transform: scale(0.95); }
+
+        header h1 {
+            color: var(--header-text);
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        /* Container für das eingebettete Canva Design */
+        .content-main {
+            flex: 1;
+            margin-top: 80px; /* Platz für Header */
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .embed-wrapper {
+            width: 100%;
+            height: 100%;
+            max-width: 1200px; /* Begrenzung für große Mac-Bildschirme */
+            background: var(--passport-green-soft);
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--border-page);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        /* Canva Embed Style */
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* Hinweis für Mac-User */
+        .desktop-hint {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.5);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        @media (hover: hover) {
+            .desktop-hint { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="familie.html" class="back-btn">←</a>
+        <h1>Gastspiel</h1>
+    </header>
+
+    <main class="content-main">
+        <div class="embed-wrapper" id="page-wrapper">
+            <!-- Der Canva Link als Embed -->
+            <iframe id="canva-frame" 
+                src="https://www.canva.com/design/DAG9SuUa3TM/jwOqqS2xwYnfBF1m4NHqMg/view?embed" 
+                allowfullscreen="allowfullscreen" 
+                allow="fullscreen">
+            </iframe>
+        </div>
+    </main>
+
+    <div class="desktop-hint">Nutze ← → Pfeiltasten zum Blättern</div>
+
+    <script>
+        // Tastatur-Steuerung für Mac/Desktop
+        document.addEventListener('keydown', function(e) {
+            const iframe = document.getElementById('canva-frame');
+            
+            // Wir senden den Fokus an das Iframe, damit Canva die Tastenbefehle erhält
+            if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+                iframe.focus();
+            }
+            
+            // Fallback: Falls der Fokus nicht reicht, simulieren wir das Scrollen im Wrapper
+            if (e.key === "ArrowRight") {
+                // Canva regelt das Blättern im View-Modus meist selbst bei Fokus
+            }
+        });
+
+        // Verhindert das "Gummiband"-Scrollen auf dem iPhone
+        document.addEventListener('touchmove', function (e) {
+            if (e.target.id !== 'canva-frame') {
+                e.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+</body>
+</html>
