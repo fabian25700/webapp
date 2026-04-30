@@ -103,6 +103,13 @@
         .title { font-weight: 600; color: var(--text-primary); font-size: 1.05rem; flex-grow: 1; }
         .arrow { color: var(--arrow-color); font-size: 1rem; }
 
+        /* Anpassung der Deckkraft für Buttons während des Spiels */
+        body.game-running .menu-card, 
+        body.game-running header {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
         #games-overlay, #misc-overlay {
             position: fixed;
             inset: 0;
@@ -272,8 +279,8 @@
     <div id="misc-overlay" onclick="toggleOverlay('misc-overlay', false)">
         <div class="overlay-content" onclick="event.stopPropagation()">
             <h2 style="margin: 0 0 10px 0; color: var(--text-primary); text-align: center;">Sonstiges</h2>
-            <a href="Gastspiel2.html" class="overlay-item">
-                <span class="icon">🎭</span> Gastspiel
+            <a href="gastspiel2.html" class="overlay-item">
+                <span class="icon">⚽</span> Gastspiel
             </a>
             <a href="test.html" class="overlay-item">
                 <span class="icon">🧪</span> Test
@@ -332,6 +339,7 @@
 
         function startGame() {
             gameActive = true;
+            document.body.classList.add("game-running"); // Deckkraft-Klasse hinzufügen
             canvas.style.display = "block";
             scoreDisplay.style.display = "block";
             stopBtn.style.display = "block";
@@ -357,6 +365,7 @@
 
         function stopGame() {
             gameActive = false;
+            document.body.classList.remove("game-running"); // Deckkraft-Klasse entfernen
             canvas.style.display = "none";
             scoreDisplay.style.display = "none";
             stopBtn.style.display = "none";
@@ -433,7 +442,7 @@
 
         window.addEventListener("touchmove", (e) => {
             if (!gameActive) return;
-            e.preventDefault(); // Verhindert Scrollen beim Spielen
+            e.preventDefault(); 
         }, { passive: false });
 
         window.addEventListener("touchend", (e) => {
@@ -446,7 +455,7 @@
             const absDx = Math.abs(dx);
             const absDy = Math.abs(dy);
             
-            if (Math.max(absDx, absDy) < 20) return; // Zu kleine Bewegung ignorieren
+            if (Math.max(absDx, absDy) < 20) return; 
 
             const d = direction;
             if (absDx > absDy) {
