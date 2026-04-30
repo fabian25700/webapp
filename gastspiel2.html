@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Gastspiel</title>
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --header-bg: rgba(240, 242, 245, 0.95);
+            --header-text: #1e293b;
+            --header-border: #e2e8f0;
+            --page-padding: 16px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0f172a;
+                --header-bg: rgba(15, 23, 42, 0.95);
+                --header-text: #f1f5f9;
+                --header-border: #1e293b;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Zentriert die Überschrift, da kein Button da ist */
+            background: var(--header-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--header-border);
+        }
+
+        header h1 {
+            color: var(--header-text);
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+        }
+
+        .content-main {
+            flex: 1;
+            /* Padding oben angepasst auf Header-Höhe + Abstand */
+            padding: calc(env(safe-area-inset-top) + 85px) var(--page-padding) calc(env(safe-area-inset-bottom) + 20px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .embed-wrapper {
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .embed-wrapper {
+                box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            }
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+
+        /* Mac / Desktop Optimierung */
+        @media (min-width: 1024px) {
+            .embed-wrapper {
+                max-width: 1200px;
+                max-height: 80vh;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Gastspiel</h1>
+    </header>
+
+    <main class="content-main">
+        <div class="embed-wrapper">
+            <iframe 
+                id="canva-frame"
+                src="https://www.canva.com/design/DAG9SuUa3TM/jwOqqS2xwYnfBF1m4NHqMg/view?embed" 
+                allowfullscreen="allowfullscreen" 
+                allow="fullscreen">
+            </iframe>
+        </div>
+    </main>
+
+    <script>
+        window.onload = () => {
+            document.getElementById('canva-frame').focus();
+        };
+    </script>
+</body>
+</html>
