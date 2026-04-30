@@ -3,18 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Darts App</title>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Fabians App</title>
+    <script src="daten.js"></script>
     <style>
         :root {
+            --primary: #2ecc71;
+            --primary-dark: #27ae60;
+            --secondary: #3498db;
             --bg: #f0f2f5;
             --surface: rgba(255, 255, 255, 0.95);
-            --primary: #2ecc71;
-            --accent: #D97706;
             --text-primary: #1e293b;
             --text-secondary: #64748b;
             --border: rgba(203, 213, 225, 0.8);
             --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --card-hover: rgba(240, 240, 240, 0.95);
+            --arrow-color: #cbd5e1;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -25,6 +30,8 @@
                 --text-secondary: #94a3b8;
                 --border: rgba(51, 65, 85, 0.8);
                 --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+                --card-hover: rgba(51, 65, 85, 0.95);
+                --arrow-color: #475569;
             }
         }
 
@@ -32,292 +39,406 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
-            background-color: var(--bg);
-            color: var(--text-primary);
+            background: var(--bg);
             margin: 0;
             height: 100vh;
-            width: 100vw;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            transition: background 0.3s ease;
+        }
+
+        header {
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px 20px;
+            display: flex;
+            justify-content: center;
             align-items: center;
+            z-index: 100;
         }
 
-        .header-link { text-decoration: none; color: inherit; cursor: default; }
-        h1 { margin: 10px 0; font-weight: 800; color: var(--accent); font-size: 1.2rem; }
-
-        .setup-container {
-            display: flex; flex-direction: column; justify-content: center;
-            height: 85%; width: 90%; max-width: 400px;
+        .header-title {
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 0.04em;
+            color: var(--text-primary);
         }
 
-        .card {
-            background: var(--surface); padding: 20px; border-radius: 24px;
-            box-shadow: var(--shadow); border: 1px solid var(--border);
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+            width: 85%;
+            max-width: 360px;
+            margin: auto;
+            z-index: 10;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
-        .menu-option {
-            display: flex; align-items: center; gap: 10px; padding: 15px;
-            margin-bottom: 10px; background: var(--bg); border-radius: 12px;
-            font-weight: 700; cursor: pointer; border: 2px solid transparent;
-        }
-        .menu-option.active { border-color: var(--accent); background: var(--surface); }
-
-        #gameScreen { 
-            display: none; width: 100%; height: calc(100vh - 50px); 
-            padding: 5px; flex-direction: column; 
-        }
-
-        .table-container {
-            background: var(--surface); border-radius: 20px; overflow: hidden;
-            box-shadow: var(--shadow); border: 1px solid var(--border); flex-grow: 1; display: flex;
-        }
-        table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-        th, td { border-bottom: 1px solid var(--border); vertical-align: middle; text-align: center; }
-        .name-cell { font-size: 0.7rem; font-weight: 800; color: var(--text-secondary); padding-top: 4px; }
-        .total-score { font-size: 1.1rem; font-weight: 900; color: var(--accent); padding-bottom: 4px; }
-        .target-col { width: 45px; font-weight: 900; background: var(--text-primary); color: var(--bg); font-size: 1.1rem; }
-        .hit-btn {
-            width: 42px; height: 42px; border-radius: 10px; border: 1px solid var(--border);
-            background: var(--bg); font-size: 1.2rem; font-weight: bold; display: flex;
-            align-items: center; justify-content: center; margin: 0 auto;
-        }
-        .hit-btn.closed { background: var(--accent); color: white; border: none; }
-        .points-label { font-size: 0.7rem; color: var(--primary); font-weight: 700; height: 12px; }
-
-        .x01-header {
-            display: flex; justify-content: space-around; background: var(--surface);
-            padding: 10px; border-radius: 20px; margin-bottom: 8px; border: 1px solid var(--border);
-        }
-        .x01-p-card { text-align: center; padding: 5px; border-radius: 10px; flex: 1; }
-        .x01-p-card.active { background: rgba(217, 119, 6, 0.1); border: 1px solid var(--accent); }
-        .x01-score-big { font-size: 1.6rem; font-weight: 900; color: var(--accent); line-height: 1; }
-        .x01-avg { font-size: 0.6rem; color: var(--text-secondary); margin-top: 2px; }
-        .checkout-hint { font-size: 0.7rem; color: var(--primary); font-weight: 800; min-height: 14px; margin-top: 2px; }
-
-        .numpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
-        .num-btn { 
-            background: var(--surface); border: 1px solid var(--border); padding: 18px; 
-            border-radius: 15px; font-weight: 800; font-size: 1.2rem; color: var(--text-primary);
+        .menu-card {
+            background: var(--surface);
+            padding: 18px 22px;
+            border-radius: 20px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: transform 0.12s ease, background 0.2s ease;
+            border: 1px solid var(--border);
+            cursor: pointer;
         }
 
-        #winPopup {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-            z-index: 10000; align-items: center; justify-content: center;
+        .menu-card:active { transform: scale(0.96); background: var(--card-hover); }
+        .icon { font-size: 1.35rem; }
+        .title { font-weight: 600; color: var(--text-primary); font-size: 1.05rem; flex-grow: 1; }
+        .arrow { color: var(--arrow-color); font-size: 1rem; }
+
+        /* Overlay Styles */
+        #games-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
         }
-        .win-box { background: var(--surface); padding: 25px; border-radius: 32px; text-align: center; width: 85%; }
-        .main-btn { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 16px; font-size: 1rem; font-weight: 700; cursor: pointer; }
-        
-        .footer-controls { display: flex; justify-content: center; gap: 20px; margin-top: 5px; }
-        .control-btn { color: var(--text-secondary); font-size: 0.75rem; font-weight: 600; cursor: pointer; padding: 5px; }
+
+        .overlay-content {
+            width: 85%;
+            max-width: 320px;
+            background: var(--surface);
+            border-radius: 24px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .overlay-item {
+            background: var(--bg);
+            padding: 16px;
+            border-radius: 16px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-primary);
+            font-weight: 600;
+            border: 1px solid var(--border);
+        }
+
+        /* Game Elements */
+        #game-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            display: none;
+        }
+
+        #score-display {
+            position: fixed;
+            top: 100px;
+            width: 100%;
+            text-align: center;
+            font-weight: 900;
+            color: var(--primary);
+            display: none;
+            z-index: 100;
+            font-size: 3rem;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        #stop-btn {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 16px);
+            right: 20px;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            color: #e74c3c;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            z-index: 500;
+            display: none;
+        }
+
+        #instructions {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 400;
+            pointer-events: none;
+        }
+
+        #instructions.visible { display: flex; }
+
+        .instr-box {
+            background: var(--surface);
+            border-radius: 22px;
+            padding: 26px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            animation: fadeInScale 0.3s ease forwards;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .instr-key { 
+            display: inline-block; 
+            background: var(--bg); 
+            border: 1px solid var(--border); 
+            padding: 4px 8px; 
+            border-radius: 8px; 
+            margin: 2px; 
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-    <a href="index.html" class="header-link"><h1 id="title">DARTS</h1></a>
+    <header>
+        <div class="header-title">FABIANS APP</div>
+    </header>
 
-    <div id="screenMode" class="setup-container">
-        <div class="card">
-            <h2 style="font-size:1rem; margin-top:0">Spielmodus</h2>
-            <div class="menu-option active" id="optCricket" onclick="selM('cricket')">CRICKET</div>
-            <div class="menu-option" id="optX01" onclick="selM('x01')">X01 DARTS</div>
-            
-            <div id="xSetup" style="display:none; padding:10px; background:var(--bg); border-radius:12px; margin-bottom:10px;">
-                <label><input type="radio" name="xS" value="301" checked> 301</label>
-                <label style="margin-left:15px"><input type="radio" name="xS" value="501"> 501</label>
-                <br><br>
-                <label><input type="checkbox" id="xDO"> Double Out</label>
+    <button id="stop-btn" onclick="stopGame()">✕ STOP</button>
+    <div id="score-display"><span id="current-score">0</span></div>
+
+    <div class="menu-container" id="main-menu">
+        <a href="reise_stats.html" class="menu-card">
+            <span class="icon">🌍</span>
+            <span class="title">Reisen</span>
+            <span class="arrow">→</span>
+        </a>
+        <a href="Alltag.html" class="menu-card">
+            <span class="icon">🏠</span>
+            <span class="title">Alltag</span>
+            <span class="arrow">→</span>
+        </a>
+        <div class="menu-card" onclick="toggleOverlay(true)">
+            <span class="icon">🎮</span>
+            <span class="title">Spiele</span>
+            <span class="arrow">→</span>
+        </div>
+    </div>
+
+    <!-- Spiele Auswahl -->
+    <div id="games-overlay" onclick="toggleOverlay(false)">
+        <div class="overlay-content" onclick="event.stopPropagation()">
+            <h2 style="margin: 0 0 15px 0; text-align: center; color: var(--text-primary)">Spiele</h2>
+            <div class="overlay-item" onclick="toggleOverlay(false); prepareGame();">
+                <span class="icon">🐍</span> Snake
             </div>
-            <button class="main-btn" style="width:100%" onclick="toPlayers()">WEITER</button>
+            <a href="darts.html" class="overlay-item">
+                <span class="icon">🎯</span> Darts
+            </a>
+            <button onclick="toggleOverlay(false)" style="margin-top: 10px; background: none; border: none; color: var(--text-secondary);">Schließen</button>
         </div>
     </div>
 
-    <div id="screenPlayers" class="setup-container" style="display:none">
-        <div class="card">
-            <h2 style="font-size:1rem; margin-top:0">Spieler</h2>
-            <div id="pList">
-                <label class="menu-option"><input type="checkbox" value="Beate" checked> Beate</label>
-                <label class="menu-option"><input type="checkbox" value="Michael" checked> Michael</label>
-                <label class="menu-option"><input type="checkbox" value="Niclas" checked> Niclas</label>
-                <label class="menu-option"><input type="checkbox" value="Fabian" checked> Fabian</label>
-                <label class="menu-option"><input type="checkbox" value="Sally" checked> Sally</label>
-            </div>
-            <button class="main-btn" style="width:100%; margin-top:10px;" onclick="start()">START</button>
-        </div>
+    <!-- Anleitung -->
+    <div id="instructions">
+        <div class="instr-box" id="instr-content"></div>
     </div>
 
-    <div id="gameScreen">
-        <div id="gameArea" style="flex-grow:1; display:flex; flex-direction:column;"></div>
-        <div class="footer-controls">
-            <span class="control-btn" onclick="undo()">↩ Zurück</span>
-            <span class="control-btn" onclick="location.reload()">✖ Reset</span>
-        </div>
-    </div>
-
-    <div id="winPopup">
-        <div class="win-box">
-            <h1 id="winN" style="font-size:2.2rem; color:var(--accent); margin:0;">---</h1>
-            <p style="color:var(--text-secondary); margin-bottom:15px;">GEWONNEN!</p>
-            <div id="winStats" style="text-align:left; background:var(--bg); padding:15px; border-radius:15px; font-size:0.85rem;"></div>
-            <button class="main-btn" style="width:100%; margin-top:15px;" onclick="location.reload()">NEUSTART</button>
-        </div>
-    </div>
+    <canvas id="game-canvas"></canvas>
 
     <script>
-        const names = { "Beate": "BGL", "Michael": "MG", "Niclas": "NG", "Fabian": "FG", "Sally": "SH" };
-        const checks = { 170:"T20 T20 BE", 167:"T20 T19 BE", 164:"T20 T18 BE", 161:"T20 T17 BE", 160:"T20 T20 D20", 100:"T20 D20", 80:"T20 D10", 60:"20 D20", 50:"BE", 40:"D20", 32:"D16", 16:"D8", 8:"D4", 4:"D2", 2:"D1" };
-        const bad = [179, 178, 176, 175, 173, 172, 169, 166, 163];
-        let mode = 'cricket', players = [], state = { data: {}, stats: {}, idx: 0, input: "" }, history = [];
+        const canvas = document.getElementById("game-canvas");
+        const ctx = canvas.getContext("2d");
+        const scoreDisplay = document.getElementById("score-display");
+        const scoreVal = document.getElementById("current-score");
+        const stopBtn = document.getElementById("stop-btn");
+        const instrEl = document.getElementById("instructions");
+        const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
 
-        function selM(m) {
-            mode = m;
-            document.getElementById('optCricket').classList.toggle('active', m==='cricket');
-            document.getElementById('optX01').classList.toggle('active', m==='x01');
-            document.getElementById('xSetup').style.display = m==='x01' ? 'block' : 'none';
+        let gameActive = false;
+        let snake, direction, nextDirection, food, gameLoop;
+        let score = 0;
+        let GRID = 24;
+
+        // Touch Variablen
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        const emojis = ["🇩🇪", "🇮🇹", "🇺🇸", "🇯🇵", "🇫🇷", "🇪🇸", "🇬🇧", "🇦🇹", "🇨🇭"];
+
+        function toggleOverlay(show) {
+            document.getElementById('games-overlay').style.display = show ? 'flex' : 'none';
         }
 
-        function toPlayers() {
-            document.getElementById('screenMode').style.display = 'none';
-            document.getElementById('screenPlayers').style.display = 'flex';
-        }
-
-        function saveHistory() {
-            history.push(JSON.stringify({data: state.data, stats: state.stats, idx: state.idx}));
-            if(history.length > 50) history.shift();
-        }
-
-        function undo() {
-            if(!history.length) return;
-            const last = JSON.parse(history.pop());
-            state.data = last.data;
-            state.stats = last.stats;
-            state.idx = last.idx;
-            state.input = "";
-            render();
-        }
-
-        function start() {
-            const sel = document.querySelectorAll('#pList input:checked');
-            players = Array.from(sel).map(c => c.value);
-            if(!players.length) return alert("Spieler?");
+        function prepareGame() {
+            instrEl.classList.add("visible");
+            const content = document.getElementById("instr-content");
             
-            document.getElementById('screenPlayers').style.display = 'none';
-            document.getElementById('gameScreen').style.display = 'flex';
-            document.getElementById('title').innerText = mode.toUpperCase();
-
-            if(mode === 'cricket') {
-                [20,19,18,17,16,15,25].forEach(t => players.forEach((_,i) => state.data[`${t}-${i}`] = {h:0, p:0}));
+            if(isTouch) {
+                content.innerHTML = `<h2>🐍 Snake</h2><p style="font-size: 2rem;">👆👇👈👉</p><p>Wische in die Richtung,<br>in die du steuern willst!</p>`;
             } else {
-                const s = parseInt(document.querySelector('input[name="xS"]:checked').value);
-                state.conf = { s, do: document.getElementById('xDO').checked };
-                players.forEach((_,i) => {
-                    state.data[i] = s;
-                    state.stats[i] = { d: 0, t: 0, h: 0, r: 0 };
-                });
+                content.innerHTML = `<h2>🐍 Snake</h2><p><span class="instr-key">↑</span><span class="instr-key">↓</span><span class="instr-key">←</span><span class="instr-key">→</span></p><p>Nutze die Pfeiltasten zum Steuern</p>`;
             }
-            render();
+
+            setTimeout(() => {
+                instrEl.classList.remove("visible");
+                startGame();
+            }, 2200);
         }
 
-        function render() {
-            const area = document.getElementById('gameArea');
-            if(mode === 'cricket') {
-                let h = `<div class="table-container"><table><thead><tr><th class="target-col" rowspan="2">🎯</th>`;
-                players.forEach((p, i) => h += `<th class="name-cell">${names[p]}</th>`);
-                h += `</tr><tr>`;
-                players.forEach((_, i) => h += `<th id="sc-${i}" class="total-score">0</th>`);
-                h += `</tr></thead><tbody>`;
-                [20,19,18,17,16,15,25].forEach(t => {
-                    h += `<tr><td class="target-col">${t==25?'B':t}</td>`;
-                    players.forEach((_, i) => {
-                        const cell = state.data[`${t}-${i}`];
-                        h += `<td onclick="hitC(${t},${i})"><div class="points-label">${cell.p>0?'+'+cell.p:''}</div><div class="hit-btn ${cell.h>=3?'closed':''}">${cell.h==1?'/':cell.h==2?'X':cell.h>=3?'⦻':''}</div></td>`;
-                    });
-                    h += `</tr>`;
-                });
-                area.innerHTML = h + `</tbody></table></div>`;
-                players.forEach((_,i) => {
-                    let sum = [20,19,18,17,16,15,25].reduce((a, t) => a + state.data[`${t}-${i}`].p, 0);
-                    document.getElementById(`sc-${i}`).innerText = sum;
-                });
+        function startGame() {
+            gameActive = true;
+            canvas.style.display = "block";
+            scoreDisplay.style.display = "block";
+            stopBtn.style.display = "block";
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // Grid an Bildschirmgröße anpassen
+            GRID = Math.floor(canvas.width / 15); 
+            if(GRID > 32) GRID = 32;
+
+            score = 0;
+            scoreVal.innerText = score;
+
+            const startX = Math.floor(canvas.width / 2 / GRID) * GRID;
+            const startY = Math.floor(canvas.height / 2 / GRID) * GRID;
+            
+            snake = [{x: startX, y: startY}];
+            direction = {x: 0, y: -GRID};
+            nextDirection = {x: 0, y: -GRID};
+            
+            spawnFood();
+            run();
+        }
+
+        function run() {
+            if (!gameActive) return;
+            update();
+            draw();
+            setTimeout(run, Math.max(50, 120 - (score * 2)));
+        }
+
+        function update() {
+            direction = nextDirection;
+            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+
+            // Wall-Wrap (durch Wände laufen)
+            if (head.x < 0) head.x = Math.floor((canvas.width - 1) / GRID) * GRID;
+            if (head.x >= canvas.width) head.x = 0;
+            if (head.y < 0) head.y = Math.floor((canvas.height - 1) / GRID) * GRID;
+            if (head.y >= canvas.height) head.y = 0;
+
+            // Selbst-Kollision
+            if (snake.some(s => s.x === head.x && s.y === head.y)) return gameOver();
+
+            snake.unshift(head);
+
+            if (head.x === food.x && head.y === food.y) {
+                score++;
+                scoreVal.innerText = score;
+                spawnFood();
             } else {
-                let h = `<div class="x01-header">`;
-                players.forEach((p, i) => {
-                    const pts = state.data[i];
-                    const avg = state.stats[i].r > 0 ? (state.stats[i].t / state.stats[i].r).toFixed(1) : "0.0";
-                    h += `<div class="x01-p-card ${i===state.idx?'active':''}">
-                        <div class="name-cell">${names[p]}</div>
-                        <div class="x01-score-big">${pts}</div>
-                        <div class="x01-avg">Ø ${avg}</div>
-                        <div class="checkout-hint">${checks[pts] || (pts<=158?"Checkbar":"")}</div>
-                    </div>`;
-                });
-                h += `</div><div class="card" style="margin:5px auto; text-align:center; width:100%">
-                    <div style="font-size:0.7rem; color:var(--text-secondary)">Am Zug: ${players[state.idx]}</div>
-                    <div style="font-size:2.5rem; font-weight:900; height:3rem;">${state.input || "0"}</div>
-                    <div class="numpad">
-                        ${[1,2,3,4,5,6,7,8,9].map(n => `<button class="num-btn" onclick="press(${n})">${n}</button>`).join('')}
-                        <button class="num-btn" style="color:red" onclick="press('C')">C</button>
-                        <button class="num-btn" onclick="press(0)">0</button>
-                        <button class="num-btn" style="color:var(--primary)" onclick="sub()">OK</button>
-                    </div>
-                </div>`;
-                area.innerHTML = h;
+                snake.pop();
             }
         }
 
-        function hitC(t, i) {
-            saveHistory();
-            const c = state.data[`${t}-${i}`];
-            if(c.h < 3) c.h++; else if(players.some((_,idx) => state.data[`${t}-${idx}`].h < 3)) c.p += t;
-            render(); checkC();
-        }
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Hintergrund-Leuchten
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            ctx.fillStyle = isDark ? "#0f172a" : "#f0f2f5";
+            ctx.fillRect(0,0, canvas.width, canvas.height);
 
-        function press(v) {
-            if(v==='C') state.input = ""; else if(state.input.length < 3) state.input += v;
-            render();
-        }
+            // Food
+            ctx.font = `${GRID - 5}px serif`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(food.s, food.x + GRID/2, food.y + GRID/2);
 
-        function sub() {
-            const v = parseInt(state.input) || 0;
-            if(v > 180 || bad.includes(v)) { alert("Ungültig!"); state.input = ""; return render(); }
-            const cur = state.data[state.idx], nxt = cur - v, s = state.stats[state.idx];
-            if(nxt < 0 || (state.conf.do && nxt === 1)) { alert("BUST!"); }
-            else {
-                saveHistory();
-                state.data[state.idx] = nxt;
-                s.r++; s.d += 3; s.t += v;
-                if(v > s.h) s.h = v;
-                if(nxt === 0) return win(players[state.idx], state.idx);
-            }
-            state.idx = (state.idx + 1) % players.length;
-            state.input = ""; render();
-        }
-
-        function checkC() {
-            players.forEach((p, i) => {
-                const closed = [20,19,18,17,16,15,25].every(t => state.data[`${t}-${i}`].h >= 3);
-                const scores = players.map((_, idx) => [20,19,18,17,16,15,25].reduce((a,t) => a + state.data[`${t}-${idx}`].p, 0));
-                if(closed && scores[i] === Math.max(...scores)) win(p, i);
+            // Snake
+            snake.forEach((part, i) => {
+                ctx.fillStyle = i === 0 ? "#2ecc71" : "#27ae60";
+                ctx.beginPath();
+                const r = 6;
+                ctx.roundRect(part.x + 2, part.y + 2, GRID - 4, GRID - 4, r);
+                ctx.fill();
             });
         }
 
-        function win(p, i) {
-            document.getElementById('winN').innerText = p;
-            let h = "";
-            if(mode === 'x01') {
-                const s = state.stats[i];
-                h = `<b>Average:</b> ${(s.t/s.r).toFixed(2)}<br><b>Darts:</b> ${s.d}<br><b>High Score:</b> ${s.h}<br><b>Runden:</b> ${s.r}`;
-            } else { h = "Alle Felder zu & meiste Punkte!"; }
-            document.getElementById('winStats').innerHTML = h;
-            document.getElementById('winPopup').style.display = 'flex';
-            
-            const end = Date.now() + 2000;
-            (function f() {
-                confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, zIndex: 10001 });
-                confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, zIndex: 10001 });
-                if (Date.now() < end) requestAnimationFrame(f);
-            }());
+        function spawnFood() {
+            const cols = Math.floor(canvas.width / GRID);
+            const rows = Math.floor(canvas.height / GRID);
+            food = {
+                x: Math.floor(Math.random() * cols) * GRID,
+                y: Math.floor(Math.random() * rows) * GRID,
+                s: emojis[Math.floor(Math.random() * emojis.length)]
+            };
         }
+
+        function gameOver() {
+            gameActive = false;
+            ctx.fillStyle = "#e74c3c";
+            ctx.font = "bold 30px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillText("GAME OVER", canvas.width/2, canvas.height/2);
+            setTimeout(stopGame, 1500);
+        }
+
+        function stopGame() {
+            gameActive = false;
+            canvas.style.display = "none";
+            scoreDisplay.style.display = "none";
+            stopBtn.style.display = "none";
+        }
+
+        // --- STEUERUNG ---
+
+        // Desktop (Pfeiltasten)
+        window.addEventListener("keydown", e => {
+            if(!gameActive) return;
+            if (e.key === "ArrowUp" && direction.y === 0) nextDirection = {x: 0, y: -GRID};
+            if (e.key === "ArrowDown" && direction.y === 0) nextDirection = {x: 0, y: GRID};
+            if (e.key === "ArrowLeft" && direction.x === 0) nextDirection = {x: -GRID, y: 0};
+            if (e.key === "ArrowRight" && direction.x === 0) nextDirection = {x: GRID, y: 0};
+        });
+
+        // Mobile (Swipe)
+        window.addEventListener("touchstart", e => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, {passive: true});
+
+        window.addEventListener("touchend", e => {
+            if(!gameActive) return;
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            const dy = e.changedTouches[0].clientY - touchStartY;
+            
+            if (Math.abs(dx) > Math.abs(dy)) {
+                if (Math.abs(dx) > 30) {
+                    if (dx > 0 && direction.x === 0) nextDirection = {x: GRID, y: 0};
+                    else if (dx < 0 && direction.x === 0) nextDirection = {x: -GRID, y: 0};
+                }
+            } else {
+                if (Math.abs(dy) > 30) {
+                    if (dy > 0 && direction.y === 0) nextDirection = {x: 0, y: GRID};
+                    else if (dy < 0 && direction.y === 0) nextDirection = {x: 0, y: -GRID};
+                }
+            }
+        }, {passive: true});
+
     </script>
 </body>
 </html>
