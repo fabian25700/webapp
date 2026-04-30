@@ -103,7 +103,7 @@
         .title { font-weight: 600; color: var(--text-primary); font-size: 1.05rem; flex-grow: 1; }
         .arrow { color: var(--arrow-color); font-size: 1rem; }
 
-        #games-overlay {
+        #games-overlay, #misc-overlay {
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.4);
@@ -241,17 +241,22 @@
             <span class="title">Alltag</span>
             <span class="arrow">→</span>
         </a>
-        <div class="menu-card" onclick="toggleOverlay(true)">
+        <div class="menu-card" onclick="toggleOverlay('games-overlay', true)">
             <span class="icon">🎮</span>
             <span class="title">Spiele</span>
             <span class="arrow">→</span>
         </div>
+        <div class="menu-card" onclick="toggleOverlay('misc-overlay', true)">
+            <span class="icon">📁</span>
+            <span class="title">Sonstiges</span>
+            <span class="arrow">→</span>
+        </div>
     </div>
 
-    <div id="games-overlay" onclick="toggleOverlay(false)">
+    <div id="games-overlay" onclick="toggleOverlay('games-overlay', false)">
         <div class="overlay-content" onclick="event.stopPropagation()">
             <h2 style="margin: 0 0 10px 0; color: var(--text-primary); text-align: center;">Spiele</h2>
-            <div class="overlay-item" onclick="toggleOverlay(false); toggleGame();">
+            <div class="overlay-item" onclick="toggleOverlay('games-overlay', false); toggleGame();">
                 <span class="icon">🐍</span> Snake
             </div>
             <a href="darts.html" class="overlay-item">
@@ -260,10 +265,20 @@
             <a href="imposter.html" class="overlay-item">
                 <span class="icon">🕵️‍♂️</span> Imposter
             </a>
+            <button onclick="toggleOverlay('games-overlay', false)" style="margin-top: 10px; background: none; border: none; color: var(--text-secondary); font-weight: 600;">Schließen</button>
+        </div>
+    </div>
+
+    <div id="misc-overlay" onclick="toggleOverlay('misc-overlay', false)">
+        <div class="overlay-content" onclick="event.stopPropagation()">
+            <h2 style="margin: 0 0 10px 0; color: var(--text-primary); text-align: center;">Sonstiges</h2>
+            <a href="Gastspiel2.html" class="overlay-item">
+                <span class="icon">🎭</span> Gastspiel
+            </a>
             <a href="test.html" class="overlay-item">
                 <span class="icon">🧪</span> Test
             </a>
-            <button onclick="toggleOverlay(false)" style="margin-top: 10px; background: none; border: none; color: var(--text-secondary); font-weight: 600;">Schließen</button>
+            <button onclick="toggleOverlay('misc-overlay', false)" style="margin-top: 10px; background: none; border: none; color: var(--text-secondary); font-weight: 600;">Schließen</button>
         </div>
     </div>
 
@@ -296,8 +311,8 @@
         const SPEED_MIN = 45;
         const SPEED_STEP = 5;
 
-        function toggleOverlay(show) {
-            document.getElementById('games-overlay').style.display = show ? 'flex' : 'none';
+        function toggleOverlay(id, show) {
+            document.getElementById(id).style.display = show ? 'flex' : 'none';
         }
 
         function toggleGame() {
@@ -309,7 +324,7 @@
             if (!isTouchDevice) {
                 instrContent.innerHTML = `<h2>🐍 Snake</h2><p>Pfeiltasten zum Steuern</p><p><span class="instr-key">↑</span> <span class="instr-key">↓</span> <span class="instr-key">←</span> <span class="instr-key">→</span></p>`;
             } else {
-                instrContent.innerHTML = `<h2>🐍 Snake</h2><div class="instr-touch">👈 &nbsp;&nbsp;&nbsp; 👉</div><p>Links tippen = Links-Drehung<br>Rechts tippen = Rechts-Drehung</p>`;
+                instrContent.innerHTML = `<h2>🐍 Snake</h2><div class="instr-touch">👆</div><p>Wische in die Richtung,<br>in die du steuern willst.</p>`;
             }
             instrEl.classList.add("visible");
             setTimeout(() => { instrEl.classList.remove("visible"); startGame(); }, 2500);
@@ -407,22 +422,39 @@
             if ((e.key === "ArrowRight" || e.key === "d") && d.x === 0) nextDirection = { x: GRID, y: 0 };
         });
 
+        let touchStartX = 0;
+        let touchStartY = 0;
+
         window.addEventListener("touchstart", (e) => {
             if (!gameActive) return;
-            const touchX = e.touches[0].clientX;
-            const screenWidth = window.innerWidth;
-            const d = direction;
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
 
-            if (touchX < screenWidth / 2) {
-                if (d.x > 0) nextDirection = { x: 0, y: -GRID };
-                else if (d.x < 0) nextDirection = { x: 0, y: GRID };
-                else if (d.y > 0) nextDirection = { x: GRID, y: 0 };
-                else if (d.y < 0) nextDirection = { x: -GRID, y: 0 };
+        window.addEventListener("touchmove", (e) => {
+            if (!gameActive) return;
+            e.preventDefault(); // Verhindert Scrollen beim Spielen
+        }, { passive: false });
+
+        window.addEventListener("touchend", (e) => {
+            if (!gameActive) return;
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            
+            const dx = touchEndX - touchStartX;
+            const dy = touchEndY - touchStartY;
+            const absDx = Math.abs(dx);
+            const absDy = Math.abs(dy);
+            
+            if (Math.max(absDx, absDy) < 20) return; // Zu kleine Bewegung ignorieren
+
+            const d = direction;
+            if (absDx > absDy) {
+                if (dx > 0 && d.x === 0) nextDirection = { x: GRID, y: 0 };
+                else if (dx < 0 && d.x === 0) nextDirection = { x: -GRID, y: 0 };
             } else {
-                if (d.x > 0) nextDirection = { x: 0, y: GRID };
-                else if (d.x < 0) nextDirection = { x: 0, y: -GRID };
-                else if (d.y > 0) nextDirection = { x: -GRID, y: 0 };
-                else if (d.y < 0) nextDirection = { x: GRID, y: 0 };
+                if (dy > 0 && d.y === 0) nextDirection = { x: 0, y: GRID };
+                else if (dy < 0 && d.y === 0) nextDirection = { x: 0, y: -GRID };
             }
         }, { passive: true });
     </script>
