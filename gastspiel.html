@@ -8,26 +8,25 @@
     <title>Gastspiel</title>
     <style>
         :root {
-            /* Hintergrundfarbe einheitlich auf die dunkle Canva-Ladefarbe oder das App-Design abgestimmt */
-            --bg-color: #0f172a; 
-            --header-bg: rgba(15, 23, 42, 0.95);
-            --header-text: #f1f5f9;
-            --header-border: #1e293b;
-            --btn-bg: #1e293b;
-            --btn-border: #2d3f55;
-            --btn-text: #f1f5f9;
+            --bg-color: #f0f2f5;
+            --header-bg: rgba(240, 242, 245, 0.95);
+            --header-text: #1e293b;
+            --header-border: #e2e8f0;
+            --btn-bg: #ffffff;
+            --btn-border: #e2e8f0;
+            --btn-text: #1e293b;
+            --page-padding: 16px; /* Abstand zum Rand */
         }
 
-        /* Heller Modus Anpassung (optional, hier für Einheitlichkeit auch dunkel gehalten während Load) */
-        @media (prefers-color-scheme: light) {
+        @media (prefers-color-scheme: dark) {
             :root {
-                --bg-color: #f0f2f5;
-                --header-bg: rgba(240, 242, 245, 0.95);
-                --header-text: #1e293b;
-                --header-border: #e2e8f0;
-                --btn-bg: #ffffff;
-                --btn-border: #e2e8f0;
-                --btn-text: #1e293b;
+                --bg-color: #0f172a;
+                --header-bg: rgba(15, 23, 42, 0.95);
+                --header-text: #f1f5f9;
+                --header-border: #1e293b;
+                --btn-bg: #1e293b;
+                --btn-border: #2d3f55;
+                --btn-text: #f1f5f9;
             }
         }
 
@@ -35,7 +34,7 @@
 
         body {
             background: var(--bg-color);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -52,8 +51,8 @@
             align-items: center;
             gap: 12px;
             background: var(--header-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             border-bottom: 1px solid var(--header-border);
         }
 
@@ -61,64 +60,58 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 42px;
-            height: 42px;
+            width: 36px;
+            height: 36px;
             border-radius: 12px;
             background: var(--btn-bg);
             border: 1px solid var(--btn-border);
             text-decoration: none;
             color: var(--btn-text);
-            font-size: 1.2rem;
-            transition: transform 0.1s ease;
         }
-
-        .back-btn:active { transform: scale(0.9); }
 
         header h1 {
             color: var(--header-text);
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 800;
         }
 
         .content-main {
             flex: 1;
-            /* Nahtloser Übergang zum Header */
-            margin-top: calc(env(safe-area-inset-top) + 60px); 
+            /* Abstand nach oben (Header) + Padding unten/links/rechts */
+            padding: calc(env(safe-area-inset-top) + 85px) var(--page-padding) calc(env(safe-area-inset-bottom) + 20px);
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Maximale Ausnutzung des Screens */
-            padding: 0; 
         }
 
         .embed-wrapper {
             width: 100%;
             height: 100%;
-            /* Verhindert das Aufblitzen von Passport-Grün: */
-            background: var(--bg-color); 
+            background: var(--bg-color);
             position: relative;
-            display: flex;
-            justify-content: center;
+            border-radius: 16px; /* Abgerundete Ecken für den "Karten-Look" */
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .embed-wrapper {
+                box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            }
         }
 
         iframe {
             width: 100%;
             height: 100%;
             border: none;
-            /* Erlaubt flüssiges Swipen auf Mobile */
-            -webkit-overflow-scrolling: touch; 
+            display: block;
         }
 
-        /* Mac/Desktop Optimierung: Leichtes Padding für Ästhetik */
+        /* Mac Anpassung */
         @media (min-width: 1024px) {
-            .content-main {
-                padding: 20px 40px;
-            }
             .embed-wrapper {
-                border-radius: 16px;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                max-width: 1400px;
-                height: 90%;
+                max-width: 1200px;
+                max-height: 800px;
             }
         }
     </style>
@@ -142,23 +135,9 @@
     </main>
 
     <script>
-        // Fokus-Management für Mac (Pfeiltasten-Support verbessern)
         window.onload = () => {
-            const frame = document.getElementById('canva-frame');
-            frame.focus();
-            
-            // Falls der User irgendwo hinklickt, Fokus zurück zum Iframe
-            document.body.addEventListener('click', () => {
-                frame.focus();
-            }, true);
+            document.getElementById('canva-frame').focus();
         };
-
-        // Automatisches Nachladen bei Orientierungswechsel (Handy)
-        window.addEventListener('orientationchange', () => {
-            setTimeout(() => {
-                window.scrollTo(0, 0);
-            }, 200);
-        });
     </script>
 </body>
 </html>
