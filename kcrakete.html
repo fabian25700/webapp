@@ -46,6 +46,8 @@
             align-items: center;
             user-select: none;
             -webkit-user-select: none;
+            /* Verhindert das Verdecken durch die Notch */
+            padding-top: env(safe-area-inset-top);
         }
 
         h1 { margin: 20px 0; font-weight: 800; color: var(--primary); font-size: 1.6rem; text-transform: uppercase; }
@@ -56,6 +58,8 @@
             height: 80vh;
             display: flex;
             flex-direction: column;
+            /* Berücksichtigt den Home-Indicator unten am iPhone */
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         .card {
