@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>KC Rakete - Chronik</title>
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --surface: #ffffff;
+            --primary: #e3000b; /* Rot */
+            --accent: #c0c0c0; /* Silber */
+            --text-primary: #1a1a1a;
+            --text-secondary: #4a4a4a;
+            --border: #d1d1d1;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #121212;
+                --surface: #1e1e1e;
+                --text-primary: #ffffff;
+                --text-secondary: #b0b0b0;
+                --border: #333333;
+                --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        /* Zoom deaktiviert, Pan (Scrollen) erlaubt */
+        html, body { 
+            width: 100%; 
+            height: 100%; 
+            margin: 0;
+            touch-action: pan-y; /* Erlaubt vertikales Scrollen */
+        }
+
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        header {
+            width: 100%;
+            background: var(--surface);
+            border-bottom: 2px solid var(--primary);
+            text-align: center;
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        h1 { margin: 0; font-weight: 800; color: var(--primary); font-size: 1.4rem; text-transform: uppercase; }
+
+        .container {
+            width: 90%;
+            max-width: 500px;
+            padding: 20px 0;
+        }
+
+        .timeline {
+            position: relative;
+            margin: 0 auto;
+        }
+
+        /* Die vertikale Linie */
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            background-color: var(--accent);
+            top: 0;
+            bottom: 0;
+            left: 20px;
+            margin-left: -2px;
+        }
+
+        .event-card {
+            padding: 10px 10px 10px 50px;
+            position: relative;
+            background-color: inherit;
+            margin-bottom: 15px;
+        }
+
+        /* Der Punkt auf der Linie */
+        .event-card::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            left: 14px;
+            background-color: var(--primary);
+            border: 2px solid var(--accent);
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .content {
+            padding: 15px;
+            background-color: var(--surface);
+            position: relative;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .date {
+            font-weight: 900;
+            color: var(--primary);
+            font-size: 0.85rem;
+            display: block;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .event-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .details {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .highlight {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        footer {
+            padding: 30px 20px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary);
+            background: var(--accent);
+            width: 100%;
+            margin-top: 20px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>KC Rakete Chronik</h1>
+    </header>
+
+    <div class="container">
+        <div class="timeline" id="chronik">
+            <!-- Events werden hier eingefügt -->
+        </div>
+    </div>
+
+    <footer id="stats">
+        HEUTE: 11 MITGLIEDER - 53 KEGELABENDE
+    </footer>
+
+    <script>
+        const events = [
+            { d: "18. Okt 2020", t: "Erstes Kegeln als KBC Warmer Hans", m: "Gründer: Christoph, Fabian, Jan, Leonard, Marvin, Niklas, Tobias, Yannick" },
+            { d: "30. Sep 2021", t: "Umbenennung in KC Rakete", m: "Erstes Kegeln mit Strafen. Beitritt: Cengiz und Julian" },
+            { d: "01. Nov 2021", t: "Erste eigene Aufkleber", m: "Das Branding beginnt." },
+            { d: "24. Feb 2022", t: "Abbruch Karnevalskegeln", m: "Grund: Kritischer Alkoholpegel erreicht." },
+            { d: "04. Aug 2022", t: "Jubiläum: 10. Kegeln", m: "Ein Meilenstein." },
+            { d: "29. Dez 2022", t: "1. Kegelturnier (Brauhaus Krone)", m: "3. Platz hinter KC Govas & KC Met Schmackes" },
+            { d: "20. Okt 2023", t: "Zuwachs", m: "Beitritt des Mitglieds: Daniel" },
+            { d: "03. Nov 2023", t: "Official Gear", m: "Neue KC Rakete Polo-Shirts" },
+            { d: "17. Nov 2023", t: "Jubiläum: 25. Kegeln", m: "Die Konstanz zahlt sich aus." },
+            { d: "29. Dez 2023", t: "2. Kegelturnier (Brauhaus Krone)", m: "Erneut 3. Platz hinter KC Govas & KC Met Schmackes" },
+            { d: "02. Apr 2024", t: "Neue KC Rakete Hoodies", m: "Upgrade für die kalten Tage." },
+            { d: "25. Apr 2024", t: "Zuwachs", m: "Beitritt des Mitglieds: Neitzke" },
+            { d: "14. Jun 2024", t: "1. Kegeltour - Brüssel", m: "Schnitzeljagd. Orga: Fabian & Christoph. Mottoshirts & Flachmänner." },
+            { d: "28. Jun 2024", t: "Abschied", m: "Austritt des Mitglieds: Daniel" },
+            { d: "31. Aug 2024", t: "Erste KC Rakete Fahne", m: "Präsenz zeigen." },
+            { d: "29. Dez 2024", t: "3. Kegelturnier (Brauhaus Krone)", m: "2. Platz (geteilt mit KC Met Schmackes) hinter KC Govas" },
+            { d: "07. Feb 2025", t: "Heimwechsel", m: "Von Em Pittermänchen zum Brauhaus zur Krone" },
+            { d: "13. Jun 2025", t: "2. Kegeltour - Hamburg", m: "Beerpong & Schnitzeljagd. Orga: Yannick & Cengiz. Rucksäcke & Fischerhüte." },
+            { d: "25. Jul 2025", t: "1. Mitgliederversammlung", m: "Satzung beschlossen. Vorstand: Christoph, Niklas, Yannick, Fabian." },
+            { d: "15. Nov 2025", t: "1. KC Rakete Winterfest", m: "Bierbrunnen Bergheim mit 32 Gästen." },
+            { d: "27. Dez 2025", t: "4. Kegelturnier (Brauhaus Krone)", m: "ERSTER PLATZ! Vor KC Govas & KC Met Schmackes." },
+            { d: "12. Jun 2026", t: "3. Kegeltour - ??", m: "Organisatoren: Tobias und Christoph. Die Spannung steigt." }
+        ];
+
+        function renderChronik() {
+            const container = document.getElementById('chronik');
+            events.forEach(e => {
+                const card = document.createElement('div');
+                card.className = 'event-card';
+                card.innerHTML = `
+                    <div class="content">
+                        <span class="date">${e.d}</span>
+                        <span class="event-title">${e.t}</span>
+                        <div class="details">${e.m}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        renderChronik();
+    </script>
+</body>
+</html>
