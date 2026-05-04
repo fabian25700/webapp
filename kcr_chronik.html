@@ -43,6 +43,8 @@
             align-items: center;
             user-select: none;
             -webkit-user-select: none;
+            /* Padding für die untere Safe Area (Home-Indicator) */
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         header {
@@ -50,7 +52,9 @@
             background: var(--surface);
             border-bottom: 2px solid var(--primary);
             text-align: center;
-            padding: 15px 0;
+            /* Berücksichtigt die Notch oben */
+            padding-top: calc(15px + env(safe-area-inset-top));
+            padding-bottom: 15px;
             position: sticky;
             top: 0;
             z-index: 10;
