@@ -2,253 +2,267 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>KC Rakete - Chronik</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>KC Rakete - Interaktive Chronik</title>
     <style>
         :root {
+            --primary: #e3000b;
             --bg: #f5f5f5;
             --surface: #ffffff;
-            --primary: #e3000b;
-            --accent: #c0c0c0;
-            --text-primary: #1a1a1a;
+            --text: #1a1a1a;
             --border: #d1d1d1;
-            --header-height: 110px; /* Gesamthöhe von Header + Nav */
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg: #121212;
                 --surface: #1e1e1e;
-                --text-primary: #ffffff;
+                --text: #ffffff;
                 --border: #333333;
             }
         }
 
-        html, body { 
-            width: 100%; 
-            overflow-x: hidden; 
-            margin: 0; 
-            padding: 0;
-            scroll-behavior: smooth;
-            background-color: var(--bg);
+        body {
+            margin: 0;
             font-family: -apple-system, system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        /* FIXIERTER BEREICH OBEN */
-        .fixed-header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 9999;
-            background: var(--surface);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
+        /* HEADER */
         header {
-            padding-top: env(safe-area-inset-top);
+            padding: 15px;
             text-align: center;
+            background: var(--surface);
+            border-bottom: 2px solid var(--primary);
+            z-index: 10;
+        }
+
+        h1 { margin: 0; font-size: 1.2rem; text-transform: uppercase; color: var(--primary); }
+
+        /* MAIN LAYOUT */
+        main {
+            display: grid;
+            flex: 1;
+            overflow: hidden;
+            grid-template-areas: "nav" "content";
+            grid-template-rows: auto 1fr;
+        }
+
+        /* DESKTOP: Nav rechts */
+        @media (min-width: 900px) {
+            main {
+                grid-template-areas: "content nav";
+                grid-template-columns: 1fr 120px;
+                grid-template-rows: 1fr;
+            }
+        }
+
+        /* NAVIGATION / SLIDER BEREICH */
+        .nav-container {
+            grid-area: nav;
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
             border-bottom: 1px solid var(--border);
         }
 
-        h1 { 
-            margin: 8px 0; 
-            font-size: 1rem; 
-            color: var(--primary); 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
+        @media (min-width: 900px) {
+            .nav-container {
+                border-bottom: none;
+                border-left: 1px solid var(--border);
+            }
         }
 
-        /* Horizontale Scroll-Leiste für Jahre */
-        nav#year-nav {
+        /* Der Slider */
+        .slider-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 300px;
+            height: 40px;
             display: flex;
-            overflow-x: auto; /* Erlaubt seitliches Wischen */
-            white-space: nowrap;
-            padding: 10px 5px;
-            -webkit-overflow-scrolling: touch; /* Flüssiges Scrollen auf iOS */
-            scrollbar-width: none; /* Versteckt Scrollbar auf Firefox */
+            align-items: center;
         }
 
-        nav#year-nav::-webkit-scrollbar {
-            display: none; /* Versteckt Scrollbar auf Chrome/Safari */
+        @media (min-width: 900px) {
+            .slider-wrapper {
+                height: 300px;
+                width: 40px;
+            }
         }
 
-        .nav-item {
-            display: inline-block;
-            text-decoration: none;
-            color: var(--text-primary);
-            font-size: 0.85rem;
-            font-weight: bold;
-            padding: 6px 15px;
-            margin: 0 4px;
-            border-radius: 20px;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            flex: 0 0 auto; /* Verhindert das Stauchen der Jahre */
+        input[type=range] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: var(--primary);
         }
 
-        .nav-item:active {
-            background: var(--primary);
-            color: white;
+        @media (min-width: 900px) {
+            input[type=range] {
+                appearance: slider-vertical;
+                width: 40px;
+                height: 100%;
+            }
+        }
+
+        .year-label {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
         }
 
         /* CONTENT BEREICH */
-        .container {
+        #content-area {
+            grid-area: content;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .timeline-line {
+            width: 2px;
+            background: var(--primary);
+            position: relative;
+            margin-top: 20px;
+        }
+
+        .event-node {
+            position: relative;
             width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
-            /* WICHTIG: Platz für den fixierten Header lassen */
-            padding-top: calc(var(--header-height) + 20px); 
-            box-sizing: border-box;
+            max-width: 500px;
+            margin-bottom: 30px;
+            opacity: 0.3;
+            transition: opacity 0.3s, transform 0.3s;
         }
 
-        .timeline {
-            position: relative;
-            padding-left: 20px;
-            margin-left: 20px;
+        .event-node.active {
+            opacity: 1;
+            transform: scale(1.02);
         }
 
-        .timeline::after {
-            content: '';
+        .content-card {
+            background: var(--surface);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid var(--primary);
+        }
+
+        .node-dot {
             position: absolute;
-            width: 3px;
-            background-color: var(--accent);
-            top: 0;
-            bottom: 0;
-            left: 0;
-        }
-
-        .event-card {
-            padding: 10px 15px 15px 25px;
-            position: relative;
-            scroll-margin-top: 140px; /* Damit der Text nach dem Sprung unter dem Header landet */
-        }
-
-        .event-card::after {
-            content: '';
-            position: absolute;
+            left: -26px;
+            top: 20px;
             width: 12px;
             height: 12px;
-            left: -5px;
-            background-color: var(--primary);
-            border: 2px solid var(--bg);
-            top: 22px;
+            background: var(--primary);
             border-radius: 50%;
-            z-index: 2;
+            border: 3px solid var(--bg);
         }
 
-        .content {
-            padding: 15px;
-            background-color: var(--surface);
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            border: 1px solid var(--border);
-            font-size: 0.95rem;
-        }
+        .date-text { font-size: 0.8rem; font-weight: bold; color: var(--primary); }
+        .desc-text { font-size: 1rem; margin-top: 5px; line-height: 1.4; }
 
-        .date {
-            color: var(--primary);
-            font-weight: 800;
-            font-size: 0.8rem;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .details { line-height: 1.5; color: var(--text-primary); }
-
-        footer {
-            padding: 40px 20px;
-            text-align: center;
-            font-size: 0.8rem;
-            background: var(--accent);
-            color: #000;
-            text-transform: uppercase;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
 
-    <div class="fixed-header">
-        <header>
-            <h1>KC Rakete - Chronik</h1>
-        </header>
-        <nav id="year-nav">
-            <!-- Jahre kommen hier rein -->
-        </nav>
-    </div>
+    <header>
+        <h1>KC Rakete Chronik</h1>
+    </header>
 
-    <div class="container">
-        <div class="timeline" id="chronik"></div>
-    </div>
+    <main>
+        <div class="nav-container">
+            <div id="active-year" class="year-label">2026</div>
+            <div class="slider-wrapper">
+                <input type="range" id="year-slider" min="0" max="100" value="0">
+            </div>
+            <div style="font-size: 0.7rem; opacity: 0.6; margin-top: 10px;">Zieh mich!</div>
+        </div>
 
-    <footer id="stats"></footer>
+        <div id="content-area">
+            <div class="timeline-line" id="timeline-target">
+                <!-- Content wird per JS generiert -->
+            </div>
+        </div>
+    </main>
 
     <script>
         const data = [
-            { d: "18. Oktober 2020", txt: "Erstes Kegeln als <b>KBC Warmer Hans</b> mit den Gründungsmitgliedern: Christoph, Fabian, Jan, Leonard, Marvin, Niklas, Tobias und Yannick" },
-            { d: "30. September 2021", txt: "Zweites Kegeln (erstes mit Strafen) und Umbennung in <b>KC Rakete</b> \nBeitritt der Mitglieder: Cengiz und Julian" },
-            { d: "1. November 2021", txt: "Erste eigene <b>Aufkleber</b>" },
-            { d: "24. Februar 2022", txt: "Abbruch <b>Karnevalskegeln</b> wegen Alkoholpegel" },
-            { d: "4. August 2022", txt: "<b>10. Kegeln</b>" },
-            { d: "29. Dezember 2022", txt: "<b>1. Kegeltunier</b> im Brauhaus Zur Krone Bergheim \n<b>3. Platz</b> hinter KC Govas & KC Met Schmackes" },
-            { d: "20. Oktober 2023", txt: "Beitritt des Mitglieds: <b>Daniel</b>" },
-            { d: "3. November 2023", txt: "Neue KC Rakete <b>Polo-Shirts</b>" },
-            { d: "17. November 2023", txt: "<b>25. Kegeln</b>" },
-            { d: "29. Dezember 2023", txt: "<b>2. Kegeltunier</b> im Brauhaus Zur Krone Bergheim \n<b>3. Platz</b> hinter KC Govas & KC Met Schmackes" },
-            { d: "2. April 2024", txt: "Neue KC Rakete <b>Hoodies</b>" },
-            { d: "25. April 2024", txt: "Beitritt des Mitglieds: <b>Neitzke</b>" },
-            { d: "14. Juni 2024", txt: "<b>1. Kegeltour - Brüssel</b> - mit Schnitzeljagd \nOrganisatoren: Fabian und Christoph \nKC Rakete Mottoshirts, Flachmänner und Jute-Beutel für Teilnehmer" },
-            { d: "28. Juni 2024", txt: "Austritt des Mitglieds: <b>Daniel</b>" },
-            { d: "31. August 2024", txt: "Erste KC Rakete <b>Fahne</b>" },
-            { d: "29. Dezember 2024", txt: "<b>3. Kegeltunier</b> im Brauhaus Zur Krone Bergheim \nmit KC Met Schmackes geteilter <b>2. Platz</b> hinter KC Govas" },
-            { d: "7. Februar 2025", txt: "Wechsel Kegelbahn <b>Em Pittermänche</b> zum Brauhaus zur Krone" },
-            { d: "13. Juni 2025", txt: "<b>2. Kegeltour - Hamburg</b> - mit Beerpong Tunier und Schnitzeljagd \nOrganisatoren: Yannick und Cengiz \nKC Rakete Rucksäcke und Fischerhüte + Kölschgläser für Gewinner" },
-            { d: "25. Juli 2025", txt: "Erste Mitgliederversammlung und <b>Beschluss Satzung</b> \"Zur Krone\" \nErster Vorstand: Christoph (Präsident), Niklas (Schriftführer), Yannick (Kassenwart), Fabian (Kassenprüfer)" },
-            { d: "15. November 2025", txt: "<b>1. KC Rakete Winterfest</b> \nim Bierbrunnen Bergheim mit 32 Gästen" },
-            { d: "27. Dezember 2025", txt: "<b>4. Kegeltunier</b> im Brauhaus Zur Krone Bergheim \n<b>1. Platz</b> vor KC Govas & KC Met Schmackes" },
-            { d: "12. Juni 2026", txt: "<b>3. Kegeltour - ??</b> \nOrganisatoren: Tobias und Christoph" },
-            { d: "27. Juni 2026", txt: "Erstes <b>KC Rakete Sommerfest</b> im Vereinsheim Thorr mit x Gästen und Überraschungsgast" },
-            { d: "Offen", txt: "Eintrag ins <b>Vereinsregister</b> unter dem Namen <b>Kegelclub Rakete e.V.</b>", isGoal: true }
+            { d: "27. Juni 2026", txt: "Erstes Sommerfest Thorr" },
+            { d: "12. Juni 2026", txt: "3. Kegeltour" },
+            { d: "27. Dezember 2025", txt: "1. Platz beim Weihnachtstunier!" },
+            { d: "15. November 2025", txt: "1. KC Rakete Winterfest" },
+            { d: "25. Juli 2025", txt: "Satzungsbeschluss & Vorstandswahl" },
+            { d: "13. Juni 2025", txt: "2. Kegeltour - Hamburg" },
+            { d: "7. Februar 2025", txt: "Wechsel ins Brauhaus zur Krone" },
+            { d: "29. Dezember 2024", txt: "3. Kegeltunier - 2. Platz" },
+            { d: "14. Juni 2024", txt: "1. Kegeltour - Brüssel" },
+            { d: "29. Dezember 2023", txt: "2. Kegeltunier - 3. Platz" },
+            { d: "4. August 2022", txt: "10. Kegeln" },
+            { d: "30. September 2021", txt: "Umbenennung in KC Rakete" },
+            { d: "18. Oktober 2020", txt: "Gründung als KBC Warmer Hans" }
         ];
 
+        const timelineTarget = document.getElementById('timeline-target');
+        const slider = document.getElementById('year-slider');
+        const yearDisplay = document.getElementById('active-year');
+        const contentArea = document.getElementById('content-area');
+
         function render() {
-            const container = document.getElementById('chronik');
-            const nav = document.getElementById('year-nav');
-            
-            // Umdrehen: Neu zu Alt
-            const reversedData = [...data].reverse();
-            const yearsSeen = new Set();
-
-            reversedData.forEach(item => {
-                const yearMatch = item.d.match(/\d{4}/);
-                const year = yearMatch ? yearMatch[0] : "Zukunft";
-
-                const el = document.createElement('div');
-                el.className = 'event-card';
-                
-                if (!yearsSeen.has(year)) {
-                    el.id = `year-${year}`;
-                    yearsSeen.add(year);
-                    
-                    const navBtn = document.createElement('a');
-                    navBtn.href = `#year-${year}`;
-                    navBtn.className = 'nav-item';
-                    navBtn.innerText = year;
-                    nav.appendChild(navBtn);
-                }
-
-                el.innerHTML = `
-                    <div class="content">
-                        <span class="date">${item.d}</span>
-                        <div class="details">${item.txt}</div>
+            timelineTarget.innerHTML = '';
+            data.forEach((item, index) => {
+                const node = document.createElement('div');
+                node.className = 'event-node';
+                node.id = `node-${index}`;
+                node.innerHTML = `
+                    <div class="node-dot"></div>
+                    <div class="content-card">
+                        <div class="date-text">${item.d}</div>
+                        <div class="desc-text">${item.txt}</div>
                     </div>
                 `;
-                container.appendChild(el);
+                timelineTarget.appendChild(node);
             });
 
-            document.getElementById('stats').innerText = "Heute 11 Mitglieder - 53 Kegelabende";
+            // Slider Einstellungen
+            slider.max = data.length - 1;
+            slider.value = 0; // Start bei Neu (oben)
+            updateActiveNode(0);
         }
+
+        function updateActiveNode(index) {
+            // Alle deaktivieren
+            document.querySelectorAll('.event-node').forEach(n => n.classList.remove('active'));
+            
+            // Aktuelle aktivieren
+            const activeNode = document.getElementById(`node-${index}`);
+            if(activeNode) {
+                activeNode.classList.add('active');
+                
+                // Jahr im Header anzeigen
+                const year = data[index].d.match(/\d{4}/);
+                yearDisplay.innerText = year ? year[0] : "Start";
+
+                // Zum Element scrollen
+                activeNode.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        slider.addEventListener('input', (e) => {
+            updateActiveNode(e.target.value);
+        });
 
         render();
     </script>
