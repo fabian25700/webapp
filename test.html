@@ -2,473 +2,269 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Startseite</title>
-    <script src="daten.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>KC Rakete - Chronik</title>
     <style>
         :root {
-            --primary: #2ecc71;
-            --primary-dark: #27ae60;
-            --secondary: #3498db;
-            --bg: #f0f2f5;
-            --surface: rgba(255, 255, 255, 0.95);
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --border: rgba(203, 213, 225, 0.8);
-            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            --card-hover: rgba(240, 240, 240, 0.95);
-            --snake-btn-bg: white;
-            --snake-btn-border: #cbd5e1;
-            --snake-btn-color: #64748b;
-            --arrow-color: #cbd5e1;
+            --bg: #f5f5f5;
+            --surface: #ffffff;
+            --primary: #e3000b; /* Rot */
+            --accent: #c0c0c0; /* Silber */
+            --text-primary: #1a1a1a;
+            --text-secondary: #4a4a4a;
+            --border: #d1d1d1;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --nav-width: 80px;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: #0f172a;
-                --surface: rgba(30, 41, 59, 0.95);
-                --text-primary: #f1f5f9;
-                --text-secondary: #94a3b8;
-                --border: rgba(51, 65, 85, 0.8);
-                --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-                --card-hover: rgba(51, 65, 85, 0.95);
-                --snake-btn-bg: #1e293b;
-                --snake-btn-border: #334155;
-                --snake-btn-color: #94a3b8;
-                --arrow-color: #475569;
+                --bg: #121212;
+                --surface: #1e1e1e;
+                --text-primary: #ffffff;
+                --text-secondary: #b0b0b0;
+                --border: #333333;
+                --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             }
         }
 
-        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
-            background: var(--bg);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-primary);
             margin: 0;
-            height: 100vh;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
+            align-items: center;
+            /* Verhindert Textmarkierung beim schnellen Tippen auf Mobile */
             -webkit-tap-highlight-color: transparent;
-            transition: background 0.3s ease;
         }
 
         header {
-            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 100%;
+            background: var(--surface);
+            border-bottom: 2px solid var(--primary);
+            text-align: center;
+            padding-top: calc(15px + env(safe-area-inset-top));
+            padding-bottom: 15px;
+            position: sticky;
+            top: 0;
             z-index: 100;
         }
 
-        .header-title {
-            font-weight: 800;
-            font-size: 1.1rem;
-            letter-spacing: 0.04em;
-            color: var(--text-primary);
-        }
+        h1 { margin: 0; font-weight: 800; color: var(--primary); font-size: 1.4rem; text-transform: uppercase; }
 
-        .menu-container {
+        /* Layout-Container für Sidebar + Content */
+        .main-layout {
             display: flex;
-            flex-direction: column;
-            gap: 13px;
-            width: 85%;
-            max-width: 360px;
-            margin: auto;
-            z-index: 10;
+            width: 100%;
+            max-width: 800px;
+            position: relative;
             padding-bottom: env(safe-area-inset-bottom);
         }
 
-        .menu-card {
-            background: var(--surface);
-            padding: 18px 22px;
-            border-radius: 20px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            transition: transform 0.12s ease, background 0.2s ease;
-            border: 1px solid var(--border);
-            cursor: pointer;
-        }
-
-        .menu-card:active { transform: scale(0.96); background: var(--card-hover); }
-
-        .icon { font-size: 1.35rem; line-height: 1; }
-        .title { font-weight: 600; color: var(--text-primary); font-size: 1.05rem; flex-grow: 1; }
-        .arrow { color: var(--arrow-color); font-size: 1rem; }
-
-        /* Anpassung der Deckkraft für Buttons während des Spiels */
-        body.game-running .menu-card, 
-        body.game-running header {
-            opacity: 0.3;
-            pointer-events: none;
-        }
-
-        #games-overlay, #misc-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 300;
-            animation: fadeIn 0.2s ease;
-        }
-
-        .overlay-content {
-            width: 85%;
-            max-width: 320px;
-            background: var(--surface);
-            border-radius: 24px;
-            padding: 24px;
+        /* Fixes Inhaltsverzeichnis */
+        nav#year-nav {
+            width: var(--nav-width);
+            position: sticky;
+            top: 80px;
+            height: fit-content;
+            padding: 20px 10px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
+        }
+
+        .nav-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            box-shadow: var(--shadow);
+            transition: 0.2s;
+        }
+
+        .nav-item:active { transform: scale(0.9); background: var(--primary); color: white; }
+
+        /* Timeline Content */
+        .container {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .timeline { position: relative; }
+
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            background-color: var(--accent);
+            top: 0;
+            bottom: 0;
+            left: 20px;
+            margin-left: -2px;
+        }
+
+        .event-card { padding: 10px 10px 10px 50px; position: relative; scroll-margin-top: 100px; }
+
+        .event-card::after {
+            content: '';
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            left: 14px;
+            background-color: var(--primary);
+            border: 2px solid var(--accent);
+            top: 25px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .event-card.goal::after {
+            background-color: var(--surface);
+            border: 2px dashed var(--primary);
+        }
+
+        .content {
+            padding: 15px;
+            background-color: var(--surface);
+            border-radius: 12px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
         }
 
-        .overlay-item {
-            background: var(--bg);
-            padding: 16px;
-            border-radius: 16px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--text-primary);
-            font-weight: 600;
-            border: 1px solid var(--border);
-        }
+        .date { font-weight: 900; color: var(--primary); font-size: 0.85rem; display: block; margin-bottom: 5px; }
+        .details { font-size: 0.95rem; line-height: 1.4; white-space: pre-wrap; }
+        b { color: var(--text-primary); font-weight: 700; }
 
-        .overlay-item:active { transform: scale(0.97); }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to   { opacity: 1; }
-        }
-
-        #game-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 1;
-            display: none;
-        }
-
-        #score-display {
-            position: fixed;
-            top: 80px;
+        footer {
+            padding: 25px;
+            text-align: center;
+            font-weight: bold;
+            background: var(--accent);
             width: 100%;
-            text-align: center;
-            font-weight: 900;
-            color: var(--primary);
-            display: none;
-            z-index: 100;
-            font-size: 2.2rem;
-            opacity: 0.5;
-            pointer-events: none;
+            margin-top: 20px;
+            text-transform: uppercase;
         }
 
-        #instructions {
-            position: fixed;
-            inset: 0;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 400;
-            pointer-events: none;
-        }
-
-        #instructions.visible { display: flex; }
-
-        .instr-box {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 22px;
-            padding: 26px 32px;
-            max-width: 300px;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            animation: fadeInScale 0.35s ease;
-        }
-
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.88); }
-            to   { opacity: 1; transform: scale(1); }
-        }
-
-        .instr-box h2 { margin: 0 0 10px 0; font-size: 1.2rem; font-weight: 800; color: var(--text-primary); }
-        .instr-box p { margin: 0 0 6px 0; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; }
-        .instr-key { display: inline-block; background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; padding: 3px 8px; font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin: 2px; }
-        .instr-touch { font-size: 1.6rem; margin: 6px 0; }
-
-        #stop-btn {
-            position: fixed;
-            top: calc(env(safe-area-inset-top) + 16px);
-            right: 20px;
-            background: var(--surface);
-            border: 1.5px solid var(--border);
-            color: var(--text-primary);
-            padding: 8px 16px;
-            border-radius: 12px;
-            font-weight: 700;
-            z-index: 500;
-            display: none;
+        /* Mobile Anpassung für das Menü */
+        @media (max-width: 600px) {
+            .main-layout { flex-direction: column; }
+            nav#year-nav {
+                width: 100%;
+                position: sticky;
+                top: 60px; /* Unter dem Header */
+                flex-direction: row;
+                overflow-x: auto;
+                background: var(--bg);
+                z-index: 90;
+                padding: 10px;
+                box-sizing: border-box;
+                border-bottom: 1px solid var(--border);
+            }
+            .nav-item { min-width: 60px; }
+            .container { padding: 10px; }
         }
     </style>
 </head>
 <body>
+
     <header>
-        <div class="header-title">FABIANS APP</div>
+        <h1>KC Rakete - Chronik</h1>
     </header>
 
-    <button id="stop-btn" onclick="stopGame()">■ STOP</button>
+    <div class="main-layout">
+        <!-- Inhaltsverzeichnis wird per JS befüllt -->
+        <nav id="year-nav"></nav>
 
-    <div id="score-display"><span id="current-score">0</span></div>
-
-    <div class="menu-container" id="main-menu">
-        <a href="reise_stats.html" class="menu-card">
-            <span class="icon">🌍</span>
-            <span class="title">Reisen</span>
-            <span class="arrow">→</span>
-        </a>
-        <a href="Alltag.html" class="menu-card">
-            <span class="icon">🏠</span>
-            <span class="title">Alltag</span>
-            <span class="arrow">→</span>
-        </a>
-        <div class="menu-card" onclick="toggleOverlay('games-overlay', true)">
-            <span class="icon">🎮</span>
-            <span class="title">Spiele</span>
-            <span class="arrow">→</span>
-        </div>
-        <div class="menu-card" onclick="toggleOverlay('misc-overlay', true)">
-            <span class="icon">📁</span>
-            <span class="title">Sonstiges</span>
-            <span class="arrow">→</span>
+        <div class="container">
+            <div class="timeline" id="chronik"></div>
         </div>
     </div>
 
-    <div id="games-overlay" onclick="toggleOverlay('games-overlay', false)">
-        <div class="overlay-content" onclick="event.stopPropagation()">
-            <h2 style="margin: 0 0 10px 0; color: var(--text-primary); text-align: center;">Spiele</h2>
-            <div class="overlay-item" onclick="toggleOverlay('games-overlay', false); toggleGame();">
-                <span class="icon">🐍</span> Snake
-            </div>
-            <a href="darts.html" class="overlay-item">
-                <span class="icon">🎯</span> Darts
-            </a>
-            <a href="imposter.html" class="overlay-item">
-                <span class="icon">🕵️‍♂️</span> Imposter
-            </a>
-            <button onclick="toggleOverlay('games-overlay', false)" style="margin-top: 10px; background: none; border: none; color: var(--text-secondary); font-weight: 600;">Schließen</button>
-        </div>
-    </div>
-
-    <div id="misc-overlay" onclick="toggleOverlay('misc-overlay', false)">
-        <div class="overlay-content" onclick="event.stopPropagation()">
-            <h2 style="margin: 0 0 10px 0; color: var(--text-primary); text-align: center;">Sonstiges</h2>
-            <a href="gastspiel2.html" class="overlay-item">
-                <span class="icon">⚽</span> Gastspiel
-            </a>
-            <a href="https://bit.ly/m/kcrakete" class="overlay-item">
-                <span class="icon">🚀</span> KC Rakete
-            </a>
-            <a href="test.html" class="overlay-item">
-                <span class="icon">🧪</span> Test
-            </a>
-            <button onclick="toggleOverlay('misc-overlay', false)" style="margin-top: 10px; background: none; border: none; color: var(--text-secondary); font-weight: 600;">Schließen</button>
-        </div>
-    </div>
-
-    <div id="instructions">
-        <div class="instr-box" id="instr-content"></div>
-    </div>
-
-    <canvas id="game-canvas"></canvas>
+    <footer id="stats"></footer>
 
     <script>
-        const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-        const canvas = document.getElementById("game-canvas");
-        const ctx = canvas.getContext("2d");
-        const scoreDisplay = document.getElementById("score-display");
-        const scoreVal = document.getElementById("current-score");
-        const instrEl = document.getElementById("instructions");
-        const instrContent = document.getElementById("instr-content");
-        const stopBtn = document.getElementById("stop-btn");
+        const data = [
+            { d: "18. Oktober 2020", txt: "Erstes Kegeln als <b>KBC Warmer Hans</b> mit den Gründungsmitgliedern: Christoph, Fabian, Jan, Leonard, Marvin, Niklas, Tobias und Yannick" },
+            { d: "30. September 2021", txt: "Zweites Kegeln (erstes mit Strafen) und Umbennung in <b>KC Rakete</b> \nBeitritt der Mitglieder: Cengiz und Julian" },
+            { d: "1. November 2021", txt: "Erste eigene <b>Aufkleber</b>" },
+            { d: "24. Februar 2022", txt: "Abbruch <b>Karnevalskegeln</b> wegen Alkoholpegel" },
+            { d: "4. August 2022", txt: "<b>10. Kegeln</b>" },
+            { d: "29. Dezember 2022", txt: "<b>1. Kegeltunier</b> im Brauhaus Zur Krone Bergheim \n<b>3. Platz</b> hinter KC Govas & KC Met Schmackes" },
+            { d: "20. Oktober 2023", txt: "Beitritt des Mitglieds: <b>Daniel</b>" },
+            { d: "3. November 2023", txt: "Neue KC Rakete <b>Polo-Shirts</b>" },
+            { d: "17. November 2023", txt: "<b>25. Kegeln</b>" },
+            { d: "29. Dezember 2023", txt: "<b>2. Kegeltunier</b> im Brauhaus Zur Krone Bergheim \n<b>3. Platz</b> hinter KC Govas & KC Met Schmackes" },
+            { d: "2. April 2024", txt: "Neue KC Rakete <b>Hoodies</b>" },
+            { d: "25. April 2024", txt: "Beitritt des Mitglieds: <b>Neitzke</b>" },
+            { d: "14. Juni 2024", txt: "<b>1. Kegeltour - Brüssel</b> - mit Schnitzeljagd \nOrganisatoren: Fabian und Christoph \nKC Rakete Mottoshirts, Flachmänner und Jute-Beutel für Teilnehmer" },
+            { d: "28. Juni 2024", txt: "Austritt des Mitglieds: <b>Daniel</b>" },
+            { d: "31. August 2024", txt: "Erste KC Rakete <b>Fahne</b>" },
+            { d: "29. Dezember 2024", txt: "<b>3. Kegeltunier</b> im Brauhaus Zur Krone Bergheim \nmit KC Met Schmackes geteilter <b>2. Platz</b> hinter KC Govas" },
+            { d: "7. Februar 2025", txt: "Wechsel Kegelbahn <b>Em Pittermänche</b> zum Brauhaus zur Krone" },
+            { d: "13. Juni 2025", txt: "<b>2. Kegeltour - Hamburg</b> - mit Beerpong Tunier und Schnitzeljagd \nOrganisatoren: Yannick und Cengiz \nKC Rakete Rucksäcke und Fischerhüte + Kölschgläser für Gewinner" },
+            { d: "25. Juli 2025", txt: "Erste Mitgliederversammlung und <b>Beschluss Satzung</b> \"Zur Krone\" \nErster Vorstand: Christoph (Präsident), Niklas (Schriftführer), Yannick (Kassenwart), Fabian (Kassenprüfer)" },
+            { d: "15. November 2025", txt: "<b>1. KC Rakete Winterfest</b> \nim Bierbrunnen Bergheim mit 32 Gästen" },
+            { d: "27. Dezember 2025", txt: "<b>4. Kegeltunier</b> im Brauhaus Zur Krone Bergheim \n<b>1. Platz</b> vor KC Govas & KC Met Schmackes" },
+            { d: "12. Juni 2026", txt: "<b>3. Kegeltour - ??</b> \nOrganisatoren: Tobias und Christoph" },
+            { d: "27. Juni 2026", txt: "Erstes <b>KC Rakete Sommerfest</b> im Vereinsheim Thorr mit x Gästen und Überraschungsgast" },
+            { d: "Offen", txt: "Eintrag ins <b>Vereinsregister</b> unter dem Namen <b>Kegelclub Rakete e.V.</b>", isGoal: true }
+        ];
 
-        let gameActive = false;
-        let snake, direction, nextDirection, food;
-        let score = 0;
+        const footerText = "Heute 11 Mitglieder - 53 Kegelabende";
 
-        const laender = (typeof MEINE_REISEN !== 'undefined')
-            ? MEINE_REISEN.map(r => r.flagge || "📍")
-            : ["🇩🇪","🇮🇹","🇺🇸"];
+        function render() {
+            const container = document.getElementById('chronik');
+            const nav = document.getElementById('year-nav');
+            
+            // 1. Daten umkehren für Neu -> Alt
+            const reversedData = [...data].reverse();
+            
+            const yearsSet = new Set();
 
-        const GRID = 32;
-        const SPEED_START = 110;
-        const SPEED_MIN = 45;
-        const SPEED_STEP = 5;
+            reversedData.forEach((item, index) => {
+                // Jahr extrahieren für das Inhaltsverzeichnis
+                const yearMatch = item.d.match(/\d{4}/);
+                const year = yearMatch ? yearMatch[0] : "Zukunft";
 
-        function toggleOverlay(id, show) {
-            document.getElementById(id).style.display = show ? 'flex' : 'none';
-        }
+                // Event Card erstellen
+                const el = document.createElement('div');
+                el.className = 'event-card' + (item.isGoal ? ' goal' : '');
+                
+                // ID vergeben, wenn es der erste Eintrag dieses Jahres ist
+                if (!yearsSet.has(year)) {
+                    el.id = `year-${year}`;
+                    yearsSet.add(year);
+                    
+                    // Navigations-Punkt erstellen
+                    const navItem = document.createElement('a');
+                    navItem.href = `#year-${year}`;
+                    navItem.className = 'nav-item';
+                    navItem.innerText = year;
+                    nav.appendChild(navItem);
+                }
 
-        function toggleGame() {
-            if (!gameActive) showInstructions();
-            else stopGame();
-        }
-
-        function showInstructions() {
-            if (!isTouchDevice) {
-                instrContent.innerHTML = `<h2>🐍 Snake</h2><p>Pfeiltasten zum Steuern</p><p><span class="instr-key">↑</span> <span class="instr-key">↓</span> <span class="instr-key">←</span> <span class="instr-key">→</span></p>`;
-            } else {
-                instrContent.innerHTML = `<h2>🐍 Snake</h2><div class="instr-touch">👆</div><p>Wische in die Richtung,<br>in die du steuern willst.</p>`;
-            }
-            instrEl.classList.add("visible");
-            setTimeout(() => { instrEl.classList.remove("visible"); startGame(); }, 2500);
-        }
-
-        function startGame() {
-            gameActive = true;
-            document.body.classList.add("game-running"); // Deckkraft-Klasse hinzufügen
-            canvas.style.display = "block";
-            scoreDisplay.style.display = "block";
-            stopBtn.style.display = "block";
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            score = 0;
-            scoreVal.innerText = score;
-
-            const startX = Math.floor(canvas.width / 2 / GRID) * GRID;
-            const startY = Math.floor(canvas.height / 2 / GRID) * GRID;
-            snake = [{ x: startX, y: startY }, { x: startX - GRID, y: startY }, { x: startX - GRID * 2, y: startY }];
-            direction = { x: GRID, y: 0 };
-            nextDirection = { x: GRID, y: 0 };
-            spawnFood();
-            runLoop();
-        }
-
-        function runLoop() {
-            if (!gameActive) return;
-            draw();
-            setTimeout(runLoop, Math.max(SPEED_MIN, SPEED_START - score * SPEED_STEP));
-        }
-
-        function stopGame() {
-            gameActive = false;
-            document.body.classList.remove("game-running"); // Deckkraft-Klasse entfernen
-            canvas.style.display = "none";
-            scoreDisplay.style.display = "none";
-            stopBtn.style.display = "none";
-        }
-
-        function spawnFood() {
-            const cols = Math.floor(canvas.width / GRID);
-            const rows = Math.floor(canvas.height / GRID);
-            let pos;
-            do {
-                pos = { x: Math.floor(Math.random() * cols) * GRID, y: Math.floor(Math.random() * rows) * GRID };
-            } while (snake.some(s => s.x === pos.x && s.y === pos.y));
-            food = { ...pos, symbol: laender[Math.floor(Math.random() * laender.length)] };
-        }
-
-        function draw() {
-            direction = nextDirection;
-            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
-
-            if (head.x < 0) head.x = Math.floor((canvas.width - 1) / GRID) * GRID;
-            if (head.x >= canvas.width) head.x = 0;
-            if (head.y < 0) head.y = Math.floor((canvas.height - 1) / GRID) * GRID;
-            if (head.y >= canvas.height) head.y = 0;
-
-            if (snake.some(s => s.x === head.x && s.y === head.y)) { gameOver(); return; }
-
-            snake.unshift(head);
-            if (head.x === food.x && head.y === food.y) { score++; scoreVal.innerText = score; spawnFood(); }
-            else { snake.pop(); }
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            ctx.fillStyle = isDark ? "rgba(15,23,42,0.7)" : "rgba(240,242,245,0.7)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.font = `${GRID - 4}px sans-serif`;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(food.symbol, food.x + GRID / 2, food.y + GRID / 2);
-
-            snake.forEach((s, i) => {
-                ctx.fillStyle = i === 0 ? "#2ecc71" : `rgba(46, 204, 113, ${Math.max(0.3, 1 - i * 0.05)})`;
-                ctx.beginPath();
-                ctx.roundRect(s.x + 2, s.y + 2, GRID - 4, GRID - 4, 8);
-                ctx.fill();
+                el.innerHTML = `
+                    <div class="content">
+                        <span class="date">${item.d}</span>
+                        <div class="details">${item.txt}</div>
+                    </div>
+                `;
+                container.appendChild(el);
             });
+
+            document.getElementById('stats').innerText = footerText;
         }
 
-        function gameOver() {
-            ctx.fillStyle = "#e74c3c";
-            ctx.font = "bold 32px -apple-system";
-            ctx.textAlign = "center";
-            ctx.fillText(`💀 ${score} Länder`, canvas.width / 2, canvas.height / 2);
-            setTimeout(stopGame, 1500);
-        }
-
-        window.addEventListener("keydown", (e) => {
-            if (!gameActive) return;
-            const d = direction;
-            if ((e.key === "ArrowUp" || e.key === "w") && d.y === 0) nextDirection = { x: 0, y: -GRID };
-            if ((e.key === "ArrowDown" || e.key === "s") && d.y === 0) nextDirection = { x: 0, y: GRID };
-            if ((e.key === "ArrowLeft" || e.key === "a") && d.x === 0) nextDirection = { x: -GRID, y: 0 };
-            if ((e.key === "ArrowRight" || e.key === "d") && d.x === 0) nextDirection = { x: GRID, y: 0 };
-        });
-
-        let touchStartX = 0;
-        let touchStartY = 0;
-
-        window.addEventListener("touchstart", (e) => {
-            if (!gameActive) return;
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-
-        window.addEventListener("touchmove", (e) => {
-            if (!gameActive) return;
-            e.preventDefault(); 
-        }, { passive: false });
-
-        window.addEventListener("touchend", (e) => {
-            if (!gameActive) return;
-            const touchEndX = e.changedTouches[0].clientX;
-            const touchEndY = e.changedTouches[0].clientY;
-            
-            const dx = touchEndX - touchStartX;
-            const dy = touchEndY - touchStartY;
-            const absDx = Math.abs(dx);
-            const absDy = Math.abs(dy);
-            
-            if (Math.max(absDx, absDy) < 20) return; 
-
-            const d = direction;
-            if (absDx > absDy) {
-                if (dx > 0 && d.x === 0) nextDirection = { x: GRID, y: 0 };
-                else if (dx < 0 && d.x === 0) nextDirection = { x: -GRID, y: 0 };
-            } else {
-                if (dy > 0 && d.y === 0) nextDirection = { x: 0, y: GRID };
-                else if (dy < 0 && d.y === 0) nextDirection = { x: 0, y: -GRID };
-            }
-        }, { passive: true });
+        render();
     </script>
 </body>
 </html>
