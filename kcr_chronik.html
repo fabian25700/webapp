@@ -14,6 +14,7 @@
             --text-secondary: #4a4a4a;
             --border: #d1d1d1;
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --nav-width: 80px;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -27,24 +28,18 @@
             }
         }
 
-        /* Zoom deaktiviert, Pan erlaubt */
-        html, body { 
-            width: 100%; 
-            margin: 0;
-            touch-action: pan-y; 
-        }
+        html { scroll-behavior: smooth; }
 
         body {
-            font-family: -apple-system, system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg);
             color: var(--text-primary);
+            margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            user-select: none;
-            -webkit-user-select: none;
-            /* Padding für die untere Safe Area (Home-Indicator) */
-            padding-bottom: env(safe-area-inset-bottom);
+            /* Verhindert Textmarkierung beim schnellen Tippen auf Mobile */
+            -webkit-tap-highlight-color: transparent;
         }
 
         header {
@@ -52,25 +47,59 @@
             background: var(--surface);
             border-bottom: 2px solid var(--primary);
             text-align: center;
-            /* Berücksichtigt die Notch oben */
             padding-top: calc(15px + env(safe-area-inset-top));
             padding-bottom: 15px;
             position: sticky;
             top: 0;
-            z-index: 10;
+            z-index: 100;
         }
 
         h1 { margin: 0; font-weight: 800; color: var(--primary); font-size: 1.4rem; text-transform: uppercase; }
 
-        .container {
-            width: 90%;
-            max-width: 500px;
-            padding: 20px 0;
+        /* Layout-Container für Sidebar + Content */
+        .main-layout {
+            display: flex;
+            width: 100%;
+            max-width: 800px;
+            position: relative;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
-        .timeline {
-            position: relative;
+        /* Fixes Inhaltsverzeichnis */
+        nav#year-nav {
+            width: var(--nav-width);
+            position: sticky;
+            top: 80px;
+            height: fit-content;
+            padding: 20px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
+
+        .nav-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            text-decoration: none;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            box-shadow: var(--shadow);
+            transition: 0.2s;
+        }
+
+        .nav-item:active { transform: scale(0.9); background: var(--primary); color: white; }
+
+        /* Timeline Content */
+        .container {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .timeline { position: relative; }
 
         .timeline::after {
             content: '';
@@ -83,10 +112,7 @@
             margin-left: -2px;
         }
 
-        .event-card {
-            padding: 10px 10px 10px 50px;
-            position: relative;
-        }
+        .event-card { padding: 10px 10px 10px 50px; position: relative; scroll-margin-top: 100px; }
 
         .event-card::after {
             content: '';
@@ -101,7 +127,6 @@
             z-index: 1;
         }
 
-        /* Styling für das offene Ziel am Ende */
         .event-card.goal::after {
             background-color: var(--surface);
             border: 2px dashed var(--primary);
@@ -115,35 +140,37 @@
             border: 1px solid var(--border);
         }
 
-        .date {
-            font-weight: 900;
-            color: var(--primary);
-            font-size: 0.85rem;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .details {
-            font-size: 0.95rem;
-            line-height: 1.4;
-            white-space: pre-wrap;
-        }
-
-        b {
-            color: var(--text-primary);
-            font-weight: 700;
-        }
+        .date { font-weight: 900; color: var(--primary); font-size: 0.85rem; display: block; margin-bottom: 5px; }
+        .details { font-size: 0.95rem; line-height: 1.4; white-space: pre-wrap; }
+        b { color: var(--text-primary); font-weight: 700; }
 
         footer {
             padding: 25px;
             text-align: center;
             font-weight: bold;
-            color: #000;
             background: var(--accent);
             width: 100%;
             margin-top: 20px;
-            box-sizing: border-box;
             text-transform: uppercase;
+        }
+
+        /* Mobile Anpassung für das Menü */
+        @media (max-width: 600px) {
+            .main-layout { flex-direction: column; }
+            nav#year-nav {
+                width: 100%;
+                position: sticky;
+                top: 60px; /* Unter dem Header */
+                flex-direction: row;
+                overflow-x: auto;
+                background: var(--bg);
+                z-index: 90;
+                padding: 10px;
+                box-sizing: border-box;
+                border-bottom: 1px solid var(--border);
+            }
+            .nav-item { min-width: 60px; }
+            .container { padding: 10px; }
         }
     </style>
 </head>
@@ -153,8 +180,13 @@
         <h1>KC Rakete - Chronik</h1>
     </header>
 
-    <div class="container">
-        <div class="timeline" id="chronik"></div>
+    <div class="main-layout">
+        <!-- Inhaltsverzeichnis wird per JS befüllt -->
+        <nav id="year-nav"></nav>
+
+        <div class="container">
+            <div class="timeline" id="chronik"></div>
+        </div>
     </div>
 
     <footer id="stats"></footer>
@@ -191,9 +223,35 @@
 
         function render() {
             const container = document.getElementById('chronik');
-            data.forEach(item => {
+            const nav = document.getElementById('year-nav');
+            
+            // 1. Daten umkehren für Neu -> Alt
+            const reversedData = [...data].reverse();
+            
+            const yearsSet = new Set();
+
+            reversedData.forEach((item, index) => {
+                // Jahr extrahieren für das Inhaltsverzeichnis
+                const yearMatch = item.d.match(/\d{4}/);
+                const year = yearMatch ? yearMatch[0] : "Zukunft";
+
+                // Event Card erstellen
                 const el = document.createElement('div');
                 el.className = 'event-card' + (item.isGoal ? ' goal' : '');
+                
+                // ID vergeben, wenn es der erste Eintrag dieses Jahres ist
+                if (!yearsSet.has(year)) {
+                    el.id = `year-${year}`;
+                    yearsSet.add(year);
+                    
+                    // Navigations-Punkt erstellen
+                    const navItem = document.createElement('a');
+                    navItem.href = `#year-${year}`;
+                    navItem.className = 'nav-item';
+                    navItem.innerText = year;
+                    nav.appendChild(navItem);
+                }
+
                 el.innerHTML = `
                     <div class="content">
                         <span class="date">${item.d}</span>
@@ -202,6 +260,7 @@
                 `;
                 container.appendChild(el);
             });
+
             document.getElementById('stats').innerText = footerText;
         }
 
