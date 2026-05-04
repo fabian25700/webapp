@@ -2,226 +2,473 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Kegel-Teams</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Startseite</title>
+    <script src="daten.js"></script>
     <style>
         :root {
-            --bg: #f5f5f5;
-            --surface: #ffffff;
-            --primary: #e3000b; /* Rot */
-            --accent: #c0c0c0; /* Silber */
-            --text-primary: #1a1a1a;
-            --text-secondary: #4a4a4a;
-            --border: #d1d1d1;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --primary: #2ecc71;
+            --primary-dark: #27ae60;
+            --secondary: #3498db;
+            --bg: #f0f2f5;
+            --surface: rgba(255, 255, 255, 0.95);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: rgba(203, 213, 225, 0.8);
+            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --card-hover: rgba(240, 240, 240, 0.95);
+            --snake-btn-bg: white;
+            --snake-btn-border: #cbd5e1;
+            --snake-btn-color: #64748b;
+            --arrow-color: #cbd5e1;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: #121212;
-                --surface: #1e1e1e;
-                --text-primary: #ffffff;
-                --text-secondary: #b0b0b0;
-                --border: #333333;
-                --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+                --bg: #0f172a;
+                --surface: rgba(30, 41, 59, 0.95);
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: rgba(51, 65, 85, 0.8);
+                --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+                --card-hover: rgba(51, 65, 85, 0.95);
+                --snake-btn-bg: #1e293b;
+                --snake-btn-border: #334155;
+                --snake-btn-color: #94a3b8;
+                --arrow-color: #475569;
             }
         }
 
-        /* Verhindert Zoom und Pan */
-        html, body { 
-            overflow: hidden; 
-            position: fixed; 
-            width: 100%; 
-            height: 100%; 
-            touch-action: none; 
-        }
+        * { box-sizing: border-box; }
 
         body {
-            font-family: -apple-system, system-ui, sans-serif;
-            background-color: var(--bg);
-            color: var(--text-primary);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        h1 { margin: 20px 0; font-weight: 800; color: var(--primary); font-size: 1.6rem; text-transform: uppercase; }
-
-        .container {
-            width: 90%;
-            max-width: 400px;
-            height: 80vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card {
-            background: var(--surface);
-            padding: 20px;
-            border-radius: 16px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--accent);
-            text-align: center;
-            overflow-y: auto; /* Erlaubt Scrollen nur innerhalb der Card wenn nötig */
-            touch-action: pan-y;
-        }
-
-        .grid-players {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            margin: 15px 0;
-        }
-
-        .menu-option {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
             background: var(--bg);
-            border-radius: 8px;
-            font-size: 0.85rem;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.3s ease;
+        }
+
+        header {
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .header-title {
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 0.04em;
+            color: var(--text-primary);
+        }
+
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+            width: 85%;
+            max-width: 360px;
+            margin: auto;
+            z-index: 10;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .menu-card {
+            background: var(--surface);
+            padding: 18px 22px;
+            border-radius: 20px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: transform 0.12s ease, background 0.2s ease;
+            border: 1px solid var(--border);
+            cursor: pointer;
+        }
+
+        .menu-card:active { transform: scale(0.96); background: var(--card-hover); }
+
+        .icon { font-size: 1.35rem; line-height: 1; }
+        .title { font-weight: 600; color: var(--text-primary); font-size: 1.05rem; flex-grow: 1; }
+        .arrow { color: var(--arrow-color); font-size: 1rem; }
+
+        /* Anpassung der Deckkraft für Buttons während des Spiels */
+        body.game-running .menu-card, 
+        body.game-running header {
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        #games-overlay, #misc-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 300;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .overlay-content {
+            width: 85%;
+            max-width: 320px;
+            background: var(--surface);
+            border-radius: 24px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: var(--shadow);
             border: 1px solid var(--border);
         }
 
-        .settings-box {
-            background: var(--accent);
-            color: #000;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-        }
-
-        .team-selector {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 8px;
-        }
-
-        .radio-btn { display: none; }
-
-        .radio-label {
-            padding: 8px 20px;
-            background: #fff;
-            border: 2px solid #000;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .radio-btn:checked + .radio-label {
-            background: var(--primary);
-            color: #fff;
-            border-color: var(--primary);
-        }
-
-        .main-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            text-transform: uppercase;
-        }
-
-        .team-result-box {
-            margin-top: 10px;
-            padding: 12px;
+        .overlay-item {
             background: var(--bg);
-            border-radius: 10px;
-            text-align: left;
-            border-left: 5px solid var(--primary);
+            padding: 16px;
+            border-radius: 16px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-primary);
+            font-weight: 600;
+            border: 1px solid var(--border);
         }
 
-        .team-title { color: var(--primary); font-weight: 900; font-size: 0.8rem; margin-bottom: 3px; }
-        .team-members { font-size: 1.1rem; font-weight: bold; }
+        .overlay-item:active { transform: scale(0.97); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        #game-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            display: none;
+        }
+
+        #score-display {
+            position: fixed;
+            top: 80px;
+            width: 100%;
+            text-align: center;
+            font-weight: 900;
+            color: var(--primary);
+            display: none;
+            z-index: 100;
+            font-size: 2.2rem;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        #instructions {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 400;
+            pointer-events: none;
+        }
+
+        #instructions.visible { display: flex; }
+
+        .instr-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 26px 32px;
+            max-width: 300px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            animation: fadeInScale 0.35s ease;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.88); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        .instr-box h2 { margin: 0 0 10px 0; font-size: 1.2rem; font-weight: 800; color: var(--text-primary); }
+        .instr-box p { margin: 0 0 6px 0; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; }
+        .instr-key { display: inline-block; background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; padding: 3px 8px; font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin: 2px; }
+        .instr-touch { font-size: 1.6rem; margin: 6px 0; }
+
+        #stop-btn {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 16px);
+            right: 20px;
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            z-index: 500;
+            display: none;
+        }
     </style>
 </head>
 <body>
+    <header>
+        <div class="header-title">FABIANS APP</div>
+    </header>
 
-    <h1>Kegel-Teams</h1>
+    <button id="stop-btn" onclick="stopGame()">■ STOP</button>
 
-    <div class="container">
-        <div id="setupScreen" class="card">
-            <div class="settings-box">
-                <div style="font-weight: bold;">Anzahl Teams:</div>
-                <div class="team-selector">
-                    <input type="radio" name="tCount" id="t2" value="2" class="radio-btn" checked>
-                    <label for="t2" class="radio-label">2</label>
-                    <input type="radio" name="tCount" id="t3" value="3" class="radio-btn">
-                    <label for="t3" class="radio-label">3</label>
-                </div>
-            </div>
+    <div id="score-display"><span id="current-score">0</span></div>
 
-            <div class="grid-players" id="pList"></div>
-            <button class="main-btn" onclick="generateTeams()">Teams losen</button>
+    <div class="menu-container" id="main-menu">
+        <a href="reise_stats.html" class="menu-card">
+            <span class="icon">🌍</span>
+            <span class="title">Reisen</span>
+            <span class="arrow">→</span>
+        </a>
+        <a href="Alltag.html" class="menu-card">
+            <span class="icon">🏠</span>
+            <span class="title">Alltag</span>
+            <span class="arrow">→</span>
+        </a>
+        <div class="menu-card" onclick="toggleOverlay('games-overlay', true)">
+            <span class="icon">🎮</span>
+            <span class="title">Spiele</span>
+            <span class="arrow">→</span>
         </div>
-
-        <div id="resultScreen" class="card" style="display:none;">
-            <div id="teamResults"></div>
-            <button class="main-btn" style="background: var(--accent); color: #000; margin-top: 20px;" onclick="reset()">Neu auslosen</button>
+        <div class="menu-card" onclick="toggleOverlay('misc-overlay', true)">
+            <span class="icon">📁</span>
+            <span class="title">Sonstiges</span>
+            <span class="arrow">→</span>
         </div>
     </div>
 
+    <div id="games-overlay" onclick="toggleOverlay('games-overlay', false)">
+        <div class="overlay-content" onclick="event.stopPropagation()">
+            <h2 style="margin: 0 0 10px 0; color: var(--text-primary); text-align: center;">Spiele</h2>
+            <div class="overlay-item" onclick="toggleOverlay('games-overlay', false); toggleGame();">
+                <span class="icon">🐍</span> Snake
+            </div>
+            <a href="darts.html" class="overlay-item">
+                <span class="icon">🎯</span> Darts
+            </a>
+            <a href="imposter.html" class="overlay-item">
+                <span class="icon">🕵️‍♂️</span> Imposter
+            </a>
+            <button onclick="toggleOverlay('games-overlay', false)" style="margin-top: 10px; background: none; border: none; color: var(--text-secondary); font-weight: 600;">Schließen</button>
+        </div>
+    </div>
+
+    <div id="misc-overlay" onclick="toggleOverlay('misc-overlay', false)">
+        <div class="overlay-content" onclick="event.stopPropagation()">
+            <h2 style="margin: 0 0 10px 0; color: var(--text-primary); text-align: center;">Sonstiges</h2>
+            <a href="gastspiel2.html" class="overlay-item">
+                <span class="icon">⚽</span> Gastspiel
+            </a>
+            <a href="https://bit.ly/m/kcrakete" class="overlay-item">
+                <span class="icon">🚀</span> KC Rakete
+            </a>
+            <a href="test.html" class="overlay-item">
+                <span class="icon">🧪</span> Test
+            </a>
+            <button onclick="toggleOverlay('misc-overlay', false)" style="margin-top: 10px; background: none; border: none; color: var(--text-secondary); font-weight: 600;">Schließen</button>
+        </div>
+    </div>
+
+    <div id="instructions">
+        <div class="instr-box" id="instr-content"></div>
+    </div>
+
+    <canvas id="game-canvas"></canvas>
+
     <script>
-        const stamm = ["Christoph", "Fabian", "Jan", "Leonard", "Marvin", "Niklas", "Tobias", "Yannick", "Cengiz", "Julian", "Neitzke"];
-        const gaeste = ["Gastkegler1", "Gastkegler2"];
+        const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+        const canvas = document.getElementById("game-canvas");
+        const ctx = canvas.getContext("2d");
+        const scoreDisplay = document.getElementById("score-display");
+        const scoreVal = document.getElementById("current-score");
+        const instrEl = document.getElementById("instructions");
+        const instrContent = document.getElementById("instr-content");
+        const stopBtn = document.getElementById("stop-btn");
 
-        function init() {
-            const pList = document.getElementById('pList');
-            // Sortiere Stammspieler alphabetisch
-            stamm.sort((a, b) => a.localeCompare(b));
-            
-            stamm.forEach(n => createCb(pList, n, true));
-            gaeste.forEach(n => createCb(pList, n, false));
+        let gameActive = false;
+        let snake, direction, nextDirection, food;
+        let score = 0;
+
+        const laender = (typeof MEINE_REISEN !== 'undefined')
+            ? MEINE_REISEN.map(r => r.flagge || "📍")
+            : ["🇩🇪","🇮🇹","🇺🇸"];
+
+        const GRID = 32;
+        const SPEED_START = 110;
+        const SPEED_MIN = 45;
+        const SPEED_STEP = 5;
+
+        function toggleOverlay(id, show) {
+            document.getElementById(id).style.display = show ? 'flex' : 'none';
         }
 
-        function createCb(container, name, checked) {
-            const label = document.createElement('label');
-            label.className = 'menu-option';
-            label.innerHTML = `<input type="checkbox" value="${name}" ${checked?'checked':''}><span>${name}</span>`;
-            container.appendChild(label);
+        function toggleGame() {
+            if (!gameActive) showInstructions();
+            else stopGame();
         }
 
-        function generateTeams() {
-            const sel = document.querySelectorAll('#pList input:checked');
-            let p = Array.from(sel).map(c => c.value);
-            const nT = parseInt(document.querySelector('input[name="tCount"]:checked').value);
+        function showInstructions() {
+            if (!isTouchDevice) {
+                instrContent.innerHTML = `<h2>🐍 Snake</h2><p>Pfeiltasten zum Steuern</p><p><span class="instr-key">↑</span> <span class="instr-key">↓</span> <span class="instr-key">←</span> <span class="instr-key">→</span></p>`;
+            } else {
+                instrContent.innerHTML = `<h2>🐍 Snake</h2><div class="instr-touch">👆</div><p>Wische in die Richtung,<br>in die du steuern willst.</p>`;
+            }
+            instrEl.classList.add("visible");
+            setTimeout(() => { instrEl.classList.remove("visible"); startGame(); }, 2500);
+        }
 
-            if(p.length < nT) return alert("Zu wenig Spieler!");
+        function startGame() {
+            gameActive = true;
+            document.body.classList.add("game-running"); // Deckkraft-Klasse hinzufügen
+            canvas.style.display = "block";
+            scoreDisplay.style.display = "block";
+            stopBtn.style.display = "block";
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            score = 0;
+            scoreVal.innerText = score;
 
-            p.sort(() => Math.random() - 0.5);
-            const teams = Array.from({ length: nT }, () => []);
-            p.forEach((player, i) => teams[i % nT].push(player));
+            const startX = Math.floor(canvas.width / 2 / GRID) * GRID;
+            const startY = Math.floor(canvas.height / 2 / GRID) * GRID;
+            snake = [{ x: startX, y: startY }, { x: startX - GRID, y: startY }, { x: startX - GRID * 2, y: startY }];
+            direction = { x: GRID, y: 0 };
+            nextDirection = { x: GRID, y: 0 };
+            spawnFood();
+            runLoop();
+        }
 
-            const res = document.getElementById('teamResults');
-            res.innerHTML = '';
-            
-            teams.forEach((t, i) => {
-                const b = document.createElement('div');
-                b.className = 'team-result-box';
-                b.innerHTML = `<div class="team-title">Team ${i+1}</div><div class="team-members">${t.join(', ')}</div>`;
-                res.appendChild(b);
+        function runLoop() {
+            if (!gameActive) return;
+            draw();
+            setTimeout(runLoop, Math.max(SPEED_MIN, SPEED_START - score * SPEED_STEP));
+        }
+
+        function stopGame() {
+            gameActive = false;
+            document.body.classList.remove("game-running"); // Deckkraft-Klasse entfernen
+            canvas.style.display = "none";
+            scoreDisplay.style.display = "none";
+            stopBtn.style.display = "none";
+        }
+
+        function spawnFood() {
+            const cols = Math.floor(canvas.width / GRID);
+            const rows = Math.floor(canvas.height / GRID);
+            let pos;
+            do {
+                pos = { x: Math.floor(Math.random() * cols) * GRID, y: Math.floor(Math.random() * rows) * GRID };
+            } while (snake.some(s => s.x === pos.x && s.y === pos.y));
+            food = { ...pos, symbol: laender[Math.floor(Math.random() * laender.length)] };
+        }
+
+        function draw() {
+            direction = nextDirection;
+            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+
+            if (head.x < 0) head.x = Math.floor((canvas.width - 1) / GRID) * GRID;
+            if (head.x >= canvas.width) head.x = 0;
+            if (head.y < 0) head.y = Math.floor((canvas.height - 1) / GRID) * GRID;
+            if (head.y >= canvas.height) head.y = 0;
+
+            if (snake.some(s => s.x === head.x && s.y === head.y)) { gameOver(); return; }
+
+            snake.unshift(head);
+            if (head.x === food.x && head.y === food.y) { score++; scoreVal.innerText = score; spawnFood(); }
+            else { snake.pop(); }
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            ctx.fillStyle = isDark ? "rgba(15,23,42,0.7)" : "rgba(240,242,245,0.7)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.font = `${GRID - 4}px sans-serif`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(food.symbol, food.x + GRID / 2, food.y + GRID / 2);
+
+            snake.forEach((s, i) => {
+                ctx.fillStyle = i === 0 ? "#2ecc71" : `rgba(46, 204, 113, ${Math.max(0.3, 1 - i * 0.05)})`;
+                ctx.beginPath();
+                ctx.roundRect(s.x + 2, s.y + 2, GRID - 4, GRID - 4, 8);
+                ctx.fill();
             });
-
-            document.getElementById('setupScreen').style.display = 'none';
-            document.getElementById('resultScreen').style.display = 'block';
         }
 
-        function reset() {
-            document.getElementById('resultScreen').style.display = 'none';
-            document.getElementById('setupScreen').style.display = 'block';
+        function gameOver() {
+            ctx.fillStyle = "#e74c3c";
+            ctx.font = "bold 32px -apple-system";
+            ctx.textAlign = "center";
+            ctx.fillText(`💀 ${score} Länder`, canvas.width / 2, canvas.height / 2);
+            setTimeout(stopGame, 1500);
         }
 
-        init();
+        window.addEventListener("keydown", (e) => {
+            if (!gameActive) return;
+            const d = direction;
+            if ((e.key === "ArrowUp" || e.key === "w") && d.y === 0) nextDirection = { x: 0, y: -GRID };
+            if ((e.key === "ArrowDown" || e.key === "s") && d.y === 0) nextDirection = { x: 0, y: GRID };
+            if ((e.key === "ArrowLeft" || e.key === "a") && d.x === 0) nextDirection = { x: -GRID, y: 0 };
+            if ((e.key === "ArrowRight" || e.key === "d") && d.x === 0) nextDirection = { x: GRID, y: 0 };
+        });
+
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        window.addEventListener("touchstart", (e) => {
+            if (!gameActive) return;
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        window.addEventListener("touchmove", (e) => {
+            if (!gameActive) return;
+            e.preventDefault(); 
+        }, { passive: false });
+
+        window.addEventListener("touchend", (e) => {
+            if (!gameActive) return;
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            
+            const dx = touchEndX - touchStartX;
+            const dy = touchEndY - touchStartY;
+            const absDx = Math.abs(dx);
+            const absDy = Math.abs(dy);
+            
+            if (Math.max(absDx, absDy) < 20) return; 
+
+            const d = direction;
+            if (absDx > absDy) {
+                if (dx > 0 && d.x === 0) nextDirection = { x: GRID, y: 0 };
+                else if (dx < 0 && d.x === 0) nextDirection = { x: -GRID, y: 0 };
+            } else {
+                if (dy > 0 && d.y === 0) nextDirection = { x: 0, y: GRID };
+                else if (dy < 0 && d.y === 0) nextDirection = { x: 0, y: -GRID };
+            }
+        }, { passive: true });
     </script>
 </body>
 </html>
