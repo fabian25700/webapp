@@ -97,7 +97,7 @@
         .content-container {
             height: 100vh;
             overflow-y: auto;
-            padding: 200px 20px 100px 20px; /* Standard-Padding */
+            padding: 220px 20px 100px 20px; 
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
         }
@@ -146,11 +146,6 @@
 
         .date { font-weight: 800; color: var(--primary); font-size: 0.9rem; margin-bottom: 8px; display: block; }
         .details { font-size: 1.05rem; line-height: 1.5; white-space: pre-wrap; }
-
-        @media (min-width: 1024px) {
-            .fixed-header { padding: 20px; }
-            .content-container { padding-top: 220px; }
-        }
     </style>
 </head>
 <body>
@@ -167,7 +162,7 @@
         <div class="timeline-path" id="timeline-content">
             <!-- Content via JS -->
         </div>
-        <div style="height: 70vh;"></div> 
+        <div style="height: 80vh;"></div> 
     </div>
 
 <script>
@@ -217,7 +212,6 @@
         });
 
         slider.max = data.length - 1;
-        // Initialer Stand ohne Scrollen beim Laden
         update(0, false);
     }
 
@@ -230,14 +224,16 @@
             yearLabel.innerText = yearMatch ? yearMatch[0] : "Offen";
             
             if(shouldScroll) {
-                // Präzise Berechnung: 
-                // Position der Karte im Container + Padding des Containers - Header-Höhe - kleiner Puffer
-                const headerHeight = header.offsetHeight;
-                const cardTop = active.offsetTop;
-                const scrollTarget = cardTop - headerHeight - 20;
+                // Header-Höhe jedes Mal neu messen (wichtig für mobile Orientierung)
+                const headerBottom = header.getBoundingClientRect().bottom;
+                // Position der Karte relativ zum Viewport
+                const cardRect = active.getBoundingClientRect();
+                // Wie viel muss die scroll-area bewegen?
+                // Aktueller Scrollstand + (Karten-Oberkante - Header-Unterkante)
+                const offset = cardRect.top - headerBottom - 20;
 
-                scrollArea.scrollTo({
-                    top: scrollTarget,
+                scrollArea.scrollBy({
+                    top: offset,
                     behavior: 'smooth'
                 });
             }
@@ -246,7 +242,7 @@
 
     slider.addEventListener('input', (e) => update(e.target.value, true));
 
-    render();
+    window.addEventListener('load', render);
 </script>
 </body>
 </html>
