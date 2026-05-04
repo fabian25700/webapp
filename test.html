@@ -11,6 +11,8 @@
             --surface: #ffffff;
             --text: #1a1a1a;
             --border: #d1d1d1;
+            --header-h: 160px;
+            --sidebar-w: 220px;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -22,227 +24,224 @@
             }
         }
 
-        /* Grund-Setup gegen Zerschießen */
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         html, body { 
-            width: 100%; 
-            margin: 0; 
-            padding: 0; 
-            background: var(--bg); 
-            font-family: -apple-system, sans-serif;
-            overflow-x: hidden;
+            width: 100%; height: 100%; margin: 0; padding: 0;
+            background: var(--bg); font-family: -apple-system, system-ui, sans-serif;
+            color: var(--text); overflow: hidden; /* Verhindert doppeltes Scrollen */
         }
 
-        /* FIXIERTER HEADER-BEREICH */
-        .header-nav-unit {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
+        /* LAYOUT STRUKTUR */
+        .app-wrapper {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* NAVIGATION OBEN (MOBILE) / RECHTS (DESKTOP) */
+        .nav-unit {
             background: var(--surface);
             z-index: 1000;
             border-bottom: 2px solid var(--primary);
-            padding-top: env(safe-area-inset-top);
+            padding: env(safe-area-inset-top) 15px 15px 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            flex-shrink: 0;
         }
 
-        h1 { margin: 10px 0 5px 0; font-size: 1.1rem; color: var(--primary); text-transform: uppercase; }
-
-        /* DER SLIDER (DIE LINIE) */
-        .slider-container {
-            width: 80%;
+        .slider-box {
+            width: 100%;
             max-width: 400px;
-            padding: 15px 0 20px 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            text-align: center;
         }
 
         #year-label {
-            font-size: 1.5rem;
+            font-size: 2rem;
             font-weight: 900;
-            color: var(--text);
+            color: var(--primary);
             margin-bottom: 5px;
         }
 
+        /* SLIDER STYLING */
         input[type=range] {
             -webkit-appearance: none;
             width: 100%;
             background: transparent;
+            cursor: pointer;
         }
 
-        /* Die Schiene */
         input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 4px;
-            background: var(--border);
-            border-radius: 2px;
+            height: 6px; background: var(--border); border-radius: 3px;
         }
 
-        /* Der Knopf (Thumb) */
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            height: 24px;
-            width: 24px;
-            border-radius: 50%;
+            height: 28px; width: 28px;
             background: var(--primary);
-            cursor: pointer;
-            margin-top: -10px; /* Zentriert den Knopf auf der Linie */
-            box-shadow: 0 0 10px rgba(227, 0, 11, 0.4);
-            border: 3px solid var(--surface);
+            border-radius: 50%;
+            border: 4px solid var(--surface);
+            margin-top: -11px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
 
-        /* CONTENT */
-        .scroll-container {
-            margin-top: 160px; /* Platz für den fixen Header */
+        /* SCROLL BEREICH */
+        .content-scroll {
+            flex: 1;
+            overflow-y: scroll;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
         }
 
-        .timeline-wrapper {
-            position: relative;
-            width: 100%;
-            max-width: 500px;
+        .timeline-container {
+            max-width: 600px;
+            margin: 0 auto;
             border-left: 3px solid var(--primary);
             padding-left: 30px;
+            position: relative;
         }
 
         .event-card {
             background: var(--surface);
-            margin-bottom: 40px;
-            padding: 15px;
-            border-radius: 12px;
+            margin-bottom: 30px;
+            padding: 18px;
+            border-radius: 15px;
             position: relative;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            opacity: 0.4;
-            transition: opacity 0.4s, transform 0.4s;
-            scroll-margin-top: 180px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 1px solid var(--border);
+            transition: transform 0.3s, opacity 0.3s;
+            scroll-margin-top: 20px;
         }
 
-        .event-card.active {
-            opacity: 1;
-            transform: scale(1.03);
-            border: 1px solid var(--primary);
-        }
-
-        /* Der Punkt auf der Linie */
         .event-card::before {
             content: '';
             position: absolute;
-            left: -39px;
-            top: 20px;
-            width: 14px;
-            height: 14px;
+            left: -40px;
+            top: 24px;
+            width: 16px; height: 16px;
             background: var(--primary);
             border-radius: 50%;
             border: 3px solid var(--bg);
         }
 
-        .date { font-weight: bold; color: var(--primary); font-size: 0.9rem; }
-        .text { margin-top: 5px; font-size: 1rem; line-height: 1.4; }
+        .date { font-weight: 800; color: var(--primary); font-size: 0.85rem; margin-bottom: 6px; display: block; }
+        .details { font-size: 1rem; line-height: 1.5; white-space: pre-wrap; }
+        b { color: var(--primary); }
 
-        /* DESKTOP ANPASSUNG */
-        @media (min-width: 900px) {
-            .header-nav-unit {
-                width: 200px;
+        /* DESKTOP OPTIMIERUNG */
+        @media (min-width: 1024px) {
+            .app-wrapper { flex-direction: row-reverse; }
+            .nav-unit {
+                width: var(--sidebar-w);
                 height: 100vh;
-                right: 0;
-                left: auto;
                 border-bottom: none;
                 border-left: 2px solid var(--primary);
                 justify-content: center;
+                padding: 40px;
             }
-            .slider-container {
-                transform: rotate(0deg); /* Hier kann man bei Bedarf auf Vertikal drehen */
-                width: 150px;
-            }
-            .scroll-container {
-                margin-top: 0;
-                margin-right: 200px;
-                padding-top: 50px;
+            .slider-box {
+                transform: rotate(0deg); /* Optional: auf -90deg für vertikalen Slider */
             }
         }
     </style>
 </head>
 <body>
 
-    <div class="header-nav-unit">
-        <h1>KC Rakete</h1>
-        <div class="slider-container">
-            <div id="year-label">2026</div>
-            <input type="range" id="chronik-slider" min="0" max="10" value="0">
-            <div style="font-size: 0.6rem; margin-top: 10px; opacity: 0.5;">ZIEHEN ZUM REISEN</div>
+<div class="app-wrapper">
+    <!-- Navigation: Oben auf Mobile, Rechts auf Desktop -->
+    <div class="nav-unit">
+        <div style="font-size: 0.8rem; font-weight: bold; opacity: 0.6; text-transform: uppercase;">KC Rakete Chronik</div>
+        <div id="year-label">2026</div>
+        <div class="slider-box">
+            <input type="range" id="main-slider" min="0" value="0">
         </div>
+        <div style="font-size: 0.6rem; margin-top: 10px; opacity: 0.5;">ZIEHEN ZUM REISEN</div>
     </div>
 
-    <div class="scroll-container">
-        <div class="timeline-wrapper" id="timeline-list">
-            <!-- JS befüllt das -->
+    <!-- Hauptinhalt -->
+    <div class="content-scroll" id="scroll-area">
+        <div class="timeline-container" id="timeline-body">
+            <!-- Content wird hier generiert -->
         </div>
+        <div style="height: 300px;"></div> <!-- Puffer unten -->
     </div>
+</div>
 
-    <script>
-        const data = [
-            { d: "27. Juni 2026", txt: "Erstes <b>KC Rakete Sommerfest</b> im Vereinsheim Thorr" },
-            { d: "12. Juni 2026", txt: "3. Kegeltour - Ziel noch Geheim!" },
-            { d: "27. Dezember 2025", txt: "4. Kegeltunier: <b>1. Platz!</b> Sieg vor KC Govas." },
-            { d: "15. November 2025", txt: "1. KC Rakete Winterfest im Bierbrunnen." },
-            { d: "25. Juli 2025", txt: "Mitgliederversammlung & <b>Satzungsbeschluss</b>." },
-            { d: "13. Juni 2025", txt: "2. Kegeltour - Hamburg. Elbe, Reeperbahn & Kegeln." },
-            { d: "29. Dezember 2024", txt: "3. Kegeltunier: Geteilter 2. Platz." },
-            { d: "14. Juni 2024", txt: "1. Kegeltour - Brüssel. Schnitzeljagd & Mottoshirts." },
-            { d: "29. Dezember 2023", txt: "2. Kegeltunier: 3. Platz." },
-            { d: "4. August 2022", txt: "<b>10. Kegeln</b> - Jubiläumsabend." },
-            { d: "30. September 2021", txt: "Umbenennung in <b>KC Rakete</b>." },
-            { d: "18. Oktober 2020", txt: "Gründung als <b>KBC Warmer Hans</b>." }
-        ];
+<script>
+    // DEINE VOLLSTÄNDIGEN DATEN (Neu zu Alt)
+    const data = [
+        { d: "27. Juni 2026", txt: "Erstes <b>KC Rakete Sommerfest</b> im Vereinsheim Thorr mit x Gästen und Überraschungsgast" },
+        { d: "12. Juni 2026", txt: "<b>3. Kegeltour - ??</b> \nOrganisatoren: Tobias und Christoph" },
+        { d: "27. Dezember 2025", txt: "<b>4. Kegeltunier</b> im Brauhaus Zur Krone Bergheim \n<b>1. Platz</b> vor KC Govas & KC Met Schmackes" },
+        { d: "15. November 2025", txt: "<b>1. KC Rakete Winterfest</b> \nim Bierbrunnen Bergheim mit 32 Gästen" },
+        { d: "25. Juli 2025", txt: "Erste Mitgliederversammlung und <b>Beschluss Satzung</b> \"Zur Krone\" \nErster Vorstand: Christoph (Präsident), Niklas (Schriftführer), Yannick (Kassenwart), Fabian (Kassenprüfer)" },
+        { d: "13. Juni 2025", txt: "<b>2. Kegeltour - Hamburg</b> - mit Beerpong Tunier und Schnitzeljagd \nOrganisatoren: Yannick und Cengiz \nKC Rakete Rucksäcke und Fischerhüte + Kölschgläser für Gewinner" },
+        { d: "7. Februar 2025", txt: "Wechsel Kegelbahn <b>Em Pittermänche</b> zum Brauhaus zur Krone" },
+        { d: "29. Dezember 2024", txt: "<b>3. Kegeltunier</b> im Brauhaus Zur Krone Bergheim \nmit KC Met Schmackes geteilter <b>2. Platz</b> hinter KC Govas" },
+        { d: "31. August 2024", txt: "Erste KC Rakete <b>Fahne</b>" },
+        { d: "28. Juni 2024", txt: "Austritt des Mitglieds: <b>Daniel</b>" },
+        { d: "25. April 2024", txt: "Beitritt des Mitglieds: <b>Neitzke</b>" },
+        { d: "2. April 2024", txt: "Neue KC Rakete <b>Hoodies</b>" },
+        { d: "29. Dezember 2023", txt: "<b>2. Kegeltunier</b> im Brauhaus Zur Krone Bergheim \n<b>3. Platz</b> hinter KC Govas & KC Met Schmackes" },
+        { d: "17. November 2023", txt: "<b>25. Kegeln</b>" },
+        { d: "3. November 2023", txt: "Neue KC Rakete <b>Polo-Shirts</b>" },
+        { d: "20. Oktober 2023", txt: "Beitritt des Mitglieds: <b>Daniel</b>" },
+        { d: "29. Dezember 2022", txt: "<b>1. Kegeltunier</b> im Brauhaus Zur Krone Bergheim \n<b>3. Platz</b> hinter KC Govas & KC Met Schmackes" },
+        { d: "4. August 2022", txt: "<b>10. Kegeln</b>" },
+        { d: "24. Februar 2022", txt: "Abbruch <b>Karnevalskegeln</b> wegen Alkoholpegel" },
+        { d: "1. November 2021", txt: "Erste eigene <b>Aufkleber</b>" },
+        { d: "30. September 2021", txt: "Zweites Kegeln (erstes mit Strafen) und Umbennung in <b>KC Rakete</b> \nBeitritt der Mitglieder: Cengiz und Julian" },
+        { d: "18. Oktober 2020", txt: "Erstes Kegeln als <b>KBC Warmer Hans</b> mit den Gründungsmitgliedern: Christoph, Fabian, Jan, Leonard, Marvin, Niklas, Tobias und Yannick" },
+        { d: "Offen", txt: "Eintrag ins <b>Vereinsregister</b> unter dem Namen <b>Kegelclub Rakete e.V.</b>" }
+    ];
 
-        const list = document.getElementById('timeline-list');
-        const slider = document.getElementById('chronik-slider');
-        const label = document.getElementById('year-label');
+    const body = document.getElementById('timeline-body');
+    const slider = document.getElementById('main-slider');
+    const yearLabel = document.getElementById('year-label');
+    const scrollArea = document.getElementById('scroll-area');
 
-        function init() {
-            list.innerHTML = '';
-            data.forEach((item, i) => {
-                const div = document.createElement('div');
-                div.className = 'event-card';
-                div.id = 'card-' + i;
-                div.innerHTML = `<div class="date">${item.d}</div><div class="text">${item.txt}</div>`;
-                list.appendChild(div);
-            });
-
-            slider.max = data.length - 1;
-            slider.value = 0;
-            update(0);
-        }
-
-        function update(index) {
-            // Alle Karten blass machen
-            document.querySelectorAll('.event-card').forEach(c => c.classList.remove('active'));
-            
-            // Aktive Karte hervorheben
-            const active = document.getElementById('card-' + index);
-            active.classList.add('active');
-
-            // Jahr im Slider-Text anzeigen
-            const year = data[index].d.match(/\d{4}/);
-            label.innerText = year ? year[0] : "Start";
-
-            // Sanft dorthin scrollen
-            active.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        slider.addEventListener('input', (e) => {
-            update(e.target.value);
+    function render() {
+        body.innerHTML = '';
+        data.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'event-card';
+            card.id = 'event-' + index;
+            card.innerHTML = `
+                <span class="date">${item.d}</span>
+                <div class="details">${item.txt}</div>
+            `;
+            body.appendChild(card);
         });
 
-        init();
-    </script>
+        slider.max = data.length - 1;
+        // Start bei Index 0 (Neuester Eintrag)
+        updateView(0);
+    }
+
+    function updateView(index) {
+        // Highlight Karte
+        document.querySelectorAll('.event-card').forEach(c => c.style.opacity = '0.3');
+        const activeCard = document.getElementById('event-' + index);
+        activeCard.style.opacity = '1';
+        activeCard.style.transform = 'scale(1.02)';
+
+        // Jahr-Label aktualisieren
+        const yearMatch = data[index].d.match(/\d{4}/);
+        yearLabel.innerText = yearMatch ? yearMatch[0] : "Start";
+
+        // Scrollen
+        activeCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    slider.addEventListener('input', (e) => {
+        updateView(e.target.value);
+    });
+
+    // Initialisierung
+    render();
+</script>
+
 </body>
 </html>
