@@ -8,13 +8,11 @@
         :root {
             --bg: #f5f5f5;
             --surface: #ffffff;
-            --primary: #e3000b; /* Rot */
-            --accent: #c0c0c0; /* Silber */
+            --primary: #e3000b;
+            --accent: #c0c0c0;
             --text-primary: #1a1a1a;
-            --text-secondary: #4a4a4a;
             --border: #d1d1d1;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            --nav-width: 80px;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         @media (prefers-color-scheme: dark) {
@@ -22,171 +20,160 @@
                 --bg: #121212;
                 --surface: #1e1e1e;
                 --text-primary: #ffffff;
-                --text-secondary: #b0b0b0;
                 --border: #333333;
-                --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             }
         }
 
-        html { scroll-behavior: smooth; }
+        /* Verhindert jegliches seitliches Wackeln/Scrollen */
+        html, body { 
+            width: 100%; 
+            overflow-x: hidden; 
+            margin: 0; 
+            padding: 0;
+            scroll-behavior: smooth;
+            -webkit-text-size-adjust: 100%;
+        }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, system-ui, sans-serif;
             background-color: var(--bg);
             color: var(--text-primary);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            /* Verhindert Textmarkierung beim schnellen Tippen auf Mobile */
-            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Fixierter Header + Fixiertes Menü */
+        .sticky-top {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: var(--surface);
+            width: 100%;
+            border-bottom: 1px solid var(--border);
         }
 
         header {
-            width: 100%;
-            background: var(--surface);
-            border-bottom: 2px solid var(--primary);
+            padding-top: env(safe-area-inset-top);
             text-align: center;
-            padding-top: calc(15px + env(safe-area-inset-top));
-            padding-bottom: 15px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            padding-bottom: 5px;
         }
 
-        h1 { margin: 0; font-weight: 800; color: var(--primary); font-size: 1.4rem; text-transform: uppercase; }
+        h1 { margin: 10px 0; font-size: 1.1rem; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
 
-        /* Layout-Container für Sidebar + Content */
-        .main-layout {
-            display: flex;
-            width: 100%;
-            max-width: 800px;
-            position: relative;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        /* Fixes Inhaltsverzeichnis */
+        /* Das Jahr-Nav: Fixiert und kompakt */
         nav#year-nav {
-            width: var(--nav-width);
-            position: sticky;
-            top: 80px;
-            height: fit-content;
-            padding: 20px 10px;
             display: flex;
-            flex-direction: column;
-            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap; /* Jahre brechen um, wenn Platz nicht reicht */
+            gap: 8px;
+            padding: 8px 5px;
+            background: var(--surface);
         }
 
         .nav-item {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
             text-decoration: none;
-            padding: 8px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 0.8rem;
+            color: var(--text-primary);
+            font-size: 0.75rem;
             font-weight: bold;
-            box-shadow: var(--shadow);
-            transition: 0.2s;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            min-width: 45px;
+            text-align: center;
         }
 
-        .nav-item:active { transform: scale(0.9); background: var(--primary); color: white; }
+        .nav-item:active {
+            background: var(--primary);
+            color: white;
+        }
 
-        /* Timeline Content */
+        /* Timeline-Layout */
         .container {
-            flex: 1;
-            padding: 20px;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 15px 0;
+            box-sizing: border-box;
         }
 
-        .timeline { position: relative; }
+        .timeline {
+            position: relative;
+            padding-left: 20px;
+            margin-left: 15px;
+        }
 
         .timeline::after {
             content: '';
             position: absolute;
-            width: 4px;
+            width: 3px;
             background-color: var(--accent);
             top: 0;
             bottom: 0;
-            left: 20px;
-            margin-left: -2px;
+            left: 0;
         }
 
-        .event-card { padding: 10px 10px 10px 50px; position: relative; scroll-margin-top: 100px; }
+        .event-card {
+            padding: 10px 15px 10px 25px;
+            position: relative;
+            /* Offset für den fixen Header beim Springen */
+            scroll-margin-top: 130px; 
+        }
 
         .event-card::after {
             content: '';
             position: absolute;
             width: 12px;
             height: 12px;
-            left: 14px;
+            left: -5px;
             background-color: var(--primary);
-            border: 2px solid var(--accent);
-            top: 25px;
+            border: 2px solid var(--bg);
+            top: 22px;
             border-radius: 50%;
-            z-index: 1;
-        }
-
-        .event-card.goal::after {
-            background-color: var(--surface);
-            border: 2px dashed var(--primary);
+            z-index: 2;
         }
 
         .content {
-            padding: 15px;
+            padding: 12px;
             background-color: var(--surface);
-            border-radius: 12px;
+            border-radius: 10px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
+            font-size: 0.9rem;
         }
 
-        .date { font-weight: 900; color: var(--primary); font-size: 0.85rem; display: block; margin-bottom: 5px; }
-        .details { font-size: 0.95rem; line-height: 1.4; white-space: pre-wrap; }
-        b { color: var(--text-primary); font-weight: 700; }
+        .date {
+            color: var(--primary);
+            font-weight: 800;
+            font-size: 0.75rem;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .details { line-height: 1.4; }
 
         footer {
-            padding: 25px;
+            padding: 30px 15px;
             text-align: center;
-            font-weight: bold;
+            font-size: 0.8rem;
             background: var(--accent);
-            width: 100%;
+            color: #000;
             margin-top: 20px;
             text-transform: uppercase;
-        }
-
-        /* Mobile Anpassung für das Menü */
-        @media (max-width: 600px) {
-            .main-layout { flex-direction: column; }
-            nav#year-nav {
-                width: 100%;
-                position: sticky;
-                top: 60px; /* Unter dem Header */
-                flex-direction: row;
-                overflow-x: auto;
-                background: var(--bg);
-                z-index: 90;
-                padding: 10px;
-                box-sizing: border-box;
-                border-bottom: 1px solid var(--border);
-            }
-            .nav-item { min-width: 60px; }
-            .container { padding: 10px; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>KC Rakete - Chronik</h1>
-    </header>
+    <div class="sticky-top">
+        <header>
+            <h1>KC Rakete - Chronik</h1>
+        </header>
+        <nav id="year-nav">
+            <!-- Jahre werden hier eingefügt -->
+        </nav>
+    </div>
 
-    <div class="main-layout">
-        <!-- Inhaltsverzeichnis wird per JS befüllt -->
-        <nav id="year-nav"></nav>
-
-        <div class="container">
-            <div class="timeline" id="chronik"></div>
-        </div>
+    <div class="container">
+        <div class="timeline" id="chronik"></div>
     </div>
 
     <footer id="stats"></footer>
@@ -219,37 +206,32 @@
             { d: "Offen", txt: "Eintrag ins <b>Vereinsregister</b> unter dem Namen <b>Kegelclub Rakete e.V.</b>", isGoal: true }
         ];
 
-        const footerText = "Heute 11 Mitglieder - 53 Kegelabende";
-
         function render() {
             const container = document.getElementById('chronik');
             const nav = document.getElementById('year-nav');
             
-            // 1. Daten umkehren für Neu -> Alt
+            // Neu zu Alt sortieren
             const reversedData = [...data].reverse();
-            
-            const yearsSet = new Set();
+            const yearsSeen = new Set();
 
-            reversedData.forEach((item, index) => {
-                // Jahr extrahieren für das Inhaltsverzeichnis
+            reversedData.forEach(item => {
                 const yearMatch = item.d.match(/\d{4}/);
-                const year = yearMatch ? yearMatch[0] : "Zukunft";
+                const year = yearMatch ? yearMatch[0] : "Davor";
 
-                // Event Card erstellen
                 const el = document.createElement('div');
-                el.className = 'event-card' + (item.isGoal ? ' goal' : '');
+                el.className = 'event-card';
                 
-                // ID vergeben, wenn es der erste Eintrag dieses Jahres ist
-                if (!yearsSet.has(year)) {
+                // Nur das ERSTE Element eines Jahres bekommt die ID für den Sprunganker
+                if (!yearsSeen.has(year)) {
                     el.id = `year-${year}`;
-                    yearsSet.add(year);
+                    yearsSeen.add(year);
                     
-                    // Navigations-Punkt erstellen
-                    const navItem = document.createElement('a');
-                    navItem.href = `#year-${year}`;
-                    navItem.className = 'nav-item';
-                    navItem.innerText = year;
-                    nav.appendChild(navItem);
+                    // Nav-Button oben hinzufügen
+                    const navBtn = document.createElement('a');
+                    navBtn.href = `#year-${year}`;
+                    navBtn.className = 'nav-item';
+                    navBtn.innerText = year;
+                    nav.appendChild(navBtn);
                 }
 
                 el.innerHTML = `
@@ -260,8 +242,7 @@
                 `;
                 container.appendChild(el);
             });
-
-            document.getElementById('stats').innerText = footerText;
+            document.getElementById('stats').innerText = "Heute 11 Mitglieder - 53 Kegelabende";
         }
 
         render();
