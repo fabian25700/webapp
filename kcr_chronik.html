@@ -97,6 +97,12 @@
             z-index: 1;
         }
 
+        /* Styling für das offene Ziel am Ende */
+        .event-card.goal::after {
+            background-color: var(--surface);
+            border: 2px dashed var(--primary);
+        }
+
         .content {
             padding: 15px;
             background-color: var(--surface);
@@ -116,7 +122,12 @@
         .details {
             font-size: 0.95rem;
             line-height: 1.4;
-            white-space: pre-wrap; /* Erhält Zeilenumbrüche aus dem JS */
+            white-space: pre-wrap;
+        }
+
+        b {
+            color: var(--text-primary);
+            font-weight: 700;
         }
 
         footer {
@@ -146,28 +157,30 @@
 
     <script>
         const data = [
-            { d: "18. Oktober 2020", txt: "Erstes Kegeln als KBC Warmer Hans mit den Gründungsmitgliedern: Christoph, Fabian, Jan, Leonard, Marvin, Niklas, Tobias und Yannick" },
-            { d: "30. September 2021", txt: "Zweites Kegeln (erstes mit Strafen) und Umbennung in KC Rakete \nBeitritt der Mitglieder: Cengiz und Julian" },
-            { d: "1. November 2021", txt: "Erste eigene Aufkleber" },
-            { d: "24. Februar 2022", txt: "Abbruch Karnevalskegeln wegen Alkoholpegel" },
-            { d: "4. August 2022", txt: "10. Kegeln" },
-            { d: "29. Dezember 2022", txt: "1. Kegeltunier im Brauhaus Zur Krone Bergheim \n3. Platz hinter KC Govas & KC Met Schmackes" },
-            { d: "20. Oktober 2023", txt: "Beitritt des Mitglieds: Daniel" },
-            { d: "3. November 2023", txt: "Neue KC Rakete Polo-Shirts" },
-            { d: "17. November 2023", txt: "25. Kegeln" },
-            { d: "29. Dezember 2023", txt: "2. Kegeltunier im Brauhaus Zur Krone Bergheim \n3. Platz hinter KC Govas & KC Met Schmackes" },
-            { d: "2. April 2024", txt: "Neue KC Rakete Hoodies" },
-            { d: "25. April 2024", txt: "Beitritt des Mitglieds: Neitzke" },
-            { d: "14. Juni 2024", txt: "1. Kegeltour - Brüssel - mit Schnitzeljagd \nOrganisatoren: Fabian und Christoph \nKC Rakete Mottoshirts, Flachmänner und Jute-Beutel für Teilnehmer" },
-            { d: "28. Juni 2024", txt: "Austritt des Mitglieds: Daniel" },
-            { d: "31. August 2024", txt: "Erste KC Rakete Fahne" },
-            { d: "29. Dezember 2024", txt: "3. Kegeltunier im Brauhaus Zur Krone Bergheim \nmit KC Met Schmackes geteilter 2. Platz hinter KC Govas" },
-            { d: "7. Februar 2025", txt: "Wechsel Kegelbahn Em Pittermänchen zum Brauhaus zur Krone" },
-            { d: "13. Juni 2025", txt: "2. Kegeltour - Hamburg - mit Beerpong Tunier und Schnitzeljagd \nOrganisatoren: Yannick und Cengiz \nKC Rakete Rucksäcke und Fischerhüte + Kölschgläser für Gewinner" },
-            { d: "25. Juli 2025", txt: "Erste Mitgliederversammlung und Beschuss Satzung \"Zur Krone\" \nErster Vorstand: Christoph (Präsident), Niklas (Schriftführer), Yannick (Kassenwart), Fabian (Kassenprüfer)" },
-            { d: "15. November 2025", txt: "1. KC Rakete Winterfest \nim Bierbrunnen Bergheim mit 32 Gästen" },
-            { d: "27. Dezember 2025", txt: "4. Kegeltunier im Brauhaus Zur Krone Bergheim \n1. Platz vor KC Govas & KC Met Schmackes" },
-            { d: "12. Juni 2026", txt: "3. Kegeltour - ?? \nOrganisatoren: Tobias und Christoph" }
+            { d: "18. Oktober 2020", txt: "Erstes Kegeln als <b>KBC Warmer Hans</b> mit den Gründungsmitgliedern: Christoph, Fabian, Jan, Leonard, Marvin, Niklas, Tobias und Yannick" },
+            { d: "30. September 2021", txt: "Zweites Kegeln (erstes mit Strafen) und Umbennung in <b>KC Rakete</b> \nBeitritt der Mitglieder: Cengiz und Julian" },
+            { d: "1. November 2021", txt: "Erste eigene <b>Aufkleber</b>" },
+            { d: "24. Februar 2022", txt: "Abbruch <b>Karnevalskegeln</b> wegen Alkoholpegel" },
+            { d: "4. August 2022", txt: "<b>10. Kegeln</b>" },
+            { d: "29. Dezember 2022", txt: "<b>1. Kegeltunier</b> im Brauhaus Zur Krone Bergheim \n<b>3. Platz</b> hinter KC Govas & KC Met Schmackes" },
+            { d: "20. Oktober 2023", txt: "Beitritt des Mitglieds: <b>Daniel</b>" },
+            { d: "3. November 2023", txt: "Neue KC Rakete <b>Polo-Shirts</b>" },
+            { d: "17. November 2023", txt: "<b>25. Kegeln</b>" },
+            { d: "29. Dezember 2023", txt: "<b>2. Kegeltunier</b> im Brauhaus Zur Krone Bergheim \n<b>3. Platz</b> hinter KC Govas & KC Met Schmackes" },
+            { d: "2. April 2024", txt: "Neue KC Rakete <b>Hoodies</b>" },
+            { d: "25. April 2024", txt: "Beitritt des Mitglieds: <b>Neitzke</b>" },
+            { d: "14. Juni 2024", txt: "<b>1. Kegeltour - Brüssel</b> - mit Schnitzeljagd \nOrganisatoren: Fabian und Christoph \nKC Rakete Mottoshirts, Flachmänner und Jute-Beutel für Teilnehmer" },
+            { d: "28. Juni 2024", txt: "Austritt des Mitglieds: <b>Daniel</b>" },
+            { d: "31. August 2024", txt: "Erste KC Rakete <b>Fahne</b>" },
+            { d: "29. Dezember 2024", txt: "<b>3. Kegeltunier</b> im Brauhaus Zur Krone Bergheim \nmit KC Met Schmackes geteilter <b>2. Platz</b> hinter KC Govas" },
+            { d: "7. Februar 2025", txt: "Wechsel Kegelbahn <b>Em Pittermänche</b> zum Brauhaus zur Krone" },
+            { d: "13. Juni 2025", txt: "<b>2. Kegeltour - Hamburg</b> - mit Beerpong Tunier und Schnitzeljagd \nOrganisatoren: Yannick und Cengiz \nKC Rakete Rucksäcke und Fischerhüte + Kölschgläser für Gewinner" },
+            { d: "25. Juli 2025", txt: "Erste Mitgliederversammlung und <b>Beschluss Satzung</b> \"Zur Krone\" \nErster Vorstand: Christoph (Präsident), Niklas (Schriftführer), Yannick (Kassenwart), Fabian (Kassenprüfer)" },
+            { d: "15. November 2025", txt: "<b>1. KC Rakete Winterfest</b> \nim Bierbrunnen Bergheim mit 32 Gästen" },
+            { d: "27. Dezember 2025", txt: "<b>4. Kegeltunier</b> im Brauhaus Zur Krone Bergheim \n<b>1. Platz</b> vor KC Govas & KC Met Schmackes" },
+            { d: "12. Juni 2026", txt: "<b>3. Kegeltour - ??</b> \nOrganisatoren: Tobias und Christoph" },
+            { d: "27. Juni 2026", txt: "Erstes <b>KC Rakete Sommerfest</b> im Vereinsheim Thorr mit x Gästen und Überraschungsgast" },
+            { d: "Offen", txt: "Eintrag ins <b>Vereinsregister</b> unter dem Namen <b>Kegelclub Rakete e.V.</b>", isGoal: true }
         ];
 
         const footerText = "Heute 11 Mitglieder - 53 Kegelabende";
@@ -176,7 +189,7 @@
             const container = document.getElementById('chronik');
             data.forEach(item => {
                 const el = document.createElement('div');
-                el.className = 'event-card';
+                el.className = 'event-card' + (item.isGoal ? ' goal' : '');
                 el.innerHTML = `
                     <div class="content">
                         <span class="date">${item.d}</span>
