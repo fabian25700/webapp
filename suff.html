@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captains Log - Dashboard</title>
+    <!-- Tailwind CSS für High-End UI -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Chart.js für die interaktiven Diagramme -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#0b0f19] text-gray-100 min-h-screen antialiased selection:bg-indigo-500 selection:text-white">
+
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-800 pb-6 mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight bg-gradient-to-r flow-root from-white to-gray-400 bg-clip-text text-transparent">CONSUMPTION ANALYTICS</h1>
+                <p class="text-xs text-gray-500 tracking-widest uppercase mt-1">Athletic Mindset &bull; Performance Tracking</p>
+            </div>
+            <div class="flex gap-3 w-full md:w-auto">
+                <button onclick="switchView('dashboard')" id="btn-dashboard" class="flex-1 md:flex-none px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">Athleten-Modus</button>
+                <button onclick="switchView('wrapped')" id="btn-wrapped" class="flex-1 md:flex-none px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 bg-gray-800 text-gray-400 hover:bg-gray-700">Wrapped-Modus</button>
+            </div>
+        </header>
+
+        <!-- DATA INPUT SECTION -->
+        <section id="input-section" class="bg-[#121826] border border-gray-800 rounded-xl p-6 mb-8 shadow-xl">
+            <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">Data Import <span class="text-xs text-gray-500 font-normal">(Apple Notes Paste)</span></h2>
+            <textarea id="raw-data" class="w-full h-32 bg-[#0b0f19] border border-gray-800 rounded-lg p-3 text-sm font-mono text-gray-300 focus:outline-none focus:border-indigo-500 transition-colors" placeholder="Union (A) 02.05.2026&#10;Peters 0,33: 2&#10;Heineken 0,25: 1..."></textarea>
+            <button onclick="processData()" class="mt-4 w-full bg-white text-black font-semibold py-3 rounded-lg hover:bg-gray-200 transition-colors text-sm uppercase tracking-wider">Daten analysieren & Dashboard generieren</button>
+        </section>
+
+        <!-- DASHBOARD VIEW -->
+        <main id="view-dashboard" class="space-y-8">
+            <!-- KPI Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-[#121826] border border-gray-800 p-5 rounded-xl">
+                    <p class="text-xs text-gray-400 uppercase tracking-wider">Events Gesamt</p>
+                    <p id="kpi-events" class="text-3xl font-bold mt-2 text-white">0</p>
+                </div>
+                <div class="bg-[#121826] border border-gray-800 p-5 rounded-xl">
+                    <p class="text-xs text-gray-400 uppercase tracking-wider">Getränke gesamt</p>
+                    <p id="kpi-drinks" class="text-3xl font-bold mt-2 text-indigo-400">0</p>
+                </div>
+                <div class="bg-[#121826] border border-gray-800 p-5 rounded-xl">
+                    <p class="text-xs text-gray-400 uppercase tracking-wider">Gesamtvolumen</p>
+                    <p id="kpi-volume" class="text-3xl font-bold mt-2 text-emerald-400">0.00 L</p>
+                </div>
+                <div class="bg-[#121826] border border-gray-800 p-5 rounded-xl">
+                    <p class="text-xs text-gray-400 uppercase tracking-wider">Varianz (Sorten)</p>
+                    <p id="kpi-types" class="text-3xl font-bold mt-2 text-amber-400">0</p>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-[#121826] border border-gray-800 p-5 rounded-xl shadow-xl">
+                    <h3 class="text-md font-semibold mb-4 text-gray-300">Volumen pro Event (Chronologisch)</h3>
+                    <div class="h-64 flex items-center justify-center">
+                        <canvas id="chart-events"></canvas>
+                    </div>
+                </div>
+                <div class="bg-[#121826] border border-gray-800 p-5 rounded-xl shadow-xl">
+                    <h3 class="text-md font-semibold mb-4 text-gray-300">Top Getränkesorten (Anzahl)</h3>
+                    <div class="h-64 flex items-center justify-center">
+                        <canvas id="chart-types"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Drill-Down Event List -->
+            <div class="bg-[#121826] border border-gray-800 rounded-xl shadow-xl overflow-hidden">
+                <div class="p-5 border-b border-gray-800">
+                    <h3 class="text-md font-semibold text-gray-300">Event-Protokoll & Tiefenanalyse</h3>
+                </div>
+                <div id="event-log-container" class="divide-y divide-gray-800">
+                    <p class="p-5 text-sm text-gray-500 text-center">Füge oben deine Daten ein, um das Protokoll zu laden.</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- WRAPPED VIEW (STORYTELLING) -->
+        <main id="view-wrapped" class="hidden min-h-[500px] flex items-center justify-center bg-gradient-to-br from-indigo-950 via-[#0b0f19] to-purple-950 rounded-2xl p-8 border border-indigo-500/20 shadow-2xl relative overflow-hidden">
+            <div id="wrapped-content" class="text-center max-w-lg mx-auto z-10 transition-all duration-500 transform scale-100">
+                <!-- Dynamischer Inhalt wird hier injiziert -->
+                <p class="text-gray-400 text-sm tracking-widest uppercase mb-2">Dein Monat im Rückspiegel</p>
+                <h2 class="text-4xl font-black tracking-tight text-white uppercase sm:text-5xl leading-none">Bereit für dein <span class="text-indigo-400">Wrapped</span>?</h2>
+                <p class="text-gray-400 mt-4 text-sm max-w-sm mx-auto">Füge zuerst im Dashboard deine Daten ein und klicke dann hier, um deine persönliche Story zu starten.</p>
+                <button onclick="startWrapped()" class="mt-8 bg-indigo-500 hover:bg-indigo-400 text-white font-bold py-3 px-8 rounded-full shadow-lg shadow-indigo-500/30 text-xs tracking-wider uppercase transition-all">Story starten</button>
+            </div>
+            <div class="absolute -right-20 -bottom-20 w-80 h-80 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -left-20 -top-20 w-80 h-80 bg-purple-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        </main>
+    </div>
+
+    <script>
+        // Globale App-Datenstruktur
+        let appData = {
+            events: [],
+            kpis: { totalDrinks: 0, totalVolume: 0, uniqueTypes: 0 },
+            charts: {}
+        };
+
+        // Sichtbarkeits-Wechsel zwischen Dashboard (Athlet) und Wrapped
+        function switchView(view) {
+            const btnDash = document.getElementById('btn-dashboard');
+            const btnWrap = document.getElementById('btn-wrapped');
+            const viewDash = document.getElementById('view-dashboard');
+            const viewWrap = document.getElementById('view-wrapped');
+
+            if (view === 'dashboard') {
+                viewDash.classList.remove('hidden');
+                viewWrap.classList.add('hidden');
+                btnDash.className = "flex-1 md:flex-none px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 bg-indigo-600 text-white shadow-lg shadow-indigo-600/20";
+                btnWrap.className = "flex-1 md:flex-none px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 bg-gray-800 text-gray-400 hover:bg-gray-700";
+            } else {
+                viewDash.classList.add('hidden');
+                viewWrap.classList.remove('hidden');
+                btnWrap.className = "flex-1 md:flex-none px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 bg-purple-600 text-white shadow-lg shadow-purple-600/20";
+                btnDash.className = "flex-1 md:flex-none px-5 py-2.5 rounded-lg font-semibold text-sm transition-all duration-300 bg-gray-800 text-gray-400 hover:bg-gray-700";
+            }
+        }
+
+        // Intuitiver Parser für dein exaktes Notiz-Format
+        function processData() {
+            const rawText = document.getElementById('raw-data').value;
+            if (!rawText.trim()) return;
+
+            const lines = rawText.split('\n');
+            let currentEvent = null;
+            const events = [];
+
+            // Regex zur Erkennung von: Event-Name DD.MM.YYYY
+            const eventRegex = /^(.*?)\s+(\d{2}\.\d{2}\.\d{4})$/;
+            // Regex zur Erkennung von: Getränk Größe: Anzahl (erlaubt Komma/Punkt bei Anzahl)
+            const drinkRegex = /^(.*?)\s+([\d,.]+)\s*:\s*([\d,.]+)/;
+
+            lines.forEach(line => {
+                const cleanLine = line.trim();
+                if (!cleanLine) return;
+
+                const eventMatch = cleanLine.match(eventRegex);
+                if (eventMatch) {
+                    if (currentEvent) events.push(currentEvent);
+                    currentEvent = {
+                        name: eventMatch[1],
+                        date: eventMatch[2],
+                        drinks: []
+                    };
+                } else if (currentEvent) {
+                    const drinkMatch = cleanLine.match(drinkRegex);
+                    if (drinkMatch) {
+                        const name = drinkMatch[1];
+                        const size = parseFloat(drinkMatch[2].replace(',', '.'));
+                        const count = parseFloat(drinkMatch[3].replace(',', '.'));
+                        currentEvent.drinks.push({ name, size, count, volume: size * count });
+                    }
+                }
+            });
+            if (currentEvent) events.push(currentEvent);
+
+            appData.events = events;
+            calculateMetrics();
+            renderDashboard();
+        }
+
+        // Metriken berechnen
+        function calculateMetrics() {
+            let drinksCount = 0;
+            let volSum = 0;
+            const typesSet = new Set();
+
+            appData.events.forEach(ev => {
+                ev.totalVolume = 0;
+                ev.totalDrinks = 0;
+                ev.drinks.forEach(d => {
+                    drinksCount += d.count;
+                    volSum += d.volume;
+                    typesSet.add(d.name);
+                    ev.totalVolume += d.volume;
+                    ev.totalDrinks += d.count;
+                });
+            });
+
+            appData.kpis.totalDrinks = drinksCount;
+            appData.kpis.totalVolume = volSum;
+            appData.kpis.uniqueTypes = typesSet.size;
+        }
+
+        // Dashboard rendern (Statistiken & Charts)
+        function renderDashboard() {
+            document.getElementById('kpi-events').innerText = appData.events.length;
+            document.getElementById('kpi-drinks').innerText = appData.kpis.totalDrinks;
+            document.getElementById('kpi-volume').innerText = appData.kpis.totalVolume.toFixed(2) + " L";
+            document.getElementById('kpi-types').innerText = appData.kpis.uniqueTypes;
+
+            renderCharts();
+            renderEventLog();
+        }
+
+        // ChartJS Generierung mit High-End Dark-Theme Anpassung
+        function renderCharts() {
+            if (appData.charts.events) appData.charts.events.destroy();
+            if (appData.charts.types) appData.charts.types.destroy();
+
+            // Chart 1: Chronologischer Verlauf
+            const ctxEvents = document.getElementById('chart-events').getContext('2d');
+            appData.charts.events = new Chart(ctxEvents, {
+                type: 'bar',
+                data: {
+                    labels: appData.events.map(e => e.name),
+                    datasets: [{
+                        label: 'Liter',
+                        data: appData.events.map(e => e.totalVolume),
+                        backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                        borderColor: 'rgb(99, 102, 241)',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                    }
+                }
+            });
+
+            // Chart 2: Aggregierte Sorten
+            const typeMap = {};
+            appData.events.forEach(ev => {
+                ev.drinks.forEach(d => {
+                    typeMap[d.name] = (typeMap[d.name] || 0) + d.count;
+                });
+            });
+            const sortedTypes = Object.entries(typeMap).sort((a,b) => b[1] - a[1]).slice(0, 5);
+
+            const ctxTypes = document.getElementById('chart-types').getContext('2d');
+            appData.charts.types = new Chart(ctxTypes, {
+                type: 'doughnut',
+                data: {
+                    labels: sortedTypes.map(t => t[0]),
+                    datasets: [{
+                        data: sortedTypes.map(t => t[1]),
+                        backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#3b82f6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 11 } } } }
+                }
+            });
+        }
+
+        // Interaktive Event-Liste (Drill-Down per Klick)
+        function renderEventLog() {
+            const container = document.getElementById('event-log-container');
+            container.innerHTML = '';
+
+            appData.events.forEach((ev, idx) => {
+                const div = document.createElement('div');
+                div.className = "p-4 hover:bg-[#182032] transition-colors cursor-pointer group";
+                div.innerHTML = `
+                    <div class="flex justify-between items-center" onclick="toggleEventDetails(${idx})">
+                        <div>
+                            <span class="text-xs text-gray-500 font-mono">${ev.date}</span>
+                            <h4 class="text-sm font-semibold text-white group-hover:text-indigo-400 transition-colors">${ev.name}</h4>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs text-gray-400 block">${ev.totalDrinks} Getränke</span>
+                            <span class="text-sm font-bold text-gray-200">${ev.totalVolume.toFixed(2)} L</span>
+                        </div>
+                    </div>
+                    <div id="details-${idx}" class="hidden mt-4 pt-3 border-t border-gray-800/50 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        ${ev.drinks.map(d => `
+                            <div class="bg-[#0b0f19] p-2 rounded border border-gray-800/60 text-xs">
+                                <span class="text-gray-400 block font-semibold truncate">${d.name}</span>
+                                <span class="text-gray-500">${d.size}L &bull; ${d.count}x</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function toggleEventDetails(idx) {
+            const el = document.getElementById(`details-${idx}`);
+            el.classList.toggle('hidden');
+        }
+
+        // WRAPPED STORY LOGIC (Spotify Style)
+        let wrappedStep = 0;
+        let wrappedStories = [];
+
+        function startWrapped() {
+            if (appData.events.length === 0) return;
+            
+            // Top-Getränk ermitteln
+            const typeMap = {};
+            appData.events.forEach(ev => ev.drinks.forEach(d => { typeMap[d.name] = (typeMap[d.name] || 0) + d.count; }));
+            const topDrink = Object.entries(typeMap).sort((a,b) => b[1] - a[1])[0]?.[0] || 'Keines';
+
+            // Peak Event ermitteln (meiste Liter)
+            const peakEvent = [...appData.events].sort((a,b) => b.totalVolume - a.totalVolume)[0];
+
+            wrappedStories = [
+                {
+                    title: "Dein Monat in Zahlen",
+                    subtitle: `Du hast im Mai an <span class="text-indigo-400 font-bold">${appData.events.length} Events</span> teilgenommen. Strukturierter Fokus trifft auf gesellige Dynamik.`
+                },
+                {
+                    title: "Dein absoluter Favorit",
+                    subtitle: `Eindeutige Performance von: <br><span class="text-purple-400 text-3xl font-black block mt-4 uppercase">${topDrink}</span>`
+                },
+                {
+                    title: "Der Peak-Day",
+                    subtitle: `Am ausdauerndsten warst du hier: <br><span class="text-amber-400 text-2xl font-bold block mt-3">${peakEvent.name} (${peakEvent.date})</span> mit stolzen ${peakEvent.totalVolume.toFixed(2)} Litern Gesamtvolumen.`
+                }
+            ];
+
+            wrappedStep = 0;
+            showStory();
+        }
+
+        function showStory() {
+            const container = document.getElementById('wrapped-content');
+            container.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                if (wrappedStep < wrappedStories.length) {
+                    const story = wrappedStories[wrappedStep];
+                    container.innerHTML = `
+                        <p class="text-gray-500 text-xs tracking-widest uppercase mb-2">STORY ${wrappedStep + 1} VON ${wrappedStories.length}</p>
+                        <h2 class="text-3xl font-extrabold text-white mb-4">${story.title}</h2>
+                        <p class="text-gray-300 text-lg leading-relaxed max-w-md mx-auto">${story.subtitle}</p>
+                        <button onclick="nextStory()" class="mt-8 bg-white text-black font-semibold text-xs py-2.5 px-6 rounded-full uppercase tracking-wider hover:bg-gray-200 transition-colors">Weiter</button>
+                    `;
+                    wrappedStep++;
+                } else {
+                    container.innerHTML = `
+                        <h2 class="text-3xl font-extrabold text-indigo-400 mb-2">Analyse Beendet.</h2>
+                        <p class="text-gray-400 text-sm max-w-xs mx-auto">Disziplin bedeutet auch, seine Daten zu kennen. Zurück zum Hauptdashboard für tiefere Einblicke.</p>
+                        <button onclick="switchView('dashboard')" class="mt-6 bg-gray-800 text-gray-300 font-semibold text-xs py-2.5 px-6 rounded-full uppercase tracking-wider hover:bg-gray-700 transition-colors">Dashboard öffnen</button>
+                    `;
+                }
+                container.classList.remove('scale-95', 'opacity-0');
+            }, 350);
+        }
+
+        function nextStory() {
+            showStory();
+        }
+    </script>
+</body>
+</html>
