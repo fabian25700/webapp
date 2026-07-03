@@ -39,7 +39,7 @@
             background: var(--bg);
             color: var(--text-primary);
             min-height: 100vh;
-            padding-bottom: 40px;
+            padding-bottom: 80px;
             overflow-x: hidden;
         }
 
@@ -104,7 +104,6 @@
 
         .location-name { font-weight: 600; font-size: 0.95rem; flex: 1; }
         
-        /* Erfolgsanimation für Routinen */
         .success-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--success); display: flex; align-items: center; justify-content: center;
@@ -112,6 +111,20 @@
         }
         .success-overlay.animate { animation: targetReached 2s forwards; }
         .success-text { color: white; font-weight: 800; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.1em; }
+
+        /* Sync Button ganz unten fixiert */
+        .sync-container {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: calc(100% - 32px); max-width: 568px; z-index: 99;
+        }
+        .sync-btn {
+            width: 100%; background: var(--surface); border: 1px solid var(--border);
+            color: var(--text-primary); font-weight: 700; font-size: 0.85rem;
+            text-transform: uppercase; letter-spacing: 0.05em; padding: 14px;
+            border-radius: 14px; box-shadow: var(--shadow); cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .sync-btn:active { transform: scale(0.98); }
 
         @keyframes targetReached {
             0% { opacity: 0; }
@@ -172,15 +185,51 @@
     </div>
 </main>
 
+<div class="sync-container">
+    <button class="sync-btn" id="sync-button" onclick="syncToGoogleSheets()">Tag in Cloud sichern</button>
+</div>
+
 <script>
-    // Konfiguration der Zielquote (0.8 = 80%)
-    const TARGET_RATIO = 0.8;
+    // Füge hier deine kopierte Google Web-App URL ein
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqS4-nQx9OZsOh1htF4kcw9w1LDxPSnnN3k1x4TWrJXiqZ4nc9g1kOQcywdDIvk6qn/exec";
     
-    // Status-Speicher für die Session
+    const TARGET_RATIO = 0.8;
     const habitState = {};
+    let allHabitsList = []; 
+
+    function checkMidnightReset() {
+        const todayStr = new Date().toDateString();
+        const savedDate = localStorage.getItem('routine_date');
+        
+        if (savedDate && savedDate !== todayStr) {
+            // Bevor gelöscht wird, sichern wir den alten Tag automatisch, falls online
+            syncToGoogleSheets(true);
+            localStorage.removeItem('routine_storage');
+        }
+        localStorage.setItem('routine_date', todayStr);
+    }
+
+    function getSavedStates() {
+        const saved = localStorage.getItem('routine_storage');
+        return saved ? JSON.parse(saved) : {};
+    }
+
+    function cleanAndSaveStates(activeIds, currentStates) {
+        const cleanedStates = {};
+        activeIds.forEach(id => {
+            if (currentStates[id] !== undefined) {
+                cleanedStates[id] = currentStates[id];
+            }
+        });
+        localStorage.setItem('routine_storage', JSON.stringify(cleanedStates));
+    }
 
     function initApp() {
+        checkMidnightReset();
+        const savedStates = getSavedStates();
         const groups = document.querySelectorAll('.category-group');
+        const activeIds = [];
+        allHabitsList = [];
         
         groups.forEach((group, groupIdx) => {
             const contentDiv = group.querySelector('.category-content');
@@ -195,15 +244,30 @@
 
             contentDiv.innerHTML = habits.map((habit, habitIdx) => {
                 const habitId = `${groupIdx}-${habitIdx}`;
+                activeIds.push(habitId);
+                const isChecked = savedStates[habitId] || false;
+                
+                // Für den Export merken wir uns den Namen und den Zustand
+                allHabitsList.push({ id: habitId, name: habit, routine: routineName });
+
+                if (isChecked) {
+                    habitState[routineName].done++;
+                }
+
                 return `
-                    <div class="bucket-card" id="card-${habitId}" onclick="toggleHabit('${routineName}', '${habitId}', this)">
+                    <div class="bucket-card ${isChecked ? 'done' : ''}" id="card-${habitId}" onclick="toggleHabit('${routineName}', '${habitId}', this)">
                         <div class="status-circle"></div>
                         <div class="location-name">${habit}</div>
                     </div>
                 `;
             }).join('');
+            
+            if ((habitState[routineName].done / habitState[routineName].total) >= TARGET_RATIO) {
+                habitState[routineName].animated = true;
+            }
         });
 
+        cleanAndSaveStates(activeIds, savedStates);
         updateGlobalProgress();
     }
 
@@ -214,18 +278,22 @@
     function toggleHabit(routineName, habitId, card) {
         const isDone = card.classList.toggle('done');
         
+        const currentData = getSavedStates();
+        currentData[habitId] = isDone;
+        
+        const activeIds = allHabitsList.map(h => h.id);
+        cleanAndSaveStates(activeIds, currentData);
+        
         if (isDone) {
             habitState[routineName].done++;
         } else {
             habitState[routineName].done--;
-            // Erlaubt erneutes Animieren, wenn man wieder unter die Grenze fällt
             habitState[routineName].animated = false; 
         }
 
         const routine = habitState[routineName];
         const currentRatio = routine.done / routine.total;
 
-        // Trigger für die 80%-Animation
         if (currentRatio >= TARGET_RATIO && !routine.animated) {
             routine.animated = true;
             const overlay = card.closest('.category-group').querySelector('.success-overlay');
@@ -250,14 +318,58 @@
             totalHabits += state.total;
             totalDone += state.done;
 
-            // Counter im Header der Routine aktualisieren
             group.querySelector('.counter-text').textContent = `(${state.done}/${state.total})`;
         });
 
-        // Globalen Header aktualisieren
         const percent = totalHabits > 0 ? Math.round((totalDone / totalHabits) * 100) : 0;
         document.getElementById('progress-bar').style.width = percent + '%';
         document.getElementById('stats-summary').textContent = `${totalDone} / ${totalHabits} Erledigt`;
+    }
+
+    function syncToGoogleSheets(isAuto = false) {
+        if (GOOGLE_SCRIPT_URL === "HIER_DEINE_WEB_APP_URL_EINFÜGEN") return;
+
+        const btn = document.getElementById('sync-button');
+        if (!isAuto) btn.textContent = "Übertrage...";
+
+        const savedStates = getSavedStates();
+        let totalDone = 0;
+        
+        const completedHabits = allHabitsList.map(h => {
+            const done = savedStates[h.id] || false;
+            if (done) totalDone++;
+            return { habit: h.name, routine: h.routine, erledigt: done };
+        });
+
+        const payload = {
+            done: totalDone,
+            total: allHabitsList.length,
+            habits: completedHabits
+        };
+
+        // Daten per HTTP POST im Hintergrund an Google abschicken
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors", // Verhindert CORS-Fehler bei Cross-Domain Anfragen
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        })
+        .then(() => {
+            if (!isAuto) {
+                btn.textContent = "Erfolgreich Gesichert ✓";
+                btn.style.borderColor = "var(--success)";
+                btn.style.color = "var(--success)";
+                setTimeout(() => {
+                    btn.textContent = "Tag in Cloud sichern";
+                    btn.style.borderColor = "var(--border)";
+                    btn.style.color = "var(--text-primary)";
+                }, 3000);
+            }
+        })
+        .catch(err => {
+            if (!isAuto) btn.textContent = "Fehler beim Sichern";
+            console.error(err);
+        });
     }
 
     window.onload = initApp;
