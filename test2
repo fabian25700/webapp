@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Core Routinen</title>
+    <style>
+        :root {
+            --accent: #e67e22;
+            --accent-soft: rgba(230, 126, 34, 0.1);
+            --success: #27ae60;
+            --success-soft: rgba(39, 174, 96, 0.1);
+            --danger: #e74c3c;
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: #2d3f55;
+                --border-light: #253347;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        header {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--bg);
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        }
+
+        .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+        
+        .back-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 12px;
+            background: var(--surface); border: 1px solid var(--border);
+            text-decoration: none; color: var(--text-primary); box-shadow: var(--shadow);
+        }
+
+        header h1 { font-size: 1.15rem; font-weight: 800; flex: 1; }
+
+        .progress-container { background: var(--border-light); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 5px; }
+        .progress-bar { background: var(--success); height: 100%; transition: width 0.3s ease; }
+        .stats-text { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+
+        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+        .routine-card { 
+            background: var(--surface); border: 1px solid var(--border); border-radius: 18px; 
+            box-shadow: var(--shadow); position: relative; padding: 16px;
+            display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; user-select: none; transition: all 0.2s ease;
+        }
+        .routine-card:active { transform: scale(0.99); }
+        .routine-card.done { border-style: dashed; opacity: 0.6; }
+
+        .routine-left { display: flex; align-items: center; gap: 12px; }
+        .routine-icon { width: 32px; height: 32px; background: var(--accent-soft); color: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+        .routine-title { font-weight: 800; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.03em; display: flex; align-items: center; gap: 8px; }
+        
+        /* Indikator für den Vortag */
+        .yesterday-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .yesterday-dot.ja { background: var(--success); box-shadow: 0 0 8px var(--success); }
+        .yesterday-dot.nein { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+        .yesterday-label { font-size: 0.6rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; opacity: 0.7; }
+
+        .status-circle {
+            width: 24px; height: 24px; border-radius: 8px;
+            border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+        .done .status-circle { background: var(--success); border-color: var(--success); }
+        .status-circle::after { content: '✓'; color: white; font-size: 14px; font-weight: bold; display: none; }
+        .done .status-circle::after { display: block; }
+
+        /* Cloud Status Indicator im Header */
+        .cloud-status { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <a href="index.html" class="back-btn">←</a>
+        <h1>Core Routinen</h1>
+        <div class="cloud-status" id="cloud-info">Lade Vortag...</div>
+    </div>
+    <div class="progress-container"><div class="progress-bar" id="progress-bar" style="width: 0%"></div></div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+        <div class="stats-text" id="stats-summary">0 / 7 Erledigt</div>
+        <div class="yesterday-label" id="yesterday-info">Punkte: Vortagsstatus</div>
+    </div>
+</header>
+
+<main id="routinen-container">
+    <div class="routine-card" data-id="Morgenroutine" data-icon="☀️" onclick="toggleRoutine(this)">
+        <div class="routine-left">
+            <div class="routine-icon">☀️</div>
+            <div class="routine-title">Morgenroutine <span class="yesterday-dot" id="dot-Morgenroutine"></span></div>
+        </div>
+        <div class="status-circle"></div>
+    </div>
+
+    <div class="routine-card" data-id="Sportroutine" data-icon="🏃‍♂️" onclick="toggleRoutine(this)">
+        <div class="routine-left">
+            <div class="routine-icon">🏃‍♂️</div>
+            <div class="routine-title">Sportroutine <span class="yesterday-dot" id="dot-Sportroutine"></span></div>
+        </div>
+        <div class="status-circle"></div>
+    </div>
+
+    <div class="routine-card" data-id="Gesundheitsroutine" data-icon="🥗" onclick="toggleRoutine(this)">
+        <div class="routine-left">
+            <div class="routine-icon">🥗</div>
+            <div class="routine-title">Gesundheitsroutine <span class="yesterday-dot" id="dot-Gesundheitsroutine"></span></div>
+        </div>
+        <div class="status-circle"></div>
+    </div>
+
+    <div class="routine-card" data-id="Fokusroutine" data-icon="🧠" onclick="toggleRoutine(this)">
+        <div class="routine-left">
+            <div class="routine-icon">🧠</div>
+            <div class="routine-title">Fokusroutine <span class="yesterday-dot" id="dot-Fokusroutine"></span></div>
+        </div>
+        <div class="status-circle"></div>
+    </div>
+
+    <div class="routine-card" data-id="Schlafroutine" data-icon="🛌" onclick="toggleRoutine(this)">
+        <div class="routine-left">
+            <div class="routine-icon">🛌</div>
+            <div class="routine-title">Schlafroutine <span class="yesterday-dot" id="dot-Schlafroutine"></span></div>
+        </div>
+        <div class="status-circle"></div>
+    </div>
+
+    <div class="routine-card" data-id="Abendroutine" data-icon="🌙" onclick="toggleRoutine(this)">
+        <div class="routine-left">
+            <div class="routine-icon">🌙</div>
+            <div class="routine-title">Abendroutine <span class="yesterday-dot" id="dot-Abendroutine"></span></div>
+        </div>
+        <div class="status-circle"></div>
+    </div>
+
+    <div class="routine-card" data-id="2-Day Rule" data-icon="⚡" onclick="toggleRoutine(this)">
+        <div class="routine-left">
+            <div class="routine-icon">⚡</div>
+            <div class="routine-title">2-Day Rule <span class="yesterday-dot" id="dot-2-Day Rule"></span></div>
+        </div>
+        <div class="status-circle"></div>
+    </div>
+</main>
+
+<script>
+    // DEINE GOOGLE APPS SCRIPT URL HIER EINTRAGEN
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWEKoLX16TFE-SN0Pl8_RlRrGx7FtAXRkhS5fGFS6o-gWT9jJqLe4RTXn16SZjqimrzw/exec";
+
+    function checkMidnightReset() {
+        const todayStr = new Date().toDateString();
+        const savedDate = localStorage.getItem('matrix_date');
+        
+        if (savedDate && savedDate !== todayStr) {
+            localStorage.removeItem('matrix_storage');
+        }
+        localStorage.setItem('matrix_date', todayStr);
+    }
+
+    function getSavedStates() {
+        const saved = localStorage.getItem('matrix_storage');
+        return saved ? JSON.parse(saved) : {};
+    }
+
+    function initApp() {
+        checkMidnightReset();
+        const savedStates = getSavedStates();
+        const cards = document.querySelectorAll('.routine-card');
+        
+        cards.forEach(card => {
+            const id = card.getAttribute('data-id');
+            if (savedStates[id] === true) {
+                card.classList.add('done');
+            }
+        });
+
+        updateUI();
+        fetchYesterdayStatus();
+    }
+
+    function toggleRoutine(card) {
+        card.classList.toggle('done');
+        
+        // Speicherzustand lokal erfassen
+        const cards = document.querySelectorAll('.routine-card');
+        const currentState = {};
+        cards.forEach(c => {
+            const id = c.getAttribute('data-id');
+            currentState[id] = c.classList.contains('done');
+        });
+        
+        localStorage.setItem('matrix_storage', JSON.stringify(currentState));
+        updateUI();
+        syncToCloud(currentState);
+    }
+
+    function updateUI() {
+        const cards = document.querySelectorAll('.routine-card');
+        const total = cards.length;
+        let done = 0;
+
+        cards.forEach(c => {
+            if (c.classList.contains('done')) done++;
+        });
+
+        const percent = total > 0 ? Math.round((done / total) * 100) : 0;
+        document.getElementById('progress-bar').style.width = percent + '%';
+        document.getElementById('stats-summary').textContent = `${done} / ${total} Erledigt`;
+    }
+
+    function fetchYesterdayStatus() {
+        if (GOOGLE_SCRIPT_URL === "DEINE_WEB_APP_URL") {
+            document.getElementById('cloud-info').textContent = "Keine API konfiguriert";
+            return;
+        }
+
+        fetch(GOOGLE_SCRIPT_URL)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('cloud-info').textContent = "Cloud Live ✓";
+                
+                // Färbe die Punkte basierend auf dem Vortag
+                Object.keys(data).forEach(routineName => {
+                    const dot = document.getElementById(`dot-${routineName}`);
+                    if (dot) {
+                        const status = data[routineName].toLowerCase(); // "ja" oder "nein"
+                        dot.className = `yesterday-dot ${status}`;
+                    }
+                });
+            })
+            .catch(err => {
+                document.getElementById('cloud-info').textContent = "Vortag-Fehler";
+                console.error(err);
+            });
+    }
+
+    function syncToCloud(state) {
+        if (GOOGLE_SCRIPT_URL === "DEINE_WEB_APP_URL") return;
+
+        document.getElementById('cloud-info').textContent = "Synchronisiere...";
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(state)
+        })
+        .then(() => {
+            document.getElementById('cloud-info').textContent = "Cloud synchronisiert ✓";
+        })
+        .catch(err => {
+            document.getElementById('cloud-info').textContent = "Sync Fehler";
+            console.error(err);
+        });
+    }
+
+    window.onload = initApp;
+</script>
+</body>
+</html>
