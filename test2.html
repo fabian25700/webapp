@@ -81,7 +81,6 @@
         .routine-icon { width: 32px; height: 32px; background: var(--accent-soft); color: var(--accent); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
         .routine-title { font-weight: 800; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.03em; display: flex; align-items: center; gap: 8px; }
         
-        /* Indikator für den Vortag */
         .yesterday-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
         .yesterday-dot.ja { background: var(--success); box-shadow: 0 0 8px var(--success); }
         .yesterday-dot.nein { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
@@ -96,7 +95,6 @@
         .status-circle::after { content: '✓'; color: white; font-size: 14px; font-weight: bold; display: none; }
         .done .status-circle::after { display: block; }
 
-        /* Cloud Status Indicator im Header */
         .cloud-status { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
     </style>
 </head>
@@ -104,7 +102,7 @@
 
 <header>
     <div class="header-top">
-        <a href="index.html" class="back-btn">←</a>
+        <a href="index.html" class="back-btn">&larr;</a>
         <h1>Core Routinen</h1>
         <div class="cloud-status" id="cloud-info">Lade Vortag...</div>
     </div>
@@ -116,7 +114,7 @@
 </header>
 
 <main id="routinen-container">
-    <div class="routine-card" data-id="Morgenroutine" data-icon="☀️" onclick="toggleRoutine(this)">
+    <div class="routine-card" data-id="Morgenroutine" onclick="toggleRoutine(this)">
         <div class="routine-left">
             <div class="routine-icon">☀️</div>
             <div class="routine-title">Morgenroutine <span class="yesterday-dot" id="dot-Morgenroutine"></span></div>
@@ -124,7 +122,7 @@
         <div class="status-circle"></div>
     </div>
 
-    <div class="routine-card" data-id="Sportroutine" data-icon="🏃‍♂️" onclick="toggleRoutine(this)">
+    <div class="routine-card" data-id="Sportroutine" onclick="toggleRoutine(this)">
         <div class="routine-left">
             <div class="routine-icon">🏃‍♂️</div>
             <div class="routine-title">Sportroutine <span class="yesterday-dot" id="dot-Sportroutine"></span></div>
@@ -132,7 +130,7 @@
         <div class="status-circle"></div>
     </div>
 
-    <div class="routine-card" data-id="Gesundheitsroutine" data-icon="🥗" onclick="toggleRoutine(this)">
+    <div class="routine-card" data-id="Gesundheitsroutine" onclick="toggleRoutine(this)">
         <div class="routine-left">
             <div class="routine-icon">🥗</div>
             <div class="routine-title">Gesundheitsroutine <span class="yesterday-dot" id="dot-Gesundheitsroutine"></span></div>
@@ -140,7 +138,7 @@
         <div class="status-circle"></div>
     </div>
 
-    <div class="routine-card" data-id="Fokusroutine" data-icon="🧠" onclick="toggleRoutine(this)">
+    <div class="routine-card" data-id="Fokusroutine" onclick="toggleRoutine(this)">
         <div class="routine-left">
             <div class="routine-icon">🧠</div>
             <div class="routine-title">Fokusroutine <span class="yesterday-dot" id="dot-Fokusroutine"></span></div>
@@ -148,7 +146,7 @@
         <div class="status-circle"></div>
     </div>
 
-    <div class="routine-card" data-id="Schlafroutine" data-icon="🛌" onclick="toggleRoutine(this)">
+    <div class="routine-card" data-id="Schlafroutine" onclick="toggleRoutine(this)">
         <div class="routine-left">
             <div class="routine-icon">🛌</div>
             <div class="routine-title">Schlafroutine <span class="yesterday-dot" id="dot-Schlafroutine"></span></div>
@@ -156,7 +154,7 @@
         <div class="status-circle"></div>
     </div>
 
-    <div class="routine-card" data-id="Abendroutine" data-icon="🌙" onclick="toggleRoutine(this)">
+    <div class="routine-card" data-id="Abendroutine" onclick="toggleRoutine(this)">
         <div class="routine-left">
             <div class="routine-icon">🌙</div>
             <div class="routine-title">Abendroutine <span class="yesterday-dot" id="dot-Abendroutine"></span></div>
@@ -164,10 +162,10 @@
         <div class="status-circle"></div>
     </div>
 
-    <div class="routine-card" data-id="2-Day Rule" data-icon="⚡" onclick="toggleRoutine(this)">
+    <div class="routine-card" data-id="TwoDayRule" onclick="toggleRoutine(this)">
         <div class="routine-left">
             <div class="routine-icon">⚡</div>
-            <div class="routine-title">2-Day Rule <span class="yesterday-dot" id="dot-2-Day Rule"></span></div>
+            <div class="routine-title">2-Day Rule <span class="yesterday-dot" id="dot-TwoDayRule"></span></div>
         </div>
         <div class="status-circle"></div>
     </div>
@@ -175,7 +173,7 @@
 
 <script>
     // DEINE GOOGLE APPS SCRIPT URL HIER EINTRAGEN
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWEKoLX16TFE-SN0Pl8_RlRrGx7FtAXRkhS5fGFS6o-gWT9jJqLe4RTXn16SZjqimrzw/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyvxztcv812ntd8pqutg3BduikUax2sIVJkyFSoFJxCHZU8HzvvBxh08lbg1NSjgeG8xg/exec";
 
     function checkMidnightReset() {
         const todayStr = new Date().toDateString();
@@ -211,7 +209,6 @@
     function toggleRoutine(card) {
         card.classList.toggle('done');
         
-        // Speicherzustand lokal erfassen
         const cards = document.querySelectorAll('.routine-card');
         const currentState = {};
         cards.forEach(c => {
@@ -239,7 +236,7 @@
     }
 
     function fetchYesterdayStatus() {
-        if (GOOGLE_SCRIPT_URL === "DEINE_WEB_APP_URL") {
+        if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbyvxztcv812ntd8pqutg3BduikUax2sIVJkyFSoFJxCHZU8HzvvBxh08lbg1NSjgeG8xg/exec") {
             document.getElementById('cloud-info').textContent = "Keine API konfiguriert";
             return;
         }
@@ -249,12 +246,11 @@
             .then(data => {
                 document.getElementById('cloud-info').textContent = "Cloud Live ✓";
                 
-                // Färbe die Punkte basierend auf dem Vortag
                 Object.keys(data).forEach(routineName => {
-                    const dot = document.getElementById(`dot-${routineName}`);
+                    const dot = document.getElementById("dot-" + routineName);
                     if (dot) {
-                        const status = data[routineName].toLowerCase(); // "ja" oder "nein"
-                        dot.className = `yesterday-dot ${status}`;
+                        const status = data[routineName].toLowerCase();
+                        dot.className = "yesterday-dot " + status;
                     }
                 });
             })
@@ -265,7 +261,7 @@
     }
 
     function syncToCloud(state) {
-        if (GOOGLE_SCRIPT_URL === "DEINE_WEB_APP_URL") return;
+        if (GOOGLE_SCRIPT_URL === "https://script.google.com/macros/s/AKfycbyvxztcv812ntd8pqutg3BduikUax2sIVJkyFSoFJxCHZU8HzvvBxh08lbg1NSjgeG8xg/exec") return;
 
         document.getElementById('cloud-info').textContent = "Synchronisiere...";
 
