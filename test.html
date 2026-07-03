@@ -66,6 +66,29 @@
         .progress-bar { background: var(--success); height: 100%; transition: width 0.3s ease; }
         .stats-text { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
 
+        /* Toast-Hinweis Style */
+        .toast-notification {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 70px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: var(--success);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            opacity: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        .toast-notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
         main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 
         .category-group { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); position: relative; }
@@ -113,6 +136,8 @@
 </head>
 <body>
 
+<div class="toast-notification" id="toast-notice">Habit erledigt, weiter so!</div>
+
 <header>
     <div class="header-top">
         <a href="index.html" class="back-btn">&larr;</a>
@@ -121,7 +146,7 @@
     </div>
     <div class="progress-container"><div class="progress-bar" id="progress-bar" style="width: 0%"></div></div>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
-        <div class="stats-text" id="stats-summary">0 / 0 Unterpunkte</div>
+        <div class="stats-text" id="stats-summary">0 / 7 Routinen erreicht</div>
     </div>
 </header>
 
@@ -266,6 +291,14 @@
         header.parentElement.classList.toggle('open');
     }
 
+    function showSuccessToast() {
+        const toast = document.getElementById('toast-notice');
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 2000);
+    }
+
     function toggleHabit(routineName, habitId, card) {
         const isDone = card.classList.toggle('done');
         
@@ -273,34 +306,45 @@
         currentData[habitId] = isDone;
         localStorage.setItem('routine_storage', JSON.stringify(currentData));
         
+        const oldRoutineState = (habitState[routineName].done / habitState[routineName].total) >= TARGET_RATIO ? "ja" : "nein";
+        
         if (isDone) { habitState[routineName].done++; } else { habitState[routineName].done--; }
+
+        const newRoutineState = (habitState[routineName].done / habitState[routineName].total) >= TARGET_RATIO ? "ja" : "nein";
 
         updateGlobalProgress();
 
-        const routine = habitState[routineName];
-        const achievedStatus = (routine.done / routine.total) >= TARGET_RATIO ? "ja" : "nein";
-        
-        syncModuleToCloud(routineName, achievedStatus);
+        // Zeigt den Hinweis, wenn die 80%-Marke genau jetzt erreicht wurde
+        if (oldRoutineState === "nein" && newRoutineState === "ja") {
+            showSuccessToast();
+        }
+
+        // Synchronisiert nur, wenn sich der Status der gesamten Routine verändert hat
+        if (oldRoutineState !== newRoutineState) {
+            syncModuleToCloud(routineName, newRoutineState);
+        }
     }
 
     function updateGlobalProgress() {
-        let totalHabits = 0;
-        let totalDone = 0;
+        let totalRoutines = 0;
+        let completedRoutines = 0;
 
         const groups = document.querySelectorAll('.category-group');
         groups.forEach(group => {
             const routineName = group.getAttribute('data-routine');
             const state = habitState[routineName];
             
-            totalHabits += state.total;
-            totalDone += state.done;
+            totalRoutines++;
+            if ((state.done / state.total) >= TARGET_RATIO) {
+                completedRoutines++;
+            }
 
             group.querySelector('.counter-text').textContent = `(${state.done}/${state.total})`;
         });
 
-        const percent = totalHabits > 0 ? Math.round((totalDone / totalHabits) * 100) : 0;
+        const percent = totalRoutines > 0 ? Math.round((completedRoutines / totalRoutines) * 100) : 0;
         document.getElementById('progress-bar').style.width = percent + '%';
-        document.getElementById('stats-summary').textContent = `${totalDone} / ${totalHabits} Unterpunkte`;
+        document.getElementById('stats-summary').textContent = `${completedRoutines} / ${totalRoutines} Routinen erreicht`;
     }
 
     function fetchYesterdayStatus() {
