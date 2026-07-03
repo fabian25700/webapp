@@ -117,7 +117,7 @@
     <div class="header-top">
         <a href="index.html" class="back-btn">&larr;</a>
         <h1>Core Routinen</h1>
-        <div class="cloud-status" id="cloud-info">Lade Vortag...</div>
+        <div class="cloud-status" id="cloud-info">Lade...</div>
     </div>
     <div class="progress-container"><div class="progress-bar" id="progress-bar" style="width: 0%"></div></div>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
@@ -213,11 +213,10 @@
 </main>
 
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyivviwQeUVE3Wn6KGvAgPctIvA3j4J1qqLSrE8IBLkMGnv_3V8IrW5TnHlOs7ktgqfxA/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJ61AjyUXZQvyaPcPFBq4OOSULtuLUFLFmwVAjSo-kTqdVXPSrTNW_0k04YZk0AuN2fg/exec";
     
     const TARGET_RATIO = 0.8;
     const habitState = {};
-    let allIdsList = [];
 
     function checkMidnightReset() {
         const todayStr = new Date().toDateString();
@@ -237,7 +236,6 @@
         checkMidnightReset();
         const savedStates = getSavedStates();
         const groups = document.querySelectorAll('.category-group');
-        allIdsList = [];
         
         groups.forEach((group, groupIdx) => {
             const contentDiv = group.querySelector('.category-content');
@@ -248,7 +246,6 @@
 
             contentDiv.innerHTML = habits.map((habit, habitIdx) => {
                 const habitId = `${groupIdx}-${habitIdx}`;
-                allIdsList.push(habitId);
                 const isChecked = savedStates[habitId] || false;
                 
                 if (isChecked) { habitState[routineName].done++; }
@@ -308,15 +305,14 @@
     }
 
     function fetchYesterdayStatus() {
-        fetch(GOOGLE_SCRIPT_URL)
+        fetch(GOOGLE_SCRIPT_URL, { method: "GET", redirect: "follow" })
             .then(res => res.json())
             .then(data => {
                 document.getElementById('cloud-info').textContent = "Cloud Live ✓";
                 Object.keys(data).forEach(routineName => {
                     const dot = document.getElementById("dot-" + routineName);
                     if (dot) {
-                        const status = data[routineName].toLowerCase();
-                        dot.className = "yesterday-dot " + status;
+                        dot.className = "yesterday-dot " + data[routineName].toLowerCase();
                     }
                 });
             })
@@ -336,6 +332,7 @@
 
         fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
+            mode: "no-cors",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify(payload)
         })
