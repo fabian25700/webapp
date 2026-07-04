@@ -141,34 +141,40 @@
 </header>
 
 <main>
-    <!-- KPIs ganz oben -->
     <div class="kpi-grid">
         <div class="kpi-card">
             <div class="kpi-value" id="kpi-streak">-</div>
             <div class="kpi-label">TwoDayRule Streak</div>
         </div>
         <div class="kpi-card">
-            <div class="kpi-value" id="kpi-rate">-</div>
-            <div class="kpi-label">Fokus-Metrik</div>
+            <div class="kpi-value" id="kpi-recovery">-</div>
+            <div class="kpi-label">Erholungs-Zeit</div>
         </div>
     </div>
 
-    <!-- DOMINOSTEIN-ANALYSEN jetzt direkt unter den KPIs -->
     <div class="section-block">
-        <div class="section-title">Dominostein-Analysen</div>
-        <div style="display: flex; flex-direction: column; gap: 10px;" id="correlation-container">
-            <div style="font-size: 0.8rem; color: var(--text-secondary);">Analysiere wechselseitige Abhängigkeiten...</div>
+        <div class="switch-header">
+            <div class="switch-tab active" onclick="switchBlock('mid', 'domino')">Dominosteine</div>
+            <div class="switch-tab" onclick="switchBlock('mid', 'cluster')">Muster-Cluster</div>
+        </div>
+        
+        <div id="content-domino" class="switch-content active">
+            <div style="display: flex; flex-direction: column; gap: 10px;" id="correlation-container"></div>
+        </div>
+        
+        <div id="content-cluster" class="switch-content">
+            <div style="display: flex; flex-direction: column; gap: 10px;" id="cluster-container">
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">Berechne Verhaltens-Cluster...</div>
+            </div>
         </div>
     </div>
 
-    <!-- Block 1: Switch zwischen Matrix und Auswertung -->
     <div class="section-block">
         <div class="switch-header">
             <div class="switch-tab active" onclick="switchBlock('top', 'matrix')">7-Tage Matrix</div>
             <div class="switch-tab" onclick="switchBlock('top', 'perf')">Routine Auswertung</div>
         </div>
         
-        <!-- Matrix Content -->
         <div id="content-matrix" class="switch-content active">
             <div class="matrix-grid">
                 <div class="days-header" id="matrix-days"></div>
@@ -176,27 +182,23 @@
             </div>
         </div>
         
-        <!-- Auswertung Content -->
         <div id="content-perf" class="switch-content">
             <div id="routine-performance-container"></div>
         </div>
     </div>
 
-    <!-- Block 2: Switch zwischen Monat und Woche -->
     <div class="section-block">
         <div class="switch-header">
             <div class="switch-tab active" onclick="switchBlock('bottom', 'month')">Monatsvergleich</div>
             <div class="switch-tab" onclick="switchBlock('bottom', 'week')">Wochenvergleich</div>
         </div>
         
-        <!-- Monat Content -->
         <div id="content-month" class="switch-content active">
             <div class="trend-container" id="month-trend-container">
                 <div style="font-size: 0.8rem; color: var(--text-secondary);">Berechne historische Monatsdaten...</div>
             </div>
         </div>
         
-        <!-- Woche Content -->
         <div id="content-week" class="switch-content">
             <div class="trend-container" id="week-trend-container">
                 <div style="font-size: 0.8rem; color: var(--text-secondary);">Berechne historische Wochendaten...</div>
@@ -227,6 +229,10 @@
         if (position === 'top') {
             document.getElementById('content-matrix').classList.remove('active');
             document.getElementById('content-perf').classList.remove('active');
+            document.getElementById('content-' + type).classList.add('active');
+        } else if (position === 'mid') {
+            document.getElementById('content-domino').classList.remove('active');
+            document.getElementById('content-cluster').classList.remove('active');
             document.getElementById('content-' + type).classList.add('active');
         } else if (position === 'bottom') {
             document.getElementById('content-month').classList.remove('active');
@@ -266,7 +272,6 @@
         return dateObj.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
     }
 
-    // Hilfsfunktion zur Ermittlung der Kalenderwoche (ISO 8601)
     function getWeekNumber(dateStr) {
         const parts = dateStr.split('.');
         if (parts.length !== 3) return null;
@@ -307,16 +312,17 @@
         const monthlyData = {};
         const weeklyData = {};
 
+        // Historie umdrehen für chronologische Berechnungen (Älteste zuerst)
+        const chronologicalHistory = [...historyArray].reverse();
+
         historyArray.forEach(row => {
             if (!row.datum) return;
             
-            // Monats-Aggregation
             const monthKey = parseMonthYear(row.datum);
             if (!monthlyData[monthKey]) {
                 monthlyData[monthKey] = { total: 0, success: 0 };
             }
 
-            // Wochen-Aggregation (Format: "KW XX / YYYY")
             const weekNum = getWeekNumber(row.datum);
             const year = row.datum.split('.')[2];
             const weekKey = weekNum ? `KW ${String(weekNum).padStart(2, '0')} / ${year}` : "Unbekannt";
@@ -341,7 +347,7 @@
             });
         });
 
-        // --- 2. MONATSVERGLEICH DYNAMISCH RENDERN ---
+        // --- 2. MONATSVERGLEICH RENDERN ---
         const trendContainer = document.getElementById('month-trend-container');
         trendContainer.innerHTML = '';
         const sortedMonths = Object.keys(monthlyData).reverse();
@@ -376,10 +382,10 @@
             });
         }
 
-        // --- NEU: WOCHENVERGLEICH DYNAMISCH RENDERN (LETZTE 4 WOCHEN) ---
+        // --- 3. WOCHENVERGLEICH RENDERN ---
         const weekTrendContainer = document.getElementById('week-trend-container');
         weekTrendContainer.innerHTML = '';
-        const sortedWeeks = Object.keys(weeklyData).sort().reverse(); // Neueste KW zuerst
+        const sortedWeeks = Object.keys(weeklyData).sort().reverse();
         const limitedWeeks = sortedWeeks.slice(0, 4);
 
         if (limitedWeeks.length === 0) {
@@ -412,7 +418,7 @@
             });
         }
 
-        // --- 3. KORRELATIONS-MATRIX BERECHNEN ---
+        // --- 4. DOMINOSTEINE BERECHNEN ---
         const correlationContainer = document.getElementById('correlation-container');
         correlationContainer.innerHTML = '';
 
@@ -470,7 +476,7 @@
             correlationContainer.innerHTML = `
                 <div class="insight-card">
                     <div class="insight-title">⏳ Datenbasis wird aufgebaut</div>
-                    <div class="insight-desc">Sobald du die ersten Routinen auf "ja" setzt und Kausalitäten entstehen, siehst du hier deinen mächtigsten Dominostein.</div>
+                    <div class="insight-desc">Sobald Kausalitäten entstehen, siehst du hier deinen mächtigsten Hebel.</div>
                 </div>`;
         } else {
             insights.sort((a, b) => b.prob - a.prob);
@@ -481,13 +487,61 @@
                 correlationContainer.innerHTML += `
                     <div class="insight-card">
                         <div class="insight-title">${triggerIcon} ${ins.trigger} → ${targetIcon} ${ins.target}</div>
-                        <div class="insight-desc">Wenn diese Routine sitzt, erfüllst du deine <strong>${ins.target}</strong> ${contextText} mit einer Wahrscheinlichkeit von <strong>${ins.prob}%</strong>. Es ist dein strategischer Hebel.</div>
+                        <div class="insight-desc">Sichert deine <strong>${ins.target}</strong> ${contextText} mit einer Wahrscheinlichkeit von <strong>${ins.prob}%</strong>.</div>
                     </div>
                 `;
             });
         }
 
-        // --- 4. TWODAYRULE STREAK BERECHNEN ---
+        // --- NEU: MUSTER-CLUSTER BERECHNEN ---
+        const clusterContainer = document.getElementById('cluster-container');
+        clusterContainer.innerHTML = '';
+        const clusters = [];
+
+        for (let i = 0; i < routineKeys.length; i++) {
+            for (let j = i + 1; j < routineKeys.length; j++) {
+                const r1 = routineKeys[i];
+                const r2 = routineKeys[j];
+                
+                let commonDays = 0;
+                let totalActiveDays = historyArray.length;
+
+                historyArray.forEach(row => {
+                    if (row.routinen && row.routinen[r1] && row.routinen[r2]) {
+                        if (row.routinen[r1].toLowerCase() === 'ja' && row.routinen[r2].toLowerCase() === 'ja') {
+                            commonDays++;
+                        }
+                    }
+                });
+
+                if (commonDays >= 2) {
+                    const pairProb = Math.round((commonDays / totalActiveDays) * 100);
+                    clusters.push({ routine1: r1, routine2: r2, strength: pairProb, count: commonDays });
+                }
+            }
+        }
+
+        if (clusters.length === 0) {
+            clusterContainer.innerHTML = `
+                <div class="insight-card">
+                    <div class="insight-title">⏳ Berechne Synergien...</div>
+                    <div class="insight-desc">Hier erscheinen Kombinationen, die du besonders oft zusammen meisterst.</div>
+                </div>`;
+        } else {
+            clusters.sort((a, b) => b.strength - a.strength);
+            clusters.slice(0, 3).forEach(c => {
+                const icon1 = routineIcons[c.routine1] || "🎯";
+                const icon2 = routineIcons[c.routine2] || "🎯";
+                clusterContainer.innerHTML += `
+                    <div class="insight-card">
+                        <div class="insight-title">${icon1} ${c.routine1} + ${icon2} ${c.routine2}</div>
+                        <div class="insight-desc">Dieses Routine-Paket tritt in <strong>${c.strength}%</strong> aller aufgezeichneten Tage als geschlossene Einheit auf.</div>
+                    </div>
+                `;
+            });
+        }
+
+        // --- 5. TWODAYRULE STREAK BERECHNEN ---
         let currentStreak = 0;
         let checkDate = new Date();
         checkDate.setDate(checkDate.getDate() - 1); 
@@ -508,7 +562,38 @@
             }
         }
 
-        // --- 5. MATRIX ZEILEN RENDERN (NAME + EMOJI IDENTISCH ZUR AUSWERTUNG + FARBEN) ---
+        // --- NEU: DOMINO-REAKTIONSZEIT (RECOVERY TIME) BERECHNEN ---
+        let totalRecoveryDays = 0;
+        let recoveryTracksCount = 0;
+        let currentGap = 0;
+        let trackingGap = false;
+
+        // Nutze chronologische Abfolge (von Vergangenheit zu Gegenwart)
+        chronologicalHistory.forEach(row => {
+            if (row.routinen && row.routinen["TwoDayRule"]) {
+                const status = row.routinen["TwoDayRule"].toLowerCase();
+                if (status === 'nein') {
+                    if (!trackingGap) {
+                        trackingGap = true;
+                        currentGap = 1;
+                    } else {
+                        currentGap++;
+                    }
+                } else if (status === 'ja') {
+                    if (trackingGap) {
+                        totalRecoveryDays += currentGap;
+                        recoveryTracksCount++;
+                        trackingGap = false;
+                        currentGap = 0;
+                    }
+                }
+            }
+        });
+
+        const avgRecovery = recoveryTracksCount > 0 ? (totalRecoveryDays / recoveryTracksCount).toFixed(1) : "0.0";
+        document.getElementById('kpi-recovery').textContent = `${avgRecovery} T`;
+
+        // --- 6. MATRIX ZEILEN RENDERN ---
         const rowsContainer = document.getElementById('matrix-rows-container');
         rowsContainer.innerHTML = '';
 
@@ -537,7 +622,7 @@
             `;
         });
 
-        // --- 6. PERFORMANCE BALKEN ALL-TIME ---
+        // --- 7. PERFORMANCE BALKEN ALL-TIME ---
         const perfContainer = document.getElementById('routine-performance-container');
         perfContainer.innerHTML = '';
 
@@ -562,7 +647,6 @@
         });
 
         document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
-        document.getElementById('kpi-rate').textContent = "Aktiv"; 
     }
 
     window.onload = fetchStats;
