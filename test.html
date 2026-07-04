@@ -52,18 +52,17 @@
             padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
             border-bottom: 1px solid var(--border-light);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
         }
 
-        .header-top { 
+        .header-inner {
+            max-width: 600px;
+            margin: 0 auto;
             display: flex;
             align-items: center;
             justify-content: space-between;
             width: 100%;
         }
-        
+
         .header-left { 
             display: flex; 
             align-items: center; 
@@ -99,12 +98,6 @@
             line-height: 1;
         }
 
-        .switchers-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
         .main-view-switch {
             display: flex; 
             background: var(--apple-switch-bg); 
@@ -137,6 +130,16 @@
             background: var(--surface); 
             color: var(--text-primary);
             box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Modus-Umschalter unter dem Header (nur bei Tracker sichtbar) */
+        .mode-toggle-zone {
+            max-width: 600px;
+            margin: 12px auto 0;
+            padding: 0 16px;
+            display: flex;
+            justify-content: center;
+            width: 100%;
         }
 
         .apple-switch-container {
@@ -182,7 +185,8 @@
             font-size: 0.75rem;
             font-weight: 700;
             text-align: center;
-            margin: 0 16px;
+            max-width: 568px;
+            margin: 12px auto 0;
         }
 
         .toast-notification {
@@ -362,7 +366,7 @@
 <div class="toast-notification" id="toast-notice">Habit erledigt, weiter so!</div>
 
 <header>
-    <div class="header-top">
+    <div class="header-inner">
         <div class="header-left">
             <a href="index.html" class="back-container">
                 <div class="back-btn">&larr;</div>
@@ -370,24 +374,23 @@
             </a>
         </div>
         
-        <div class="switchers-right">
-            <div class="main-view-switch">
-                <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')">🏹 Tracker</button>
-                <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')">Stats 📊</button>
-            </div>
-
-            <div class="apple-switch-container" id="mode-switch-wrapper">
-                <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')" title="Zuhause">🏡</button>
-                <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')" title="Unterwegs">🧳</button>
-            </div>
+        <div class="main-view-switch">
+            <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')">🏹 Tracker</button>
+            <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')">Stats 📊</button>
         </div>
     </div>
 </header>
 
+<div class="mode-toggle-zone" id="mode-switch-wrapper">
+    <div class="apple-switch-container">
+        <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')" title="Zuhause">🏡</button>
+        <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')" title="Unterwegs">🧳</button>
+    </div>
+</div>
+
 <div class="cloud-error-banner" id="cloud-error-box">Sync-Fehler: Keine Verbindung zur Cloud möglich.</div>
 
 <main>
-    <!-- TRACKER VIEW -->
     <div id="view-tracker" class="view-section active">
         <div class="category-group" data-routine="TwoDayRule" id="routine-block-TwoDayRule">
             <div class="category-header" style="cursor: default;">
@@ -410,7 +413,6 @@
         </div>
     </div>
 
-    <!-- STATS VIEW -->
     <div id="view-stats" class="view-section">
         <div class="kpi-grid">
             <div class="kpi-card">
@@ -584,6 +586,7 @@
         document.getElementById('view-tracker').classList.toggle('active', view === 'tracker');
         document.getElementById('view-stats').classList.toggle('active', view === 'stats');
 
+        // Ort-Umschalter nur einblenden, wenn die Tracker-Ansicht aktiv ist
         document.getElementById('mode-switch-wrapper').style.display = view === 'tracker' ? 'flex' : 'none';
 
         if (view === 'stats' && globalHistoryArray.length > 0) {
