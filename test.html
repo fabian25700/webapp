@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Routinen und Statistiken</title>
+    <title>Routinen</title>
     <style>
         :root {
             --accent: #e67e22;
@@ -52,32 +52,44 @@
             padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
             border-bottom: 1px solid var(--border-light);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
         .header-top { 
-            display: grid; 
-            grid-template-columns: 1fr auto 1fr; 
-            align-items: center; 
-            gap: 8px; 
-            margin-bottom: 14px; 
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
         }
         
-        .header-left { display: flex; align-items: center; gap: 12px; justify-content: flex-start; }
-        .header-right { display: flex; align-items: center; gap: 12px; justify-content: flex-end; }
+        .header-left { display: flex; align-items: center; gap: 8px; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+
+        .back-container { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-primary); }
+        .back-container span { font-size: 0.95rem; font-weight: 700; }
 
         .back-btn {
             display: flex; align-items: center; justify-content: center;
             width: 36px; height: 36px; border-radius: 12px;
             background: var(--surface); border: 1px solid var(--border);
-            text-decoration: none; color: var(--text-primary); box-shadow: var(--shadow);
+            color: var(--text-primary); box-shadow: var(--shadow);
             flex-shrink: 0;
         }
 
-        header h1 { font-size: 1.15rem; font-weight: 800; white-space: nowrap; }
+        .switchers-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 4px;
+        }
 
         .main-view-switch {
             display: flex; background: var(--apple-switch-bg); border-radius: 9px;
-            padding: 2px; width: 160px; height: 32px; flex-shrink: 0; justify-self: center;
+            padding: 2px; width: 160px; height: 32px; flex-shrink: 0;
         }
         .main-switch-btn {
             flex: 1; text-align: center; display: flex; align-items: center; justify-content: center;
@@ -103,9 +115,7 @@
             box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
         }
 
-        .progress-container { background: var(--border-light); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 5px; }
-        .progress-bar { background: var(--success); height: 100%; transition: width 0.3s ease; }
-        .stats-text { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+        .cloud-status { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; white-space: nowrap; }
 
         .toast-notification {
             position: fixed;
@@ -186,8 +196,6 @@
         .yesterday-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; background: var(--border); }
         .yesterday-dot.ja { background: var(--success); box-shadow: 0 0 6px var(--success); }
         .yesterday-dot.nein { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
-
-        .cloud-status { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; white-space: nowrap; }
 
         .close-routine-trigger {
             display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -283,36 +291,25 @@
 <header>
     <div class="header-top">
         <div class="header-left">
-            <a href="index.html" class="back-btn">&larr;</a>
+            <a href="index.html" class="back-container">
+                <div class="back-btn">&larr;</div>
+                <span>Routinen</span>
+            </a>
         </div>
-        
-        <div class="main-view-switch">
-            <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')">Tracker</button>
-            <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')">Stats 📊</button>
-        </div>
-
         <div class="header-right">
-            <div id="header-context-right">
-                <div class="apple-switch-container">
-                    <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')" title="Zuhause">🏡</button>
-                    <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')" title="Unterwegs">🧳</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="tracker-header-details">
-        <div class="progress-container"><div class="progress-bar" id="progress-bar" style="width: 0%"></div></div>
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
-            <div class="stats-text" id="stats-summary">0 / 7 Routinen erreicht</div>
             <div class="cloud-status" id="cloud-info">Lade...</div>
         </div>
     </div>
-    
-    <div id="stats-header-details" style="display: none;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div class="stats-text">Auswertungen und Hebel</div>
-            <div class="cloud-status" id="cloud-info-stats">Cloud Live ✓</div>
+
+    <div class="switchers-center">
+        <div class="main-view-switch">
+            <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')">🎯 Tracker</button>
+            <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')">Stats 📊</button>
+        </div>
+
+        <div class="apple-switch-container" id="mode-switch-wrapper">
+            <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')" title="Zuhause">🏡</button>
+            <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')" title="Unterwegs">🧳</button>
         </div>
     </div>
 </header>
@@ -513,11 +510,7 @@
         document.getElementById('view-tracker').classList.toggle('active', view === 'tracker');
         document.getElementById('view-stats').classList.toggle('active', view === 'stats');
 
-        document.getElementById('tracker-header-details').style.display = view === 'tracker' ? 'block' : 'none';
-        document.getElementById('stats-header-details').style.display = view === 'stats' ? 'block' : 'none';
-        
-        document.getElementById('header-context-right').style.opacity = view === 'tracker' ? '1' : '0';
-        document.getElementById('header-context-right').style.pointerEvents = view === 'tracker' ? 'auto' : 'none';
+        document.getElementById('mode-switch-wrapper').style.display = view === 'tracker' ? 'flex' : 'none';
 
         if (view === 'stats' && globalHistoryArray.length > 0) {
             renderDashboard(globalHistoryArray);
@@ -760,9 +753,6 @@
     }
 
     function updateGlobalProgress(suppressCloudSync = false) {
-        let totalRoutines = 0;
-        let completedRoutines = 0;
-
         const activeContainer = document.getElementById('active-routines-container');
         const doneContainer = document.getElementById('done-routines-list');
         const masterBox = document.getElementById('done-routines-master-box');
@@ -776,14 +766,12 @@
             const state = habitState[routineName];
             if (!state) return;
             
-            totalRoutines++;
             const isDoneNow = isRoutineApproved(routineName) ? "ja" : "nein";
             
             const heuteDot = document.getElementById(`dot-${routineName}-heute`);
             if (heuteDot) heuteDot.className = "yesterday-dot " + isDoneNow;
 
             if (isDoneNow === "ja") {
-                completedRoutines++;
                 group.classList.add('routine-done-state');
                 if (group.classList.contains('open')) group.classList.remove('open');
                 doneContainer.appendChild(group);
@@ -802,13 +790,6 @@
         if (oldTdrState !== newTdrState && !suppressCloudSync) {
             syncModuleToCloud("TwoDayRule", newTdrState);
         }
-
-        if (habitState["TwoDayRule"].isApproved) completedRoutines++;
-        totalRoutines++;
-
-        const percent = totalRoutines > 0 ? Math.round((completedRoutines / totalRoutines) * 100) : 0;
-        document.getElementById('progress-bar').style.width = percent + '%';
-        document.getElementById('stats-summary').textContent = `${completedRoutines} / ${totalRoutines} Routinen erreicht`;
     }
 
     function updateTwoDayRuleStatus() {
@@ -872,7 +853,6 @@
             .then(res => res.json())
             .then(historyArray => {
                 document.getElementById('cloud-info').textContent = "Cloud Live ✓";
-                document.getElementById('cloud-info-stats').textContent = "Cloud Live ✓";
                 if (!Array.isArray(historyArray)) return;
                 globalHistoryArray = historyArray;
 
@@ -915,7 +895,6 @@
             })
             .catch(err => {
                 document.getElementById('cloud-info').textContent = "Fehler";
-                document.getElementById('cloud-info-stats').textContent = "Fehler";
                 console.error(err);
             });
     }
