@@ -74,7 +74,6 @@
         .progress-bar { background: var(--success); height: 100%; transition: width 0.3s ease; }
         .stats-text { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
 
-        /* Toast-Hinweis Style */
         .toast-notification {
             position: fixed;
             top: calc(env(safe-area-inset-top) + 70px);
@@ -110,7 +109,6 @@
         .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; flex: 1; }
         .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
         
-        /* 3-Tage-Status Meta Box */
         .category-meta { display: flex; align-items: center; gap: 6px; margin-left: auto; margin-right: 12px; flex-shrink: 0; }
         .status-dot-wrapper { display: flex; flex-direction: column; align-items: center; }
 
@@ -356,7 +354,7 @@
             contentDiv.innerHTML = habitsHtml;
         });
 
-        updateGlobalProgress(true); // Erste Berechnung unterdrückt den Cloud-Sync beim Laden
+        updateGlobalProgress(true);
         fetchHistoryStatus();
     }
 
@@ -431,7 +429,6 @@
     function updateGlobalProgress(suppressCloudSync = false) {
         let totalRoutines = 0;
         let completedRoutines = 0;
-        let anyRoutineFailedHeute = false;
 
         const groups = document.querySelectorAll('.category-group');
         groups.forEach(group => {
@@ -445,8 +442,6 @@
             const isDoneNow = isRoutineApproved(routineName) ? "ja" : "nein";
             if (isDoneNow === "ja") {
                 completedRoutines++;
-            } else {
-                anyRoutineFailedHeute = true;
             }
 
             group.querySelector('.counter-text').textContent = `(${state.done}/${state.total})`;
@@ -457,15 +452,12 @@
             }
         });
 
-        // Zustand der TwoDayRule vor der Neuberechnung merken
         const oldTdrState = habitState["TwoDayRule"] ? (habitState["TwoDayRule"].isApproved ? "ja" : "nein") : "nein";
 
-        updateTwoDayRuleStatus(anyRoutineFailedHeute);
+        updateTwoDayRuleStatus();
 
-        // Zustand nach der Neuberechnung holen
         const newTdrState = habitState["TwoDayRule"].isApproved ? "ja" : "nein";
 
-        // Wenn sich der Status geändert hat und Sync nicht unterdrückt ist, ab in die Cloud
         if (oldTdrState !== newTdrState && !suppressCloudSync) {
             syncModuleToCloud("TwoDayRule", newTdrState);
         }
@@ -480,43 +472,83 @@
         document.getElementById('stats-summary').textContent = `${completedRoutines} / ${totalRoutines} Routinen erreicht`;
     }
 
-    function updateTwoDayRuleStatus(anyRoutineFailedHeute) {
-        let anyRoutineFailedGestern = false;
-        let anyRoutineFailedVorgestern = false;
+    function updateTwoDayRuleStatus() {
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+        const ereyesterday = new Date();
+        ereyesterday.setDate(today.getDate() - 2);
+
+        const yesterdayStr = formatDateToString(yesterday);
+        const ereyesterdayStr = formatDateToString(ereyesterday);
+
+        let yesterdayData = null;
+        let ereyesterdayData = null;
 
         if (Array.isArray(globalHistoryArray) && globalHistoryArray.length > 0) {
-            const today = new Date();
-            const yesterday = new Date();
-            yesterday.setDate(today.getDate() - 1);
-            const ereyesterday = new Date();
-            ereyesterday.setDate(today.getDate() - 2);
-
-            const yesterdayStr = formatDateToString(yesterday);
-            const ereyesterdayStr = formatDateToString(ereyesterday);
-
-            const yesterdayData = globalHistoryArray.find(item => item.datum === yesterdayStr);
-            const ereyesterdayData = globalHistoryArray.find(item => item.datum === ereyesterdayStr);
-
-            const groups = document.querySelectorAll('.category-group');
-            groups.forEach(group => {
-                const routineName = group.getAttribute('data-routine');
-                if (routineName === "TwoDayRule") return;
-
-                if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen[routineName]) {
-                    if (yesterdayData.routinen[routineName].toLowerCase() === "nein") {
-                        anyRoutineFailedGestern = true;
-                    }
-                }
-                if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen[routineName]) {
-                    if (ereyesterdayData.routinen[routineName].toLowerCase() === "nein") {
-                        anyRoutineFailedVorgestern = true;
-                    }
-                }
-            });
+            yesterdayData = globalHistoryArray.find(item => item.datum === yesterdayStr);
+            ereyesterdayData = globalHistoryArray.find(item => item.datum === ereyesterdayStr);
         }
 
-        const tdrHeute = (!anyRoutineFailedHeute && !anyRoutineFailedGestern) ? "ja" : "nein";
-        const tdrGestern = (!anyRoutineFailedGestern && !anyRoutineFailedVorgestern) ? "ja" : "nein";
+        const standardRoutines = [
+            "Morgenroutine", 
+            "Sportroutine", 
+            "Gesundheitsroutine", 
+            "Fokusroutine", 
+            "Abendroutine", 
+            "Schlafroutine"
+        ];
+
+        // 1. Check für HEUTE (Bedingung: Für jede Spalte muss HEUTE oder GESTERN ein "ja" existieren)
+        let tdrHeuteKombinationErfuellt = true;
+        standardRoutines.forEach(routineName => {
+            const heuteJa = isRoutineApproved(routineName);
+            let gesternJa = false;
+
+            if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen[routineName]) {
+                if (yesterdayData.routinen[routineName].toLowerCase() === "ja") {
+                    gesternJa = true;
+                }
+            }
+
+            // Wenn eine Routine weder heute noch gestern geschafft wurde -> Two-Day-Rule verletzt
+            if (!heuteJa && !gesternJa) {
+                tdrHeuteKombinationErfuellt = false;
+            }
+        });
+
+        // 2. Check für GESTERN (Bedingung: Für jede Spalte muss GESTERN oder VORGESTERN ein "ja" existieren)
+        let tdrGesternKombinationErfuellt = true;
+        standardRoutines.forEach(routineName => {
+            let gesternJa = false;
+            let vorgesternJa = false;
+
+            if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen[routineName]) {
+                if (yesterdayData.routinen[routineName].toLowerCase() === "ja") {
+                    gesternJa = true;
+                }
+            }
+            if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen[routineName]) {
+                if (ereyesterdayData.routinen[routineName].toLowerCase() === "ja") {
+                    vorgesternJa = true;
+                }
+            }
+
+            if (!gesternJa && !vorgesternJa) {
+                tdrGesternKombinationErfuellt = false;
+            }
+        });
+
+        // 3. Check für VORGESTERN (Hilfsweise direkt aus dem Sheet lesen, falls vorhanden)
+        let tdrVorgesternJa = false;
+        if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen["TwoDayRule"]) {
+            if (ereyesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") {
+                tdrVorgesternJa = true;
+            }
+        }
+
+        const tdrHeute = tdrHeuteKombinationErfuellt ? "ja" : "nein";
+        const tdrGestern = tdrGesternKombinationErfuellt ? "ja" : "nein";
 
         habitState["TwoDayRule"] = { total: 0, done: 0, isApproved: (tdrHeute === "ja") };
 
@@ -527,7 +559,7 @@
         if (gesternDot) gesternDot.className = "yesterday-dot " + tdrGestern;
         
         const vorgesternTdrDot = document.getElementById("dot-TwoDayRule-vorgestern");
-        if (vorgesternTdrDot) vorgesternTdrDot.className = "yesterday-dot " + ((!anyRoutineFailedVorgestern) ? "ja" : "nein");
+        if (vorgesternTdrDot) vorgesternTdrDot.className = "yesterday-dot " + (tdrVorgesternJa ? "ja" : "nein");
     }
 
     function fetchHistoryStatus() {
@@ -575,16 +607,7 @@
                     }
                 });
 
-                let anyRoutineFailedHeute = false;
-                groups.forEach(group => {
-                    const routineName = group.getAttribute('data-routine');
-                    if (routineName === "TwoDayRule") return;
-                    if (!isRoutineApproved(routineName)) {
-                        anyRoutineFailedHeute = true;
-                    }
-                });
-                
-                updateTwoDayRuleStatus(anyRoutineFailedHeute);
+                updateTwoDayRuleStatus();
             })
             .catch(err => {
                 document.getElementById('cloud-info').textContent = "Fehler";
