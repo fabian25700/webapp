@@ -285,7 +285,7 @@
 </main>
 
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvzXJ9VesApgA0RPJ_cnNrfIPYiYIPjB9FQlbITXg3HRcoJPBDlBVHajY4dxKjluoRiQ/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbhl1k_pgXinca2FA2hxqzMJzW--7Hfo54XHtVm_vfrxndA-GFF57UsQ2ILn6drZnu2w/exec";
     
     const TARGET_RATIO = 0.8;
     const habitState = {};
@@ -302,6 +302,13 @@
     function getSavedStates() {
         const saved = localStorage.getItem('routine_storage');
         return saved ? JSON.parse(saved) : {};
+    }
+
+    function formatDateToString(date) {
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const yyyy = date.getFullYear();
+        return `${dd}.${mm}.${yyyy}`;
     }
 
     function initApp() {
@@ -405,21 +412,45 @@
     }
 
     function fetchHistoryStatus() {
-        fetch(GOOGLE_SCRIPT_URL, { method: "GET", redirect: "follow" })
+        fetch(GOOGLE_SCRIPT_URL, { method: "GET" })
             .then(res => res.json())
-            .then(data => {
+            .then(historyArray => {
                 document.getElementById('cloud-info').textContent = "Cloud Live ✓";
                 
-                const timeframes = ['gestern', 'vorgestern'];
-                
-                timeframes.forEach(timeframe => {
-                    if (data[timeframe]) {
-                        Object.keys(data[timeframe]).forEach(routineName => {
-                            const dot = document.getElementById(`dot-${routineName}-${timeframe}`);
-                            if (dot) {
-                                dot.className = "yesterday-dot " + data[timeframe][routineName].toLowerCase();
-                            }
-                        });
+                if (!Array.isArray(historyArray)) return;
+
+                const today = new Date();
+                const yesterday = new Date();
+                yesterday.setDate(today.getDate() - 1);
+                const ereyesterday = new Date();
+                ereyesterday.setDate(today.getDate() - 2);
+
+                const yesterdayStr = formatDateToString(yesterday);
+                const ereyesterdayStr = formatDateToString(ereyesterday);
+
+                const yesterdayData = historyArray.find(item => item.datum === yesterdayStr);
+                const ereyesterdayData = historyArray.find(item => item.datum === ereyesterdayStr);
+
+                const groups = document.querySelectorAll('.category-group');
+                groups.forEach(group => {
+                    const routineName = group.getAttribute('data-routine');
+
+                    const gesternDot = document.getElementById(`dot-${routineName}-gestern`);
+                    if (gesternDot) {
+                        let statusGestern = "nein";
+                        if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen[routineName]) {
+                            statusGestern = yesterdayData.routinen[routineName].toLowerCase();
+                        }
+                        gesternDot.className = "yesterday-dot " + statusGestern;
+                    }
+
+                    const vorgesternDot = document.getElementById(`dot-${routineName}-vorgestern`);
+                    if (vorgesternDot) {
+                        let statusVorgestern = "nein";
+                        if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen[routineName]) {
+                            statusVorgestern = ereyesterdayData.routinen[routineName].toLowerCase();
+                        }
+                        vorgesternDot.className = "yesterday-dot " + statusVorgestern;
                     }
                 });
             })
@@ -432,16 +463,16 @@
     function syncModuleToCloud(routineName, statusString) {
         document.getElementById('cloud-info').textContent = "Synchronisiere...";
 
-        const payload = {
-            routine: routineName,
-            status: statusString
-        };
+        const formBody = new URLSearchParams();
+        formBody.append('routine', routineName);
+        formBody.append('status', statusString);
 
+        // mode: "no-cors" unterbindet das Blockieren durch die Browser-Sicherheitsprüfung
         fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
             mode: "no-cors",
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify(payload)
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formBody.toString()
         })
         .then(() => {
             document.getElementById('cloud-info').textContent = "Cloud aktualisiert ✓";
