@@ -285,7 +285,7 @@
 </main>
 
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKmFPu1QJNjei7wjhSwxIvOlwAGnTsRedAqqyoYqt2JZRpNCQMBOZQH_OIGW4qLCMrYA/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoK6QhlA44CtDJdb_K80lkLyQ-YSKdvDH9mlLM6Zi_6MFs6GCx36aw2wxhTK4b_ERLVA/exec";
     
     const TARGET_RATIO = 0.8;
     const habitState = {};
@@ -405,7 +405,7 @@
     }
 
     function fetchHistoryStatus() {
-        fetch(GOOGLE_SCRIPT_URL, { method: "GET", redirect: "follow" })
+        fetch(GOOGLE_SCRIPT_URL, { method: "GET" })
             .then(res => res.json())
             .then(data => {
                 document.getElementById('cloud-info').textContent = "Cloud Live ✓";
@@ -439,12 +439,17 @@
 
         fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
-            mode: "no-cors",
             headers: { "Content-Type": "text/plain;charset=utf-8" },
             body: JSON.stringify(payload)
         })
-        .then(() => {
-            document.getElementById('cloud-info').textContent = "Cloud aktualisiert ✓";
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === "success") {
+                document.getElementById('cloud-info').textContent = "Cloud aktualisiert ✓";
+            } else {
+                document.getElementById('cloud-info').textContent = "Fehler";
+                console.error("API Error: ", data.message);
+            }
         })
         .catch(err => {
             document.getElementById('cloud-info').textContent = "Sync Fehler";
