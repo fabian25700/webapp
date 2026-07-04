@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Routinen & Statistiken</title>
+    <title>Routinen und Statistiken</title>
     <style>
         :root {
             --accent: #e67e22;
@@ -75,7 +75,6 @@
 
         header h1 { font-size: 1.15rem; font-weight: 800; white-space: nowrap; }
 
-        /* Großer Haupt-Switch oben */
         .main-view-switch {
             display: flex; background: var(--apple-switch-bg); border-radius: 9px;
             padding: 2px; width: 160px; height: 32px; flex-shrink: 0; justify-self: center;
@@ -90,7 +89,6 @@
             box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
         }
 
-        /* Modus Switch (Zuhause/Unterwegs) */
         .apple-switch-container {
             display: flex; background: var(--apple-switch-bg); border-radius: 9px;
             padding: 2px; width: 80px; height: 32px; flex-shrink: 0;
@@ -130,7 +128,6 @@
 
         main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 
-        /* Ansichten-Steuerung */
         .view-section { display: none; flex-direction: column; gap: 12px; width: 100%; }
         .view-section.active { display: flex; }
 
@@ -202,7 +199,6 @@
         }
         .close-routine-trigger:active { background: var(--border); }
 
-        /* STYLES AUS STATS-ANSICHT */
         .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .kpi-card {
             background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
@@ -315,7 +311,7 @@
     
     <div id="stats-header-details" style="display: none;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div class="stats-text">Auswertungen & Hebel</div>
+            <div class="stats-text">Auswertungen und Hebel</div>
             <div class="cloud-status" id="cloud-info-stats">Cloud Live ✓</div>
         </div>
     </div>
@@ -423,7 +419,7 @@
             </div>
             <div class="arrow">▼</div>
         </div>
-        <div class="category-content" data-habits='["Aufstehen ohne Snooze", "Stoisches Kapitel", "Wiegen", "alle Rollladen / Fenster", "Tageslicht", "Klo", "Wasser mit Salz / Elektrolyte", "Zunge reinigen", "Zähne putzen", "Schlafzimmer aufräumen", "Morning Healthdrink", "Küche aufräumen und putzen", "Whoop checken", "Ziele + ToDo’s des Tages anschauen", "Mails checken", "ggf. Sport", "duschen", "anziehen", "bis 8:00 keine Geräte"]'></div>
+        <div class="category-content" data-habits='["Aufstehen ohne Snooze", "Stoisches Kapitel", "Wiegen", "alle Rollladen / Fenster", "Tageslicht", "Klo", "Wasser mit Salz / Elektrolyte", "Zunge reinigen", "Zähne putzen", "Schlafzimmer aufräumen", "Morning Healthdrink", "Küche aufräumen und putzen", "Whoop checken", "Ziele + ToDos des Tages anschauen", "Mails checken", "ggf. Sport", "duschen", "anziehen", "bis 8:00 keine Geräte"]'></div>
     </div>
 
     <div class="category-group" data-routine="Sportroutine" id="routine-block-Sportroutine">
@@ -436,7 +432,7 @@
             </div>
             <div class="arrow">▼</div>
         </div>
-        <div class="category-content" data-habits='["Athletik- / Krafteinheit", "Dehnen & Mobility", "Schritte-Ziel erreicht", "Erholungs-Check", "Protein-Zufuhr gedeckt"]'></div>
+        <div class="category-content" data-habits='["Athletik- / Krafteinheit", "Dehnen und Mobility", "Schritte-Ziel erreicht", "Erholungs-Check", "Protein-Zufuhr gedeckt"]'></div>
     </div>
 
     <div class="category-group" data-routine="Gesundheitsroutine" id="routine-block-Gesundheitsroutine">
@@ -475,7 +471,7 @@
             </div>
             <div class="arrow">▼</div>
         </div>
-        <div class="category-content" data-habits='["Tagesabschluss-Journal", "Digital Detox ab 21:30", "Klamotten/Setup für morgen", "Lesen (15 Seiten)", "Licht gedimmt"]'></div>
+        <div class="category-content" data-habits='["Tagesabschluss-Journal", "Digital Detox ab 21:30", "Klamotten / Setup für morgen", "Lesen (15 Seiten)", "Licht gedimmt"]'></div>
     </div>
 
     <div class="category-group" data-routine="Schlafroutine" id="routine-block-Schlafroutine">
@@ -488,7 +484,7 @@
             </div>
             <div class="arrow">▼</div>
         </div>
-        <div class="category-content" data-habits='["Kein Koffein nach 14:00", "Zimmer gelüftet & kühl", "Keine schweren Mahlzeiten spät", "Magnesium genommen", "Fixe Aufstehzeit vorbereitet"]'></div>
+        <div class="category-content" data-habits='["Kein Koffein nach 14:00", "Zimmer gelüftet und kühl", "Keine schweren Mahlzeiten spät", "Magnesium genommen", "Fixe Aufstehzeit vorbereitet"]'></div>
     </div>
 </div>
 
@@ -510,7 +506,6 @@
         "TwoDayRule": "⚡"
     };
 
-    // --- ANSICHTEN SWITCH (TRACKER VS STATS) ---
     function toggleMainView(view) {
         document.getElementById('view-btn-tracker').classList.toggle('active', view === 'tracker');
         document.getElementById('view-btn-stats').classList.toggle('active', view === 'stats');
@@ -521,7 +516,6 @@
         document.getElementById('tracker-header-details').style.display = view === 'tracker' ? 'block' : 'none';
         document.getElementById('stats-header-details').style.display = view === 'stats' ? 'block' : 'none';
         
-        // Verstecke Home/Away Switch in der Stats-Ansicht für Cleanliness
         document.getElementById('header-context-right').style.opacity = view === 'tracker' ? '1' : '0';
         document.getElementById('header-context-right').style.pointerEvents = view === 'tracker' ? 'auto' : 'none';
 
@@ -530,7 +524,6 @@
         }
     }
 
-    // --- SUBSWITCHES FÜR DIE STATS-BLÖCKE ---
     function switchBlock(position, type) {
         if (!event || !event.target) return;
         const header = event.target.parentElement;
@@ -916,7 +909,6 @@
 
                 updateGlobalProgress(true);
                 
-                // Falls der Nutzer direkt in der Stats-Ansicht startet
                 if (document.getElementById('view-stats').classList.contains('active')) {
                     renderDashboard(historyArray);
                 }
@@ -942,7 +934,6 @@
         })
         .then(() => { 
             document.getElementById('cloud-info').textContent = "Cloud aktualisiert ✓"; 
-            // Historie im Hintergrund neu laden, damit die mathematischen Berechnungen frisch sind
             fetchHistoryStatus();
         })
         .catch(err => {
@@ -951,11 +942,9 @@
         });
     }
 
-    // --- RENDERING DER DASHBOARD-DATEN (AUS STATS.HTML INJEKTIERT) ---
     function renderDashboard(historyArray) {
         const routineKeys = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine", "TwoDayRule"];
         
-        // 1. 7-TAGE MATRIX
         const totalMatrixDays = 7;
         const matrixDates = [];
         const daysHeader = document.getElementById('matrix-days');
@@ -1006,7 +995,6 @@
             });
         });
 
-        // 2. MONATSVERGLEICH
         const trendContainer = document.getElementById('month-trend-container');
         trendContainer.innerHTML = '';
         const sortedMonths = Object.keys(monthlyData).reverse();
@@ -1030,7 +1018,6 @@
             });
         }
 
-        // 3. WOCHENVERGLEICH
         const weekTrendContainer = document.getElementById('week-trend-container');
         weekTrendContainer.innerHTML = '';
         const sortedWeeks = Object.keys(weeklyData).sort().reverse();
@@ -1055,7 +1042,6 @@
             });
         }
 
-        // 4. KAUSALITÄTEN
         const correlationContainer = document.getElementById('correlation-container');
         correlationContainer.innerHTML = '';
         const insights = [];
@@ -1105,11 +1091,10 @@
                 const triggerIcon = routineIcons[ins.trigger] || "🎯";
                 const targetIcon = routineIcons[ins.target] || "🎯";
                 const contextText = ins.isShifted ? "am Folgetag" : "am selben Tag";
-                correlationContainer.innerHTML += `<div class="insight-card"><div class="insight-title">${triggerIcon} ${ins.trigger} → ${targetIcon} ${ins.target}</div><div class="insight-desc">Sichert deine <strong>${ins.target}</strong> ${contextText} mit einer Wahrscheinlichkeit von <strong>${ins.prob}%</strong>.</div></div>`;
+                correlationContainer.innerHTML += `<div class="insight-card"><div class="insight-title">${triggerIcon} ${ins.trigger} &rarr; ${targetIcon} ${ins.target}</div><div class="insight-desc">Sichert deine <strong>${ins.target}</strong> ${contextText} mit einer Wahrscheinlichkeit von <strong>${ins.prob}%</strong>.</div></div>`;
             });
         }
 
-        // 5. SYNERGIEN
         const clusterContainer = document.getElementById('cluster-container');
         clusterContainer.innerHTML = '';
         const clusters = [];
@@ -1142,7 +1127,6 @@
             });
         }
 
-        // 6. STREAK
         let currentStreak = 0; let checkDate = new Date(); checkDate.setDate(checkDate.getDate() - 1); 
         while (true) {
             const checkDateStr = formatDateToString(checkDate);
@@ -1153,7 +1137,6 @@
         }
         document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
 
-        // 7. ERHOLUNGS-ZEIT GAUGE
         let totalRecoveryDays = 0; let recoveryTracksCount = 0; let maxRecoveryDays = 0; let currentGap = 0; let trackingGap = false;
         chronologicalHistory.forEach(row => {
             if (row.routinen && row.routinen["TwoDayRule"]) {
@@ -1180,7 +1163,6 @@
         }
         document.getElementById('gauge-needle').style.transform = `rotate(${degrees}deg)`;
 
-        // 8. MATRIX ZEILEN
         const rowsContainer = document.getElementById('matrix-rows-container');
         rowsContainer.innerHTML = '';
         routineKeys.forEach(routine => {
@@ -1195,7 +1177,6 @@
             rowsContainer.innerHTML += `<div class="matrix-row"><div class="matrix-label"><span class="perf-icon">${icon}</span><span class="perf-name">${routine}</span></div><div class="matrix-cells">${cellsHtml}</div></div>`;
         });
 
-        // 9. ALL-TIME PERFORMANCE
         const perfContainer = document.getElementById('routine-performance-container');
         perfContainer.innerHTML = '';
         routineKeys.forEach(routine => {
