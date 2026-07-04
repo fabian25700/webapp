@@ -64,58 +64,126 @@
             width: 100%;
         }
         
-        .header-left { display: flex; align-items: center; gap: 8px; }
-        .header-right { display: flex; align-items: center; gap: 12px; }
-
-        .back-container { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text-primary); }
-        .back-container span { font-size: 0.95rem; font-weight: 700; }
-
-        .back-btn {
-            display: flex; align-items: center; justify-content: center;
-            width: 36px; height: 36px; border-radius: 12px;
-            background: var(--surface); border: 1px solid var(--border);
-            color: var(--text-primary); box-shadow: var(--shadow);
-            flex-shrink: 0;
+        .header-left { 
+            display: flex; 
+            align-items: center; 
         }
 
-        .switchers-center {
+        .back-container { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            text-decoration: none; 
+            color: var(--text-primary); 
+        }
+        
+        .back-container span { 
+            font-size: 0.95rem; 
+            font-weight: 700; 
+            line-height: 1;
+        }
+
+        .back-btn {
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            width: 32px; 
+            height: 32px; 
+            border-radius: 9px;
+            background: var(--surface); 
+            border: 1px solid var(--border);
+            color: var(--text-primary); 
+            box-shadow: var(--shadow);
+            flex-shrink: 0; 
+            font-size: 0.9rem;
+            line-height: 1;
+        }
+
+        .switchers-right {
             display: flex;
-            flex-direction: column;
             align-items: center;
             gap: 8px;
-            width: 100%;
-            margin-top: 4px;
         }
 
         .main-view-switch {
-            display: flex; background: var(--apple-switch-bg); border-radius: 9px;
-            padding: 2px; width: 160px; height: 32px; flex-shrink: 0;
+            display: flex; 
+            background: var(--apple-switch-bg); 
+            border-radius: 9px;
+            padding: 2px; 
+            width: 140px; 
+            height: 32px; 
+            flex-shrink: 0;
         }
+        
         .main-switch-btn {
-            flex: 1; text-align: center; display: flex; align-items: center; justify-content: center;
-            font-size: 0.8rem; font-weight: 700; border-radius: 7px; border: none; background: transparent;
-            color: var(--text-secondary); cursor: pointer; transition: all 0.2s;
+            flex: 1; 
+            text-align: center; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-size: 0.78rem; 
+            font-weight: 700; 
+            border-radius: 7px; 
+            border: none; 
+            background: transparent;
+            color: var(--text-secondary); 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            height: 100%;
+            line-height: 1;
         }
+        
         .main-switch-btn.active {
-            background: var(--surface); color: var(--text-primary);
+            background: var(--surface); 
+            color: var(--text-primary);
             box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
         }
 
         .apple-switch-container {
-            display: flex; background: var(--apple-switch-bg); border-radius: 9px;
-            padding: 2px; width: 80px; height: 32px; flex-shrink: 0;
+            display: flex; 
+            background: var(--apple-switch-bg); 
+            border-radius: 9px;
+            padding: 2px; 
+            width: 80px; 
+            height: 32px; 
+            flex-shrink: 0;
         }
+        
         .apple-switch-btn {
-            flex: 1; text-align: center; display: flex; align-items: center; justify-content: center;
-            font-size: 0.95rem; border-radius: 7px; border: none; background: transparent;
-            cursor: pointer; transition: all 0.2s; position: relative; z-index: 2;
+            flex: 1; 
+            text-align: center; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-size: 0.95rem; 
+            border-radius: 7px; 
+            border: none; 
+            background: transparent;
+            cursor: pointer; 
+            transition: all 0.2s; 
+            position: relative; 
+            z-index: 2; 
+            height: 100%;
+            line-height: 1;
         }
+        
         .apple-switch-btn.active {
             background: var(--surface);
             box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
         }
 
-        .cloud-status { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; white-space: nowrap; }
+        .cloud-error-banner {
+            display: none;
+            background: var(--danger-soft);
+            border: 1px solid var(--danger);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 0 16px;
+        }
 
         .toast-notification {
             position: fixed;
@@ -276,6 +344,11 @@
         .switch-content { display: none; }
         .switch-content.active { display: flex; flex-direction: column; }
 
+        @media (max-width: 420px) {
+            .main-view-switch { width: 120px; }
+            .main-switch-btn { font-size: 0.72rem; }
+        }
+
         @media (max-width: 395px) {
             .matrix-label, .perf-name { font-size: 0.78rem; }
             .matrix-cells, .days-header-labels, .perf-bar-wrapper { width: 168px; gap: 4px; }
@@ -296,25 +369,25 @@
                 <span>Routinen</span>
             </a>
         </div>
-        <div class="header-right">
-            <div class="cloud-status" id="cloud-info">Lade...</div>
-        </div>
-    </div>
+        
+        <div class="switchers-right">
+            <div class="main-view-switch">
+                <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')">🏹 Tracker</button>
+                <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')">Stats 📊</button>
+            </div>
 
-    <div class="switchers-center">
-        <div class="main-view-switch">
-            <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')">🎯 Tracker</button>
-            <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')">Stats 📊</button>
-        </div>
-
-        <div class="apple-switch-container" id="mode-switch-wrapper">
-            <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')" title="Zuhause">🏡</button>
-            <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')" title="Unterwegs">🧳</button>
+            <div class="apple-switch-container" id="mode-switch-wrapper">
+                <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')" title="Zuhause">🏡</button>
+                <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')" title="Unterwegs">🧳</button>
+            </div>
         </div>
     </div>
 </header>
 
+<div class="cloud-error-banner" id="cloud-error-box">Sync-Fehler: Keine Verbindung zur Cloud möglich.</div>
+
 <main>
+    <!-- TRACKER VIEW -->
     <div id="view-tracker" class="view-section active">
         <div class="category-group" data-routine="TwoDayRule" id="routine-block-TwoDayRule">
             <div class="category-header" style="cursor: default;">
@@ -337,6 +410,7 @@
         </div>
     </div>
 
+    <!-- STATS VIEW -->
     <div id="view-stats" class="view-section">
         <div class="kpi-grid">
             <div class="kpi-card">
@@ -852,7 +926,7 @@
         fetch(GOOGLE_SCRIPT_URL, { method: "GET" })
             .then(res => res.json())
             .then(historyArray => {
-                document.getElementById('cloud-info').textContent = "Cloud Live ✓";
+                document.getElementById('cloud-error-box').style.display = 'none';
                 if (!Array.isArray(historyArray)) return;
                 globalHistoryArray = historyArray;
 
@@ -894,13 +968,12 @@
                 }
             })
             .catch(err => {
-                document.getElementById('cloud-info').textContent = "Fehler";
+                document.getElementById('cloud-error-box').style.display = 'block';
                 console.error(err);
             });
     }
 
     function syncModuleToCloud(routineName, statusString) {
-        document.getElementById('cloud-info').textContent = "Synchronisiere...";
         const formBody = new URLSearchParams();
         formBody.append('routine', routineName);
         formBody.append('status', statusString);
@@ -912,11 +985,11 @@
             body: formBody.toString()
         })
         .then(() => { 
-            document.getElementById('cloud-info').textContent = "Cloud aktualisiert ✓"; 
+            document.getElementById('cloud-error-box').style.display = 'none'; 
             fetchHistoryStatus();
         })
         .catch(err => {
-            document.getElementById('cloud-info').textContent = "Sync Fehler";
+            document.getElementById('cloud-error-box').style.display = 'block';
             console.error(err);
         });
     }
