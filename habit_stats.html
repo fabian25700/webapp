@@ -104,6 +104,19 @@
         .perf-bar-bg { flex: 1; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
         .perf-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; }
         .perf-pct { font-size: 0.75rem; font-weight: 700; width: 32px; text-align: right; }
+
+        /* Monatsvergleich Styles */
+        .trend-container { display: flex; flex-direction: column; gap: 10px; }
+        .trend-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
+        .trend-month-label { font-size: 0.9rem; font-weight: 700; }
+        .trend-badge { font-size: 0.75rem; font-weight: 700; padding: 4px 8px; border-radius: 8px; }
+        .trend-badge.up { background: var(--success-soft); color: var(--success); }
+        .trend-badge.neutral { background: var(--border-light); color: var(--text-secondary); }
+
+        /* Korrelations-Matrix Styles */
+        .insight-card { background: var(--bg); border-radius: 12px; border: 1px solid var(--border); padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+        .insight-title { font-size: 0.85rem; font-weight: 700; }
+        .insight-desc { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.3; }
     </style>
 </head>
 <body>
@@ -133,6 +146,20 @@
         <div class="matrix-grid">
             <div class="days-header" id="matrix-days"></div>
             <div id="matrix-rows-container" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        </div>
+    </div>
+
+    <div class="section-block">
+        <div class="section-title">Monatsvergleich Trend</div>
+        <div class="trend-container" id="month-trend-container">
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">Berechne historische Monatsdaten...</div>
+        </div>
+    </div>
+
+    <div class="section-block">
+        <div class="section-title">Dominostein-Analysen (Hebel 4)</div>
+        <div style="display: flex; flex-direction: column; gap: 10px;" id="correlation-container">
+            <div style="font-size: 0.8rem; color: var(--text-secondary);">Analysiere wechselseitige Abhängigkeiten...</div>
         </div>
     </div>
 
@@ -179,15 +206,23 @@
         return `${dd}.${mm}.${yyyy}`;
     }
 
+    function parseMonthYear(dateStr) {
+        // "dd.mm.yyyy" -> "Monat yyyy"
+        const parts = dateStr.split('.');
+        if (parts.length !== 3) return "Unbekannt";
+        const dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+        return dateObj.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+    }
+
     function renderDashboard(historyArray) {
         const routineKeys = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine", "TwoDayRule"];
         
+        // --- 1. 7-TAGE MATRIX ---
         const totalMatrixDays = 7;
         const matrixDates = [];
         const daysHeader = document.getElementById('matrix-days');
         daysHeader.innerHTML = '';
 
-        // Schleife startet bei 0 (Heute) und geht bis 6 Tage in die Vergangenheit (von links nach rechts)
         for (let i = 0; i < totalMatrixDays; i++) {
             const d = new Date();
             d.setDate(d.getDate() - i);
@@ -199,23 +234,128 @@
 
         let totalChecks = 0;
         let successfulChecks = 0;
-        
         const routineSuccessCounts = {};
         routineKeys.forEach(k => routineSuccessCounts[k] = 0);
 
+        // --- NEU: DYNAMISCHE STRUKTUREN FÜR MONATE UND KORRELATIONEN ---
+        const monthlyData = {};
+
         historyArray.forEach(row => {
+            const monthKey = parseMonthYear(row.datum);
+            if (!monthlyData[monthKey]) {
+                monthlyData[monthKey] = { total: 0, success: 0 };
+            }
+
             routineKeys.forEach(routine => {
                 if (row.routinen && row.routinen[routine]) {
                     const status = row.routinen[routine].toLowerCase();
                     totalChecks++;
+                    monthlyData[monthKey].total++;
+                    
                     if (status === "ja") {
                         successfulChecks++;
                         routineSuccessCounts[routine]++;
+                        monthlyData[monthKey].success++;
                     }
                 }
             });
         });
 
+        // --- 2. MONATSVERGLEICH DYNAMISCH RENDERN ---
+        const trendContainer = document.getElementById('month-trend-container');
+        trendContainer.innerHTML = '';
+        const sortedMonths = Object.keys(monthlyData).reverse(); // Neueste Monate zuerst
+
+        if (sortedMonths.length === 0) {
+            trendContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary);">Noch keine Monatsdaten vorhanden.</div>`;
+        } else {
+            sortedMonths.forEach((month, idx) => {
+                const data = monthlyData[month];
+                const pct = data.total > 0 ? Math.round((data.success / data.total) * 100) : 0;
+                
+                let badgeHtml = `<span class="trend-badge neutral">${pct}% Erfüllung</span>`;
+                if (idx < sortedMonths.length - 1) {
+                    const prevMonth = sortedMonths[idx + 1];
+                    const prevData = monthlyData[prevMonth];
+                    const prevPct = prevData.total > 0 ? Math.round((prevData.success / prevData.total) * 100) : 0;
+                    const diff = pct - prevPct;
+                    
+                    if (diff > 0) {
+                        badgeHtml = `<span class="trend-badge up">▲ +${diff}% vs. Vormonat (${pct}%)</span>`;
+                    } else if (diff < 0) {
+                        badgeHtml = `<span class="trend-badge" style="background: rgba(231, 76, 60, 0.1); color: var(--danger);">▼ ${diff}% vs. Vormonat (${pct}%)</span>`;
+                    }
+                }
+
+                trendContainer.innerHTML += `
+                    <div class="trend-row">
+                        <span class="trend-month-label">${month}</span>
+                        ${badgeHtml}
+                    </div>
+                `;
+            });
+        }
+
+        // --- 3. KORRELATIONS-MATRIX BERECHNEN (HEBEL 4) ---
+        const correlationContainer = document.getElementById('correlation-container');
+        correlationContainer.innerHTML = '';
+
+        const insights = [];
+        
+        // Wir untersuchen alle Paare, z.B. Schlafroutine -> Fokusroutine
+        routineKeys.forEach(triggerRoutine => {
+            routineKeys.forEach(targetRoutine => {
+                if (triggerRoutine === targetRoutine) return;
+
+                let triggerJaCount = 0;
+                let targetAlsoJaCount = 0;
+
+                historyArray.forEach(row => {
+                    if (row.routinen && row.routinen[triggerRoutine] && row.routinen[targetRoutine]) {
+                        if (row.routinen[triggerRoutine].toLowerCase() === 'ja') {
+                            triggerJaCount++;
+                            if (row.routinen[targetRoutine].toLowerCase() === 'ja') {
+                                targetAlsoJaCount++;
+                            }
+                        }
+                    }
+                });
+
+                if (triggerJaCount >= 2) { // Mindestens zwei Treffer nötig, um statistisch relevant zu sein
+                    const probability = Math.round((targetAlsoJaCount / triggerJaCount) * 100);
+                    if (probability >= 70) { // Nur starke positive Hebel anzeigen
+                        insights.push({
+                            trigger: triggerRoutine,
+                            target: targetRoutine,
+                            prob: probability
+                        });
+                    }
+                }
+            });
+        });
+
+        if (insights.length === 0) {
+            correlationContainer.innerHTML = `
+                <div class="insight-card">
+                    <div class="insight-title">⏳ Datenbasis wird aufgebaut</div>
+                    <div class="insight-desc">Sobald du die ersten Routinen auf "ja" setzt und Kausalitäten entstehen, siehst du hier deinen mächtigsten Dominostein.</div>
+                </div>`;
+        } else {
+            // Sortieren nach höchster Wahrscheinlichkeit
+            insights.sort((a, b) => b.prob - a.prob);
+            insights.slice(0, 3).forEach(ins => {
+                const triggerIcon = routineIcons[ins.trigger] || "🎯";
+                const targetIcon = routineIcons[ins.target] || "🎯";
+                correlationContainer.innerHTML += `
+                    <div class="insight-card">
+                        <div class="insight-title">${triggerIcon} ${ins.trigger} → ${targetIcon} ${ins.target}</div>
+                        <div class="insight-desc">Wenn diese Routine sitzt, erfüllst du deine <strong>${ins.target}</strong> mit einer Wahrscheinlichkeit von <strong>${ins.prob}%</strong>. Es ist dein strategischer Hebel.</div>
+                    </div>
+                `;
+            });
+        }
+
+        // --- 4. ECHTEN ALL-TIME STREAK BERECHNEN ---
         let currentStreak = 0;
         let checkDate = new Date();
         
@@ -248,6 +388,7 @@
             }
         }
 
+        // --- 5. MATRIX ZEILEN RENDERN ---
         const rowsContainer = document.getElementById('matrix-rows-container');
         rowsContainer.innerHTML = '';
 
@@ -271,6 +412,7 @@
             `;
         });
 
+        // --- 6. PERFORMANCE BALKEN ALL-TIME ---
         const perfContainer = document.getElementById('routine-performance-container');
         perfContainer.innerHTML = '';
 
