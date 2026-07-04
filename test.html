@@ -142,6 +142,16 @@
         .yesterday-dot.nein { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
 
         .cloud-status { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+
+        .close-routine-trigger {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 12px; margin-top: 8px; border-radius: 12px;
+            background: var(--border-light); border: 1px dashed var(--border);
+            color: var(--text-secondary); font-size: 0.8rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+            user-select: none; transition: background 0.2s;
+        }
+        .close-routine-trigger:active { background: var(--border); }
     </style>
 </head>
 <body>
@@ -351,16 +361,41 @@
                 </div>
             `;
 
+            habitsHtml += `
+                <div class="close-routine-trigger" onclick="event.stopPropagation(); closeCurrentGroup('${routineName}')">
+                    Routine einklappen ▲
+                </div>
+            `;
+
             contentDiv.innerHTML = habitsHtml;
         });
 
-        // WICHTIG: Erster Durchlauf unterdrückt Cloud-Sync, berechnet aber den lokalen Zustand vor dem Fetch
         updateGlobalProgress(true);
         fetchHistoryStatus();
     }
 
     function toggleGroup(header) {
-        header.parentElement.classList.toggle('open');
+        const targetGroup = header.parentElement;
+        const isOpen = targetGroup.classList.contains('open');
+        
+        document.querySelectorAll('.category-group').forEach(group => {
+            group.classList.remove('open');
+        });
+
+        if (!isOpen) {
+            targetGroup.classList.add('open');
+            setTimeout(() => {
+                targetGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+    }
+
+    function closeCurrentGroup(routineName) {
+        const group = document.querySelector(`.category-group[data-routine="${routineName}"]`);
+        if (group) {
+            group.classList.remove('open');
+            group.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
     }
 
     function showSuccessToast() {
@@ -500,7 +535,6 @@
             "Schlafroutine"
         ];
 
-        // 1. Check für HEUTE (Lokaler Zustand ODER Cloud-Zustand gestern)
         let tdrHeuteKombinationErfuellt = true;
         standardRoutines.forEach(routineName => {
             const heuteJa = isRoutineApproved(routineName);
@@ -517,7 +551,6 @@
             }
         });
 
-        // 2. Check für GESTERN
         let tdrGesternKombinationErfuellt = true;
         standardRoutines.forEach(routineName => {
             let gesternJa = false;
@@ -606,8 +639,6 @@
                     }
                 });
 
-                // HIER IST DIE KORREKTUR: Erzwingt nach dem Laden der Cloud-Daten eine Neuberechnung
-                // mit Unterdrückung des initialen Uploads, damit lokale Haken die Matrix sofort grün schalten.
                 updateGlobalProgress(true);
             })
             .catch(err => {
