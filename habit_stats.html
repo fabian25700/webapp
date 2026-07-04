@@ -143,7 +143,6 @@
 </main>
 
 <script>
-    // Aktualisierte API-URL
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbhl1k_pgXinca2FA2hxqzMJzW--7Hfo54XHtVm_vfrxndA-GFF57UsQ2ILn6drZnu2w/exec";
     
     const routineIcons = {
@@ -183,7 +182,6 @@
     function renderDashboard(historyArray) {
         const routineKeys = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine", "TwoDayRule"];
         
-        // 1. Letzte 7 Kalendertage generieren (für die Spalten-Überschriften)
         const totalMatrixDays = 7;
         const matrixDates = [];
         const daysHeader = document.getElementById('matrix-days');
@@ -194,19 +192,16 @@
             d.setDate(d.getDate() - i);
             matrixDates.push(formatDateToString(d));
             
-            // Wochentag-Buchstabe ermitteln (M, D, M, D, F, S, S)
             const dayName = d.toLocaleDateString('de-DE', { weekday: 'short' }).charAt(0);
             daysHeader.innerHTML += `<div class="day-label">${dayName}</div>`;
         }
 
-        // 2. Daten-Auswertung über die gesamte Historie
         let totalChecks = 0;
         let successfulChecks = 0;
         
         const routineSuccessCounts = {};
         routineKeys.forEach(k => routineSuccessCounts[k] = 0);
 
-        // Gehe durch jeden Eintrag im Daten-Array
         historyArray.forEach(row => {
             routineKeys.forEach(routine => {
                 if (row.routinen && row.routinen[routine]) {
@@ -220,7 +215,6 @@
             });
         });
 
-        // 3. Echten fortlaufenden Streak berechnen (rückwärts ab heute prüfen)
         let currentStreak = 0;
         let checkDate = new Date();
         
@@ -229,7 +223,6 @@
             const foundDay = historyArray.find(item => item.datum === checkDateStr);
             
             if (foundDay && foundDay.routinen) {
-                // Ein Tag gilt als geschafft, wenn mindestens 5 Routinen auf "ja" stehen
                 let jaCount = 0;
                 routineKeys.forEach(r => {
                     if (foundDay.routinen[r] && foundDay.routinen[r].toLowerCase() === 'ja') jaCount++;
@@ -237,9 +230,8 @@
                 
                 if (jaCount >= 5) {
                     currentStreak++;
-                    checkDate.setDate(checkDate.getDate() - 1); // Einen Tag weiter zurückgehen
+                    checkDate.setDate(checkDate.getDate() - 1);
                 } else {
-                    // Wenn heute noch nicht vollendet ist, aber gestern vollendet war, bricht der Streak nicht sofort ab
                     if (checkDateStr === formatDateToString(new Date())) {
                         checkDate.setDate(checkDate.getDate() - 1);
                         continue;
@@ -255,7 +247,6 @@
             }
         }
 
-        // 4. Matrix-Zeilen für die letzten 7 Tage rendern
         const rowsContainer = document.getElementById('matrix-rows-container');
         rowsContainer.innerHTML = '';
 
@@ -279,7 +270,6 @@
             `;
         });
 
-        // 5. Performance-Balken rendern (All-Time-Quote pro Routine)
         const perfContainer = document.getElementById('routine-performance-container');
         perfContainer.innerHTML = '';
 
@@ -303,7 +293,6 @@
             `;
         });
 
-        // 6. KPIs setzen
         document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
         const totalRate = totalChecks > 0 ? Math.round((successfulChecks / totalChecks) * 100) : 0;
         document.getElementById('kpi-rate').textContent = `${totalRate}%`;
