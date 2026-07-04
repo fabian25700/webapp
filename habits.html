@@ -62,6 +62,14 @@
 
         header h1 { font-size: 1.15rem; font-weight: 800; flex: 1; }
 
+        .stats-btn {
+            display: flex; align-items: center; justify-content: center;
+            gap: 6px; padding: 0 12px; height: 36px; border-radius: 12px;
+            background: var(--surface); border: 1px solid var(--border);
+            text-decoration: none; color: var(--text-primary); box-shadow: var(--shadow);
+            font-size: 0.85rem; font-weight: 700;
+        }
+
         .progress-container { background: var(--border-light); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 5px; }
         .progress-bar { background: var(--success); height: 100%; transition: width 0.3s ease; }
         .stats-text { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
@@ -99,10 +107,14 @@
         }
         .category-header:active { background: var(--border-light); }
 
-        .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; }
-        .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; flex: 1; }
+        .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
         
-        .arrow { font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.3s ease; }
+        /* 3-Tage-Status Meta Box */
+        .category-meta { display: flex; align-items: center; gap: 6px; margin-left: auto; margin-right: 12px; flex-shrink: 0; }
+        .status-dot-wrapper { display: flex; flex-direction: column; align-items: center; }
+
+        .arrow { font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.3s ease; flex-shrink: 0; }
         .category-group.open .arrow { transform: rotate(180deg); }
 
         .category-content { display: none; padding: 0 16px 16px; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 16px; }
@@ -127,9 +139,9 @@
 
         .location-name { font-weight: 600; font-size: 0.95rem; flex: 1; }
         
-        .yesterday-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-left: 6px; }
-        .yesterday-dot.ja { background: var(--success); box-shadow: 0 0 8px var(--success); }
-        .yesterday-dot.nein { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+        .yesterday-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; background: var(--border); }
+        .yesterday-dot.ja { background: var(--success); box-shadow: 0 0 6px var(--success); }
+        .yesterday-dot.nein { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
 
         .cloud-status { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
     </style>
@@ -142,7 +154,8 @@
     <div class="header-top">
         <a href="index.html" class="back-btn">&larr;</a>
         <h1>Routinen</h1>
-        <div class="cloud-status" id="cloud-info">Lade...</div>
+        <div class="cloud-status" id="cloud-info" style="margin-right: 12px;">Lade...</div>
+        <a href="https://fabian25700.github.io/webapp/habit_stats.html" class="stats-btn">Stats 📊</a>
     </div>
     <div class="progress-container"><div class="progress-bar" id="progress-bar" style="width: 0%"></div></div>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
@@ -155,8 +168,13 @@
         <div class="category-header" onclick="toggleGroup(this)">
             <div class="category-title">
                 <div class="category-icon">☀️</div>
-                Morgenroutine <span class="yesterday-dot" id="dot-Morgenroutine"></span>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); margin-left: 6px;"></span>
+                <span>Morgenroutine</span>
+            </div>
+            <div class="category-meta">
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-vorgestern"></span></div>
+                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
         </div>
@@ -167,8 +185,13 @@
         <div class="category-header" onclick="toggleGroup(this)">
             <div class="category-title">
                 <div class="category-icon">🏃‍♂️</div>
-                Sportroutine <span class="yesterday-dot" id="dot-Sportroutine"></span>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); margin-left: 6px;"></span>
+                <span>Sportroutine</span>
+            </div>
+            <div class="category-meta">
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-vorgestern"></span></div>
+                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
         </div>
@@ -179,8 +202,13 @@
         <div class="category-header" onclick="toggleGroup(this)">
             <div class="category-title">
                 <div class="category-icon">🥗</div>
-                Gesundheitsroutine <span class="yesterday-dot" id="dot-Gesundheitsroutine"></span>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); margin-left: 6px;"></span>
+                <span>Gesundheitsroutine</span>
+            </div>
+            <div class="category-meta">
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-vorgestern"></span></div>
+                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
         </div>
@@ -191,8 +219,13 @@
         <div class="category-header" onclick="toggleGroup(this)">
             <div class="category-title">
                 <div class="category-icon">🧠</div>
-                Fokusroutine <span class="yesterday-dot" id="dot-Fokusroutine"></span>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); margin-left: 6px;"></span>
+                <span>Fokusroutine</span>
+            </div>
+            <div class="category-meta">
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-vorgestern"></span></div>
+                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
         </div>
@@ -203,8 +236,13 @@
         <div class="category-header" onclick="toggleGroup(this)">
             <div class="category-title">
                 <div class="category-icon">🌙</div>
-                Abendroutine <span class="yesterday-dot" id="dot-Abendroutine"></span>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); margin-left: 6px;"></span>
+                <span>Abendroutine</span>
+            </div>
+            <div class="category-meta">
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-vorgestern"></span></div>
+                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
         </div>
@@ -215,8 +253,13 @@
         <div class="category-header" onclick="toggleGroup(this)">
             <div class="category-title">
                 <div class="category-icon">🛌</div>
-                Schlafroutine <span class="yesterday-dot" id="dot-Schlafroutine"></span>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); margin-left: 6px;"></span>
+                <span>Schlafroutine</span>
+            </div>
+            <div class="category-meta">
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-vorgestern"></span></div>
+                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
         </div>
@@ -227,8 +270,13 @@
         <div class="category-header" onclick="toggleGroup(this)">
             <div class="category-title">
                 <div class="category-icon">⚡</div>
-                2-Day Rule <span class="yesterday-dot" id="dot-TwoDayRule"></span>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); margin-left: 6px;"></span>
+                <span>2-Day Rule</span>
+            </div>
+            <div class="category-meta">
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-vorgestern"></span></div>
+                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
         </div>
@@ -237,7 +285,7 @@
 </main>
 
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJ61AjyUXZQvyaPcPFBq4OOSULtuLUFLFmwVAjSo-kTqdVXPSrTNW_0k04YZk0AuN2fg/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvzXJ9VesApgA0RPJ_cnNrfIPYiYIPjB9FQlbITXg3HRcoJPBDlBVHajY4dxKjluoRiQ/exec";
     
     const TARGET_RATIO = 0.8;
     const habitState = {};
@@ -284,7 +332,7 @@
         });
 
         updateGlobalProgress();
-        fetchYesterdayStatus();
+        fetchHistoryStatus();
     }
 
     function toggleGroup(header) {
@@ -314,12 +362,15 @@
 
         updateGlobalProgress();
 
-        // Zeigt den Hinweis, wenn die 80%-Marke genau jetzt erreicht wurde
         if (oldRoutineState === "nein" && newRoutineState === "ja") {
             showSuccessToast();
         }
 
-        // Synchronisiert nur, wenn sich der Status der gesamten Routine verändert hat
+        const heuteDot = document.getElementById(`dot-${routineName}-heute`);
+        if (heuteDot) {
+            heuteDot.className = "yesterday-dot " + newRoutineState;
+        }
+
         if (oldRoutineState !== newRoutineState) {
             syncModuleToCloud(routineName, newRoutineState);
         }
@@ -335,11 +386,17 @@
             const state = habitState[routineName];
             
             totalRoutines++;
-            if ((state.done / state.total) >= TARGET_RATIO) {
+            const isDoneNow = (state.done / state.total) >= TARGET_RATIO ? "ja" : "nein";
+            if (isDoneNow === "ja") {
                 completedRoutines++;
             }
 
             group.querySelector('.counter-text').textContent = `(${state.done}/${state.total})`;
+            
+            const heuteDot = document.getElementById(`dot-${routineName}-heute`);
+            if (heuteDot) {
+                heuteDot.className = "yesterday-dot " + isDoneNow;
+            }
         });
 
         const percent = totalRoutines > 0 ? Math.round((completedRoutines / totalRoutines) * 100) : 0;
@@ -347,20 +404,27 @@
         document.getElementById('stats-summary').textContent = `${completedRoutines} / ${totalRoutines} Routinen erreicht`;
     }
 
-    function fetchYesterdayStatus() {
+    function fetchHistoryStatus() {
         fetch(GOOGLE_SCRIPT_URL, { method: "GET", redirect: "follow" })
             .then(res => res.json())
             .then(data => {
                 document.getElementById('cloud-info').textContent = "Cloud Live ✓";
-                Object.keys(data).forEach(routineName => {
-                    const dot = document.getElementById("dot-" + routineName);
-                    if (dot) {
-                        dot.className = "yesterday-dot " + data[routineName].toLowerCase();
+                
+                const timeframes = ['gestern', 'vorgestern'];
+                
+                timeframes.forEach(timeframe => {
+                    if (data[timeframe]) {
+                        Object.keys(data[timeframe]).forEach(routineName => {
+                            const dot = document.getElementById(`dot-${routineName}-${timeframe}`);
+                            if (dot) {
+                                dot.className = "yesterday-dot " + data[timeframe][routineName].toLowerCase();
+                            }
+                        });
                     }
                 });
             })
             .catch(err => {
-                document.getElementById('cloud-info').textContent = "Vortag-Fehler";
+                document.getElementById('cloud-info').textContent = "Fehler";
                 console.error(err);
             });
     }
