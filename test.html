@@ -320,14 +320,17 @@
         groups.forEach((group, groupIdx) => {
             const routineName = group.getAttribute('data-routine');
             if (routineName === "TwoDayRule") {
-                habitState[routineName] = { total: 0, done: 0 };
+                habitState[routineName] = { total: 0, done: 0, isApproved: false };
                 return;
             }
 
             const contentDiv = group.querySelector('.category-content');
             const habits = JSON.parse(contentDiv.getAttribute('data-habits'));
             
-            habitState[routineName] = { total: habits.length, done: 0, joker: false };
+            const jokerId = `${groupIdx}-joker`;
+            const isJokerChecked = savedStates[jokerId] || false;
+            
+            habitState[routineName] = { total: habits.length, done: 0, joker: isJokerChecked };
 
             let habitsHtml = habits.map((habit, habitIdx) => {
                 const habitId = `${groupIdx}-${habitIdx}`;
@@ -343,12 +346,6 @@
                 `;
             }).join('');
 
-            const jokerId = `${groupIdx}-joker`;
-            const isJokerChecked = savedStates[jokerId] || false;
-            if (isJokerChecked) {
-                habitState[routineName].joker = true;
-            }
-
             habitsHtml += `
                 <div class="bucket-card ${isJokerChecked ? 'done' : ''}" id="card-${jokerId}" onclick="toggleJoker('${routineName}', '${jokerId}', this)" data-joker="true" style="margin-top: 8px; border-color: var(--text-secondary);">
                     <div class="status-circle" style="border-radius: 50%;"></div>
@@ -359,7 +356,7 @@
             contentDiv.innerHTML = habitsHtml;
         });
 
-        updateGlobalProgress();
+        updateGlobalProgress(true); // Erste Berechnung unterdrückt den Cloud-Sync beim Laden
         fetchHistoryStatus();
     }
 
@@ -388,15 +385,10 @@
 
         const newRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
 
-        updateGlobalProgress();
+        updateGlobalProgress(false);
 
         if (oldRoutineState === "nein" && newRoutineState === "ja") {
             showSuccessToast();
-        }
-
-        const heuteDot = document.getElementById(`dot-${routineName}-heute`);
-        if (heuteDot) {
-            heuteDot.className = "yesterday-dot " + newRoutineState;
         }
 
         if (oldRoutineState !== newRoutineState) {
@@ -417,15 +409,10 @@
 
         const newRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
 
-        updateGlobalProgress();
+        updateGlobalProgress(false);
 
         if (oldRoutineState === "nein" && newRoutineState === "ja") {
             showSuccessToast();
-        }
-
-        const heuteDot = document.getElementById(`dot-${routineName}-heute`);
-        if (heuteDot) {
-            heuteDot.className = "yesterday-dot " + newRoutineState;
         }
 
         if (oldRoutineState !== newRoutineState) {
@@ -441,7 +428,7 @@
         return (state.done / state.total) >= TARGET_RATIO;
     }
 
-    function updateGlobalProgress() {
+    function updateGlobalProgress(suppressCloudSync = false) {
         let totalRoutines = 0;
         let completedRoutines = 0;
         let anyRoutineFailedHeute = false;
@@ -452,6 +439,7 @@
             if (routineName === "TwoDayRule") return;
 
             const state = habitState[routineName];
+            if (!state) return;
             
             totalRoutines++;
             const isDoneNow = isRoutineApproved(routineName) ? "ja" : "nein";
@@ -469,9 +457,20 @@
             }
         });
 
+        // Zustand der TwoDayRule vor der Neuberechnung merken
+        const oldTdrState = habitState["TwoDayRule"] ? (habitState["TwoDayRule"].isApproved ? "ja" : "nein") : "nein";
+
         updateTwoDayRuleStatus(anyRoutineFailedHeute);
 
-        if (isRoutineApproved("TwoDayRule")) {
+        // Zustand nach der Neuberechnung holen
+        const newTdrState = habitState["TwoDayRule"].isApproved ? "ja" : "nein";
+
+        // Wenn sich der Status geändert hat und Sync nicht unterdrückt ist, ab in die Cloud
+        if (oldTdrState !== newTdrState && !suppressCloudSync) {
+            syncModuleToCloud("TwoDayRule", newTdrState);
+        }
+
+        if (habitState["TwoDayRule"].isApproved) {
             completedRoutines++;
         }
         totalRoutines++;
@@ -485,7 +484,7 @@
         let anyRoutineFailedGestern = false;
         let anyRoutineFailedVorgestern = false;
 
-        if (Array.isArray(globalHistoryArray)) {
+        if (Array.isArray(globalHistoryArray) && globalHistoryArray.length > 0) {
             const today = new Date();
             const yesterday = new Date();
             yesterday.setDate(today.getDate() - 1);
@@ -519,13 +518,16 @@
         const tdrHeute = (!anyRoutineFailedHeute && !anyRoutineFailedGestern) ? "ja" : "nein";
         const tdrGestern = (!anyRoutineFailedGestern && !anyRoutineFailedVorgestern) ? "ja" : "nein";
 
-        habitState["TwoDayRule"] = { total: 0, done: 0, joker: (tdrHeute === "ja") };
+        habitState["TwoDayRule"] = { total: 0, done: 0, isApproved: (tdrHeute === "ja") };
 
         const heuteDot = document.getElementById("dot-TwoDayRule-heute");
         if (heuteDot) heuteDot.className = "yesterday-dot " + tdrHeute;
 
         const gesternDot = document.getElementById("dot-TwoDayRule-gestern");
         if (gesternDot) gesternDot.className = "yesterday-dot " + tdrGestern;
+        
+        const vorgesternTdrDot = document.getElementById("dot-TwoDayRule-vorgestern");
+        if (vorgesternTdrDot) vorgesternTdrDot.className = "yesterday-dot " + ((!anyRoutineFailedVorgestern) ? "ja" : "nein");
     }
 
     function fetchHistoryStatus() {
@@ -583,11 +585,6 @@
                 });
                 
                 updateTwoDayRuleStatus(anyRoutineFailedHeute);
-                
-                const vorgesternTdrDot = document.getElementById("dot-TwoDayRule-vorgestern");
-                if (vorgesternTdrDot) {
-                    vorgesternTdrDot.className = "yesterday-dot nein";
-                }
             })
             .catch(err => {
                 document.getElementById('cloud-info').textContent = "Fehler";
