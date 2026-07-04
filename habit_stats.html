@@ -84,14 +84,14 @@
 
         /* Wochen-Matrix */
         .matrix-grid { display: flex; flex-direction: column; gap: 10px; }
-        .matrix-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-        .matrix-label { font-size: 0.8rem; font-weight: 600; width: 85px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
-        .matrix-cells { display: flex; gap: 6px; flex: 1; justify-content: flex-end; }
+        .matrix-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .matrix-label { font-size: 0.8rem; font-weight: 600; flex: 1; text-align: left; }
+        .matrix-cells { display: flex; gap: 6px; flex-shrink: 0; justify-content: flex-end; }
         .matrix-cell { width: 20px; height: 20px; border-radius: 6px; background: var(--border-light); border: 1px solid var(--border); position: relative; transition: all 0.2s; }
         .matrix-cell.ja { background: var(--success); border-color: var(--success); }
         .matrix-cell.nein { background: var(--danger); border-color: var(--danger); opacity: 0.3; }
         
-        .days-header { display: flex; margin-bottom: -4px; padding-left: 93px; flex: 1; justify-content: flex-end; gap: 6px; }
+        .days-header { display: flex; margin-bottom: -4px; flex: 1; justify-content: flex-end; gap: 6px; padding-right: 0; }
         .day-label { font-size: 0.55rem; font-weight: 700; color: var(--text-secondary); text-align: center; width: 20px; text-transform: uppercase; }
 
         /* Routine Listen Performance */
@@ -187,7 +187,8 @@
         const daysHeader = document.getElementById('matrix-days');
         daysHeader.innerHTML = '';
 
-        for (let i = totalMatrixDays - 1; i >= 0; i--) {
+        // Schleife startet bei 0 (Heute) und geht bis 6 Tage in die Vergangenheit (von links nach rechts)
+        for (let i = 0; i < totalMatrixDays; i++) {
             const d = new Date();
             d.setDate(d.getDate() - i);
             matrixDates.push(formatDateToString(d));
