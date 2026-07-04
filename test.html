@@ -12,8 +12,6 @@
             --accent-soft: rgba(230, 126, 34, 0.1);
             --success: #27ae60;
             --success-soft: rgba(39, 174, 96, 0.1);
-            --minimal: #2980b9;
-            --minimal-soft: rgba(41, 128, 185, 0.1);
             --danger: #e74c3c;
             --bg: #f0f2f5;
             --surface: #ffffff;
@@ -22,6 +20,7 @@
             --border: #e2e8f0;
             --border-light: #f1f5f9;
             --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --apple-switch-bg: #e3e3e6;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -32,6 +31,7 @@
                 --text-secondary: #94a3b8;
                 --border: #2d3f55;
                 --border-light: #253347;
+                --apple-switch-bg: #1c1c1e;
             }
         }
 
@@ -53,7 +53,7 @@
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         }
 
-        .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
         
         .back-btn {
             display: flex; align-items: center; justify-content: center;
@@ -72,18 +72,19 @@
             font-size: 0.85rem; font-weight: 700;
         }
 
-        /* Mode Switcher Styles */
-        .mode-container {
-            display: flex; background: var(--border-light); border-radius: 10px;
-            padding: 2px; margin-bottom: 12px; border: 1px solid var(--border);
+        /* Apple Style segmented control */
+        .apple-switch-container {
+            display: flex; background: var(--apple-switch-bg); border-radius: 9px;
+            padding: 2px; margin-bottom: 14px; position: relative;
         }
-        .mode-btn {
-            flex: 1; text-align: center; padding: 8px; font-size: 0.8rem; font-weight: 700;
-            border-radius: 8px; border: none; background: transparent; color: var(--text-secondary);
-            cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.05em;
+        .apple-switch-btn {
+            flex: 1; text-align: center; padding: 6px 0; font-size: 0.8rem; font-weight: 600;
+            border-radius: 7px; border: none; background: transparent; color: var(--text-secondary);
+            cursor: pointer; transition: all 0.2s; position: relative; z-index: 2;
         }
-        .mode-btn.active {
-            background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow);
+        .apple-switch-btn.active {
+            color: var(--text-primary); font-weight: 700; background: var(--surface);
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
         }
 
         .progress-container { background: var(--border-light); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 5px; }
@@ -111,8 +112,23 @@
 
         main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 
+        /* Globale Listen für aktive und erledigte Routinen */
+        #active-routines-container, #done-routines-list { display: flex; flex-direction: column; gap: 12px; }
+
+        /* Erledigte Routinen Haupt-Toggle */
+        .done-routines-master-container { margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 16px; }
+        .done-routines-trigger {
+            font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+            padding: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);
+        }
+        .done-routines-hidden-wrapper { display: none; flex-direction: column; gap: 12px; margin-top: 12px; }
+        .done-routines-master-container.expanded .done-routines-hidden-wrapper { display: flex; }
+
         .category-group { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); position: relative; }
-        
+        .category-group.routine-done-state { opacity: 0.75; }
+
         .category-header {
             padding: 16px; display: flex; align-items: center; justify-content: space-between;
             cursor: pointer; user-select: none; transition: background 0.2s;
@@ -131,41 +147,19 @@
         .category-content { display: none; padding: 0 16px 16px; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 16px; }
         .category-group.open .category-content { display: flex; }
 
-        .habit-list-active { display: flex; flex-direction: column; gap: 8px; }
-
-        /* Collapse Container für erledigte Habits */
-        .done-collapse-container { margin-top: 4px; border-top: 1px dashed var(--border-light); padding-top: 8px; }
-        .done-collapse-trigger {
-            font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);
-            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
-            padding: 6px 0; display: flex; align-items: center; gap: 4px; user-select: none;
-        }
-        .done-list-hidden { display: none; flex-direction: column; gap: 8px; margin-top: 6px; }
-        .done-collapse-container.expanded .done-list-hidden { display: flex; }
-
         .bucket-card {
             background: var(--bg); border-radius: 12px; border: 1px solid var(--border);
-            padding: 12px 14px; display: flex; align-items: center; gap: 12px;
+            padding: 14px 16px; display: flex; align-items: center; gap: 14px;
             cursor: pointer; user-select: none; transition: all 0.2s ease;
         }
         .bucket-card:active { transform: scale(0.99); }
-        
         .bucket-card.done { opacity: 0.5; border-style: dashed; background: var(--border-light); }
-        .bucket-card.minimal { border-color: var(--minimal); background: var(--minimal-soft); }
 
-        /* Minimal Mode Button */
-        .minimal-trigger {
-            width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: center; font-size: 0.85rem;
-            background: var(--surface); color: var(--text-secondary); transition: all 0.2s;
-        }
-        .minimal-trigger:active { transform: scale(0.9); }
-        .minimal .minimal-trigger { background: var(--minimal); color: white; border-color: var(--minimal); }
-
+        /* Checkbox links */
         .status-circle {
             width: 22px; height: 22px; border-radius: 6px;
             border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-            transition: all 0.2s ease; margin-left: auto;
+            transition: all 0.2s ease; order: -1;
         }
         .done .status-circle { background: var(--success); border-color: var(--success); }
         .status-circle::after { content: '✓'; color: white; font-size: 13px; font-weight: bold; display: none; }
@@ -181,7 +175,7 @@
 
         .close-routine-trigger {
             display: flex; align-items: center; justify-content: center; gap: 6px;
-            padding: 12px; margin-top: 4px; border-radius: 12px;
+            padding: 12px; margin-top: 8px; border-radius: 12px;
             background: var(--border-light); border: 1px dashed var(--border);
             color: var(--text-secondary); font-size: 0.8rem; font-weight: 700;
             text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
@@ -202,10 +196,10 @@
         <a href="https://fabian25700.github.io/webapp/habit_stats.html" class="stats-btn">Stats 📊</a>
     </div>
 
-    <!-- 1.4 Globaler Location Switcher -->
-    <div class="mode-container">
-        <button class="mode-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')">Zuhause 🏠</button>
-        <button class="mode-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')">Unterwegs 💼</button>
+    <!-- Apple-Style Switch -->
+    <div class="apple-switch-container">
+        <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')">Zuhause</button>
+        <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')">Unterwegs</button>
     </div>
 
     <div class="progress-container"><div class="progress-bar" id="progress-bar" style="width: 0%"></div></div>
@@ -214,14 +208,11 @@
     </div>
 </header>
 
-<main id="category-container">
-    <!-- Statische 2-Day-Rule Box -->
-    <div class="category-group" data-routine="TwoDayRule">
+<main>
+    <!-- Two Day Rule bleibt permanent fest verankert ganz oben -->
+    <div class="category-group" data-routine="TwoDayRule" id="routine-block-TwoDayRule">
         <div class="category-header" style="cursor: default;">
-            <div class="category-title">
-                <div class="category-icon">⚡</div>
-                <span>2-Day Rule</span>
-            </div>
+            <div class="category-title"><div class="category-icon">⚡</div><span>2-Day Rule</span></div>
             <div class="category-meta">
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-heute"></span></div>
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-gestern"></span></div>
@@ -233,8 +224,19 @@
         <div class="category-content" data-habits='[]'></div>
     </div>
 
-    <!-- Morgenroutine -->
-    <div class="category-group" data-routine="Morgenroutine">
+    <!-- Bereich für aktive (unvollständige) Routinen -->
+    <div id="active-routines-container"></div>
+
+    <!-- Bereich für erledigte Routinen (unter Toggle) -->
+    <div class="done-routines-master-container" id="done-routines-master-box">
+        <div class="done-routines-trigger" onclick="toggleDoneRoutinesMaster()">Erledigte Routinen anzeigen ▼</div>
+        <div class="done-routines-hidden-wrapper" id="done-routines-list"></div>
+    </div>
+</main>
+
+<!-- Die Rohdaten der Routinen als Templates deklariert -->
+<div id="routine-templates" style="display: none;">
+    <div class="category-group" data-routine="Morgenroutine" id="routine-block-Morgenroutine">
         <div class="category-header" onclick="toggleGroup(this)">
             <div class="category-title"><div class="category-icon">☀️</div><span>Morgenroutine</span></div>
             <div class="category-meta">
@@ -248,8 +250,7 @@
         <div class="category-content" data-habits='["Aufstehen ohne Snooze", "Stoisches Kapitel", "Wiegen", "alle Rollladen / Fenster", "Tageslicht", "Klo", "Wasser mit Salz / Elektrolyte", "Zunge reinigen", "Zähne putzen", "Schlafzimmer aufräumen", "Morning Healthdrink", "Küche aufräumen und putzen", "Whoop checken", "Ziele + ToDo’s des Tages anschauen", "Mails checken", "ggf. Sport", "duschen", "anziehen", "bis 8:00 keine Geräte"]'></div>
     </div>
 
-    <!-- Sportroutine -->
-    <div class="category-group" data-routine="Sportroutine">
+    <div class="category-group" data-routine="Sportroutine" id="routine-block-Sportroutine">
         <div class="category-header" onclick="toggleGroup(this)">
             <div class="category-title"><div class="category-icon">🏃‍♂️</div><span>Sportroutine</span></div>
             <div class="category-meta">
@@ -263,8 +264,7 @@
         <div class="category-content" data-habits='["Athletik- / Krafteinheit", "Dehnen & Mobility", "Schritte-Ziel erreicht", "Erholungs-Check", "Protein-Zufuhr gedeckt"]'></div>
     </div>
 
-    <!-- Gesundheitsroutine -->
-    <div class="category-group" data-routine="Gesundheitsroutine">
+    <div class="category-group" data-routine="Gesundheitsroutine" id="routine-block-Gesundheitsroutine">
         <div class="category-header" onclick="toggleGroup(this)">
             <div class="category-title"><div class="category-icon">🥗</div><span>Gesundheitsroutine</span></div>
             <div class="category-meta">
@@ -278,8 +278,7 @@
         <div class="category-content" data-habits='["Ernährungsplan eingehalten", "Supplements genommen", "Kein verarbeiteter Zucker", "Genug Wasser getrunken", "Intervallfasten-Fenster"]'></div>
     </div>
 
-    <!-- Fokusroutine -->
-    <div class="category-group" data-routine="Fokusroutine">
+    <div class="category-group" data-routine="Fokusroutine" id="routine-block-Fokusroutine">
         <div class="category-header" onclick="toggleGroup(this)">
             <div class="category-title"><div class="category-icon">🧠</div><span>Fokusroutine</span></div>
             <div class="category-meta">
@@ -293,8 +292,7 @@
         <div class="category-content" data-habits='["Deep Work Block 1", "Deep Work Block 2", "Kein Social Media während Fokus", "Immobilien-Task erledigt", "Schreibtisch clean gehalten"]'></div>
     </div>
 
-    <!-- Abendroutine -->
-    <div class="category-group" data-routine="Abendroutine">
+    <div class="category-group" data-routine="Abendroutine" id="routine-block-Abendroutine">
         <div class="category-header" onclick="toggleGroup(this)">
             <div class="category-title"><div class="category-icon">🌙</div><span>Abendroutine</span></div>
             <div class="category-meta">
@@ -308,8 +306,7 @@
         <div class="category-content" data-habits='["Tagesabschluss-Journal", "Digital Detox ab 21:30", "Klamotten/Setup für morgen", "Lesen (15 Seiten)", "Licht gedimmt"]'></div>
     </div>
 
-    <!-- Schlafroutine -->
-    <div class="category-group" data-routine="Schlafroutine">
+    <div class="category-group" data-routine="Schlafroutine" id="routine-block-Schlafroutine">
         <div class="category-header" onclick="toggleGroup(this)">
             <div class="category-title"><div class="category-icon">🛌</div><span>Schlafroutine</span></div>
             <div class="category-meta">
@@ -322,7 +319,7 @@
         </div>
         <div class="category-content" data-habits='["Kein Koffein nach 14:00", "Zimmer gelüftet & kühl", "Keine schweren Mahlzeiten spät", "Magnesium genommen", "Fixe Aufstehzeit vorbereitet"]'></div>
     </div>
-</main>
+</div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbhl1k_pgXinca2FA2hxqzMJzW--7Hfo54XHtVm_vfrxndA-GFF57UsQ2ILn6drZnu2w/exec";
@@ -358,90 +355,84 @@
         document.getElementById('mode-zuhause').classList.toggle('active', mode === 'zuhause');
         document.getElementById('mode-unterwegs').classList.toggle('active', mode === 'unterwegs');
         localStorage.setItem('routine_global_mode', mode);
-        // Hier wird später die dynamische Beladung je nach Modus stattfinden
+        
+        // Neu aufbauen, da sich die Untertasks ändern
+        buildDOMFromTemplates();
+        fetchHistoryStatus();
     }
 
     function initApp() {
         checkMidnightReset();
-        
         const savedMode = localStorage.getItem('routine_global_mode');
-        if (savedMode) setGlobalMode(savedMode);
+        if (savedMode) currentGlobalMode = savedMode;
+        
+        document.getElementById('mode-zuhause').classList.toggle('active', currentGlobalMode === 'zuhause');
+        document.getElementById('mode-unterwegs').classList.toggle('active', currentGlobalMode === 'unterwegs');
 
-        renderAllRoutines();
+        buildDOMFromTemplates();
         fetchHistoryStatus();
     }
 
-    function renderAllRoutines() {
+    // Baut das DOM basierend auf den Rohdaten und dem gewählten Ort-Modus auf
+    function buildDOMFromTemplates() {
+        const activeContainer = document.getElementById('active-routines-container');
+        activeContainer.innerHTML = '';
+        
+        const templates = document.querySelectorAll('#routine-templates .category-group');
+        templates.forEach(tpl => {
+            const clone = tpl.cloneNode(true);
+            activeContainer.appendChild(clone);
+        });
+
         const savedStates = getSavedStates();
-        const groups = document.querySelectorAll('.category-group');
+        const groups = document.querySelectorAll('#active-routines-container .category-group');
         
         groups.forEach((group, groupIdx) => {
             const routineName = group.getAttribute('data-routine');
-            if (routineName === "TwoDayRule") {
-                habitState[routineName] = { total: 0, donePoints: 0, isApproved: false };
-                return;
+            const contentDiv = group.querySelector('.category-content');
+            let habits = JSON.parse(contentDiv.getAttribute('data-habits'));
+            
+            // Simulation Modus "Unterwegs" -> Kürze die Listen um jeweils 3 Elemente
+            if (currentGlobalMode === "unterwegs" && habits.length > 3) {
+                habits = habits.slice(0, habits.length - 3);
             }
 
-            const contentDiv = group.querySelector('.category-content');
-            const habits = JSON.parse(contentDiv.getAttribute('data-habits'));
-            
             const jokerId = `${groupIdx}-joker`;
             const isJokerChecked = savedStates[jokerId] || false;
             
-            habitState[routineName] = { total: habits.length, donePoints: 0, joker: isJokerChecked };
+            habitState[routineName] = { total: habits.length, done: 0, joker: isJokerChecked };
 
-            // Dom-Struktur für 1.1 (Getrennte Listen für aktive und erledigte Tasks)
-            contentDiv.innerHTML = `
-                <div class="habit-list-active" id="active-list-${routineName}"></div>
-                <div class="done-collapse-container" id="done-container-${routineName}">
-                    <div class="done-collapse-trigger" onclick="toggleDoneCollapse('${routineName}')">Erledigte Habits anzeigen ▼</div>
-                    <div class="done-list-hidden" id="done-list-${routineName}"></div>
-                </div>
-                <div class="joker-container" id="joker-container-${routineName}"></div>
-                <div class="close-routine-trigger" onclick="event.stopPropagation(); closeCurrentGroup('${routineName}')">Routine einklappen ▲</div>
-            `;
-
-            const activeList = contentDiv.querySelector(`#active-list-${routineName}`);
-            const doneList = contentDiv.querySelector(`#done-list-${routineName}`);
-
-            habits.forEach((habit, habitIdx) => {
+            let habitsHtml = habits.map((habit, habitIdx) => {
                 const habitId = `${groupIdx}-${habitIdx}`;
-                const habitValue = savedStates[habitId] || "off"; // "off", "minimal", "full"
+                const isChecked = savedStates[habitId] || false;
                 
-                let cardClass = "";
-                if (habitValue === "full") {
-                    cardClass = "done";
-                    habitState[routineName].donePoints += 1;
-                } else if (habitValue === "minimal") {
-                    cardClass = "minimal";
-                    habitState[routineName].donePoints += 0.5;
-                }
+                if (isChecked) { habitState[routineName].done++; }
 
-                const cardHtml = `
-                    <div class="bucket-card ${cardClass}" id="card-${habitId}" data-habit-id="${habitId}" data-routine="${routineName}">
-                        <div class="minimal-trigger" onclick="event.stopPropagation(); triggerMinimal('${routineName}', '${habitId}')">⚡</div>
-                        <div class="location-name" onclick="triggerFull('${routineName}', '${habitId}')">${habit}</div>
-                        <div class="status-circle" onclick="triggerFull('${routineName}', '${habitId}')"></div>
+                return `
+                    <div class="bucket-card ${isChecked ? 'done' : ''}" id="card-${habitId}" onclick="toggleHabit('${routineName}', '${habitId}', this)">
+                        <div class="status-circle"></div>
+                        <div class="location-name">${habit}</div>
                     </div>
                 `;
+            }).join('');
 
-                if (habitValue === "full" || habitValue === "minimal") {
-                    doneList.insertAdjacentHTML('beforeend', cardHtml);
-                } else {
-                    activeList.insertAdjacentHTML('beforeend', cardHtml);
-                }
-            });
-
-            // Joker einhängen
-            const jokerContainer = contentDiv.querySelector(`#joker-container-${routineName}`);
-            jokerContainer.innerHTML = `
+            habitsHtml += `
                 <div class="bucket-card ${isJokerChecked ? 'done' : ''}" id="card-${jokerId}" onclick="toggleJoker('${routineName}', '${jokerId}', this)" data-joker="true" style="margin-top: 8px; border-color: var(--text-secondary);">
-                    <div class="status-circle" style="border-radius: 50%; margin-left: 0; margin-right: 12px;"></div>
+                    <div class="status-circle" style="border-radius: 50%;"></div>
                     <div class="location-name" style="color: var(--text-secondary); font-style: italic;">Ausnahme / Reisetag 🏳️</div>
                 </div>
             `;
+
+            habitsHtml += `
+                <div class="close-routine-trigger" onclick="event.stopPropagation(); closeCurrentGroup('${routineName}')">
+                    Routine einklappen ▲
+                </div>
+            `;
+
+            contentDiv.innerHTML = habitsHtml;
         });
 
+        // Initiale Sortierung und Fortschrittsprüfung
         updateGlobalProgress(true);
     }
 
@@ -450,7 +441,9 @@
         const isOpen = targetGroup.classList.contains('open');
         
         document.querySelectorAll('.category-group').forEach(group => {
-            group.classList.remove('open');
+            if(group.getAttribute('data-routine') !== 'TwoDayRule') {
+                group.classList.remove('open');
+            }
         });
 
         if (!isOpen) {
@@ -462,21 +455,21 @@
     }
 
     function closeCurrentGroup(routineName) {
-        const group = document.querySelector(`.category-group[data-routine="${routineName}"]`);
+        const group = document.getElementById(`routine-block-${routineName}`);
         if (group) {
             group.classList.remove('open');
             group.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
     }
 
-    function toggleDoneCollapse(routineName) {
-        const container = document.getElementById(`done-container-${routineName}`);
+    function toggleDoneRoutinesMaster() {
+        const container = document.getElementById('done-routines-master-box');
         container.classList.toggle('expanded');
-        const trigger = container.querySelector('.done-collapse-trigger');
+        const trigger = container.querySelector('.done-routines-trigger');
         if (container.classList.contains('expanded')) {
-            trigger.textContent = "Erledigte Habits ausblenden ▲";
+            trigger.textContent = "Erledigte Routinen ausblenden ▲";
         } else {
-            trigger.textContent = "Erledigte Habits anzeigen ▼";
+            trigger.textContent = "Erledigte Routinen anzeigen ▼";
         }
     }
 
@@ -486,74 +479,25 @@
         setTimeout(() => { toast.classList.remove('show'); }, 2000);
     }
 
-    // 1.4 Execution Minimal Mode (0.5 Punkte)
-    function triggerMinimal(routineName, habitId) {
-        const currentData = getSavedStates();
-        const currentVal = currentData[habitId] || "off";
-        const oldRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
-
-        if (currentVal === "minimal") {
-            currentData[habitId] = "off";
-            habitState[routineName].donePoints -= 0.5;
-        } else {
-            if (currentVal === "full") habitState[routineName].donePoints -= 1;
-            currentData[habitId] = "minimal";
-            habitState[routineName].donePoints += 0.5;
-        }
-
-        localStorage.setItem('routine_storage', JSON.stringify(currentData));
-        reSortHabitDOM(routineName, habitId, currentData[habitId]);
-        handlePostClickState(routineName, oldRoutineState);
-    }
-
-    // 1.1 & 1.4 Execution Full Mode (1.0 Punkt)
-    function triggerFull(routineName, habitId) {
-        const currentData = getSavedStates();
-        const currentVal = currentData[habitId] || "off";
-        const oldRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
-
-        if (currentVal === "full") {
-            currentData[habitId] = "off";
-            habitState[routineName].donePoints -= 1;
-        } else {
-            if (currentVal === "minimal") habitState[routineName].donePoints -= 0.5;
-            currentData[habitId] = "full";
-            habitState[routineName].donePoints += 1;
-        }
-
-        localStorage.setItem('routine_storage', JSON.stringify(currentData));
-        reSortHabitDOM(routineName, habitId, currentData[habitId]);
-        handlePostClickState(routineName, oldRoutineState);
-    }
-
-    // Sortiert die Karten live zwischen Aktiver Liste und Einklapp-Liste um (Dopamin-Fokus)
-    function reSortHabitDOM(routineName, habitId, newValue) {
-        const card = document.getElementById(`card-${habitId}`);
-        if (!card) return;
-
-        card.classList.remove('done', 'minimal');
+    function toggleHabit(routineName, habitId, card) {
+        const isDone = card.classList.toggle('done');
         
-        const activeList = document.getElementById(`active-list-${routineName}`);
-        const doneList = document.getElementById(`done-list-${routineName}`);
+        const currentData = getSavedStates();
+        currentData[habitId] = isDone;
+        localStorage.setItem('routine_storage', JSON.stringify(currentData));
+        
+        const oldRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
+        
+        if (isDone) { habitState[routineName].done++; } else { habitState[routineName].done--; }
 
-        if (newValue === "full") {
-            card.classList.add('done');
-            doneList.appendChild(card);
-        } else if (newValue === "minimal") {
-            card.classList.add('minimal');
-            doneList.appendChild(card);
-        } else {
-            activeList.appendChild(card);
-        }
-    }
-
-    function handlePostClickState(routineName, oldRoutineState) {
         const newRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
+
         updateGlobalProgress(false);
 
         if (oldRoutineState === "nein" && newRoutineState === "ja") {
             showSuccessToast();
         }
+
         if (oldRoutineState !== newRoutineState) {
             syncModuleToCloud(routineName, newRoutineState);
         }
@@ -561,14 +505,26 @@
 
     function toggleJoker(routineName, jokerId, card) {
         const isDone = card.classList.toggle('done');
+        
         const currentData = getSavedStates();
         currentData[jokerId] = isDone;
         localStorage.setItem('routine_storage', JSON.stringify(currentData));
         
         const oldRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
+        
         habitState[routineName].joker = isDone;
 
-        handlePostClickState(routineName, oldRoutineState);
+        const newRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
+
+        updateGlobalProgress(false);
+
+        if (oldRoutineState === "nein" && newRoutineState === "ja") {
+            showSuccessToast();
+        }
+
+        if (oldRoutineState !== newRoutineState) {
+            syncModuleToCloud(routineName, newRoutineState);
+        }
     }
 
     function isRoutineApproved(routineName) {
@@ -576,32 +532,56 @@
         if (!state) return false;
         if (state.joker) return true;
         if (state.total === 0) return false;
-        return (state.donePoints / state.total) >= TARGET_RATIO;
+        return (state.done / state.total) >= TARGET_RATIO;
     }
 
     function updateGlobalProgress(suppressCloudSync = false) {
         let totalRoutines = 0;
         let completedRoutines = 0;
 
-        const groups = document.querySelectorAll('.category-group');
-        groups.forEach(group => {
-            const routineName = group.getAttribute('data-routine');
-            if (routineName === "TwoDayRule") return;
+        const activeContainer = document.getElementById('active-routines-container');
+        const doneContainer = document.getElementById('done-routines-list');
+        const masterBox = document.getElementById('done-routines-master-box');
+
+        // Alle Routinen im DOM durchgehen
+        const routineNames = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine"];
+        
+        routineNames.forEach(routineName => {
+            const group = document.getElementById(`routine-block-${routineName}`);
+            if (!group) return;
 
             const state = habitState[routineName];
             if (!state) return;
             
             totalRoutines++;
             const isDoneNow = isRoutineApproved(routineName) ? "ja" : "nein";
-            if (isDoneNow === "ja") completedRoutines++;
-
-            // Zeige gerundete Punkte an (z.B. 3.5/5)
-            group.querySelector('.counter-text').textContent = `(${Math.round(state.donePoints * 10) / 10}/${state.total})`;
             
+            group.querySelector('.counter-text').textContent = `(${state.done}/${state.total})`;
             const heuteDot = document.getElementById(`dot-${routineName}-heute`);
             if (heuteDot) heuteDot.className = "yesterday-dot " + isDoneNow;
+
+            // Große Routinen Umsortierung (Feature 4)
+            if (isDoneNow === "ja") {
+                completedRoutines++;
+                group.classList.add('routine-done-state');
+                if (group.classList.contains('open')) {
+                    group.classList.remove('open'); // Automatisch einklappen
+                }
+                doneContainer.appendChild(group);
+            } else {
+                group.classList.remove('routine-done-state');
+                activeContainer.appendChild(group);
+            }
         });
 
+        // Master-Box ein- oder ausblenden, je nachdem ob fertige Routinen existieren
+        if (doneContainer.children.length > 0) {
+            masterBox.style.display = 'block';
+        } else {
+            masterBox.style.display = 'none';
+        }
+
+        // Two-Day Rule Logik ausführen (Bleibt fest oben verankert)
         const oldTdrState = habitState["TwoDayRule"] ? (habitState["TwoDayRule"].isApproved ? "ja" : "nein") : "nein";
         updateTwoDayRuleStatus();
         const newTdrState = habitState["TwoDayRule"].isApproved ? "ja" : "nein";
@@ -667,7 +647,7 @@
         const tdrHeute = tdrHeuteKombinationErfuellt ? "ja" : "nein";
         const tdrGestern = tdrGesternKombinationErfuellt ? "ja" : "nein";
 
-        habitState["TwoDayRule"] = { total: 0, donePoints: 0, isApproved: (tdrHeute === "ja") };
+        habitState["TwoDayRule"] = { total: 0, done: 0, isApproved: (tdrHeute === "ja") };
 
         if (document.getElementById("dot-TwoDayRule-heute")) document.getElementById("dot-TwoDayRule-heute").className = "yesterday-dot " + tdrHeute;
         if (document.getElementById("dot-TwoDayRule-gestern")) document.getElementById("dot-TwoDayRule-gestern").className = "yesterday-dot " + tdrGestern;
@@ -692,11 +672,8 @@
                 const yesterdayData = historyArray.find(item => item.datum === yesterdayStr);
                 const ereyesterdayData = historyArray.find(item => item.datum === ereyesterdayStr);
 
-                const groups = document.querySelectorAll('.category-group');
-                groups.forEach(group => {
-                    const routineName = group.getAttribute('data-routine');
-                    if (routineName === "TwoDayRule") return;
-
+                const routineNames = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine"];
+                routineNames.forEach(routineName => {
                     const gesternDot = document.getElementById(`dot-${routineName}-gestern`);
                     if (gesternDot) {
                         let statusGestern = "nein";
