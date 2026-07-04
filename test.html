@@ -53,7 +53,7 @@
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         }
 
-        .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+        .header-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
         
         .back-btn {
             display: flex; align-items: center; justify-content: center;
@@ -62,7 +62,7 @@
             text-decoration: none; color: var(--text-primary); box-shadow: var(--shadow);
         }
 
-        header h1 { font-size: 1.15rem; font-weight: 800; flex: 1; }
+        header h1 { font-size: 1.15rem; font-weight: 800; }
 
         .stats-btn {
             display: flex; align-items: center; justify-content: center;
@@ -72,18 +72,18 @@
             font-size: 0.85rem; font-weight: 700;
         }
 
-        /* Apple Style segmented control */
+        /* Apple Style Switch mittig platziert */
         .apple-switch-container {
             display: flex; background: var(--apple-switch-bg); border-radius: 9px;
-            padding: 2px; margin-bottom: 14px; position: relative;
+            padding: 2px; width: 90px; height: 32px; shrink: 0;
         }
         .apple-switch-btn {
-            flex: 1; text-align: center; padding: 6px 0; font-size: 0.8rem; font-weight: 600;
-            border-radius: 7px; border: none; background: transparent; color: var(--text-secondary);
+            flex: 1; text-align: center; display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; border-radius: 7px; border: none; background: transparent;
             cursor: pointer; transition: all 0.2s; position: relative; z-index: 2;
         }
         .apple-switch-btn.active {
-            color: var(--text-primary); font-weight: 700; background: var(--surface);
+            background: var(--surface);
             box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
         }
 
@@ -112,10 +112,8 @@
 
         main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 
-        /* Globale Listen für aktive und erledigte Routinen */
         #active-routines-container, #done-routines-list { display: flex; flex-direction: column; gap: 12px; }
 
-        /* Erledigte Routinen Haupt-Toggle */
         .done-routines-master-container { margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 16px; }
         .done-routines-trigger {
             font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);
@@ -155,7 +153,6 @@
         .bucket-card:active { transform: scale(0.99); }
         .bucket-card.done { opacity: 0.5; border-style: dashed; background: var(--border-light); }
 
-        /* Checkbox links */
         .status-circle {
             width: 22px; height: 22px; border-radius: 6px;
             border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -192,14 +189,15 @@
     <div class="header-top">
         <a href="index.html" class="back-btn">&larr;</a>
         <h1>Routinen</h1>
-        <div class="cloud-status" id="cloud-info" style="margin-right: 12px;">Lade...</div>
-        <a href="https://fabian25700.github.io/webapp/habit_stats.html" class="stats-btn">Stats 📊</a>
-    </div>
+        
+        <!-- Apple-Style Switch mittig -->
+        <div class="apple-switch-container">
+            <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')" title="Zuhause">🏡</button>
+            <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')" title="Unterwegs">🧳</button>
+        </div>
 
-    <!-- Apple-Style Switch -->
-    <div class="apple-switch-container">
-        <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')">Zuhause</button>
-        <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')">Unterwegs</button>
+        <div class="cloud-status" id="cloud-info">Lade...</div>
+        <a href="https://fabian25700.github.io/webapp/habit_stats.html" class="stats-btn">Stats 📊</a>
     </div>
 
     <div class="progress-container"><div class="progress-bar" id="progress-bar" style="width: 0%"></div></div>
@@ -209,7 +207,6 @@
 </header>
 
 <main>
-    <!-- Two Day Rule bleibt permanent fest verankert ganz oben -->
     <div class="category-group" data-routine="TwoDayRule" id="routine-block-TwoDayRule">
         <div class="category-header" style="cursor: default;">
             <div class="category-title"><div class="category-icon">⚡</div><span>2-Day Rule</span></div>
@@ -217,24 +214,20 @@
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-heute"></span></div>
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-gestern"></span></div>
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-vorgestern"></span></div>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow" style="visibility: hidden;">▼</div>
         </div>
         <div class="category-content" data-habits='[]'></div>
     </div>
 
-    <!-- Bereich für aktive (unvollständige) Routinen -->
     <div id="active-routines-container"></div>
 
-    <!-- Bereich für erledigte Routinen (unter Toggle) -->
     <div class="done-routines-master-container" id="done-routines-master-box">
         <div class="done-routines-trigger" onclick="toggleDoneRoutinesMaster()">Erledigte Routinen anzeigen ▼</div>
         <div class="done-routines-hidden-wrapper" id="done-routines-list"></div>
     </div>
 </main>
 
-<!-- Die Rohdaten der Routinen als Templates deklariert -->
 <div id="routine-templates" style="display: none;">
     <div class="category-group" data-routine="Morgenroutine" id="routine-block-Morgenroutine">
         <div class="category-header" onclick="toggleGroup(this)">
@@ -243,7 +236,6 @@
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-heute"></span></div>
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-gestern"></span></div>
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-vorgestern"></span></div>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
         </div>
@@ -257,7 +249,6 @@
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-heute"></span></div>
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-gestern"></span></div>
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-vorgestern"></span></div>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
         </div>
@@ -271,7 +262,6 @@
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-heute"></span></div>
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-gestern"></span></div>
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-vorgestern"></span></div>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
         </div>
@@ -285,7 +275,6 @@
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-heute"></span></div>
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-gestern"></span></div>
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-vorgestern"></span></div>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
         </div>
@@ -299,7 +288,6 @@
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-heute"></span></div>
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-gestern"></span></div>
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-vorgestern"></span></div>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
         </div>
@@ -313,7 +301,6 @@
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-heute"></span></div>
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-gestern"></span></div>
                 <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-vorgestern"></span></div>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
         </div>
@@ -356,7 +343,6 @@
         document.getElementById('mode-unterwegs').classList.toggle('active', mode === 'unterwegs');
         localStorage.setItem('routine_global_mode', mode);
         
-        // Neu aufbauen, da sich die Untertasks ändern
         buildDOMFromTemplates();
         fetchHistoryStatus();
     }
@@ -373,7 +359,6 @@
         fetchHistoryStatus();
     }
 
-    // Baut das DOM basierend auf den Rohdaten und dem gewählten Ort-Modus auf
     function buildDOMFromTemplates() {
         const activeContainer = document.getElementById('active-routines-container');
         activeContainer.innerHTML = '';
@@ -392,7 +377,6 @@
             const contentDiv = group.querySelector('.category-content');
             let habits = JSON.parse(contentDiv.getAttribute('data-habits'));
             
-            // Simulation Modus "Unterwegs" -> Kürze die Listen um jeweils 3 Elemente
             if (currentGlobalMode === "unterwegs" && habits.length > 3) {
                 habits = habits.slice(0, habits.length - 3);
             }
@@ -432,7 +416,6 @@
             contentDiv.innerHTML = habitsHtml;
         });
 
-        // Initiale Sortierung und Fortschrittsprüfung
         updateGlobalProgress(true);
     }
 
@@ -527,6 +510,14 @@
         }
     }
 
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+            checkMidnightReset();
+            buildDOMFromTemplates();
+            fetchHistoryStatus();
+        }
+    });
+
     function isRoutineApproved(routineName) {
         const state = habitState[routineName];
         if (!state) return false;
@@ -543,7 +534,6 @@
         const doneContainer = document.getElementById('done-routines-list');
         const masterBox = document.getElementById('done-routines-master-box');
 
-        // Alle Routinen im DOM durchgehen
         const routineNames = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine"];
         
         routineNames.forEach(routineName => {
@@ -556,16 +546,14 @@
             totalRoutines++;
             const isDoneNow = isRoutineApproved(routineName) ? "ja" : "nein";
             
-            group.querySelector('.counter-text').textContent = `(${state.done}/${state.total})`;
             const heuteDot = document.getElementById(`dot-${routineName}-heute`);
             if (heuteDot) heuteDot.className = "yesterday-dot " + isDoneNow;
 
-            // Große Routinen Umsortierung (Feature 4)
             if (isDoneNow === "ja") {
                 completedRoutines++;
                 group.classList.add('routine-done-state');
                 if (group.classList.contains('open')) {
-                    group.classList.remove('open'); // Automatisch einklappen
+                    group.classList.remove('open');
                 }
                 doneContainer.appendChild(group);
             } else {
@@ -574,14 +562,12 @@
             }
         });
 
-        // Master-Box ein- oder ausblenden, je nachdem ob fertige Routinen existieren
         if (doneContainer.children.length > 0) {
             masterBox.style.display = 'block';
         } else {
             masterBox.style.display = 'none';
         }
 
-        // Two-Day Rule Logik ausführen (Bleibt fest oben verankert)
         const oldTdrState = habitState["TwoDayRule"] ? (habitState["TwoDayRule"].isApproved ? "ja" : "nein") : "nein";
         updateTwoDayRuleStatus();
         const newTdrState = habitState["TwoDayRule"].isApproved ? "ja" : "nein";
