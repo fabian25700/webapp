@@ -354,6 +354,7 @@
             contentDiv.innerHTML = habitsHtml;
         });
 
+        // WICHTIG: Erster Durchlauf unterdrückt Cloud-Sync, berechnet aber den lokalen Zustand vor dem Fetch
         updateGlobalProgress(true);
         fetchHistoryStatus();
     }
@@ -499,7 +500,7 @@
             "Schlafroutine"
         ];
 
-        // 1. Check für HEUTE (Bedingung: Für jede Spalte muss HEUTE oder GESTERN ein "ja" existieren)
+        // 1. Check für HEUTE (Lokaler Zustand ODER Cloud-Zustand gestern)
         let tdrHeuteKombinationErfuellt = true;
         standardRoutines.forEach(routineName => {
             const heuteJa = isRoutineApproved(routineName);
@@ -511,13 +512,12 @@
                 }
             }
 
-            // Wenn eine Routine weder heute noch gestern geschafft wurde -> Two-Day-Rule verletzt
             if (!heuteJa && !gesternJa) {
                 tdrHeuteKombinationErfuellt = false;
             }
         });
 
-        // 2. Check für GESTERN (Bedingung: Für jede Spalte muss GESTERN oder VORGESTERN ein "ja" existieren)
+        // 2. Check für GESTERN
         let tdrGesternKombinationErfuellt = true;
         standardRoutines.forEach(routineName => {
             let gesternJa = false;
@@ -539,7 +539,6 @@
             }
         });
 
-        // 3. Check für VORGESTERN (Hilfsweise direkt aus dem Sheet lesen, falls vorhanden)
         let tdrVorgesternJa = false;
         if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen["TwoDayRule"]) {
             if (ereyesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") {
@@ -607,7 +606,9 @@
                     }
                 });
 
-                updateTwoDayRuleStatus();
+                // HIER IST DIE KORREKTUR: Erzwingt nach dem Laden der Cloud-Daten eine Neuberechnung
+                // mit Unterdrückung des initialen Uploads, damit lokale Haken die Matrix sofort grün schalten.
+                updateGlobalProgress(true);
             })
             .catch(err => {
                 document.getElementById('cloud-info').textContent = "Fehler";
