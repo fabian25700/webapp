@@ -55,6 +55,9 @@
 
         .header-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
         
+        .header-left { display: flex; align-items: center; gap: 12px; flex: 1; }
+        .header-right { display: flex; align-items: center; gap: 12px; justify-content: flex-end; flex: 1; }
+
         .back-btn {
             display: flex; align-items: center; justify-content: center;
             width: 36px; height: 36px; border-radius: 12px;
@@ -62,7 +65,7 @@
             text-decoration: none; color: var(--text-primary); box-shadow: var(--shadow);
         }
 
-        header h1 { font-size: 1.15rem; font-weight: 800; }
+        header h1 { font-size: 1.15rem; font-weight: 800; white-space: nowrap; }
 
         .stats-btn {
             display: flex; align-items: center; justify-content: center;
@@ -75,7 +78,7 @@
         /* Apple Style Switch mittig platziert */
         .apple-switch-container {
             display: flex; background: var(--apple-switch-bg); border-radius: 9px;
-            padding: 2px; width: 90px; height: 32px; shrink: 0;
+            padding: 2px; width: 90px; height: 32px; flex-shrink: 0;
         }
         .apple-switch-btn {
             flex: 1; text-align: center; display: flex; align-items: center; justify-content: center;
@@ -168,7 +171,7 @@
         .yesterday-dot.ja { background: var(--success); box-shadow: 0 0 6px var(--success); }
         .yesterday-dot.nein { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
 
-        .cloud-status { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+        .cloud-status { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; white-space: nowrap; }
 
         .close-routine-trigger {
             display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -187,17 +190,20 @@
 
 <header>
     <div class="header-top">
-        <a href="index.html" class="back-btn">&larr;</a>
-        <h1>Routinen</h1>
+        <div class="header-left">
+            <a href="index.html" class="back-btn">&larr;</a>
+            <h1>Routinen</h1>
+        </div>
         
-        <!-- Apple-Style Switch mittig -->
         <div class="apple-switch-container">
             <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')" title="Zuhause">🏡</button>
             <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')" title="Unterwegs">🧳</button>
         </div>
 
-        <div class="cloud-status" id="cloud-info">Lade...</div>
-        <a href="https://fabian25700.github.io/webapp/habit_stats.html" class="stats-btn">Stats 📊</a>
+        <div class="header-right">
+            <div class="cloud-status" id="cloud-info">Lade...</div>
+            <a href="https://fabian25700.github.io/webapp/habit_stats.html" class="stats-btn">Stats 📊</a>
+        </div>
     </div>
 
     <div class="progress-container"><div class="progress-bar" id="progress-bar" style="width: 0%"></div></div>
