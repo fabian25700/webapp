@@ -71,14 +71,17 @@
         .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .kpi-card {
             background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-            padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; height: 90px;
+            padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 6px; height: 105px;
         }
         .kpi-value { font-size: 1.45rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; justify-content: center; gap: 6px; }
         .kpi-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
         
-        /* Grafischer Recovery Indikator */
-        .recovery-visual { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-        .recovery-visual .days-sub { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); }
+        /* Tacho KPI Card Anpassungen */
+        .gauge-container { position: relative; width: 90px; height: 45px; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
+        .gauge-arc { width: 80px; height: 80px; border-radius: 50%; border: 4px solid var(--border-light); border-bottom-color: transparent; border-left-color: transparent; transform: rotate(-45deg); position: absolute; bottom: -40px; }
+        .gauge-needle { width: 2px; height: 38px; background: var(--text-primary); position: absolute; bottom: 0; origin: bottom center; transform-origin: bottom center; transform: rotate(0deg); transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .gauge-center { width: 6px; height: 6px; background: var(--text-primary); border-radius: 50%; position: absolute; bottom: -3px; }
+        .gauge-labels { display: flex; justify-content: space-between; width: 100%; padding: 0 4px; font-size: 0.55rem; font-weight: 700; color: var(--text-secondary); margin-top: -2px; }
 
         /* Section Block */
         .section-block {
@@ -150,9 +153,18 @@
             <div class="kpi-value" id="kpi-streak">-</div>
             <div class="kpi-label">TwoDayRule Streak</div>
         </div>
-        <div class="kpi-card">
-            <div class="kpi-value" id="kpi-recovery">-</div>
-            <div class="kpi-label">Erholungs-Zeit</div>
+        <div class="kpi-card" style="justify-content: flex-start; padding-top: 10px; gap: 2px;">
+            <div class="gauge-container">
+                <div class="gauge-arc"></div>
+                <div class="gauge-needle" id="gauge-needle"></div>
+                <div class="gauge-center"></div>
+            </div>
+            <div class="gauge-labels">
+                <span id="gauge-lbl-max">Max</span>
+                <span id="gauge-lbl-avg">Ø</span>
+                <span>0.0 T</span>
+            </div>
+            <div class="kpi-label" style="margin-top: 4px;">Erholungs-Zeit</div>
         </div>
     </div>
 
@@ -544,7 +556,7 @@
             });
         }
 
-        // --- 6. TWODAYRULE STREAK BERECHNEN (MITTIG CODIERT DURCH CSS ALIGN) ---
+        // --- 6. TWODAYRULE STREAK BERECHNEN ---
         let currentStreak = 0;
         let checkDate = new Date();
         checkDate.setDate(checkDate.getDate() - 1); 
@@ -566,11 +578,13 @@
         }
         document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
 
-        // --- 7. DOMINO-REAKTIONSZEIT (ERHOLUNGS-ZEIT ALS VISUELLER TACHO-PFEIL) ---
+        // --- 7. DYNAMISCHER TACHO FÜR ERHOLUNGS-ZEIT ---
         let totalRecoveryDays = 0;
         let recoveryTracksCount = 0;
+        let maxRecoveryDays = 0;
         let currentGap = 0;
         let trackingGap = false;
+        let recoveryGaps = [];
 
         chronologicalHistory.forEach(row => {
             if (row.routinen && row.routinen["TwoDayRule"]) {
@@ -585,6 +599,8 @@
                 } else if (status === 'ja') {
                     if (trackingGap) {
                         totalRecoveryDays += currentGap;
+                        recoveryGaps.push(currentGap);
+                        if (currentGap > maxRecoveryDays) maxRecoveryDays = currentGap;
                         recoveryTracksCount++;
                         trackingGap = false;
                         currentGap = 0;
@@ -594,19 +610,36 @@
         });
 
         const avgRecovery = recoveryTracksCount > 0 ? parseFloat((totalRecoveryDays / recoveryTracksCount).toFixed(1)) : 0.0;
-        
-        // Grafische Statuseinstufung auf Basis der Reaktionszeit
-        let visualStatus = "▲▲ Elite";
-        if (avgRecovery === 0.0) visualStatus = "▲▲ Perfekt";
-        else if (avgRecovery > 1.0 && avgRecovery <= 2.0) visualStatus = "▲ Stabil";
-        else if (avgRecovery > 2.0) visualStatus = "▼ Träge";
+        const finalMax = maxRecoveryDays > 0 ? maxRecoveryDays : 3.0; // Fallback, falls keine Ausfälle
 
-        document.getElementById('kpi-recovery').innerHTML = `
-            <div class="recovery-visual">
-                <span>${visualStatus}</span>
-                <span class="days-sub">Ø ${avgRecovery} Tage</span>
-            </div>
-        `;
+        // Tacho-Labels links und mittig dynamisch updaten
+        document.getElementById('gauge-lbl-max').textContent = `${finalMax.toFixed(1)} T`;
+        document.getElementById('gauge-lbl-avg').textContent = `Ø ${avgRecovery.toFixed(1)}`;
+
+        // Berechnung des Winkels (-75 Grad bis +75 Grad)
+        // 0.0 Tage = Ganz rechts (+75 Grad)
+        // avgRecovery == All-Time Durchschnitt = Genau Mitte (0 Grad)
+        // avgRecovery == Historisches Maximum = Ganz links (-75 Grad)
+        let degrees = 75; // Default: perfekte Leistung ganz rechts
+
+        if (recoveryTracksCount > 0 && finalMax > 0) {
+            if (avgRecovery <= avgRecovery) {
+                // Skalierung von ganz rechts (0.0) bis zur Mitte (avgRecovery)
+                const range = avgRecovery;
+                const ratio = range > 0 ? (avgRecovery / range) : 1;
+                degrees = 75 - (75 * (1 - ratio)); 
+            } else {
+                // Skalierung von der Mitte (avgRecovery) bis ganz links (finalMax)
+                const range = finalMax - avgRecovery;
+                const ratio = range > 0 ? ((avgRecovery - avgRecovery) / range) : 0;
+                degrees = 0 - (75 * ratio);
+            }
+            // Sicherheitsgrenzen einhalten
+            if (degrees < -75) degrees = -75;
+            if (degrees > 75) degrees = 75;
+        }
+
+        document.getElementById('gauge-needle').style.transform = `rotate(${degrees}deg)`;
 
         // --- 8. MATRIX ZEILEN RENDERN ---
         const rowsContainer = document.getElementById('matrix-rows-container');
