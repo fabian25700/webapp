@@ -90,32 +90,77 @@
         }
         
         /* Interactive Switch Header */
-        .switch-header { display: flex; background: var(--bg); border-radius: 10px; padding: 2px; border: 1px solid var(--border); }
+        .switch-header { display: flex; background: var(--bg); border-radius: 10px; padding: 2px; border: 1px solid var(--border); width: 100%; }
         .switch-tab { flex: 1; text-align: center; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); padding: 7px 4px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
         .switch-tab.active { background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow); }
 
-        /* Wochen-Matrix Optimierung gegen Verzerrung */
+        /* Feste, mathematisch exakte Ausrichtung der Matrix gegen Verzerrung */
         .matrix-grid { display: flex; flex-direction: column; gap: 8px; width: 100%; }
-        .matrix-row { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 32px; }
-        .matrix-label { font-size: 0.88rem; font-weight: 700; display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
-        .matrix-cells { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
+        .matrix-row { display: flex; align-items: center; width: 100%; height: 28px; }
+        
+        .matrix-label { 
+            flex: 1; 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            min-width: 0; 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis; 
+        }
+        
+        .matrix-cells { 
+            display: flex; 
+            gap: 6px; 
+            flex-shrink: 0; 
+            align-items: center; 
+            justify-content: flex-end;
+            width: 204px; /* Exakte Breite: 7 * 24px + 6 * 6px */
+        }
+        
         .matrix-cell { width: 24px; height: 24px; border-radius: 6px; background: var(--border-light); border: 1px solid var(--border); transition: all 0.2s; flex-shrink: 0; }
         .matrix-cell.ja { background: var(--success); border-color: var(--success); }
         .matrix-cell.nein { background: var(--danger-soft); border-color: var(--danger); opacity: 0.3; }
         
-        .days-header { display: flex; justify-content: flex-end; gap: 6px; width: 100%; margin-bottom: 2px; height: 16px; align-items: center; }
+        .days-header { 
+            display: flex; 
+            width: 100%; 
+            margin-bottom: 2px; 
+            height: 16px; 
+            align-items: center; 
+        }
+        
+        .days-header-spacer { flex: 1; }
+        
+        .days-header-labels {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+            justify-content: flex-end;
+            width: 204px; /* Exakt analog zu den Zellen */
+        }
+        
         .day-label { font-size: 0.6rem; font-weight: 700; color: var(--text-secondary); text-align: center; width: 24px; text-transform: uppercase; flex-shrink: 0; }
 
         /* Routine Listen Performance */
-        .perf-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-light); height: 34px; }
+        .perf-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-light); height: 32px; }
         .perf-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .perf-info { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+        .perf-info { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
         .perf-icon { font-size: 0.95rem; flex-shrink: 0; }
-        .perf-name { font-size: 0.88rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .perf-bar-wrapper { display: flex; align-items: center; gap: 8px; width: 110px; flex-shrink: 0; }
+        .perf-name { font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .perf-bar-wrapper { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            width: 204px; /* Gleiche Ausrichtung wie Matrix-Blöcke */
+            flex-shrink: 0; 
+        }
         .perf-bar-bg { flex: 1; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
         .perf-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; }
-        .perf-pct { font-size: 0.75rem; font-weight: 700; width: 28px; text-align: right; }
+        .perf-pct { font-size: 0.75rem; font-weight: 700; width: 32px; text-align: right; }
 
         /* Monats/Wochenvergleich */
         .trend-container { display: flex; flex-direction: column; gap: 8px; }
@@ -133,15 +178,13 @@
         .switch-content { display: none; }
         .switch-content.active { display: flex; flex-direction: column; }
 
-        /* Smartphone-Spezifische Optimierung gegen Umbrüche */
-        @media (max-width: 380px) {
-            .matrix-label { font-size: 0.78rem; gap: 4px; }
+        /* Harter Mobile Breakpoint für kleine Displays */
+        @media (max-width: 395px) {
+            .matrix-label { font-size: 0.78rem; }
             .perf-name { font-size: 0.78rem; }
-            .matrix-cell { width: 20px; height: 20px; border-radius: 5px; }
-            .day-label { width: 20px; font-size: 0.55rem; }
-            .matrix-cells { gap: 4px; }
-            .days-header { gap: 4px; }
-            .perf-bar-wrapper { width: 90px; }
+            .matrix-cells, .days-header-labels, .perf-bar-wrapper { width: 168px; gap: 4px; }
+            .matrix-cell, .day-label { width: 20px; height: 20px; font-size: 0.55rem; }
+            .day-label { height: 20px; line-height: 20px; }
         }
     </style>
 </head>
@@ -201,7 +244,10 @@
         
         <div id="content-matrix" class="switch-content active">
             <div class="matrix-grid">
-                <div class="days-header" id="matrix-days"></div>
+                <div class="days-header">
+                    <div class="days-header-spacer"></div>
+                    <div class="days-header-labels" id="matrix-days"></div>
+                </div>
                 <div id="matrix-rows-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
             </div>
         </div>
