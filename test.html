@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Statistiken</title>
+    <title>Routinen & Statistiken</title>
     <style>
         :root {
             --accent: #e67e22;
@@ -21,6 +21,7 @@
             --border: #e2e8f0;
             --border-light: #f1f5f9;
             --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --apple-switch-bg: #e3e3e6;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -31,6 +32,7 @@
                 --text-secondary: #94a3b8;
                 --border: #2d3f55;
                 --border-light: #253347;
+                --apple-switch-bg: #1c1c1e;
             }
         }
 
@@ -47,27 +49,160 @@
         header {
             position: sticky; top: 0; z-index: 100;
             background: var(--bg);
-            padding: calc(env(safe-area-inset-top) + 12px) 16px 10px;
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
             border-bottom: 1px solid var(--border-light);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         }
 
-        .header-top { display: flex; align-items: center; gap: 12px; }
+        .header-top { 
+            display: grid; 
+            grid-template-columns: 1fr auto 1fr; 
+            align-items: center; 
+            gap: 8px; 
+            margin-bottom: 14px; 
+        }
         
+        .header-left { display: flex; align-items: center; gap: 12px; justify-content: flex-start; }
+        .header-right { display: flex; align-items: center; gap: 12px; justify-content: flex-end; }
+
         .back-btn {
             display: flex; align-items: center; justify-content: center;
-            width: 34px; height: 34px; border-radius: 10px;
+            width: 36px; height: 36px; border-radius: 12px;
             background: var(--surface); border: 1px solid var(--border);
             text-decoration: none; color: var(--text-primary); box-shadow: var(--shadow);
-            font-size: 1rem;
+            flex-shrink: 0;
         }
 
-        header h1 { font-size: 1.1rem; font-weight: 800; flex: 1; }
-        .cloud-status { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+        header h1 { font-size: 1.15rem; font-weight: 800; white-space: nowrap; }
 
-        main { padding: 12px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+        /* Großer Haupt-Switch oben */
+        .main-view-switch {
+            display: flex; background: var(--apple-switch-bg); border-radius: 9px;
+            padding: 2px; width: 160px; height: 32px; flex-shrink: 0; justify-self: center;
+        }
+        .main-switch-btn {
+            flex: 1; text-align: center; display: flex; align-items: center; justify-content: center;
+            font-size: 0.8rem; font-weight: 700; border-radius: 7px; border: none; background: transparent;
+            color: var(--text-secondary); cursor: pointer; transition: all 0.2s;
+        }
+        .main-switch-btn.active {
+            background: var(--surface); color: var(--text-primary);
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
+        }
 
-        /* KPI Grid */
+        /* Modus Switch (Zuhause/Unterwegs) */
+        .apple-switch-container {
+            display: flex; background: var(--apple-switch-bg); border-radius: 9px;
+            padding: 2px; width: 80px; height: 32px; flex-shrink: 0;
+        }
+        .apple-switch-btn {
+            flex: 1; text-align: center; display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; border-radius: 7px; border: none; background: transparent;
+            cursor: pointer; transition: all 0.2s; position: relative; z-index: 2;
+        }
+        .apple-switch-btn.active {
+            background: var(--surface);
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
+        }
+
+        .progress-container { background: var(--border-light); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 5px; }
+        .progress-bar { background: var(--success); height: 100%; transition: width 0.3s ease; }
+        .stats-text { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .toast-notification {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 110px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: var(--success);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            opacity: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        .toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+        /* Ansichten-Steuerung */
+        .view-section { display: none; flex-direction: column; gap: 12px; width: 100%; }
+        .view-section.active { display: flex; }
+
+        #active-routines-container, #done-routines-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .done-routines-master-container { margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 16px; }
+        .done-routines-trigger {
+            font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+            padding: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);
+        }
+        .done-routines-hidden-wrapper { display: none; flex-direction: column; gap: 12px; margin-top: 12px; }
+        .done-routines-master-container.expanded .done-routines-hidden-wrapper { display: flex; }
+
+        .category-group { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); position: relative; }
+        .category-group.routine-done-state { opacity: 0.75; }
+
+        .category-header {
+            padding: 16px; display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; user-select: none; transition: background 0.2s;
+        }
+        .category-header:active { background: var(--border-light); }
+
+        .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; flex: 1; }
+        .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        
+        .category-meta { display: flex; align-items: center; gap: 6px; margin-left: auto; margin-right: 12px; flex-shrink: 0; }
+        .status-dot-wrapper { display: flex; flex-direction: column; align-items: center; }
+
+        .arrow { font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.3s ease; flex-shrink: 0; }
+        .category-group.open .arrow { transform: rotate(180deg); }
+
+        .category-content { display: none; padding: 0 16px 16px; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 16px; }
+        .category-group.open .category-content { display: flex; }
+
+        .bucket-card {
+            background: var(--bg); border-radius: 12px; border: 1px solid var(--border);
+            padding: 14px 16px; display: flex; align-items: center; gap: 14px;
+            cursor: pointer; user-select: none; transition: all 0.2s ease;
+        }
+        .bucket-card:active { transform: scale(0.99); }
+        .bucket-card.done { opacity: 0.5; border-style: dashed; background: var(--border-light); }
+
+        .status-circle {
+            width: 22px; height: 22px; border-radius: 6px;
+            border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            transition: all 0.2s ease; order: -1;
+        }
+        .done .status-circle { background: var(--success); border-color: var(--success); }
+        .status-circle::after { content: '✓'; color: white; font-size: 13px; font-weight: bold; display: none; }
+        .done .status-circle::after { display: block; }
+
+        .location-name { font-weight: 600; font-size: 0.95rem; flex: 1; }
+        
+        .yesterday-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; background: var(--border); }
+        .yesterday-dot.ja { background: var(--success); box-shadow: 0 0 6px var(--success); }
+        .yesterday-dot.nein { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
+
+        .cloud-status { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; white-space: nowrap; }
+
+        .close-routine-trigger {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 12px; margin-top: 8px; border-radius: 12px;
+            background: var(--border-light); border: 1px dashed var(--border);
+            color: var(--text-secondary); font-size: 0.8rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+            user-select: none; transition: background 0.2s;
+        }
+        .close-routine-trigger:active { background: var(--border); }
+
+        /* STYLES AUS STATS-ANSICHT */
         .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         .kpi-card {
             background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
@@ -76,93 +211,53 @@
         .kpi-value { font-size: 1.35rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; justify-content: center; gap: 6px; }
         .kpi-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
         
-        /* Tacho KPI Card */
         .gauge-container { position: relative; width: 85px; height: 42px; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
         .gauge-arc { width: 76px; height: 76px; border-radius: 50%; border: 4px solid var(--border-light); border-bottom-color: transparent; border-left-color: transparent; transform: rotate(-45deg); position: absolute; bottom: -38px; }
         .gauge-needle { width: 2px; height: 35px; background: var(--text-primary); position: absolute; bottom: 0; transform-origin: bottom center; transform: rotate(0deg); transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         .gauge-center { width: 6px; height: 6px; background: var(--text-primary); border-radius: 50%; position: absolute; bottom: -3px; }
         .gauge-labels { display: flex; justify-content: space-between; width: 100%; padding: 0 2px; font-size: 0.55rem; font-weight: 700; color: var(--text-secondary); margin-top: -2px; }
 
-        /* Section Block */
         .section-block {
             background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
             padding: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px;
         }
         
-        /* Interactive Switch Header */
         .switch-header { display: flex; background: var(--bg); border-radius: 10px; padding: 2px; border: 1px solid var(--border); width: 100%; }
         .switch-tab { flex: 1; text-align: center; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); padding: 7px 4px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
         .switch-tab.active { background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow); }
 
-        /* Feste, mathematisch exakte Ausrichtung der Matrix gegen Verzerrung */
         .matrix-grid { display: flex; flex-direction: column; gap: 8px; width: 100%; }
         .matrix-row { display: flex; align-items: center; width: 100%; height: 28px; }
         
         .matrix-label { 
-            flex: 1; 
-            font-size: 0.85rem; 
-            font-weight: 700; 
-            display: flex; 
-            align-items: center; 
-            gap: 6px; 
-            min-width: 0; 
-            white-space: nowrap; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
+            flex: 1; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; 
+            gap: 6px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
         }
         
         .matrix-cells { 
-            display: flex; 
-            gap: 6px; 
-            flex-shrink: 0; 
-            align-items: center; 
-            justify-content: flex-end;
-            width: 204px; /* Exakte Breite: 7 * 24px + 6 * 6px */
+            display: flex; gap: 6px; flex-shrink: 0; align-items: center; justify-content: flex-end; width: 204px; 
         }
         
         .matrix-cell { width: 24px; height: 24px; border-radius: 6px; background: var(--border-light); border: 1px solid var(--border); transition: all 0.2s; flex-shrink: 0; }
         .matrix-cell.ja { background: var(--success); border-color: var(--success); }
         .matrix-cell.nein { background: var(--danger-soft); border-color: var(--danger); opacity: 0.3; }
         
-        .days-header { 
-            display: flex; 
-            width: 100%; 
-            margin-bottom: 2px; 
-            height: 16px; 
-            align-items: center; 
-        }
-        
+        .days-header { display: flex; width: 100%; margin-bottom: 2px; height: 16px; align-items: center; }
         .days-header-spacer { flex: 1; }
-        
-        .days-header-labels {
-            display: flex;
-            gap: 6px;
-            flex-shrink: 0;
-            justify-content: flex-end;
-            width: 204px; /* Exakt analog zu den Zellen */
-        }
-        
+        .days-header-labels { display: flex; gap: 6px; flex-shrink: 0; justify-content: flex-end; width: 204px; }
         .day-label { font-size: 0.6rem; font-weight: 700; color: var(--text-secondary); text-align: center; width: 24px; text-transform: uppercase; flex-shrink: 0; }
 
-        /* Routine Listen Performance */
         .perf-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-light); height: 32px; }
         .perf-item:last-child { border-bottom: none; padding-bottom: 0; }
         .perf-info { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
         .perf-icon { font-size: 0.95rem; flex-shrink: 0; }
         .perf-name { font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        .perf-bar-wrapper { 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-            width: 204px; /* Gleiche Ausrichtung wie Matrix-Blöcke */
-            flex-shrink: 0; 
-        }
+        .perf-bar-wrapper { display: flex; align-items: center; gap: 8px; width: 204px; flex-shrink: 0; }
         .perf-bar-bg { flex: 1; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
         .perf-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; }
         .perf-pct { font-size: 0.75rem; font-weight: 700; width: 32px; text-align: right; }
 
-        /* Monats/Wochenvergleich */
         .trend-container { display: flex; flex-direction: column; gap: 8px; }
         .trend-row { display: flex; align-items: center; justify-content: space-between; padding: 2px 0; }
         .trend-month-label { font-size: 0.88rem; font-weight: 700; }
@@ -170,7 +265,6 @@
         .trend-badge.up { background: var(--success-soft); color: var(--success); }
         .trend-badge.neutral { background: var(--border-light); color: var(--text-secondary); }
 
-        /* Korrelations-Matrix */
         .insight-card { background: var(--bg); border-radius: 10px; border: 1px solid var(--border); padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
         .insight-title { font-size: 0.82rem; font-weight: 700; }
         .insight-desc { font-size: 0.72rem; color: var(--text-secondary); line-height: 1.3; }
@@ -178,10 +272,8 @@
         .switch-content { display: none; }
         .switch-content.active { display: flex; flex-direction: column; }
 
-        /* Harter Mobile Breakpoint für kleine Displays */
         @media (max-width: 395px) {
-            .matrix-label { font-size: 0.78rem; }
-            .perf-name { font-size: 0.78rem; }
+            .matrix-label, .perf-name { font-size: 0.78rem; }
             .matrix-cells, .days-header-labels, .perf-bar-wrapper { width: 168px; gap: 4px; }
             .matrix-cell, .day-label { width: 20px; height: 20px; font-size: 0.55rem; }
             .day-label { height: 20px; line-height: 20px; }
@@ -190,96 +282,224 @@
 </head>
 <body>
 
+<div class="toast-notification" id="toast-notice">Habit erledigt, weiter so!</div>
+
 <header>
     <div class="header-top">
-        <a href="javascript:history.back()" class="back-btn">&larr;</a>
-        <h1>Statistiken</h1>
-        <div class="cloud-status" id="cloud-info">Lade Daten...</div>
+        <div class="header-left">
+            <a href="index.html" class="back-btn">&larr;</a>
+        </div>
+        
+        <div class="main-view-switch">
+            <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')">Tracker</button>
+            <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')">Stats 📊</button>
+        </div>
+
+        <div class="header-right">
+            <div id="header-context-right">
+                <div class="apple-switch-container">
+                    <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')" title="Zuhause">🏡</button>
+                    <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')" title="Unterwegs">🧳</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tracker-header-details">
+        <div class="progress-container"><div class="progress-bar" id="progress-bar" style="width: 0%"></div></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
+            <div class="stats-text" id="stats-summary">0 / 7 Routinen erreicht</div>
+            <div class="cloud-status" id="cloud-info">Lade...</div>
+        </div>
+    </div>
+    
+    <div id="stats-header-details" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="stats-text">Auswertungen & Hebel</div>
+            <div class="cloud-status" id="cloud-info-stats">Cloud Live ✓</div>
+        </div>
     </div>
 </header>
 
 <main>
-    <div class="kpi-grid">
-        <div class="kpi-card">
-            <div class="kpi-value" id="kpi-streak">-</div>
-            <div class="kpi-label">TwoDayRule Streak</div>
-        </div>
-        <div class="kpi-card" style="justify-content: flex-start; padding-top: 10px; gap: 2px;">
-            <div class="gauge-container">
-                <div class="gauge-arc"></div>
-                <div class="gauge-needle" id="gauge-needle"></div>
-                <div class="gauge-center"></div>
-            </div>
-            <div class="gauge-labels">
-                <span id="gauge-lbl-max">Max</span>
-                <span id="gauge-lbl-avg">Ø</span>
-                <span>0.0 T</span>
-            </div>
-            <div class="kpi-label" style="margin-top: 4px;">Erholungs-Zeit</div>
-        </div>
-    </div>
-
-    <div class="section-block">
-        <div class="switch-header">
-            <div class="switch-tab active" onclick="switchBlock('mid', 'domino')">Kausalitäten</div>
-            <div class="switch-tab" onclick="switchBlock('mid', 'cluster')">Synergien</div>
-        </div>
-        
-        <div id="content-domino" class="switch-content active">
-            <div style="display: flex; flex-direction: column; gap: 8px;" id="correlation-container"></div>
-        </div>
-        
-        <div id="content-cluster" class="switch-content">
-            <div style="display: flex; flex-direction: column; gap: 8px;" id="cluster-container">
-                <div style="font-size: 0.8rem; color: var(--text-secondary);">Berechne Verhaltens-Cluster...</div>
-            </div>
-        </div>
-    </div>
-
-    <div class="section-block">
-        <div class="switch-header">
-            <div class="switch-tab active" onclick="switchBlock('top', 'matrix')">7-Tage Matrix</div>
-            <div class="switch-tab" onclick="switchBlock('top', 'perf')">Routine Auswertung</div>
-        </div>
-        
-        <div id="content-matrix" class="switch-content active">
-            <div class="matrix-grid">
-                <div class="days-header">
-                    <div class="days-header-spacer"></div>
-                    <div class="days-header-labels" id="matrix-days"></div>
+    <div id="view-tracker" class="view-section active">
+        <div class="category-group" data-routine="TwoDayRule" id="routine-block-TwoDayRule">
+            <div class="category-header" style="cursor: default;">
+                <div class="category-title"><div class="category-icon">⚡</div><span>2-Day Rule</span></div>
+                <div class="category-meta">
+                    <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-heute"></span></div>
+                    <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-gestern"></span></div>
+                    <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-vorgestern"></span></div>
                 </div>
-                <div id="matrix-rows-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                <div class="arrow" style="visibility: hidden;">▼</div>
             </div>
+            <div class="category-content" data-habits='[]'></div>
         </div>
-        
-        <div id="content-perf" class="switch-content">
-            <div id="routine-performance-container" style="display: flex; flex-direction: column; gap: 2px;"></div>
+
+        <div id="active-routines-container"></div>
+
+        <div class="done-routines-master-container" id="done-routines-master-box">
+            <div class="done-routines-trigger" onclick="toggleDoneRoutinesMaster()">Erledigte Routinen anzeigen ▼</div>
+            <div class="done-routines-hidden-wrapper" id="done-routines-list"></div>
         </div>
     </div>
 
-    <div class="section-block">
-        <div class="switch-header">
-            <div class="switch-tab active" onclick="switchBlock('bottom', 'month')">Monatsvergleich</div>
-            <div class="switch-tab" onclick="switchBlock('bottom', 'week')">Wochenvergleich</div>
-        </div>
-        
-        <div id="content-month" class="switch-content active">
-            <div class="trend-container" id="month-trend-container">
-                <div style="font-size: 0.8rem; color: var(--text-secondary);">Berechne historische Monatsdaten...</div>
+    <div id="view-stats" class="view-section">
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-value" id="kpi-streak">-</div>
+                <div class="kpi-label">TwoDayRule Streak</div>
+            </div>
+            <div class="kpi-card" style="justify-content: flex-start; padding-top: 10px; gap: 2px;">
+                <div class="gauge-container">
+                    <div class="gauge-arc"></div>
+                    <div class="gauge-needle" id="gauge-needle"></div>
+                    <div class="gauge-center"></div>
+                </div>
+                <div class="gauge-labels">
+                    <span id="gauge-lbl-max">Max</span>
+                    <span id="gauge-lbl-avg">Ø</span>
+                    <span>0.0 T</span>
+                </div>
+                <div class="kpi-label" style="margin-top: 4px;">Erholungs-Zeit</div>
             </div>
         </div>
-        
-        <div id="content-week" class="switch-content">
-            <div class="trend-container" id="week-trend-container">
-                <div style="font-size: 0.8rem; color: var(--text-secondary);">Berechne historische Wochendaten...</div>
+
+        <div class="section-block">
+            <div class="switch-header">
+                <div class="switch-tab active" onclick="switchBlock('mid', 'domino')">Kausalitäten</div>
+                <div class="switch-tab" onclick="switchBlock('mid', 'cluster')">Synergien</div>
+            </div>
+            <div id="content-domino" class="switch-content active">
+                <div style="display: flex; flex-direction: column; gap: 8px;" id="correlation-container"></div>
+            </div>
+            <div id="content-cluster" class="switch-content">
+                <div style="display: flex; flex-direction: column; gap: 8px;" id="cluster-container"></div>
+            </div>
+        </div>
+
+        <div class="section-block">
+            <div class="switch-header">
+                <div class="switch-tab active" onclick="switchBlock('top', 'matrix')">7-Tage Matrix</div>
+                <div class="switch-tab" onclick="switchBlock('top', 'perf')">Routine Auswertung</div>
+            </div>
+            <div id="content-matrix" class="switch-content active">
+                <div class="matrix-grid">
+                    <div class="days-header">
+                        <div class="days-header-spacer"></div>
+                        <div class="days-header-labels" id="matrix-days"></div>
+                    </div>
+                    <div id="matrix-rows-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                </div>
+            </div>
+            <div id="content-perf" class="switch-content">
+                <div id="routine-performance-container" style="display: flex; flex-direction: column; gap: 2px;"></div>
+            </div>
+        </div>
+
+        <div class="section-block">
+            <div class="switch-header">
+                <div class="switch-tab active" onclick="switchBlock('bottom', 'month')">Monatsvergleich</div>
+                <div class="switch-tab" onclick="switchBlock('bottom', 'week')">Wochenvergleich</div>
+            </div>
+            <div id="content-month" class="switch-content active">
+                <div class="trend-container" id="month-trend-container"></div>
+            </div>
+            <div id="content-week" class="switch-content">
+                <div class="trend-container" id="week-trend-container"></div>
             </div>
         </div>
     </div>
 </main>
 
+<div id="routine-templates" style="display: none;">
+    <div class="category-group" data-routine="Morgenroutine" id="routine-block-Morgenroutine">
+        <div class="category-header" onclick="toggleGroup(this)">
+            <div class="category-title"><div class="category-icon">☀️</div><span>Morgenroutine</span></div>
+            <div class="category-meta">
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-vorgestern"></span></div>
+            </div>
+            <div class="arrow">▼</div>
+        </div>
+        <div class="category-content" data-habits='["Aufstehen ohne Snooze", "Stoisches Kapitel", "Wiegen", "alle Rollladen / Fenster", "Tageslicht", "Klo", "Wasser mit Salz / Elektrolyte", "Zunge reinigen", "Zähne putzen", "Schlafzimmer aufräumen", "Morning Healthdrink", "Küche aufräumen und putzen", "Whoop checken", "Ziele + ToDo’s des Tages anschauen", "Mails checken", "ggf. Sport", "duschen", "anziehen", "bis 8:00 keine Geräte"]'></div>
+    </div>
+
+    <div class="category-group" data-routine="Sportroutine" id="routine-block-Sportroutine">
+        <div class="category-header" onclick="toggleGroup(this)">
+            <div class="category-title"><div class="category-icon">🏃‍♂️</div><span>Sportroutine</span></div>
+            <div class="category-meta">
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-vorgestern"></span></div>
+            </div>
+            <div class="arrow">▼</div>
+        </div>
+        <div class="category-content" data-habits='["Athletik- / Krafteinheit", "Dehnen & Mobility", "Schritte-Ziel erreicht", "Erholungs-Check", "Protein-Zufuhr gedeckt"]'></div>
+    </div>
+
+    <div class="category-group" data-routine="Gesundheitsroutine" id="routine-block-Gesundheitsroutine">
+        <div class="category-header" onclick="toggleGroup(this)">
+            <div class="category-title"><div class="category-icon">🥗</div><span>Gesundheitsroutine</span></div>
+            <div class="category-meta">
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-vorgestern"></span></div>
+            </div>
+            <div class="arrow">▼</div>
+        </div>
+        <div class="category-content" data-habits='["Ernährungsplan eingehalten", "Supplements genommen", "Kein verarbeiteter Zucker", "Genug Wasser getrunken", "Intervallfasten-Fenster"]'></div>
+    </div>
+
+    <div class="category-group" data-routine="Fokusroutine" id="routine-block-Fokusroutine">
+        <div class="category-header" onclick="toggleGroup(this)">
+            <div class="category-title"><div class="category-icon">🧠</div><span>Fokusroutine</span></div>
+            <div class="category-meta">
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-vorgestern"></span></div>
+            </div>
+            <div class="arrow">▼</div>
+        </div>
+        <div class="category-content" data-habits='["Deep Work Block 1", "Deep Work Block 2", "Kein Social Media während Fokus", "Immobilien-Task erledigt", "Schreibtisch clean gehalten"]'></div>
+    </div>
+
+    <div class="category-group" data-routine="Abendroutine" id="routine-block-Abendroutine">
+        <div class="category-header" onclick="toggleGroup(this)">
+            <div class="category-title"><div class="category-icon">🌙</div><span>Abendroutine</span></div>
+            <div class="category-meta">
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-vorgestern"></span></div>
+            </div>
+            <div class="arrow">▼</div>
+        </div>
+        <div class="category-content" data-habits='["Tagesabschluss-Journal", "Digital Detox ab 21:30", "Klamotten/Setup für morgen", "Lesen (15 Seiten)", "Licht gedimmt"]'></div>
+    </div>
+
+    <div class="category-group" data-routine="Schlafroutine" id="routine-block-Schlafroutine">
+        <div class="category-header" onclick="toggleGroup(this)">
+            <div class="category-title"><div class="category-icon">🛌</div><span>Schlafroutine</span></div>
+            <div class="category-meta">
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-vorgestern"></span></div>
+            </div>
+            <div class="arrow">▼</div>
+        </div>
+        <div class="category-content" data-habits='["Kein Koffein nach 14:00", "Zimmer gelüftet & kühl", "Keine schweren Mahlzeiten spät", "Magnesium genommen", "Fixe Aufstehzeit vorbereitet"]'></div>
+    </div>
+</div>
+
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbhl1k_pgXinca2FA2hxqzMJzW--7Hfo54XHtVm_vfrxndA-GFF57UsQ2ILn6drZnu2w/exec";
     
+    const TARGET_RATIO = 0.8;
+    const habitState = {};
+    let globalHistoryArray = [];
+    let currentGlobalMode = "zuhause";
+
     const routineIcons = {
         "Morgenroutine": "☀️",
         "Sportroutine": "🏃‍♂️",
@@ -290,6 +510,27 @@
         "TwoDayRule": "⚡"
     };
 
+    // --- ANSICHTEN SWITCH (TRACKER VS STATS) ---
+    function toggleMainView(view) {
+        document.getElementById('view-btn-tracker').classList.toggle('active', view === 'tracker');
+        document.getElementById('view-btn-stats').classList.toggle('active', view === 'stats');
+        
+        document.getElementById('view-tracker').classList.toggle('active', view === 'tracker');
+        document.getElementById('view-stats').classList.toggle('active', view === 'stats');
+
+        document.getElementById('tracker-header-details').style.display = view === 'tracker' ? 'block' : 'none';
+        document.getElementById('stats-header-details').style.display = view === 'stats' ? 'block' : 'none';
+        
+        // Verstecke Home/Away Switch in der Stats-Ansicht für Cleanliness
+        document.getElementById('header-context-right').style.opacity = view === 'tracker' ? '1' : '0';
+        document.getElementById('header-context-right').style.pointerEvents = view === 'tracker' ? 'auto' : 'none';
+
+        if (view === 'stats' && globalHistoryArray.length > 0) {
+            renderDashboard(globalHistoryArray);
+        }
+    }
+
+    // --- SUBSWITCHES FÜR DIE STATS-BLÖCKE ---
     function switchBlock(position, type) {
         if (!event || !event.target) return;
         const header = event.target.parentElement;
@@ -312,21 +553,18 @@
         }
     }
 
-    function fetchStats() {
-        fetch(GOOGLE_SCRIPT_URL, { method: "GET" })
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('cloud-info').textContent = "Cloud Live ✓";
-                if (!Array.isArray(data) || data.length === 0) {
-                    document.getElementById('cloud-info').textContent = "Keine Daten";
-                    return;
-                }
-                renderDashboard(data);
-            })
-            .catch(err => {
-                document.getElementById('cloud-info').textContent = "Fehler";
-                console.error(err);
-            });
+    function checkMidnightReset() {
+        const todayStr = new Date().toDateString();
+        const savedDate = localStorage.getItem('routine_date');
+        if (savedDate && savedDate !== todayStr) {
+            localStorage.removeItem('routine_storage');
+        }
+        localStorage.setItem('routine_date', todayStr);
+    }
+
+    function getSavedStates() {
+        const saved = localStorage.getItem('routine_storage');
+        return saved ? JSON.parse(saved) : {};
     }
 
     function formatDateToString(date) {
@@ -357,10 +595,367 @@
         return 1 + Math.ceil((firstThursday - target) / 604800000);
     }
 
+    function setGlobalMode(mode) {
+        currentGlobalMode = mode;
+        document.getElementById('mode-zuhause').classList.toggle('active', mode === 'zuhause');
+        document.getElementById('mode-unterwegs').classList.toggle('active', mode === 'unterwegs');
+        localStorage.setItem('routine_global_mode', mode);
+        
+        buildDOMFromTemplates();
+        fetchHistoryStatus();
+    }
+
+    function initApp() {
+        checkMidnightReset();
+        const savedMode = localStorage.getItem('routine_global_mode');
+        if (savedMode) currentGlobalMode = savedMode;
+        
+        document.getElementById('mode-zuhause').classList.toggle('active', currentGlobalMode === 'zuhause');
+        document.getElementById('mode-unterwegs').classList.toggle('active', currentGlobalMode === 'unterwegs');
+
+        buildDOMFromTemplates();
+        fetchHistoryStatus();
+    }
+
+    function buildDOMFromTemplates() {
+        const activeContainer = document.getElementById('active-routines-container');
+        activeContainer.innerHTML = '';
+        
+        const templates = document.querySelectorAll('#routine-templates .category-group');
+        templates.forEach(tpl => {
+            const clone = tpl.cloneNode(true);
+            activeContainer.appendChild(clone);
+        });
+
+        const savedStates = getSavedStates();
+        const groups = document.querySelectorAll('#active-routines-container .category-group');
+        
+        groups.forEach((group, groupIdx) => {
+            const routineName = group.getAttribute('data-routine');
+            const contentDiv = group.querySelector('.category-content');
+            let habits = JSON.parse(contentDiv.getAttribute('data-habits'));
+            
+            if (currentGlobalMode === "unterwegs" && habits.length > 3) {
+                habits = habits.slice(0, habits.length - 3);
+            }
+
+            const jokerId = `${groupIdx}-joker`;
+            const isJokerChecked = savedStates[jokerId] || false;
+            
+            habitState[routineName] = { total: habits.length, done: 0, joker: isJokerChecked };
+
+            let habitsHtml = habits.map((habit, habitIdx) => {
+                const habitId = `${groupIdx}-${habitIdx}`;
+                const isChecked = savedStates[habitId] || false;
+                
+                if (isChecked) { habitState[routineName].done++; }
+
+                return `
+                    <div class="bucket-card ${isChecked ? 'done' : ''}" id="card-${habitId}" onclick="toggleHabit('${routineName}', '${habitId}', this)">
+                        <div class="status-circle"></div>
+                        <div class="location-name">${habit}</div>
+                    </div>
+                `;
+            }).join('');
+
+            habitsHtml += `
+                <div class="bucket-card ${isJokerChecked ? 'done' : ''}" id="card-${jokerId}" onclick="toggleJoker('${routineName}', '${jokerId}', this)" data-joker="true" style="margin-top: 8px; border-color: var(--text-secondary);">
+                    <div class="status-circle" style="border-radius: 50%;"></div>
+                    <div class="location-name" style="color: var(--text-secondary); font-style: italic;">Ausnahme / Reisetag 🏳️</div>
+                </div>
+            `;
+
+            habitsHtml += `
+                <div class="close-routine-trigger" onclick="event.stopPropagation(); closeCurrentGroup('${routineName}')">
+                    Routine einklappen ▲
+                </div>
+            `;
+
+            contentDiv.innerHTML = habitsHtml;
+        });
+
+        updateGlobalProgress(true);
+    }
+
+    function toggleGroup(header) {
+        const targetGroup = header.parentElement;
+        const isOpen = targetGroup.classList.contains('open');
+        
+        document.querySelectorAll('.category-group').forEach(group => {
+            if(group.getAttribute('data-routine') !== 'TwoDayRule') {
+                group.classList.remove('open');
+            }
+        });
+
+        if (!isOpen) {
+            targetGroup.classList.add('open');
+            setTimeout(() => {
+                targetGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+    }
+
+    function closeCurrentGroup(routineName) {
+        const group = document.getElementById(`routine-block-${routineName}`);
+        if (group) {
+            group.classList.remove('open');
+            group.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    function toggleDoneRoutinesMaster() {
+        const container = document.getElementById('done-routines-master-box');
+        container.classList.toggle('expanded');
+        const trigger = container.querySelector('.done-routines-trigger');
+        if (container.classList.contains('expanded')) {
+            trigger.textContent = "Erledigte Routinen ausblenden ▲";
+        } else {
+            trigger.textContent = "Erledigte Routinen anzeigen ▼";
+        }
+    }
+
+    function showSuccessToast() {
+        const toast = document.getElementById('toast-notice');
+        toast.classList.add('show');
+        setTimeout(() => { toast.classList.remove('show'); }, 2000);
+    }
+
+    function toggleHabit(routineName, habitId, card) {
+        const isDone = card.classList.toggle('done');
+        const currentData = getSavedStates();
+        currentData[habitId] = isDone;
+        localStorage.setItem('routine_storage', JSON.stringify(currentData));
+        
+        const oldRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
+        if (isDone) { habitState[routineName].done++; } else { habitState[routineName].done--; }
+        const newRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
+
+        updateGlobalProgress(false);
+        if (oldRoutineState === "nein" && newRoutineState === "ja") showSuccessToast();
+        if (oldRoutineState !== newRoutineState) syncModuleToCloud(routineName, newRoutineState);
+    }
+
+    function toggleJoker(routineName, jokerId, card) {
+        const isDone = card.classList.toggle('done');
+        const currentData = getSavedStates();
+        currentData[jokerId] = isDone;
+        localStorage.setItem('routine_storage', JSON.stringify(currentData));
+        
+        const oldRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
+        habitState[routineName].joker = isDone;
+        const newRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
+
+        updateGlobalProgress(false);
+        if (oldRoutineState === "nein" && newRoutineState === "ja") showSuccessToast();
+        if (oldRoutineState !== newRoutineState) syncModuleToCloud(routineName, newRoutineState);
+    }
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+            checkMidnightReset();
+            buildDOMFromTemplates();
+            fetchHistoryStatus();
+        }
+    });
+
+    function isRoutineApproved(routineName) {
+        const state = habitState[routineName];
+        if (!state) return false;
+        if (state.joker) return true;
+        if (state.total === 0) return false;
+        return (state.done / state.total) >= TARGET_RATIO;
+    }
+
+    function updateGlobalProgress(suppressCloudSync = false) {
+        let totalRoutines = 0;
+        let completedRoutines = 0;
+
+        const activeContainer = document.getElementById('active-routines-container');
+        const doneContainer = document.getElementById('done-routines-list');
+        const masterBox = document.getElementById('done-routines-master-box');
+
+        const routineNames = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine"];
+        
+        routineNames.forEach(routineName => {
+            const group = document.getElementById(`routine-block-${routineName}`);
+            if (!group) return;
+
+            const state = habitState[routineName];
+            if (!state) return;
+            
+            totalRoutines++;
+            const isDoneNow = isRoutineApproved(routineName) ? "ja" : "nein";
+            
+            const heuteDot = document.getElementById(`dot-${routineName}-heute`);
+            if (heuteDot) heuteDot.className = "yesterday-dot " + isDoneNow;
+
+            if (isDoneNow === "ja") {
+                completedRoutines++;
+                group.classList.add('routine-done-state');
+                if (group.classList.contains('open')) group.classList.remove('open');
+                doneContainer.appendChild(group);
+            } else {
+                group.classList.remove('routine-done-state');
+                activeContainer.appendChild(group);
+            }
+        });
+
+        masterBox.style.display = doneContainer.children.length > 0 ? 'block' : 'none';
+
+        const oldTdrState = habitState["TwoDayRule"] ? (habitState["TwoDayRule"].isApproved ? "ja" : "nein") : "nein";
+        updateTwoDayRuleStatus();
+        const newTdrState = habitState["TwoDayRule"].isApproved ? "ja" : "nein";
+
+        if (oldTdrState !== newTdrState && !suppressCloudSync) {
+            syncModuleToCloud("TwoDayRule", newTdrState);
+        }
+
+        if (habitState["TwoDayRule"].isApproved) completedRoutines++;
+        totalRoutines++;
+
+        const percent = totalRoutines > 0 ? Math.round((completedRoutines / totalRoutines) * 100) : 0;
+        document.getElementById('progress-bar').style.width = percent + '%';
+        document.getElementById('stats-summary').textContent = `${completedRoutines} / ${totalRoutines} Routinen erreicht`;
+    }
+
+    function updateTwoDayRuleStatus() {
+        const today = new Date();
+        const yesterday = new Date(); yesterday.setDate(today.getDate() - 1);
+        const ereyesterday = new Date(); ereyesterday.setDate(today.getDate() - 2);
+
+        const yesterdayStr = formatDateToString(yesterday);
+        const ereyesterdayStr = formatDateToString(ereyesterday);
+
+        let yesterdayData = null;
+        let ereyesterdayData = null;
+
+        if (Array.isArray(globalHistoryArray) && globalHistoryArray.length > 0) {
+            yesterdayData = globalHistoryArray.find(item => item.datum === yesterdayStr);
+            ereyesterdayData = globalHistoryArray.find(item => item.datum === ereyesterdayStr);
+        }
+
+        const standardRoutines = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine"];
+
+        let tdrHeuteKombinationErfuellt = true;
+        standardRoutines.forEach(routineName => {
+            const heuteJa = isRoutineApproved(routineName);
+            let gesternJa = false;
+            if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen[routineName]) {
+                if (yesterdayData.routinen[routineName].toLowerCase() === "ja") gesternJa = true;
+            }
+            if (!heuteJa && !gesternJa) tdrHeuteKombinationErfuellt = false;
+        });
+
+        let tdrGesternKombinationErfuellt = true;
+        standardRoutines.forEach(routineName => {
+            let gesternJa = false;
+            let vorgesternJa = false;
+            if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen[routineName]) {
+                if (yesterdayData.routinen[routineName].toLowerCase() === "ja") gesternJa = true;
+            }
+            if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen[routineName]) {
+                if (ereyesterdayData.routinen[routineName].toLowerCase() === "ja") vorgesternJa = true;
+            }
+            if (!gesternJa && !vorgesternJa) tdrGesternKombinationErfuellt = false;
+        });
+
+        let tdrVorgesternJa = false;
+        if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen["TwoDayRule"]) {
+            if (ereyesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrVorgesternJa = true;
+        }
+
+        const tdrHeute = tdrHeuteKombinationErfuellt ? "ja" : "nein";
+        const tdrGestern = tdrGesternKombinationErfuellt ? "ja" : "nein";
+
+        habitState["TwoDayRule"] = { total: 0, done: 0, isApproved: (tdrHeute === "ja") };
+
+        if (document.getElementById("dot-TwoDayRule-heute")) document.getElementById("dot-TwoDayRule-heute").className = "yesterday-dot " + tdrHeute;
+        if (document.getElementById("dot-TwoDayRule-gestern")) document.getElementById("dot-TwoDayRule-gestern").className = "yesterday-dot " + tdrGestern;
+        if (document.getElementById("dot-TwoDayRule-vorgestern")) document.getElementById("dot-TwoDayRule-vorgestern").className = "yesterday-dot " + (tdrVorgesternJa ? "ja" : "nein");
+    }
+
+    function fetchHistoryStatus() {
+        fetch(GOOGLE_SCRIPT_URL, { method: "GET" })
+            .then(res => res.json())
+            .then(historyArray => {
+                document.getElementById('cloud-info').textContent = "Cloud Live ✓";
+                document.getElementById('cloud-info-stats').textContent = "Cloud Live ✓";
+                if (!Array.isArray(historyArray)) return;
+                globalHistoryArray = historyArray;
+
+                const today = new Date();
+                const yesterday = new Date(); yesterday.setDate(today.getDate() - 1);
+                const ereyesterday = new Date(); ereyesterday.setDate(today.getDate() - 2);
+
+                const yesterdayStr = formatDateToString(yesterday);
+                const ereyesterdayStr = formatDateToString(ereyesterday);
+
+                const yesterdayData = historyArray.find(item => item.datum === yesterdayStr);
+                const ereyesterdayData = historyArray.find(item => item.datum === ereyesterdayStr);
+
+                const routineNames = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine"];
+                routineNames.forEach(routineName => {
+                    const gesternDot = document.getElementById(`dot-${routineName}-gestern`);
+                    if (gesternDot) {
+                        let statusGestern = "nein";
+                        if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen[routineName]) {
+                            statusGestern = yesterdayData.routinen[routineName].toLowerCase();
+                        }
+                        gesternDot.className = "yesterday-dot " + statusGestern;
+                    }
+
+                    const vorgesternDot = document.getElementById(`dot-${routineName}-vorgestern`);
+                    if (vorgesternDot) {
+                        let statusVorgestern = "nein";
+                        if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen[routineName]) {
+                            statusVorgestern = ereyesterdayData.routinen[routineName].toLowerCase();
+                        }
+                        vorgesternDot.className = "yesterday-dot " + statusVorgestern;
+                    }
+                });
+
+                updateGlobalProgress(true);
+                
+                // Falls der Nutzer direkt in der Stats-Ansicht startet
+                if (document.getElementById('view-stats').classList.contains('active')) {
+                    renderDashboard(historyArray);
+                }
+            })
+            .catch(err => {
+                document.getElementById('cloud-info').textContent = "Fehler";
+                document.getElementById('cloud-info-stats').textContent = "Fehler";
+                console.error(err);
+            });
+    }
+
+    function syncModuleToCloud(routineName, statusString) {
+        document.getElementById('cloud-info').textContent = "Synchronisiere...";
+        const formBody = new URLSearchParams();
+        formBody.append('routine', routineName);
+        formBody.append('status', statusString);
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formBody.toString()
+        })
+        .then(() => { 
+            document.getElementById('cloud-info').textContent = "Cloud aktualisiert ✓"; 
+            // Historie im Hintergrund neu laden, damit die mathematischen Berechnungen frisch sind
+            fetchHistoryStatus();
+        })
+        .catch(err => {
+            document.getElementById('cloud-info').textContent = "Sync Fehler";
+            console.error(err);
+        });
+    }
+
+    // --- RENDERING DER DASHBOARD-DATEN (AUS STATS.HTML INJEKTIERT) ---
     function renderDashboard(historyArray) {
         const routineKeys = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine", "TwoDayRule"];
         
-        // --- 1. 7-TAGE MATRIX ---
+        // 1. 7-TAGE MATRIX
         const totalMatrixDays = 7;
         const matrixDates = [];
         const daysHeader = document.getElementById('matrix-days');
@@ -370,7 +965,6 @@
             const d = new Date();
             d.setDate(d.getDate() - i);
             matrixDates.push(formatDateToString(d));
-            
             const dayName = d.toLocaleDateString('de-DE', { weekday: 'short' }).charAt(0);
             daysHeader.innerHTML += `<div class="day-label">${dayName}</div>`;
         }
@@ -382,23 +976,18 @@
 
         const monthlyData = {};
         const weeklyData = {};
-
         const chronologicalHistory = [...historyArray].reverse();
 
         historyArray.forEach(row => {
             if (!row.datum) return;
             
             const monthKey = parseMonthYear(row.datum);
-            if (!monthlyData[monthKey]) {
-                monthlyData[monthKey] = { total: 0, success: 0 };
-            }
+            if (!monthlyData[monthKey]) monthlyData[monthKey] = { total: 0, success: 0 };
 
             const weekNum = getWeekNumber(row.datum);
             const year = row.datum.split('.')[2];
             const weekKey = weekNum ? `KW ${String(weekNum).padStart(2, '0')} / ${year}` : "Unbekannt";
-            if (weekKey !== "Unbekannt" && !weeklyData[weekKey]) {
-                weeklyData[weekKey] = { total: 0, success: 0 };
-            }
+            if (weekKey !== "Unbekannt" && !weeklyData[weekKey]) weeklyData[weekKey] = { total: 0, success: 0 };
 
             routineKeys.forEach(routine => {
                 if (row.routinen && row.routinen[routine]) {
@@ -417,7 +1006,7 @@
             });
         });
 
-        // --- 2. MONATSVERGLEICH RENDERN ---
+        // 2. MONATSVERGLEICH
         const trendContainer = document.getElementById('month-trend-container');
         trendContainer.innerHTML = '';
         const sortedMonths = Object.keys(monthlyData).reverse();
@@ -428,31 +1017,20 @@
             sortedMonths.forEach((month, idx) => {
                 const data = monthlyData[month];
                 const pct = data.total > 0 ? Math.round((data.success / data.total) * 100) : 0;
-                
                 let badgeHtml = `<span class="trend-badge neutral">${pct}% Erfüllung</span>`;
                 if (idx < sortedMonths.length - 1) {
                     const prevMonth = sortedMonths[idx + 1];
                     const prevData = monthlyData[prevMonth];
                     const prevPct = prevData.total > 0 ? Math.round((prevData.success / prevData.total) * 100) : 0;
                     const diff = pct - prevPct;
-                    
-                    if (diff > 0) {
-                        badgeHtml = `<span class="trend-badge up">▲ +${diff}% vs. Vormonat (${pct}%)</span>`;
-                    } else if (diff < 0) {
-                        badgeHtml = `<span class="trend-badge" style="background: rgba(231, 76, 60, 0.1); color: var(--danger);">▼ ${diff}% vs. Vormonat (${pct}%)</span>`;
-                    }
+                    if (diff > 0) badgeHtml = `<span class="trend-badge up">▲ +${diff}% vs. Vormonat (${pct}%)</span>`;
+                    else if (diff < 0) badgeHtml = `<span class="trend-badge" style="background: rgba(231, 76, 60, 0.1); color: var(--danger);">▼ ${diff}% vs. Vormonat (${pct}%)</span>`;
                 }
-
-                trendContainer.innerHTML += `
-                    <div class="trend-row">
-                        <span class="trend-month-label">${month}</span>
-                        ${badgeHtml}
-                    </div>
-                `;
+                trendContainer.innerHTML += `<div class="trend-row"><span class="trend-month-label">${month}</span>${badgeHtml}</div>`;
             });
         }
 
-        // --- 3. WOCHENVERGLEICH RENDERN ---
+        // 3. WOCHENVERGLEICH
         const weekTrendContainer = document.getElementById('week-trend-container');
         weekTrendContainer.innerHTML = '';
         const sortedWeeks = Object.keys(weeklyData).sort().reverse();
@@ -464,65 +1042,47 @@
             limitedWeeks.forEach((week, idx) => {
                 const data = weeklyData[week];
                 const pct = data.total > 0 ? Math.round((data.success / data.total) * 100) : 0;
-                
                 let badgeHtml = `<span class="trend-badge neutral">${pct}% Erfüllung</span>`;
                 if (idx < limitedWeeks.length - 1) {
                     const prevWeek = limitedWeeks[idx + 1];
                     const prevData = weeklyData[prevWeek];
                     const prevPct = prevData.total > 0 ? Math.round((prevData.success / prevData.total) * 100) : 0;
                     const diff = pct - prevPct;
-                    
-                    if (diff > 0) {
-                        badgeHtml = `<span class="trend-badge up">▲ +${diff}% vs. Vorwoche (${pct}%)</span>`;
-                    } else if (diff < 0) {
-                        badgeHtml = `<span class="trend-badge" style="background: rgba(231, 76, 60, 0.1); color: var(--danger);">▼ ${diff}% vs. Vorwoche (${pct}%)</span>`;
-                    }
+                    if (diff > 0) badgeHtml = `<span class="trend-badge up">▲ +${diff}% vs. Vorwoche (${pct}%)</span>`;
+                    else if (diff < 0) badgeHtml = `<span class="trend-badge" style="background: rgba(231, 76, 60, 0.1); color: var(--danger);">▼ ${diff}% vs. Vorwoche (${pct}%)</span>`;
                 }
-
-                weekTrendContainer.innerHTML += `
-                    <div class="trend-row">
-                        <span class="trend-month-label">${week}</span>
-                        ${badgeHtml}
-                    </div>
-                `;
+                weekTrendContainer.innerHTML += `<div class="trend-row"><span class="trend-month-label">${week}</span>${badgeHtml}</div>`;
             });
         }
 
-        // --- 4. KAUSALITÄTEN BERECHNEN ---
+        // 4. KAUSALITÄTEN
         const correlationContainer = document.getElementById('correlation-container');
         correlationContainer.innerHTML = '';
-
         const insights = [];
         
         routineKeys.forEach(triggerRoutine => {
             routineKeys.forEach(targetRoutine => {
                 if (triggerRoutine === targetRoutine) return;
-
                 let triggerJaCount = 0;
                 let targetAlsoJaCount = 0;
 
                 for (let i = 1; i < historyArray.length; i++) {
                     const currentRow = historyArray[i]; 
                     const nextDayRow = historyArray[i - 1]; 
-
                     const isTimeShifted = (triggerRoutine === "Abendroutine" || triggerRoutine === "Schlafroutine");
                     
                     if (isTimeShifted) {
                         if (currentRow.routinen && currentRow.routinen[triggerRoutine] && nextDayRow.routinen && nextDayRow.routinen[targetRoutine]) {
                             if (currentRow.routinen[triggerRoutine].toLowerCase() === 'ja') {
                                 triggerJaCount++;
-                                if (nextDayRow.routinen[targetRoutine].toLowerCase() === 'ja') {
-                                    targetAlsoJaCount++;
-                                }
+                                if (nextDayRow.routinen[targetRoutine].toLowerCase() === 'ja') targetAlsoJaCount++;
                             }
                         }
                     } else {
                         if (currentRow.routinen && currentRow.routinen[triggerRoutine] && currentRow.routinen[targetRoutine]) {
                             if (currentRow.routinen[triggerRoutine].toLowerCase() === 'ja') {
                                 triggerJaCount++;
-                                if (currentRow.routinen[targetRoutine].toLowerCase() === 'ja') {
-                                    targetAlsoJaCount++;
-                                }
+                                if (currentRow.routinen[targetRoutine].toLowerCase() === 'ja') targetAlsoJaCount++;
                             }
                         }
                     }
@@ -531,56 +1091,37 @@
                 if (triggerJaCount >= 2) {
                     const probability = Math.round((targetAlsoJaCount / triggerJaCount) * 100);
                     if (probability >= 70) {
-                        insights.push({
-                            trigger: triggerRoutine,
-                            target: targetRoutine,
-                            prob: probability,
-                            isShifted: (triggerRoutine === "Abendroutine" || triggerRoutine === "Schlafroutine")
-                        });
+                        insights.push({ trigger: triggerRoutine, target: targetRoutine, prob: probability, isShifted: (triggerRoutine === "Abendroutine" || triggerRoutine === "Schlafroutine") });
                     }
                 }
             });
         });
 
         if (insights.length === 0) {
-            correlationContainer.innerHTML = `
-                <div class="insight-card">
-                    <div class="insight-title">⏳ Datenbasis wird aufgebaut</div>
-                    <div class="insight-desc">Sobald Kausalitäten entstehen, siehst du hier deinen mächtigsten Hebel.</div>
-                </div>`;
+            correlationContainer.innerHTML = `<div class="insight-card"><div class="insight-title">⏳ Datenbasis wird aufgebaut</div><div class="insight-desc">Sobald Kausalitäten entstehen, siehst du hier deinen mächtigsten Hebel.</div></div>`;
         } else {
             insights.sort((a, b) => b.prob - a.prob);
             insights.slice(0, 3).forEach(ins => {
                 const triggerIcon = routineIcons[ins.trigger] || "🎯";
                 const targetIcon = routineIcons[ins.target] || "🎯";
                 const contextText = ins.isShifted ? "am Folgetag" : "am selben Tag";
-                correlationContainer.innerHTML += `
-                    <div class="insight-card">
-                        <div class="insight-title">${triggerIcon} ${ins.trigger} → ${targetIcon} ${ins.target}</div>
-                        <div class="insight-desc">Sichert deine <strong>${ins.target}</strong> ${contextText} mit einer Wahrscheinlichkeit von <strong>${ins.prob}%</strong>.</div>
-                    </div>
-                `;
+                correlationContainer.innerHTML += `<div class="insight-card"><div class="insight-title">${triggerIcon} ${ins.trigger} → ${targetIcon} ${ins.target}</div><div class="insight-desc">Sichert deine <strong>${ins.target}</strong> ${contextText} mit einer Wahrscheinlichkeit von <strong>${ins.prob}%</strong>.</div></div>`;
             });
         }
 
-        // --- 5. SYNERGIEN BERECHNEN ---
+        // 5. SYNERGIEN
         const clusterContainer = document.getElementById('cluster-container');
         clusterContainer.innerHTML = '';
         const clusters = [];
 
         for (let i = 0; i < routineKeys.length; i++) {
             for (let j = i + 1; j < routineKeys.length; j++) {
-                const r1 = routineKeys[i];
-                const r2 = routineKeys[j];
-                
-                let commonDays = 0;
-                let totalActiveDays = historyArray.length;
+                const r1 = routineKeys[i]; const r2 = routineKeys[j];
+                let commonDays = 0; let totalActiveDays = historyArray.length;
 
                 historyArray.forEach(row => {
                     if (row.routinen && row.routinen[r1] && row.routinen[r2]) {
-                        if (row.routinen[r1].toLowerCase() === 'ja' && row.routinen[r2].toLowerCase() === 'ja') {
-                            commonDays++;
-                        }
+                        if (row.routinen[r1].toLowerCase() === 'ja' && row.routinen[r2].toLowerCase() === 'ja') commonDays++;
                     }
                 });
 
@@ -592,148 +1133,80 @@
         }
 
         if (clusters.length === 0) {
-            clusterContainer.innerHTML = `
-                <div class="insight-card">
-                    <div class="insight-title">⏳ Berechne Synergien...</div>
-                    <div class="insight-desc">Hier erscheinen Kombinationen, die du besonders oft zusammen meisterst.</div>
-                </div>`;
+            clusterContainer.innerHTML = `<div class="insight-card"><div class="insight-title">⏳ Berechne Synergien...</div><div class="insight-desc">Hier erscheinen Kombinationen, die du besonders oft zusammen meisterst.</div></div>`;
         } else {
             clusters.sort((a, b) => b.strength - a.strength);
             clusters.slice(0, 3).forEach(c => {
-                const icon1 = routineIcons[c.routine1] || "🎯";
-                const icon2 = routineIcons[c.routine2] || "🎯";
-                clusterContainer.innerHTML += `
-                    <div class="insight-card">
-                        <div class="insight-title">${icon1} ${c.routine1} + ${icon2} ${c.routine2}</div>
-                        <div class="insight-desc">Dieses Routine-Paket tritt in <strong>${c.strength}%</strong> aller aufgezeichneten Tage als geschlossene Einheit auf.</div>
-                    </div>
-                `;
+                const icon1 = routineIcons[c.routine1] || "🎯"; const icon2 = routineIcons[c.routine2] || "🎯";
+                clusterContainer.innerHTML += `<div class="insight-card"><div class="insight-title">${icon1} ${c.routine1} + ${icon2} ${c.routine2}</div><div class="insight-desc">Dieses Routine-Paket tritt in <strong>${c.strength}%</strong> aller aufgezeichneten Tage als geschlossene Einheit auf.</div></div>`;
             });
         }
 
-        // --- 6. TWODAYRULE STREAK BERECHNEN ---
-        let currentStreak = 0;
-        let checkDate = new Date();
-        checkDate.setDate(checkDate.getDate() - 1); 
-        
+        // 6. STREAK
+        let currentStreak = 0; let checkDate = new Date(); checkDate.setDate(checkDate.getDate() - 1); 
         while (true) {
             const checkDateStr = formatDateToString(checkDate);
             const foundDay = historyArray.find(item => item.datum === checkDateStr);
-            
-            if (foundDay && foundDay.routinen && foundDay.routinen["TwoDayRule"]) {
-                if (foundDay.routinen["TwoDayRule"].toLowerCase() === 'ja') {
-                    currentStreak++;
-                    checkDate.setDate(checkDate.getDate() - 1);
-                } else {
-                    break;
-                }
-            } else {
-                break;
-            }
+            if (foundDay && foundDay.routinen && foundDay.routinen["TwoDayRule"] && foundDay.routinen["TwoDayRule"].toLowerCase() === 'ja') {
+                currentStreak++; checkDate.setDate(checkDate.getDate() - 1);
+            } else { break; }
         }
         document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
 
-        // --- 7. DYNAMISCHER TACHO FÜR ERHOLUNGS-ZEIT ---
-        let totalRecoveryDays = 0;
-        let recoveryTracksCount = 0;
-        let maxRecoveryDays = 0;
-        let currentGap = 0;
-        let trackingGap = false;
-
+        // 7. ERHOLUNGS-ZEIT GAUGE
+        let totalRecoveryDays = 0; let recoveryTracksCount = 0; let maxRecoveryDays = 0; let currentGap = 0; let trackingGap = false;
         chronologicalHistory.forEach(row => {
             if (row.routinen && row.routinen["TwoDayRule"]) {
                 const status = row.routinen["TwoDayRule"].toLowerCase();
                 if (status === 'nein') {
-                    if (!trackingGap) {
-                        trackingGap = true;
-                        currentGap = 1;
-                    } else {
-                        currentGap++;
-                    }
-                } else if (status === 'ja') {
-                    if (trackingGap) {
-                        totalRecoveryDays += currentGap;
-                        if (currentGap > maxRecoveryDays) maxRecoveryDays = currentGap;
-                        recoveryTracksCount++;
-                        trackingGap = false;
-                        currentGap = 0;
-                    }
+                    if (!trackingGap) { trackingGap = true; currentGap = 1; } else { currentGap++; }
+                } else if (status === 'ja' && trackingGap) {
+                    totalRecoveryDays += currentGap;
+                    if (currentGap > maxRecoveryDays) maxRecoveryDays = currentGap;
+                    recoveryTracksCount++; trackingGap = false; currentGap = 0;
                 }
             }
         });
 
         const avgRecovery = recoveryTracksCount > 0 ? parseFloat((totalRecoveryDays / recoveryTracksCount).toFixed(1)) : 0.0;
         const finalMax = maxRecoveryDays > 0 ? maxRecoveryDays : 3.0;
-
         document.getElementById('gauge-lbl-max').textContent = `${finalMax.toFixed(1)} T`;
         document.getElementById('gauge-lbl-avg').textContent = `Ø ${avgRecovery.toFixed(1)}`;
 
         let degrees = 75; 
-
         if (recoveryTracksCount > 0 && finalMax > 0) {
-            const ratio = avgRecovery / finalMax;
-            degrees = 75 - (ratio * 150);
-            if (degrees < -75) degrees = -75;
-            if (degrees > 75) degrees = 75;
+            degrees = 75 - ((avgRecovery / finalMax) * 150);
+            if (degrees < -75) degrees = -75; if (degrees > 75) degrees = 75;
         }
-
         document.getElementById('gauge-needle').style.transform = `rotate(${degrees}deg)`;
 
-        // --- 8. MATRIX ZEILEN RENDERN ---
+        // 8. MATRIX ZEILEN
         const rowsContainer = document.getElementById('matrix-rows-container');
         rowsContainer.innerHTML = '';
-
         routineKeys.forEach(routine => {
             let cellsHtml = '';
-            
             matrixDates.forEach(dateStr => {
                 const dayData = historyArray.find(item => item.datum === dateStr);
                 let status = 'nein';
-                if (dayData && dayData.routinen && dayData.routinen[routine]) {
-                    status = dayData.routinen[routine].toLowerCase();
-                }
+                if (dayData && dayData.routinen && dayData.routinen[routine]) status = dayData.routinen[routine].toLowerCase();
                 cellsHtml += `<div class="matrix-cell ${status}"></div>`;
             });
-
             const icon = routineIcons[routine] || "🎯";
-
-            rowsContainer.innerHTML += `
-                <div class="matrix-row">
-                    <div class="matrix-label">
-                        <span class="perf-icon">${icon}</span>
-                        <span class="perf-name">${routine}</span>
-                    </div>
-                    <div class="matrix-cells">${cellsHtml}</div>
-                </div>
-            `;
+            rowsContainer.innerHTML += `<div class="matrix-row"><div class="matrix-label"><span class="perf-icon">${icon}</span><span class="perf-name">${routine}</span></div><div class="matrix-cells">${cellsHtml}</div></div>`;
         });
 
-        // --- 9. PERFORMANCE BALKEN ALL-TIME ---
+        // 9. ALL-TIME PERFORMANCE
         const perfContainer = document.getElementById('routine-performance-container');
         perfContainer.innerHTML = '';
-
         routineKeys.forEach(routine => {
-            const routineTotal = historyArray.length;
-            const routineSuccess = routineSuccessCounts[routine] || 0;
+            const routineTotal = historyArray.length; const routineSuccess = routineSuccessCounts[routine] || 0;
             const pct = routineTotal > 0 ? Math.round((routineSuccess / routineTotal) * 100) : 0;
             const icon = routineIcons[routine] || "🎯";
-
-            perfContainer.innerHTML += `
-                <div class="perf-item">
-                    <div class="perf-info">
-                        <span class="perf-icon">${icon}</span>
-                        <span class="perf-name">${routine}</span>
-                    </div>
-                    <div class="perf-bar-wrapper">
-                        <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
-                        <span class="perf-pct">${pct}%</span>
-                    </div>
-                </div>
-            `;
+            perfContainer.innerHTML += `<div class="perf-item"><div class="perf-info"><span class="perf-icon">${icon}</span><span class="perf-name">${routine}</span></div><div class="perf-bar-wrapper"><div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div><span class="perf-pct">${pct}%</span></div></div>`;
         });
     }
 
-    window.onload = fetchStats;
+    window.onload = initApp;
 </script>
 </body>
 </html>
