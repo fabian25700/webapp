@@ -62,7 +62,6 @@
 
         header h1 { font-size: 1.15rem; font-weight: 800; flex: 1; }
 
-        /* Anpassung Statistik Button */
         .stats-btn {
             display: flex; align-items: center; justify-content: center;
             gap: 6px; padding: 0 12px; height: 36px; border-radius: 12px;
@@ -112,9 +111,8 @@
         .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
         
         /* 3-Tage-Status Meta Box */
-        .category-meta { display: flex; align-items: center; gap: 12px; margin-left: auto; margin-right: 12px; flex-shrink: 0; }
-        .status-dot-wrapper { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-        .status-dot-label { font-size: 0.5rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; }
+        .category-meta { display: flex; align-items: center; gap: 6px; margin-left: auto; margin-right: 12px; flex-shrink: 0; }
+        .status-dot-wrapper { display: flex; flex-direction: column; align-items: center; }
 
         .arrow { font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.3s ease; flex-shrink: 0; }
         .category-group.open .arrow { transform: rotate(180deg); }
@@ -141,7 +139,6 @@
 
         .location-name { font-weight: 600; font-size: 0.95rem; flex: 1; }
         
-        /* Status-Punkte Styles */
         .yesterday-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; background: var(--border); }
         .yesterday-dot.ja { background: var(--success); box-shadow: 0 0 6px var(--success); }
         .yesterday-dot.nein { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
@@ -174,9 +171,9 @@
                 <span>Morgenroutine</span>
             </div>
             <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-heute"></span><span class="status-dot-label">H</span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-gestern"></span><span class="status-dot-label">G</span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-vorgestern"></span><span class="status-dot-label">V</span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-vorgestern"></span></div>
                 <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
@@ -191,9 +188,9 @@
                 <span>Sportroutine</span>
             </div>
             <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-heute"></span><span class="status-dot-label">H</span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-gestern"></span><span class="status-dot-label">G</span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-vorgestern"></span><span class="status-dot-label">V</span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-vorgestern"></span></div>
                 <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
@@ -208,9 +205,9 @@
                 <span>Gesundheitsroutine</span>
             </div>
             <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-heute"></span><span class="status-dot-label">H</span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-gestern"></span><span class="status-dot-label">G</span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-vorgestern"></span><span class="status-dot-label">V</span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-vorgestern"></span></div>
                 <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
@@ -225,9 +222,9 @@
                 <span>Fokusroutine</span>
             </div>
             <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-heute"></span><span class="status-dot-label">H</span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-gestern"></span><span class="status-dot-label">G</span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-vorgestern"></span><span class="status-dot-label">V</span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-vorgestern"></span></div>
                 <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
@@ -242,9 +239,9 @@
                 <span>Abendroutine</span>
             </div>
             <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-heute"></span><span class="status-dot-label">H</span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-gestern"></span><span class="status-dot-label">G</span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-vorgestern"></span><span class="status-dot-label">V</span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-vorgestern"></span></div>
                 <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
@@ -259,9 +256,9 @@
                 <span>Schlafroutine</span>
             </div>
             <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-heute"></span><span class="status-dot-label">H</span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-gestern"></span><span class="status-dot-label">G</span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-vorgestern"></span><span class="status-dot-label">V</span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-vorgestern"></span></div>
                 <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
@@ -276,9 +273,9 @@
                 <span>2-Day Rule</span>
             </div>
             <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-heute"></span><span class="status-dot-label">H</span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-gestern"></span><span class="status-dot-label">G</span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-vorgestern"></span><span class="status-dot-label">V</span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-heute"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-gestern"></span></div>
+                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-vorgestern"></span></div>
                 <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
             </div>
             <div class="arrow">▼</div>
@@ -288,7 +285,7 @@
 </main>
 
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxJ61AjyUXZQvyaPcPFBq4OOSULtuLUFLFmwVAjSo-kTqdVXPSrTNW_0k04YZk0AuN2fg/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvzXJ9VesApgA0RPJ_cnNrfIPYiYIPjB9FQlbITXg3HRcoJPBDlBVHajY4dxKjluoRiQ/exec";
     
     const TARGET_RATIO = 0.8;
     const habitState = {};
@@ -365,18 +362,15 @@
 
         updateGlobalProgress();
 
-        // Zeigt den Hinweis, wenn die 80%-Marke genau jetzt erreicht wurde
         if (oldRoutineState === "nein" && newRoutineState === "ja") {
             showSuccessToast();
         }
 
-        // Live-Update für den heutigen Indikator im UI
         const heuteDot = document.getElementById(`dot-${routineName}-heute`);
         if (heuteDot) {
             heuteDot.className = "yesterday-dot " + newRoutineState;
         }
 
-        // Synchronisiert nur, wenn sich der Status der gesamten Routine verändert hat
         if (oldRoutineState !== newRoutineState) {
             syncModuleToCloud(routineName, newRoutineState);
         }
@@ -399,7 +393,6 @@
 
             group.querySelector('.counter-text').textContent = `(${state.done}/${state.total})`;
             
-            // Setzt initialen Zustand für den heutigen Indikator basierend auf lokalem Status
             const heuteDot = document.getElementById(`dot-${routineName}-heute`);
             if (heuteDot) {
                 heuteDot.className = "yesterday-dot " + isDoneNow;
@@ -417,8 +410,6 @@
             .then(data => {
                 document.getElementById('cloud-info').textContent = "Cloud Live ✓";
                 
-                // Erwartet ein JSON-Objekt mit den Schlüsseln: heute, gestern, vorgestern
-                // Jedes dieser Objekte enthält die Routinen-Status (z. B. data.gestern.Morgenroutine)
                 const timeframes = ['gestern', 'vorgestern'];
                 
                 timeframes.forEach(timeframe => {
