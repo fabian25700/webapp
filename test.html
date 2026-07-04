@@ -71,10 +71,14 @@
         .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .kpi-card {
             background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-            padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 4px;
+            padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; height: 90px;
         }
-        .kpi-value { font-size: 1.6rem; font-weight: 800; color: var(--text-primary); }
+        .kpi-value { font-size: 1.45rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; justify-content: center; gap: 6px; }
         .kpi-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+        
+        /* Grafischer Recovery Indikator */
+        .recovery-visual { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .recovery-visual .days-sub { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); }
 
         /* Section Block */
         .section-block {
@@ -154,8 +158,8 @@
 
     <div class="section-block">
         <div class="switch-header">
-            <div class="switch-tab active" onclick="switchBlock('mid', 'domino')">Dominosteine</div>
-            <div class="switch-tab" onclick="switchBlock('mid', 'cluster')">Muster-Cluster</div>
+            <div class="switch-tab active" onclick="switchBlock('mid', 'domino')">Kausalitäten</div>
+            <div class="switch-tab" onclick="switchBlock('mid', 'cluster')">Synergien</div>
         </div>
         
         <div id="content-domino" class="switch-content active">
@@ -312,7 +316,6 @@
         const monthlyData = {};
         const weeklyData = {};
 
-        // Historie umdrehen für chronologische Berechnungen (Älteste zuerst)
         const chronologicalHistory = [...historyArray].reverse();
 
         historyArray.forEach(row => {
@@ -418,7 +421,7 @@
             });
         }
 
-        // --- 4. DOMINOSTEINE BERECHNEN ---
+        // --- 4. KAUSALITÄTEN BERECHNEN ---
         const correlationContainer = document.getElementById('correlation-container');
         correlationContainer.innerHTML = '';
 
@@ -493,7 +496,7 @@
             });
         }
 
-        // --- NEU: MUSTER-CLUSTER BERECHNEN ---
+        // --- 5. SYNERGIEN BERECHNEN ---
         const clusterContainer = document.getElementById('cluster-container');
         clusterContainer.innerHTML = '';
         const clusters = [];
@@ -541,7 +544,7 @@
             });
         }
 
-        // --- 5. TWODAYRULE STREAK BERECHNEN ---
+        // --- 6. TWODAYRULE STREAK BERECHNEN (MITTIG CODIERT DURCH CSS ALIGN) ---
         let currentStreak = 0;
         let checkDate = new Date();
         checkDate.setDate(checkDate.getDate() - 1); 
@@ -561,14 +564,14 @@
                 break;
             }
         }
+        document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
 
-        // --- NEU: DOMINO-REAKTIONSZEIT (RECOVERY TIME) BERECHNEN ---
+        // --- 7. DOMINO-REAKTIONSZEIT (ERHOLUNGS-ZEIT ALS VISUELLER TACHO-PFEIL) ---
         let totalRecoveryDays = 0;
         let recoveryTracksCount = 0;
         let currentGap = 0;
         let trackingGap = false;
 
-        // Nutze chronologische Abfolge (von Vergangenheit zu Gegenwart)
         chronologicalHistory.forEach(row => {
             if (row.routinen && row.routinen["TwoDayRule"]) {
                 const status = row.routinen["TwoDayRule"].toLowerCase();
@@ -590,10 +593,22 @@
             }
         });
 
-        const avgRecovery = recoveryTracksCount > 0 ? (totalRecoveryDays / recoveryTracksCount).toFixed(1) : "0.0";
-        document.getElementById('kpi-recovery').textContent = `${avgRecovery} T`;
+        const avgRecovery = recoveryTracksCount > 0 ? parseFloat((totalRecoveryDays / recoveryTracksCount).toFixed(1)) : 0.0;
+        
+        // Grafische Statuseinstufung auf Basis der Reaktionszeit
+        let visualStatus = "▲▲ Elite";
+        if (avgRecovery === 0.0) visualStatus = "▲▲ Perfekt";
+        else if (avgRecovery > 1.0 && avgRecovery <= 2.0) visualStatus = "▲ Stabil";
+        else if (avgRecovery > 2.0) visualStatus = "▼ Träge";
 
-        // --- 6. MATRIX ZEILEN RENDERN ---
+        document.getElementById('kpi-recovery').innerHTML = `
+            <div class="recovery-visual">
+                <span>${visualStatus}</span>
+                <span class="days-sub">Ø ${avgRecovery} Tage</span>
+            </div>
+        `;
+
+        // --- 8. MATRIX ZEILEN RENDERN ---
         const rowsContainer = document.getElementById('matrix-rows-container');
         rowsContainer.innerHTML = '';
 
@@ -622,7 +637,7 @@
             `;
         });
 
-        // --- 7. PERFORMANCE BALKEN ALL-TIME ---
+        // --- 9. PERFORMANCE BALKEN ALL-TIME ---
         const perfContainer = document.getElementById('routine-performance-container');
         perfContainer.innerHTML = '';
 
@@ -645,8 +660,6 @@
                 </div>
             `;
         });
-
-        document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
     }
 
     window.onload = fetchStats;
