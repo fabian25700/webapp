@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Routinen</title>
+    <title>Statistiken</title>
     <style>
         :root {
             --accent: #e67e22;
@@ -51,257 +51,125 @@
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
         }
 
-        .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+        .header-top { display: flex; align-items: center; gap: 12px; }
         
         .back-btn {
             display: flex; align-items: center; justify-content: center;
             width: 36px; height: 36px; border-radius: 12px;
             background: var(--surface); border: 1px solid var(--border);
             text-decoration: none; color: var(--text-primary); box-shadow: var(--shadow);
+            font-size: 1.1rem;
         }
 
         header h1 { font-size: 1.15rem; font-weight: 800; flex: 1; }
-
-        .stats-btn {
-            display: flex; align-items: center; justify-content: center;
-            gap: 6px; padding: 0 12px; height: 36px; border-radius: 12px;
-            background: var(--surface); border: 1px solid var(--border);
-            text-decoration: none; color: var(--text-primary); box-shadow: var(--shadow);
-            font-size: 0.85rem; font-weight: 700;
-        }
-
-        .progress-container { background: var(--border-light); height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 5px; }
-        .progress-bar { background: var(--success); height: 100%; transition: width 0.3s ease; }
-        .stats-text { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; }
-
-        /* Toast-Hinweis Style */
-        .toast-notification {
-            position: fixed;
-            top: calc(env(safe-area-inset-top) + 70px);
-            left: 50%;
-            transform: translateX(-50%) translateY(-20px);
-            background: var(--success);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            opacity: 0;
-            z-index: 1000;
-            transition: all 0.3s ease;
-            pointer-events: none;
-        }
-        .toast-notification.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
-
-        .category-group { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); position: relative; }
-        
-        .category-header {
-            padding: 16px; display: flex; align-items: center; justify-content: space-between;
-            cursor: pointer; user-select: none; transition: background 0.2s;
-        }
-        .category-header:active { background: var(--border-light); }
-
-        .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; flex: 1; }
-        .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
-        
-        /* 3-Tage-Status Meta Box */
-        .category-meta { display: flex; align-items: center; gap: 6px; margin-left: auto; margin-right: 12px; flex-shrink: 0; }
-        .status-dot-wrapper { display: flex; flex-direction: column; align-items: center; }
-
-        .arrow { font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.3s ease; flex-shrink: 0; }
-        .category-group.open .arrow { transform: rotate(180deg); }
-
-        .category-content { display: none; padding: 0 16px 16px; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 16px; }
-        .category-group.open .category-content { display: flex; }
-
-        .bucket-card {
-            background: var(--bg); border-radius: 12px; border: 1px solid var(--border);
-            padding: 14px 16px; display: flex; align-items: center; gap: 14px;
-            cursor: pointer; user-select: none; transition: all 0.2s ease;
-        }
-        .bucket-card:active { transform: scale(0.99); }
-        .bucket-card.done { opacity: 0.6; border-style: dashed; }
-
-        .status-circle {
-            width: 22px; height: 22px; border-radius: 6px;
-            border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-            transition: all 0.2s ease;
-        }
-        .done .status-circle { background: var(--success); border-color: var(--success); }
-        .status-circle::after { content: '✓'; color: white; font-size: 13px; font-weight: bold; display: none; }
-        .done .status-circle::after { display: block; }
-
-        .location-name { font-weight: 600; font-size: 0.95rem; flex: 1; }
-        
-        .yesterday-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; background: var(--border); }
-        .yesterday-dot.ja { background: var(--success); box-shadow: 0 0 6px var(--success); }
-        .yesterday-dot.nein { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
-
         .cloud-status { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+
+        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+
+        /* KPI Grid */
+        .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .kpi-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 4px;
+        }
+        .kpi-value { font-size: 1.6rem; font-weight: 800; color: var(--text-primary); }
+        .kpi-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+
+        /* Section Block */
+        .section-block {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+            padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 14px;
+        }
+        .section-title { font-weight: 800; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary); }
+
+        /* Wochen-Matrix */
+        .matrix-grid { display: flex; flex-direction: column; gap: 10px; }
+        .matrix-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .matrix-label { font-size: 0.8rem; font-weight: 600; flex: 1; text-align: left; }
+        .matrix-cells { display: flex; gap: 6px; flex-shrink: 0; justify-content: flex-end; }
+        .matrix-cell { width: 20px; height: 20px; border-radius: 6px; background: var(--border-light); border: 1px solid var(--border); position: relative; transition: all 0.2s; }
+        .matrix-cell.ja { background: var(--success); border-color: var(--success); }
+        .matrix-cell.nein { background: var(--danger); border-color: var(--danger); opacity: 0.3; }
+        
+        .days-header { display: flex; margin-bottom: -4px; flex: 1; justify-content: flex-end; gap: 6px; padding-right: 0; }
+        .day-label { font-size: 0.55rem; font-weight: 700; color: var(--text-secondary); text-align: center; width: 20px; text-transform: uppercase; }
+
+        /* Routine Listen Performance */
+        .perf-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-light); }
+        .perf-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .perf-info { display: flex; align-items: center; gap: 10px; }
+        .perf-icon { font-size: 1rem; }
+        .perf-name { font-size: 0.9rem; font-weight: 700; }
+        .perf-bar-wrapper { display: flex; align-items: center; gap: 12px; width: 120px; }
+        .perf-bar-bg { flex: 1; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
+        .perf-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; }
+        .perf-pct { font-size: 0.75rem; font-weight: 700; width: 32px; text-align: right; }
     </style>
 </head>
 <body>
 
-<div class="toast-notification" id="toast-notice">Habit erledigt, weiter so!</div>
-
 <header>
     <div class="header-top">
-        <a href="index.html" class="back-btn">&larr;</a>
-        <h1>Routinen</h1>
-        <div class="cloud-status" id="cloud-info" style="margin-right: 12px;">Lade...</div>
-        <a href="https://fabian25700.github.io/webapp/habit_stats.html" class="stats-btn">Stats 📊</a>
-    </div>
-    <div class="progress-container"><div class="progress-bar" id="progress-bar" style="width: 0%"></div></div>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 5px;">
-        <div class="stats-text" id="stats-summary">0 / 7 Routinen erreicht</div>
+        <a href="javascript:history.back()" class="back-btn">&larr;</a>
+        <h1>Statistiken</h1>
+        <div class="cloud-status" id="cloud-info">Lade Daten...</div>
     </div>
 </header>
 
-<main id="category-container">
-    <div class="category-group" data-routine="Morgenroutine">
-        <div class="category-header" onclick="toggleGroup(this)">
-            <div class="category-title">
-                <div class="category-icon">☀️</div>
-                <span>Morgenroutine</span>
-            </div>
-            <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-heute"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-gestern"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-vorgestern"></span></div>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
-            </div>
-            <div class="arrow">▼</div>
+<main>
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-value" id="kpi-streak">-</div>
+            <div class="kpi-label">Aktueller Streak</div>
         </div>
-        <div class="category-content" data-habits='["Aufstehen ohne Snooze", "Hydration (500ml Wasser)", "10 Min Tageslicht tanken", "Kalt duschen", "Mindset-Fokus (Journal)"]'></div>
+        <div class="kpi-card">
+            <div class="kpi-value" id="kpi-rate">-</div>
+            <div class="kpi-label">Erfüllung (Gesamt)</div>
+        </div>
     </div>
 
-    <div class="category-group" data-routine="Sportroutine">
-        <div class="category-header" onclick="toggleGroup(this)">
-            <div class="category-title">
-                <div class="category-icon">🏃‍♂️</div>
-                <span>Sportroutine</span>
-            </div>
-            <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-heute"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-gestern"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-vorgestern"></span></div>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
-            </div>
-            <div class="arrow">▼</div>
+    <div class="section-block">
+        <div class="section-title">7-Tage Konsistenz Matrix</div>
+        <div class="matrix-grid">
+            <div class="days-header" id="matrix-days"></div>
+            <div id="matrix-rows-container" style="display: flex; flex-direction: column; gap: 10px;"></div>
         </div>
-        <div class="category-content" data-habits='["Athletik- / Krafteinheit", "Dehnen & Mobility", "Schritte-Ziel erreicht", "Erholungs-Check", "Protein-Zufuhr gedeckt"]'></div>
     </div>
 
-    <div class="category-group" data-routine="Gesundheitsroutine">
-        <div class="category-header" onclick="toggleGroup(this)">
-            <div class="category-title">
-                <div class="category-icon">🥗</div>
-                <span>Gesundheitsroutine</span>
-            </div>
-            <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-heute"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-gestern"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-vorgestern"></span></div>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
-            </div>
-            <div class="arrow">▼</div>
-        </div>
-        <div class="category-content" data-habits='["Ernährungsplan eingehalten", "Supplements genommen", "Kein verarbeiteter Zucker", "Genug Wasser getrunken", "Intervallfasten-Fenster"]'></div>
-    </div>
-
-    <div class="category-group" data-routine="Fokusroutine">
-        <div class="category-header" onclick="toggleGroup(this)">
-            <div class="category-title">
-                <div class="category-icon">🧠</div>
-                <span>Fokusroutine</span>
-            </div>
-            <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-heute"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-gestern"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-vorgestern"></span></div>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
-            </div>
-            <div class="arrow">▼</div>
-        </div>
-        <div class="category-content" data-habits='["Deep Work Block 1", "Deep Work Block 2", "Kein Social Media während Fokus", "Immobilien-Task erledigt", "Schreibtisch clean gehalten"]'></div>
-    </div>
-
-    <div class="category-group" data-routine="Abendroutine">
-        <div class="category-header" onclick="toggleGroup(this)">
-            <div class="category-title">
-                <div class="category-icon">🌙</div>
-                <span>Abendroutine</span>
-            </div>
-            <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-heute"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-gestern"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-vorgestern"></span></div>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
-            </div>
-            <div class="arrow">▼</div>
-        </div>
-        <div class="category-content" data-habits='["Tagesabschluss-Journal", "Digital Detox ab 21:30", "Klamotten/Setup für morgen", "Lesen (15 Seiten)", "Licht gedimmt"]'></div>
-    </div>
-
-    <div class="category-group" data-routine="Schlafroutine">
-        <div class="category-header" onclick="toggleGroup(this)">
-            <div class="category-title">
-                <div class="category-icon">🛌</div>
-                <span>Schlafroutine</span>
-            </div>
-            <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-heute"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-gestern"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-vorgestern"></span></div>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
-            </div>
-            <div class="arrow">▼</div>
-        </div>
-        <div class="category-content" data-habits='["Kein Koffein nach 14:00", "Zimmer gelüftet & kühl", "Keine schweren Mahlzeiten spät", "Magnesium genommen", "Fixe Aufstehzeit vorbereitet"]'></div>
-    </div>
-
-    <div class="category-group" data-routine="TwoDayRule">
-        <div class="category-header" onclick="toggleGroup(this)">
-            <div class="category-title">
-                <div class="category-icon">⚡</div>
-                <span>2-Day Rule</span>
-            </div>
-            <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-heute"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-gestern"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-vorgestern"></span></div>
-                <span class="counter-text" style="font-size: 0.65rem; color: var(--text-secondary); font-weight: 700; margin-left: 4px;"></span>
-            </div>
-            <div class="arrow">▼</div>
-        </div>
-        <div class="category-content" data-habits='["Keinen Tag komplett geskippt", "Disziplin-Notfallplan gehalten", "Mindset im Fokus gehalten"]'></div>
+    <div class="section-block">
+        <div class="section-title">Routine Auswertung</div>
+        <div id="routine-performance-container"></div>
     </div>
 </main>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbhl1k_pgXinca2FA2hxqzMJzW--7Hfo54XHtVm_vfrxndA-GFF57UsQ2ILn6drZnu2w/exec";
     
-    const TARGET_RATIO = 0.8;
-    const habitState = {};
+    const routineIcons = {
+        "Morgenroutine": "☀️",
+        "Sportroutine": "🏃‍♂️",
+        "Gesundheitsroutine": "🥗",
+        "Fokusroutine": "🧠",
+        "Abendroutine": "🌙",
+        "Schlafroutine": "🛌",
+        "TwoDayRule": "⚡"
+    };
 
-    function checkMidnightReset() {
-        const todayStr = new Date().toDateString();
-        const savedDate = localStorage.getItem('routine_date');
-        if (savedDate && savedDate !== todayStr) {
-            localStorage.removeItem('routine_storage');
-        }
-        localStorage.setItem('routine_date', todayStr);
-    }
-
-    function getSavedStates() {
-        const saved = localStorage.getItem('routine_storage');
-        return saved ? JSON.parse(saved) : {};
+    function fetchStats() {
+        fetch(GOOGLE_SCRIPT_URL, { method: "GET" })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('cloud-info').textContent = "Cloud Live ✓";
+                if (!Array.isArray(data) || data.length === 0) {
+                    document.getElementById('cloud-info').textContent = "Keine Daten";
+                    return;
+                }
+                renderDashboard(data);
+            })
+            .catch(err => {
+                document.getElementById('cloud-info').textContent = "Fehler";
+                console.error(err);
+            });
     }
 
     function formatDateToString(date) {
@@ -311,179 +179,127 @@
         return `${dd}.${mm}.${yyyy}`;
     }
 
-    function initApp() {
-        checkMidnightReset();
-        const savedStates = getSavedStates();
-        const groups = document.querySelectorAll('.category-group');
+    function renderDashboard(historyArray) {
+        const routineKeys = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine", "TwoDayRule"];
         
-        groups.forEach((group, groupIdx) => {
-            const contentDiv = group.querySelector('.category-content');
-            const habits = JSON.parse(contentDiv.getAttribute('data-habits'));
-            const routineName = group.getAttribute('data-routine');
+        const totalMatrixDays = 7;
+        const matrixDates = [];
+        const daysHeader = document.getElementById('matrix-days');
+        daysHeader.innerHTML = '';
+
+        // Schleife startet bei 0 (Heute) und geht bis 6 Tage in die Vergangenheit (von links nach rechts)
+        for (let i = 0; i < totalMatrixDays; i++) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            matrixDates.push(formatDateToString(d));
             
-            habitState[routineName] = { total: habits.length, done: 0 };
-
-            contentDiv.innerHTML = habits.map((habit, habitIdx) => {
-                const habitId = `${groupIdx}-${habitIdx}`;
-                const isChecked = savedStates[habitId] || false;
-                
-                if (isChecked) { habitState[routineName].done++; }
-
-                return `
-                    <div class="bucket-card ${isChecked ? 'done' : ''}" id="card-${habitId}" onclick="toggleHabit('${routineName}', '${habitId}', this)">
-                        <div class="status-circle"></div>
-                        <div class="location-name">${habit}</div>
-                    </div>
-                `;
-            }).join('');
-        });
-
-        updateGlobalProgress();
-        fetchHistoryStatus();
-    }
-
-    function toggleGroup(header) {
-        header.parentElement.classList.toggle('open');
-    }
-
-    function showSuccessToast() {
-        const toast = document.getElementById('toast-notice');
-        toast.classList.add('show');
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 2000);
-    }
-
-    function toggleHabit(routineName, habitId, card) {
-        const isDone = card.classList.toggle('done');
-        
-        const currentData = getSavedStates();
-        currentData[habitId] = isDone;
-        localStorage.setItem('routine_storage', JSON.stringify(currentData));
-        
-        const oldRoutineState = (habitState[routineName].done / habitState[routineName].total) >= TARGET_RATIO ? "ja" : "nein";
-        
-        if (isDone) { habitState[routineName].done++; } else { habitState[routineName].done--; }
-
-        const newRoutineState = (habitState[routineName].done / habitState[routineName].total) >= TARGET_RATIO ? "ja" : "nein";
-
-        updateGlobalProgress();
-
-        if (oldRoutineState === "nein" && newRoutineState === "ja") {
-            showSuccessToast();
+            const dayName = d.toLocaleDateString('de-DE', { weekday: 'short' }).charAt(0);
+            daysHeader.innerHTML += `<div class="day-label">${dayName}</div>`;
         }
 
-        const heuteDot = document.getElementById(`dot-${routineName}-heute`);
-        if (heuteDot) {
-            heuteDot.className = "yesterday-dot " + newRoutineState;
-        }
+        let totalChecks = 0;
+        let successfulChecks = 0;
+        
+        const routineSuccessCounts = {};
+        routineKeys.forEach(k => routineSuccessCounts[k] = 0);
 
-        if (oldRoutineState !== newRoutineState) {
-            syncModuleToCloud(routineName, newRoutineState);
-        }
-    }
-
-    function updateGlobalProgress() {
-        let totalRoutines = 0;
-        let completedRoutines = 0;
-
-        const groups = document.querySelectorAll('.category-group');
-        groups.forEach(group => {
-            const routineName = group.getAttribute('data-routine');
-            const state = habitState[routineName];
-            
-            totalRoutines++;
-            const isDoneNow = (state.done / state.total) >= TARGET_RATIO ? "ja" : "nein";
-            if (isDoneNow === "ja") {
-                completedRoutines++;
-            }
-
-            group.querySelector('.counter-text').textContent = `(${state.done}/${state.total})`;
-            
-            const heuteDot = document.getElementById(`dot-${routineName}-heute`);
-            if (heuteDot) {
-                heuteDot.className = "yesterday-dot " + isDoneNow;
-            }
-        });
-
-        const percent = totalRoutines > 0 ? Math.round((completedRoutines / totalRoutines) * 100) : 0;
-        document.getElementById('progress-bar').style.width = percent + '%';
-        document.getElementById('stats-summary').textContent = `${completedRoutines} / ${totalRoutines} Routinen erreicht`;
-    }
-
-    function fetchHistoryStatus() {
-        fetch(GOOGLE_SCRIPT_URL, { method: "GET" })
-            .then(res => res.json())
-            .then(historyArray => {
-                document.getElementById('cloud-info').textContent = "Cloud Live ✓";
-                
-                if (!Array.isArray(historyArray)) return;
-
-                const today = new Date();
-                const yesterday = new Date();
-                yesterday.setDate(today.getDate() - 1);
-                const ereyesterday = new Date();
-                ereyesterday.setDate(today.getDate() - 2);
-
-                const yesterdayStr = formatDateToString(yesterday);
-                const ereyesterdayStr = formatDateToString(ereyesterday);
-
-                const yesterdayData = historyArray.find(item => item.datum === yesterdayStr);
-                const ereyesterdayData = historyArray.find(item => item.datum === ereyesterdayStr);
-
-                const groups = document.querySelectorAll('.category-group');
-                groups.forEach(group => {
-                    const routineName = group.getAttribute('data-routine');
-
-                    const gesternDot = document.getElementById(`dot-${routineName}-gestern`);
-                    if (gesternDot) {
-                        let statusGestern = "nein";
-                        if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen[routineName]) {
-                            statusGestern = yesterdayData.routinen[routineName].toLowerCase();
-                        }
-                        gesternDot.className = "yesterday-dot " + statusGestern;
+        historyArray.forEach(row => {
+            routineKeys.forEach(routine => {
+                if (row.routinen && row.routinen[routine]) {
+                    const status = row.routinen[routine].toLowerCase();
+                    totalChecks++;
+                    if (status === "ja") {
+                        successfulChecks++;
+                        routineSuccessCounts[routine]++;
                     }
-
-                    const vorgesternDot = document.getElementById(`dot-${routineName}-vorgestern`);
-                    if (vorgesternDot) {
-                        let statusVorgestern = "nein";
-                        if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen[routineName]) {
-                            statusVorgestern = ereyesterdayData.routinen[routineName].toLowerCase();
-                        }
-                        vorgesternDot.className = "yesterday-dot " + statusVorgestern;
-                    }
-                });
-            })
-            .catch(err => {
-                document.getElementById('cloud-info').textContent = "Fehler";
-                console.error(err);
+                }
             });
-    }
-
-    function syncModuleToCloud(routineName, statusString) {
-        document.getElementById('cloud-info').textContent = "Synchronisiere...";
-
-        const formBody = new URLSearchParams();
-        formBody.append('routine', routineName);
-        formBody.append('status', statusString);
-
-        // mode: "no-cors" unterbindet das Blockieren durch die Browser-Sicherheitsprüfung
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: formBody.toString()
-        })
-        .then(() => {
-            document.getElementById('cloud-info').textContent = "Cloud aktualisiert ✓";
-        })
-        .catch(err => {
-            document.getElementById('cloud-info').textContent = "Sync Fehler";
-            console.error(err);
         });
+
+        let currentStreak = 0;
+        let checkDate = new Date();
+        
+        while (true) {
+            const checkDateStr = formatDateToString(checkDate);
+            const foundDay = historyArray.find(item => item.datum === checkDateStr);
+            
+            if (foundDay && foundDay.routinen) {
+                let jaCount = 0;
+                routineKeys.forEach(r => {
+                    if (foundDay.routinen[r] && foundDay.routinen[r].toLowerCase() === 'ja') jaCount++;
+                });
+                
+                if (jaCount >= 5) {
+                    currentStreak++;
+                    checkDate.setDate(checkDate.getDate() - 1);
+                } else {
+                    if (checkDateStr === formatDateToString(new Date())) {
+                        checkDate.setDate(checkDate.getDate() - 1);
+                        continue;
+                    }
+                    break;
+                }
+            } else {
+                if (checkDateStr === formatDateToString(new Date())) {
+                    checkDate.setDate(checkDate.getDate() - 1);
+                    continue;
+                }
+                break;
+            }
+        }
+
+        const rowsContainer = document.getElementById('matrix-rows-container');
+        rowsContainer.innerHTML = '';
+
+        routineKeys.forEach(routine => {
+            let cellsHtml = '';
+            
+            matrixDates.forEach(dateStr => {
+                const dayData = historyArray.find(item => item.datum === dateStr);
+                let status = 'nein';
+                if (dayData && dayData.routinen && dayData.routinen[routine]) {
+                    status = dayData.routinen[routine].toLowerCase();
+                }
+                cellsHtml += `<div class="matrix-cell ${status}"></div>`;
+            });
+
+            rowsContainer.innerHTML += `
+                <div class="matrix-row">
+                    <div class="matrix-label">${routine}</div>
+                    <div class="matrix-cells">${cellsHtml}</div>
+                </div>
+            `;
+        });
+
+        const perfContainer = document.getElementById('routine-performance-container');
+        perfContainer.innerHTML = '';
+
+        routineKeys.forEach(routine => {
+            const routineTotal = historyArray.length;
+            const routineSuccess = routineSuccessCounts[routine] || 0;
+            const pct = routineTotal > 0 ? Math.round((routineSuccess / routineTotal) * 100) : 0;
+            const icon = routineIcons[routine] || "🎯";
+
+            perfContainer.innerHTML += `
+                <div class="perf-item">
+                    <div class="perf-info">
+                        <span class="perf-icon">${icon}</span>
+                        <span class="perf-name">${routine}</span>
+                    </div>
+                    <div class="perf-bar-wrapper">
+                        <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
+                        <span class="perf-pct">${pct}%</span>
+                    </div>
+                </div>
+            `;
+        });
+
+        document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
+        const totalRate = totalChecks > 0 ? Math.round((successfulChecks / totalChecks) * 100) : 0;
+        document.getElementById('kpi-rate').textContent = `${totalRate}%`;
     }
 
-    window.onload = initApp;
+    window.onload = fetchStats;
 </script>
 </body>
 </html>
