@@ -13,6 +13,7 @@
             --success: #27ae60;
             --success-soft: rgba(39, 174, 96, 0.1);
             --danger: #e74c3c;
+            --danger-soft: rgba(231, 76, 60, 0.3);
             --bg: #f0f2f5;
             --surface: #ffffff;
             --text-primary: #1e293b;
@@ -80,19 +81,25 @@
             background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
             padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 14px;
         }
+        
+        /* Interactive Switch Header */
+        .switch-header { display: flex; background: var(--bg); border-radius: 10px; padding: 2px; border: 1px solid var(--border); }
+        .switch-tab { flex: 1; text-align: center; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); padding: 8px 4px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .switch-tab.active { background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow); }
+
         .section-title { font-weight: 800; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary); }
 
         /* Wochen-Matrix */
-        .matrix-grid { display: flex; flex-direction: column; gap: 10px; }
-        .matrix-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-        .matrix-label { font-size: 0.8rem; font-weight: 600; flex: 1; text-align: left; }
-        .matrix-cells { display: flex; gap: 6px; flex-shrink: 0; justify-content: flex-end; }
-        .matrix-cell { width: 20px; height: 20px; border-radius: 6px; background: var(--border-light); border: 1px solid var(--border); position: relative; transition: all 0.2s; }
+        .matrix-grid { display: flex; flex-direction: column; gap: 12px; }
+        .matrix-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+        .matrix-label { font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; gap: 10px; flex: 1; text-align: left; }
+        .matrix-cells { display: flex; gap: 8px; flex-shrink: 0; justify-content: flex-end; }
+        .matrix-cell { width: 26px; height: 26px; border-radius: 7px; background: var(--border-light); border: 1px solid var(--border); position: relative; transition: all 0.2s; }
         .matrix-cell.ja { background: var(--success); border-color: var(--success); }
-        .matrix-cell.nein { background: var(--danger); border-color: var(--danger); opacity: 0.3; }
+        .matrix-cell.nein { background: var(--danger-soft); border-color: var(--danger); opacity: 0.3; }
         
-        .days-header { display: flex; margin-bottom: -4px; flex: 1; justify-content: flex-end; gap: 6px; padding-right: 0; }
-        .day-label { font-size: 0.55rem; font-weight: 700; color: var(--text-secondary); text-align: center; width: 20px; text-transform: uppercase; }
+        .days-header { display: flex; margin-bottom: -4px; justify-content: flex-end; gap: 8px; padding-right: 0; }
+        .day-label { font-size: 0.6rem; font-weight: 700; color: var(--text-secondary); text-align: center; width: 26px; text-transform: uppercase; }
 
         /* Routine Listen Performance */
         .perf-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-light); }
@@ -105,7 +112,7 @@
         .perf-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; }
         .perf-pct { font-size: 0.75rem; font-weight: 700; width: 32px; text-align: right; }
 
-        /* Monatsvergleich Styles */
+        /* Monats/Wochenvergleich Styles */
         .trend-container { display: flex; flex-direction: column; gap: 10px; }
         .trend-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; }
         .trend-month-label { font-size: 0.9rem; font-weight: 700; }
@@ -117,6 +124,10 @@
         .insight-card { background: var(--bg); border-radius: 12px; border: 1px solid var(--border); padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
         .insight-title { font-size: 0.85rem; font-weight: 700; }
         .insight-desc { font-size: 0.75rem; color: var(--text-secondary); line-height: 1.3; }
+        
+        /* Switch Display Helpers */
+        .switch-content { display: none; }
+        .switch-content.active { display: flex; flex-direction: column; }
     </style>
 </head>
 <body>
@@ -130,42 +141,67 @@
 </header>
 
 <main>
+    <!-- KPIs ganz oben -->
     <div class="kpi-grid">
         <div class="kpi-card">
             <div class="kpi-value" id="kpi-streak">-</div>
-            <div class="kpi-label">Aktueller Streak</div>
+            <div class="kpi-label">TwoDayRule Streak</div>
         </div>
         <div class="kpi-card">
             <div class="kpi-value" id="kpi-rate">-</div>
-            <div class="kpi-label">Erfüllung (Gesamt)</div>
+            <div class="kpi-label">Fokus-Metrik</div>
         </div>
     </div>
 
+    <!-- DOMINOSTEIN-ANALYSEN jetzt direkt unter den KPIs -->
     <div class="section-block">
-        <div class="section-title">7-Tage Konsistenz Matrix</div>
-        <div class="matrix-grid">
-            <div class="days-header" id="matrix-days"></div>
-            <div id="matrix-rows-container" style="display: flex; flex-direction: column; gap: 10px;"></div>
-        </div>
-    </div>
-
-    <div class="section-block">
-        <div class="section-title">Monatsvergleich Trend</div>
-        <div class="trend-container" id="month-trend-container">
-            <div style="font-size: 0.8rem; color: var(--text-secondary);">Berechne historische Monatsdaten...</div>
-        </div>
-    </div>
-
-    <div class="section-block">
-        <div class="section-title">Dominostein-Analysen (Hebel 4)</div>
+        <div class="section-title">Dominostein-Analysen</div>
         <div style="display: flex; flex-direction: column; gap: 10px;" id="correlation-container">
             <div style="font-size: 0.8rem; color: var(--text-secondary);">Analysiere wechselseitige Abhängigkeiten...</div>
         </div>
     </div>
 
+    <!-- Block 1: Switch zwischen Matrix und Auswertung -->
     <div class="section-block">
-        <div class="section-title">Routine Auswertung</div>
-        <div id="routine-performance-container"></div>
+        <div class="switch-header">
+            <div class="switch-tab active" onclick="switchBlock('top', 'matrix')">7-Tage Matrix</div>
+            <div class="switch-tab" onclick="switchBlock('top', 'perf')">Routine Auswertung</div>
+        </div>
+        
+        <!-- Matrix Content -->
+        <div id="content-matrix" class="switch-content active">
+            <div class="matrix-grid">
+                <div class="days-header" id="matrix-days"></div>
+                <div id="matrix-rows-container" style="display: flex; flex-direction: column; gap: 10px;"></div>
+            </div>
+        </div>
+        
+        <!-- Auswertung Content -->
+        <div id="content-perf" class="switch-content">
+            <div id="routine-performance-container"></div>
+        </div>
+    </div>
+
+    <!-- Block 2: Switch zwischen Monat und Woche -->
+    <div class="section-block">
+        <div class="switch-header">
+            <div class="switch-tab active" onclick="switchBlock('bottom', 'month')">Monatsvergleich</div>
+            <div class="switch-tab" onclick="switchBlock('bottom', 'week')">Wochenvergleich</div>
+        </div>
+        
+        <!-- Monat Content -->
+        <div id="content-month" class="switch-content active">
+            <div class="trend-container" id="month-trend-container">
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">Berechne historische Monatsdaten...</div>
+            </div>
+        </div>
+        
+        <!-- Woche Content -->
+        <div id="content-week" class="switch-content">
+            <div class="trend-container" id="week-trend-container">
+                <div style="font-size: 0.8rem; color: var(--text-secondary);">Berechne historische Wochendaten...</div>
+            </div>
+        </div>
     </div>
 </main>
 
@@ -181,6 +217,23 @@
         "Schlafroutine": "🛌",
         "TwoDayRule": "⚡"
     };
+
+    function switchBlock(position, type) {
+        const header = event.target.parentElement;
+        const tabs = header.querySelectorAll('.switch-tab');
+        tabs.forEach(tab => tab.classList.remove('active'));
+        event.target.classList.add('active');
+
+        if (position === 'top') {
+            document.getElementById('content-matrix').classList.remove('active');
+            document.getElementById('content-perf').classList.remove('active');
+            document.getElementById('content-' + type).classList.add('active');
+        } else if (position === 'bottom') {
+            document.getElementById('content-month').classList.remove('active');
+            document.getElementById('content-week').classList.remove('active');
+            document.getElementById('content-' + type).classList.add('active');
+        }
+    }
 
     function fetchStats() {
         fetch(GOOGLE_SCRIPT_URL, { method: "GET" })
@@ -207,11 +260,25 @@
     }
 
     function parseMonthYear(dateStr) {
-        // "dd.mm.yyyy" -> "Monat yyyy"
         const parts = dateStr.split('.');
         if (parts.length !== 3) return "Unbekannt";
         const dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
         return dateObj.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+    }
+
+    // Hilfsfunktion zur Ermittlung der Kalenderwoche (ISO 8601)
+    function getWeekNumber(dateStr) {
+        const parts = dateStr.split('.');
+        if (parts.length !== 3) return null;
+        const target = new Date(parts[2], parts[1] - 1, parts[0]);
+        const dayNr = (target.getDay() + 6) % 7;
+        target.setDate(target.getDate() - dayNr + 3);
+        const firstThursday = target.valueOf();
+        target.setMonth(0, 1);
+        if (target.getDay() !== 4) {
+            target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
+        }
+        return 1 + Math.ceil((firstThursday - target) / 604800000);
     }
 
     function renderDashboard(historyArray) {
@@ -237,13 +304,24 @@
         const routineSuccessCounts = {};
         routineKeys.forEach(k => routineSuccessCounts[k] = 0);
 
-        // --- NEU: DYNAMISCHE STRUKTUREN FÜR MONATE UND KORRELATIONEN ---
         const monthlyData = {};
+        const weeklyData = {};
 
         historyArray.forEach(row => {
+            if (!row.datum) return;
+            
+            // Monats-Aggregation
             const monthKey = parseMonthYear(row.datum);
             if (!monthlyData[monthKey]) {
                 monthlyData[monthKey] = { total: 0, success: 0 };
+            }
+
+            // Wochen-Aggregation (Format: "KW XX / YYYY")
+            const weekNum = getWeekNumber(row.datum);
+            const year = row.datum.split('.')[2];
+            const weekKey = weekNum ? `KW ${String(weekNum).padStart(2, '0')} / ${year}` : "Unbekannt";
+            if (weekKey !== "Unbekannt" && !weeklyData[weekKey]) {
+                weeklyData[weekKey] = { total: 0, success: 0 };
             }
 
             routineKeys.forEach(routine => {
@@ -251,11 +329,13 @@
                     const status = row.routinen[routine].toLowerCase();
                     totalChecks++;
                     monthlyData[monthKey].total++;
+                    if (weekKey !== "Unbekannt") weeklyData[weekKey].total++;
                     
                     if (status === "ja") {
                         successfulChecks++;
                         routineSuccessCounts[routine]++;
                         monthlyData[monthKey].success++;
+                        if (weekKey !== "Unbekannt") weeklyData[weekKey].success++;
                     }
                 }
             });
@@ -264,10 +344,10 @@
         // --- 2. MONATSVERGLEICH DYNAMISCH RENDERN ---
         const trendContainer = document.getElementById('month-trend-container');
         trendContainer.innerHTML = '';
-        const sortedMonths = Object.keys(monthlyData).reverse(); // Neueste Monate zuerst
+        const sortedMonths = Object.keys(monthlyData).reverse();
 
         if (sortedMonths.length === 0) {
-            trendContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary);">Noch keine Monatsdaten vorhanden.</div>`;
+            trendContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary);">Keine Monatsdaten verfügbar.</div>`;
         } else {
             sortedMonths.forEach((month, idx) => {
                 const data = monthlyData[month];
@@ -296,13 +376,48 @@
             });
         }
 
-        // --- 3. KORRELATIONS-MATRIX BERECHNEN (HEBEL 4) ---
+        // --- NEU: WOCHENVERGLEICH DYNAMISCH RENDERN (LETZTE 4 WOCHEN) ---
+        const weekTrendContainer = document.getElementById('week-trend-container');
+        weekTrendContainer.innerHTML = '';
+        const sortedWeeks = Object.keys(weeklyData).sort().reverse(); // Neueste KW zuerst
+        const limitedWeeks = sortedWeeks.slice(0, 4);
+
+        if (limitedWeeks.length === 0) {
+            weekTrendContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary);">Keine Wochendaten verfügbar.</div>`;
+        } else {
+            limitedWeeks.forEach((week, idx) => {
+                const data = weeklyData[week];
+                const pct = data.total > 0 ? Math.round((data.success / data.total) * 100) : 0;
+                
+                let badgeHtml = `<span class="trend-badge neutral">${pct}% Erfüllung</span>`;
+                if (idx < limitedWeeks.length - 1) {
+                    const prevWeek = limitedWeeks[idx + 1];
+                    const prevData = weeklyData[prevWeek];
+                    const prevPct = prevData.total > 0 ? Math.round((prevData.success / prevData.total) * 100) : 0;
+                    const diff = pct - prevPct;
+                    
+                    if (diff > 0) {
+                        badgeHtml = `<span class="trend-badge up">▲ +${diff}% vs. Vorwoche (${pct}%)</span>`;
+                    } else if (diff < 0) {
+                        badgeHtml = `<span class="trend-badge" style="background: rgba(231, 76, 60, 0.1); color: var(--danger);">▼ ${diff}% vs. Vorwoche (${pct}%)</span>`;
+                    }
+                }
+
+                weekTrendContainer.innerHTML += `
+                    <div class="trend-row">
+                        <span class="trend-month-label">${week}</span>
+                        ${badgeHtml}
+                    </div>
+                `;
+            });
+        }
+
+        // --- 3. KORRELATIONS-MATRIX BERECHNEN ---
         const correlationContainer = document.getElementById('correlation-container');
         correlationContainer.innerHTML = '';
 
         const insights = [];
         
-        // Wir untersuchen alle Paare, z.B. Schlafroutine -> Fokusroutine
         routineKeys.forEach(triggerRoutine => {
             routineKeys.forEach(targetRoutine => {
                 if (triggerRoutine === targetRoutine) return;
@@ -310,24 +425,41 @@
                 let triggerJaCount = 0;
                 let targetAlsoJaCount = 0;
 
-                historyArray.forEach(row => {
-                    if (row.routinen && row.routinen[triggerRoutine] && row.routinen[targetRoutine]) {
-                        if (row.routinen[triggerRoutine].toLowerCase() === 'ja') {
-                            triggerJaCount++;
-                            if (row.routinen[targetRoutine].toLowerCase() === 'ja') {
-                                targetAlsoJaCount++;
+                for (let i = 1; i < historyArray.length; i++) {
+                    const currentRow = historyArray[i]; 
+                    const nextDayRow = historyArray[i - 1]; 
+
+                    const isTimeShifted = (triggerRoutine === "Abendroutine" || triggerRoutine === "Schlafroutine");
+                    
+                    if (isTimeShifted) {
+                        if (currentRow.routinen && currentRow.routinen[triggerRoutine] && nextDayRow.routinen && nextDayRow.routinen[targetRoutine]) {
+                            if (currentRow.routinen[triggerRoutine].toLowerCase() === 'ja') {
+                                triggerJaCount++;
+                                if (nextDayRow.routinen[targetRoutine].toLowerCase() === 'ja') {
+                                    targetAlsoJaCount++;
+                                }
+                            }
+                        }
+                    } else {
+                        if (currentRow.routinen && currentRow.routinen[triggerRoutine] && currentRow.routinen[targetRoutine]) {
+                            if (currentRow.routinen[triggerRoutine].toLowerCase() === 'ja') {
+                                triggerJaCount++;
+                                if (currentRow.routinen[targetRoutine].toLowerCase() === 'ja') {
+                                    targetAlsoJaCount++;
+                                }
                             }
                         }
                     }
-                });
+                }
 
-                if (triggerJaCount >= 2) { // Mindestens zwei Treffer nötig, um statistisch relevant zu sein
+                if (triggerJaCount >= 2) {
                     const probability = Math.round((targetAlsoJaCount / triggerJaCount) * 100);
-                    if (probability >= 70) { // Nur starke positive Hebel anzeigen
+                    if (probability >= 70) {
                         insights.push({
                             trigger: triggerRoutine,
                             target: targetRoutine,
-                            prob: probability
+                            prob: probability,
+                            isShifted: (triggerRoutine === "Abendroutine" || triggerRoutine === "Schlafroutine")
                         });
                     }
                 }
@@ -341,54 +473,42 @@
                     <div class="insight-desc">Sobald du die ersten Routinen auf "ja" setzt und Kausalitäten entstehen, siehst du hier deinen mächtigsten Dominostein.</div>
                 </div>`;
         } else {
-            // Sortieren nach höchster Wahrscheinlichkeit
             insights.sort((a, b) => b.prob - a.prob);
             insights.slice(0, 3).forEach(ins => {
                 const triggerIcon = routineIcons[ins.trigger] || "🎯";
                 const targetIcon = routineIcons[ins.target] || "🎯";
+                const contextText = ins.isShifted ? "am Folgetag" : "am selben Tag";
                 correlationContainer.innerHTML += `
                     <div class="insight-card">
                         <div class="insight-title">${triggerIcon} ${ins.trigger} → ${targetIcon} ${ins.target}</div>
-                        <div class="insight-desc">Wenn diese Routine sitzt, erfüllst du deine <strong>${ins.target}</strong> mit einer Wahrscheinlichkeit von <strong>${ins.prob}%</strong>. Es ist dein strategischer Hebel.</div>
+                        <div class="insight-desc">Wenn diese Routine sitzt, erfüllst du deine <strong>${ins.target}</strong> ${contextText} mit einer Wahrscheinlichkeit von <strong>${ins.prob}%</strong>. Es ist dein strategischer Hebel.</div>
                     </div>
                 `;
             });
         }
 
-        // --- 4. ECHTEN ALL-TIME STREAK BERECHNEN ---
+        // --- 4. TWODAYRULE STREAK BERECHNEN ---
         let currentStreak = 0;
         let checkDate = new Date();
+        checkDate.setDate(checkDate.getDate() - 1); 
         
         while (true) {
             const checkDateStr = formatDateToString(checkDate);
             const foundDay = historyArray.find(item => item.datum === checkDateStr);
             
-            if (foundDay && foundDay.routinen) {
-                let jaCount = 0;
-                routineKeys.forEach(r => {
-                    if (foundDay.routinen[r] && foundDay.routinen[r].toLowerCase() === 'ja') jaCount++;
-                });
-                
-                if (jaCount >= 5) {
+            if (foundDay && foundDay.routinen && foundDay.routinen["TwoDayRule"]) {
+                if (foundDay.routinen["TwoDayRule"].toLowerCase() === 'ja') {
                     currentStreak++;
                     checkDate.setDate(checkDate.getDate() - 1);
                 } else {
-                    if (checkDateStr === formatDateToString(new Date())) {
-                        checkDate.setDate(checkDate.getDate() - 1);
-                        continue;
-                    }
                     break;
                 }
             } else {
-                if (checkDateStr === formatDateToString(new Date())) {
-                    checkDate.setDate(checkDate.getDate() - 1);
-                    continue;
-                }
                 break;
             }
         }
 
-        // --- 5. MATRIX ZEILEN RENDERN ---
+        // --- 5. MATRIX ZEILEN RENDERN (NAME + EMOJI IDENTISCH ZUR AUSWERTUNG + FARBEN) ---
         const rowsContainer = document.getElementById('matrix-rows-container');
         rowsContainer.innerHTML = '';
 
@@ -404,9 +524,14 @@
                 cellsHtml += `<div class="matrix-cell ${status}"></div>`;
             });
 
+            const icon = routineIcons[routine] || "🎯";
+
             rowsContainer.innerHTML += `
                 <div class="matrix-row">
-                    <div class="matrix-label">${routine}</div>
+                    <div class="matrix-label">
+                        <span class="perf-icon">${icon}</span>
+                        <span class="perf-name">${routine}</span>
+                    </div>
                     <div class="matrix-cells">${cellsHtml}</div>
                 </div>
             `;
@@ -437,8 +562,7 @@
         });
 
         document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
-        const totalRate = totalChecks > 0 ? Math.round((successfulChecks / totalChecks) * 100) : 0;
-        document.getElementById('kpi-rate').textContent = `${totalRate}%`;
+        document.getElementById('kpi-rate').textContent = "Aktiv"; 
     }
 
     window.onload = fetchStats;
