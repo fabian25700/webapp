@@ -99,10 +99,17 @@
             line-height: 1;
         }
 
-        .switchers-right {
+        /* Zentrierter Bereich für die Switches zwischen Header und Inhalt */
+        .centered-switch-area {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            gap: 10px;
+            margin: 16px auto 4px auto;
+            width: 100%;
+            max-width: 600px;
+            padding: 0 16px;
         }
 
         .main-view-switch {
@@ -356,6 +363,7 @@
             .day-label { height: 20px; line-height: 20px; }
         }
     </style>
+    <!-- Externe Konfigurationsdatei laden -->
     <script src="habits_input.js"></script>
 </head>
 <body>
@@ -370,24 +378,26 @@
                 <span>Routinen</span>
             </a>
         </div>
-        
-        <div class="switchers-right">
-            <div class="main-view-switch">
-                <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')">🏹 Tracker</button>
-                <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')">Stats 📊</button>
-            </div>
-
-            <div class="apple-switch-container" id="mode-switch-wrapper">
-                <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')" title="Zuhause">🏡</button>
-                <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')" title="Unterwegs">🧳</button>
-            </div>
-        </div>
     </div>
 </header>
 
 <div class="cloud-error-banner" id="cloud-error-box">Sync-Fehler: Keine Verbindung zur Cloud möglich.</div>
 
+<!-- Beide Switches zentriert untereinander zwischen Header und Main -->
+<div class="centered-switch-area">
+    <div class="main-view-switch">
+        <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')">🎯 Tracker</button>
+        <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')">Stats 📊</button>
+    </div>
+
+    <div class="apple-switch-container" id="mode-switch-wrapper">
+        <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')" title="Zuhause">🏡</button>
+        <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')" title="Unterwegs">🧳</button>
+    </div>
+</div>
+
 <main>
+    <!-- TRACKER VIEW -->
     <div id="view-tracker" class="view-section active">
         <div class="category-group" data-routine="TwoDayRule" id="routine-block-TwoDayRule">
             <div class="category-header" style="cursor: default;">
@@ -410,6 +420,7 @@
         </div>
     </div>
 
+    <!-- STATS VIEW -->
     <div id="view-stats" class="view-section">
         <div class="kpi-grid">
             <div class="kpi-card">
@@ -479,7 +490,8 @@
 </main>
 
 <div id="routine-templates" style="display: none;">
-    </div>
+    <!-- Wird dynamisch aus der JavaScript-Datei generiert -->
+</div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbhl1k_pgXinca2FA2hxqzMJzW--7Hfo54XHtVm_vfrxndA-GFF57UsQ2ILn6drZnu2w/exec";
@@ -606,7 +618,6 @@
         const templatesContainer = document.getElementById('routine-templates');
         templatesContainer.innerHTML = '';
         
-        // Dynamischer Aufbau der Templates basierend auf dem aktuellen Modus
         Object.keys(ROUTINE_CONFIG).forEach(routineName => {
             const config = ROUTINE_CONFIG[routineName];
             const habits = config[currentGlobalMode] || config.zuhause || [];
