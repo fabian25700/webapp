@@ -104,6 +104,20 @@
             line-height: 1;
         }
 
+        .header-right {
+            display: flex;
+            align-items: center;
+            position: absolute;
+            right: 0;
+            z-index: 10;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+        }
+
         /* Zentrierter erster Switch im Header */
         .header-switch-container {
             margin: 0 auto;
@@ -394,6 +408,7 @@
                 <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')"><span>📊</span> <span>Stats</span></button>
             </div>
         </div>
+        <div class="header-right" id="cloud-status-text">Cloud Live</div>
     </div>
 </header>
 
@@ -497,8 +512,7 @@
     </div>
 </main>
 
-<div id="routine-templates" style="display: none;">
-    </div>
+<div id="routine-templates" style="display: none;"></div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbhl1k_pgXinca2FA2hxqzMJzW--7Hfo54XHtVm_vfrxndA-GFF57UsQ2ILn6drZnu2w/exec";
@@ -507,6 +521,7 @@
     const habitState = {};
     let globalHistoryArray = [];
     let currentGlobalMode = "zuhause";
+    let cloudSyncTimeout = null;
 
     const routineIcons = {
         "Morgenroutine": "☀️",
@@ -517,6 +532,30 @@
         "Schlafroutine": "🛌",
         "TwoDayRule": "⚡"
     };
+
+    function updateCloudStatus(status) {
+        const indicator = document.getElementById('cloud-status-text');
+        if (!indicator) return;
+        
+        if (cloudSyncTimeout && status !== "Cloud synced") {
+            clearTimeout(cloudSyncTimeout);
+            cloudSyncTimeout = null;
+        }
+
+        indicator.textContent = status;
+        if (status === "Cloud Fehler") {
+            indicator.style.color = "var(--danger)";
+        } else if (status === "Cloud synced") {
+            indicator.style.color = "var(--success)";
+            cloudSyncTimeout = setTimeout(() => {
+                indicator.textContent = "Cloud Live";
+                indicator.style.color = "var(--text-secondary)";
+                cloudSyncTimeout = null;
+            }, 3000);
+        } else {
+            indicator.style.color = "var(--text-secondary)";
+        }
+    }
 
     function toggleMainView(view) {
         document.getElementById('view-btn-tracker').classList.toggle('active', view === 'tracker');
@@ -864,6 +903,7 @@
     }
 
     function fetchHistoryStatus() {
+        updateCloudStatus("Cloud Live");
         fetch(GOOGLE_SCRIPT_URL, { method: "GET" })
             .then(res => res.json())
             .then(historyArray => {
@@ -921,11 +961,13 @@
             })
             .catch(err => {
                 document.getElementById('cloud-error-box').style.display = 'block';
+                updateCloudStatus("Cloud Fehler");
                 console.error(err);
             });
     }
 
     function syncModuleToCloud(routineName, statusString) {
+        updateCloudStatus("Cloud Live");
         const formBody = new URLSearchParams();
         formBody.append('routine', routineName);
         formBody.append('status', statusString);
@@ -938,10 +980,12 @@
         })
         .then(() => { 
             document.getElementById('cloud-error-box').style.display = 'none'; 
+            updateCloudStatus("Cloud synced");
             fetchHistoryStatus();
         })
         .catch(err => {
             document.getElementById('cloud-error-box').style.display = 'block';
+            updateCloudStatus("Cloud Fehler");
             console.error(err);
         });
     }
