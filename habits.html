@@ -243,7 +243,7 @@
 
         #active-routines-container, #done-routines-list { display: flex; flex-direction: column; gap: 12px; }
 
-        .done-routines-master-container { margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 16px; }
+        .done-routines-master-container { display: none; margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 16px; }
         .done-routines-trigger {
             font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);
             text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
@@ -552,6 +552,8 @@
                 indicator.style.color = "var(--text-secondary)";
                 cloudSyncTimeout = null;
             }, 3000);
+        } else if (status === "Cloud lädt") {
+            indicator.style.color = "var(--accent)";
         } else {
             indicator.style.color = "var(--text-secondary)";
         }
@@ -719,9 +721,9 @@
             }).join('');
 
             habitsHtml += `
-                <div class="bucket-card ${isJokerChecked ? 'done' : ''}" id="card-${jokerId}" onclick="toggleJoker('${routineName}', '${jokerId}', this)" data-joker="true" style="margin-top: 8px; border-color: var(--text-secondary);">
-                    <div class="status-circle" style="border-radius: 50%;"></div>
-                    <div class="location-name" style="color: var(--text-secondary); font-style: italic;">Ausnahme / Reisetag 🏳️</div>
+                <div class="bucket-card ${isJokerChecked ? 'done' : ''}" id="card-${jokerId}" onclick="toggleJoker('${routineName}', '${jokerId}', this)" data-joker="true">
+                    <div class="status-circle"></div>
+                    <div class="location-name" style="color: var(--danger); font-style: italic;">Krank / Verhindert 🏳️</div>
                 </div>
             `;
 
@@ -749,9 +751,6 @@
 
         if (!isOpen) {
             targetGroup.classList.add('open');
-            setTimeout(() => {
-                targetGroup.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 100);
         }
     }
 
@@ -759,7 +758,6 @@
         const group = document.getElementById(`routine-block-${routineName}`);
         if (group) {
             group.classList.remove('open');
-            group.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
     }
 
@@ -827,10 +825,6 @@
     }
 
     function updateGlobalProgress(suppressCloudSync = false) {
-        const activeContainer = document.getElementById('active-routines-container');
-        const doneContainer = document.getElementById('done-routines-list');
-        const masterBox = document.getElementById('done-routines-master-box');
-
         const routineNames = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine"];
         
         routineNames.forEach(routineName => {
@@ -844,15 +838,10 @@
 
             if (isDoneNow === "ja") {
                 group.classList.add('routine-done-state');
-                if (group.classList.contains('open')) group.classList.remove('open');
-                doneContainer.appendChild(group);
             } else {
                 group.classList.remove('routine-done-state');
-                activeContainer.appendChild(group);
             }
         });
-
-        masterBox.style.display = doneContainer.children.length > 0 ? 'block' : 'none';
 
         const oldTdrState = habitState["TwoDayRule"] ? (habitState["TwoDayRule"].isApproved ? "ja" : "nein") : "nein";
         updateTwoDayRuleStatus();
@@ -903,7 +892,7 @@
     }
 
     function fetchHistoryStatus() {
-        updateCloudStatus("Cloud Live");
+        updateCloudStatus("Cloud lädt");
         fetch(GOOGLE_SCRIPT_URL, { method: "GET" })
             .then(res => res.json())
             .then(historyArray => {
@@ -954,6 +943,7 @@
                 });
 
                 updateTwoDayRuleStatus();
+                updateCloudStatus("Cloud Live");
                 
                 if (document.getElementById('view-stats').classList.contains('active')) {
                     renderDashboard(historyArray);
@@ -967,7 +957,7 @@
     }
 
     function syncModuleToCloud(routineName, statusString) {
-        updateCloudStatus("Cloud Live");
+        updateCloudStatus("Cloud lädt");
         const formBody = new URLSearchParams();
         formBody.append('routine', routineName);
         formBody.append('status', statusString);
