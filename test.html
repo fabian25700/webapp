@@ -104,20 +104,6 @@
             line-height: 1;
         }
 
-        .header-right {
-            display: flex;
-            align-items: center;
-            position: absolute;
-            right: 0;
-            z-index: 10;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
-            transition: color 0.2s ease;
-        }
-
         /* Zentrierter erster Switch im Header */
         .header-switch-container {
             margin: 0 auto;
@@ -408,7 +394,6 @@
                 <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')"><span>📊</span> <span>Stats</span></button>
             </div>
         </div>
-        <div class="header-right" id="cloud-status-text">Cloud Live</div>
     </div>
 </header>
 
@@ -512,7 +497,8 @@
     </div>
 </main>
 
-<div id="routine-templates" style="display: none;"></div>
+<div id="routine-templates" style="display: none;">
+    </div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbhl1k_pgXinca2FA2hxqzMJzW--7Hfo54XHtVm_vfrxndA-GFF57UsQ2ILn6drZnu2w/exec";
@@ -521,7 +507,6 @@
     const habitState = {};
     let globalHistoryArray = [];
     let currentGlobalMode = "zuhause";
-    let cloudSyncTimeout = null;
 
     const routineIcons = {
         "Morgenroutine": "☀️",
@@ -532,30 +517,6 @@
         "Schlafroutine": "🛌",
         "TwoDayRule": "⚡"
     };
-
-    function updateCloudStatus(status) {
-        const indicator = document.getElementById('cloud-status-text');
-        if (!indicator) return;
-        
-        if (cloudSyncTimeout && status !== "Cloud synced") {
-            clearTimeout(cloudSyncTimeout);
-            cloudSyncTimeout = null;
-        }
-
-        indicator.textContent = status;
-        if (status === "Cloud Fehler") {
-            indicator.style.color = "var(--danger)";
-        } else if (status === "Cloud synced") {
-            indicator.style.color = "var(--success)";
-            cloudSyncTimeout = setTimeout(() => {
-                indicator.textContent = "Cloud Live";
-                indicator.style.color = "var(--text-secondary)";
-                cloudSyncTimeout = null;
-            }, 3000);
-        } else {
-            indicator.style.color = "var(--text-secondary)";
-        }
-    }
 
     function toggleMainView(view) {
         document.getElementById('view-btn-tracker').classList.toggle('active', view === 'tracker');
@@ -903,7 +864,6 @@
     }
 
     function fetchHistoryStatus() {
-        updateCloudStatus("Cloud Live");
         fetch(GOOGLE_SCRIPT_URL, { method: "GET" })
             .then(res => res.json())
             .then(historyArray => {
@@ -961,13 +921,11 @@
             })
             .catch(err => {
                 document.getElementById('cloud-error-box').style.display = 'block';
-                updateCloudStatus("Cloud Fehler");
                 console.error(err);
             });
     }
 
     function syncModuleToCloud(routineName, statusString) {
-        updateCloudStatus("Cloud Live");
         const formBody = new URLSearchParams();
         formBody.append('routine', routineName);
         formBody.append('status', statusString);
@@ -980,18 +938,17 @@
         })
         .then(() => { 
             document.getElementById('cloud-error-box').style.display = 'none'; 
-            updateCloudStatus("Cloud synced");
             fetchHistoryStatus();
         })
         .catch(err => {
             document.getElementById('cloud-error-box').style.display = 'block';
-            updateCloudStatus("Cloud Fehler");
             console.error(err);
         });
     }
 
     function renderDashboard(historyArray) {
         const routineKeys = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine", "TwoDayRule"];
+        const coreRoutineKeys = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine"];
         
         const totalMatrixDays = 7;
         const matrixDates = [];
@@ -1094,40 +1051,85 @@
         correlationContainer.innerHTML = '';
         const insights = [];
         
-        routineKeys.forEach(triggerRoutine => {
-            routineKeys.forEach(targetRoutine => {
+        coreRoutineKeys.forEach(triggerRoutine => {
+            coreRoutineKeys.forEach(targetRoutine => {
                 if (triggerRoutine === targetRoutine) return;
-                let triggerJaCount = 0;
-                let targetAlsoJaCount = 0;
 
-                for (let i = 1; i < historyArray.length; i++) {
-                    const currentRow = historyArray[i]; 
-                    const nextDayRow = historyArray[i - 1]; 
-                    const isTimeShifted = (triggerRoutine === "Abendroutine" || triggerRoutine === "Schlafroutine");
-                    
-                    if (isTimeShifted) {
-                        if (currentRow.routinen && currentRow.routinen[triggerRoutine] && nextDayRow.routinen && nextDayRow.routinen[targetRoutine]) {
-                            if (currentRow.routinen[triggerRoutine].toLowerCase() === 'ja') {
-                                triggerJaCount++;
-                                if (nextDayRow.routinen[targetRoutine].toLowerCase() === 'ja') targetAlsoJaCount++;
+                const validTimeShifts = [];
+                if (triggerRoutine === "Morgenroutine") {
+                    validTimeShifts.push(false);
+                } else if (triggerRoutine === "Sportroutine" || triggerRoutine === "Gesundheitsroutine" || triggerRoutine === "Fokusroutine") {
+                    validTimeShifts.push(false);
+                    validTimeShifts.push(true);
+                } else if (triggerRoutine === "Abendroutine") {
+                    validTimeShifts.push(true);
+                } else if (triggerRoutine === "Schlafroutine") {
+                    validTimeShifts.push(true);
+                }
+
+                validTimeShifts.forEach(isTimeShifted => {
+                    let triggerTotalCount = 0;
+                    let targetPositiveCount = 0;
+                    let triggerNegativeCount = 0;
+                    let targetNegativePositiveCount = 0;
+
+                    for (let i = 1; i < historyArray.length; i++) {
+                        const currentRow = historyArray[i]; 
+                        const nextDayRow = historyArray[i - 1]; 
+                        
+                        if (isTimeShifted) {
+                            if (currentRow.routinen && currentRow.routinen[triggerRoutine] && nextDayRow.routinen && nextDayRow.routinen[targetRoutine]) {
+                                const tStatus = currentRow.routinen[triggerRoutine].toLowerCase();
+                                const oStatus = nextDayRow.routinen[targetRoutine].toLowerCase();
+                                if (tStatus === 'ja') {
+                                    triggerTotalCount++;
+                                    if (oStatus === 'ja') targetPositiveCount++;
+                                } else if (tStatus === 'nein') {
+                                    triggerNegativeCount++;
+                                    if (oStatus === 'nein') targetNegativePositiveCount++;
+                                }
                             }
-                        }
-                    } else {
-                        if (currentRow.routinen && currentRow.routinen[triggerRoutine] && currentRow.routinen[targetRoutine]) {
-                            if (currentRow.routinen[triggerRoutine].toLowerCase() === 'ja') {
-                                triggerJaCount++;
-                                if (currentRow.routinen[targetRoutine].toLowerCase() === 'ja') targetAlsoJaCount++;
+                        } else {
+                            if (currentRow.routinen && currentRow.routinen[triggerRoutine] && currentRow.routinen[targetRoutine]) {
+                                const tStatus = currentRow.routinen[triggerRoutine].toLowerCase();
+                                const oStatus = currentRow.routinen[targetRoutine].toLowerCase();
+                                if (tStatus === 'ja') {
+                                    triggerTotalCount++;
+                                    if (oStatus === 'ja') targetPositiveCount++;
+                                } else if (tStatus === 'nein') {
+                                    triggerNegativeCount++;
+                                    if (oStatus === 'nein') targetNegativePositiveCount++;
+                                }
                             }
                         }
                     }
-                }
 
-                if (triggerJaCount >= 2) {
-                    const probability = Math.round((targetAlsoJaCount / triggerJaCount) * 100);
-                    if (probability >= 70) {
-                        insights.push({ trigger: triggerRoutine, target: targetRoutine, prob: probability, isShifted: (triggerRoutine === "Abendroutine" || triggerRoutine === "Schlafroutine") });
+                    if (triggerTotalCount >= 2) {
+                        const probability = Math.round((targetPositiveCount / triggerTotalCount) * 100);
+                        if (probability >= 70) {
+                            insights.push({ 
+                                type: 'positive',
+                                trigger: triggerRoutine, 
+                                target: targetRoutine, 
+                                prob: probability, 
+                                isShifted: isTimeShifted 
+                            });
+                        }
                     }
-                }
+
+                    if (triggerNegativeCount >= 2) {
+                        const probabilityNeg = Math.round((targetNegativePositiveCount / triggerNegativeCount) * 100);
+                        if (probabilityNeg >= 70) {
+                            insights.push({ 
+                                type: 'negative',
+                                trigger: triggerRoutine, 
+                                target: targetRoutine, 
+                                prob: probabilityNeg, 
+                                isShifted: isTimeShifted 
+                            });
+                        }
+                    }
+                });
             });
         });
 
@@ -1139,7 +1141,12 @@
                 const triggerIcon = routineIcons[ins.trigger] || "🎯";
                 const targetIcon = routineIcons[ins.target] || "🎯";
                 const contextText = ins.isShifted ? "am Folgetag" : "am selben Tag";
-                correlationContainer.innerHTML += `<div class="insight-card"><div class="insight-title">${triggerIcon} ${ins.trigger} &rarr; ${targetIcon} ${ins.target}</div><div class="insight-desc">Sichert deine <strong>${ins.target}</strong> ${contextText} mit einer Wahrscheinlichkeit von <strong>${ins.prob}%</strong>.</div></div>`;
+                
+                if (ins.type === 'positive') {
+                    correlationContainer.innerHTML += `<div class="insight-card"><div class="insight-title">${triggerIcon} ${ins.trigger} &rarr; ${targetIcon} ${ins.target} (Positiv)</div><div class="insight-desc">Erfüllung sichert deine <strong>${ins.target}</strong> ${contextText} mit einer Wahrscheinlichkeit von <strong>${ins.prob}%</strong>.</div></div>`;
+                } else {
+                    correlationContainer.innerHTML += `<div class="insight-card" style="border-color: rgba(231, 76, 60, 0.2);"><div class="insight-title">${triggerIcon} ${ins.trigger} &rarr; ${targetIcon} ${ins.target} (Negativ)</div><div class="insight-desc">Ausbleiben führt zu Ausfall deiner <strong>${ins.target}</strong> ${contextText} mit einer Wahrscheinlichkeit von <strong>${ins.prob}%</strong>.</div></div>`;
+                }
             });
         }
 
@@ -1147,20 +1154,26 @@
         clusterContainer.innerHTML = '';
         const clusters = [];
 
-        for (let i = 0; i < routineKeys.length; i++) {
-            for (let j = i + 1; j < routineKeys.length; j++) {
-                const r1 = routineKeys[i]; const r2 = routineKeys[j];
-                let commonDays = 0; let totalActiveDays = historyArray.length;
+        for (let i = 0; i < coreRoutineKeys.length; i++) {
+            for (let j = i + 1; j < coreRoutineKeys.length; j++) {
+                const r1 = coreRoutineKeys[i]; const r2 = coreRoutineKeys[j];
+                let commonDaysJa = 0; let commonDaysNein = 0; let totalActiveDays = historyArray.length;
 
                 historyArray.forEach(row => {
                     if (row.routinen && row.routinen[r1] && row.routinen[r2]) {
-                        if (row.routinen[r1].toLowerCase() === 'ja' && row.routinen[r2].toLowerCase() === 'ja') commonDays++;
+                        if (row.routinen[r1].toLowerCase() === 'ja' && row.routinen[r2].toLowerCase() === 'ja') commonDaysJa++;
+                        if (row.routinen[r1].toLowerCase() === 'nein' && row.routinen[r2].toLowerCase() === 'nein') commonDaysNein++;
                     }
                 });
 
-                if (commonDays >= 2) {
-                    const pairProb = Math.round((commonDays / totalActiveDays) * 100);
-                    clusters.push({ routine1: r1, routine2: r2, strength: pairProb, count: commonDays });
+                if (commonDaysJa >= 2) {
+                    const pairProb = Math.round((commonDaysJa / totalActiveDays) * 100);
+                    clusters.push({ type: 'positive', routine1: r1, routine2: r2, strength: pairProb });
+                }
+
+                if (commonDaysNein >= 2) {
+                    const pairProbNein = Math.round((commonDaysNein / totalActiveDays) * 100);
+                    clusters.push({ type: 'negative', routine1: r1, routine2: r2, strength: pairProbNein });
                 }
             }
         }
@@ -1171,7 +1184,11 @@
             clusters.sort((a, b) => b.strength - a.strength);
             clusters.slice(0, 3).forEach(c => {
                 const icon1 = routineIcons[c.routine1] || "🎯"; const icon2 = routineIcons[c.routine2] || "🎯";
-                clusterContainer.innerHTML += `<div class="insight-card"><div class="insight-title">${icon1} ${c.routine1} + ${icon2} ${c.routine2}</div><div class="insight-desc">Dieses Routine-Paket tritt in <strong>${c.strength}%</strong> aller aufgezeichneten Tage als geschlossene Einheit auf.</div></div>`;
+                if (c.type === 'positive') {
+                    clusterContainer.innerHTML += `<div class="insight-card"><div class="insight-title">${icon1} ${c.routine1} + ${icon2} ${c.routine2} (Kopplung)</div><div class="insight-desc">Dieses Paket tritt in <strong>${c.strength}%</strong> aller Tage gemeinsam erfolgreich auf.</div></div>`;
+                } else {
+                    clusterContainer.innerHTML += `<div class="insight-card" style="border-color: rgba(231, 76, 60, 0.2);"><div class="insight-title">${icon1} ${c.routine1} + ${icon2} ${c.routine2} (Kettenausfall)</div><div class="insight-desc">Beide Routinen fallen in <strong>${c.strength}%</strong> aller aufgezeichneten Tage gemeinsam aus.</div></div>`;
+                }
             });
         }
 
