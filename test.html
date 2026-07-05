@@ -54,19 +54,24 @@
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             display: flex;
             flex-direction: column;
+            align-items: center;
             gap: 12px;
         }
 
         .header-top { 
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             width: 100%;
+            position: relative;
         }
         
         .header-left { 
             display: flex; 
             align-items: center; 
+            position: absolute;
+            left: 0;
+            z-index: 10;
         }
 
         .back-container { 
@@ -99,14 +104,19 @@
             line-height: 1;
         }
 
-        /* Zentrierter Bereich für die Switches zwischen Header und Inhalt */
-        .centered-switch-area {
+        /* Zentrierter erster Switch im Header */
+        .header-switch-container {
+            margin: 0 auto;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin: 16px auto 4px auto;
+            z-index: 5;
+        }
+
+        /* Zentrierter Bereich für den zweiten Switch außerhalb vom Header */
+        .outside-switch-area {
+            display: flex;
+            justify-content: center;
+            margin: 12px auto 4px auto;
             width: 100%;
             max-width: 600px;
             padding: 0 16px;
@@ -117,7 +127,7 @@
             background: var(--apple-switch-bg); 
             border-radius: 9px;
             padding: 2px; 
-            width: 140px; 
+            width: 160px; 
             height: 32px; 
             flex-shrink: 0;
         }
@@ -128,6 +138,7 @@
             display: flex; 
             align-items: center; 
             justify-content: center;
+            gap: 4px;
             font-size: 0.78rem; 
             font-weight: 700; 
             border-radius: 7px; 
@@ -352,7 +363,7 @@
         .switch-content.active { display: flex; flex-direction: column; }
 
         @media (max-width: 420px) {
-            .main-view-switch { width: 120px; }
+            .main-view-switch { width: 150px; }
             .main-switch-btn { font-size: 0.72rem; }
         }
 
@@ -378,18 +389,20 @@
                 <span>Routinen</span>
             </a>
         </div>
+        <!-- Erster Switch oben zentral im Header -->
+        <div class="header-switch-container">
+            <div class="main-view-switch">
+                <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')"><span>🎯</span> <span>Tracker</span></button>
+                <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')"><span>📊</span> <span>Stats</span></button>
+            </div>
+        </div>
     </div>
 </header>
 
 <div class="cloud-error-banner" id="cloud-error-box">Sync-Fehler: Keine Verbindung zur Cloud möglich.</div>
 
-<!-- Beide Switches zentriert untereinander zwischen Header und Main -->
-<div class="centered-switch-area">
-    <div class="main-view-switch">
-        <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')">🎯 Tracker</button>
-        <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')">Stats 📊</button>
-    </div>
-
+<!-- Zweiter Switch zentriert außerhalb vom Header -->
+<div class="outside-switch-area">
     <div class="apple-switch-container" id="mode-switch-wrapper">
         <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')" title="Zuhause">🏡</button>
         <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')" title="Unterwegs">🧳</button>
