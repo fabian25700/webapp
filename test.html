@@ -802,9 +802,6 @@
             if (!state) return;
             
             const isDoneNow = isRoutineApproved(routineName) ? "ja" : "nein";
-            
-            const heuteDot = document.getElementById(`dot-${routineName}-heute`);
-            if (heuteDot) heuteDot.className = "yesterday-dot " + isDoneNow;
 
             if (isDoneNow === "ja") {
                 group.classList.add('routine-done-state');
@@ -832,54 +829,37 @@
         const yesterday = new Date(); yesterday.setDate(today.getDate() - 1);
         const ereyesterday = new Date(); ereyesterday.setDate(today.getDate() - 2);
 
+        const todayStr = formatDateToString(today);
         const yesterdayStr = formatDateToString(yesterday);
         const ereyesterdayStr = formatDateToString(ereyesterday);
 
+        let todayData = null;
         let yesterdayData = null;
         let ereyesterdayData = null;
 
         if (Array.isArray(globalHistoryArray) && globalHistoryArray.length > 0) {
+            todayData = globalHistoryArray.find(item => item.datum === todayStr);
             yesterdayData = globalHistoryArray.find(item => item.datum === yesterdayStr);
             ereyesterdayData = globalHistoryArray.find(item => item.datum === ereyesterdayStr);
         }
 
-        const standardRoutines = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine"];
-
-        let tdrHeuteKombinationErfuellt = true;
-        standardRoutines.forEach(routineName => {
-            const heuteJa = isRoutineApproved(routineName);
-            let gesternJa = false;
-            if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen[routineName]) {
-                if (yesterdayData.routinen[routineName].toLowerCase() === "ja") gesternJa = true;
-            }
-            if (!heuteJa && !gesternJa) tdrHeuteKombinationErfuellt = false;
-        });
-
-        let tdrGesternKombinationErfuellt = true;
-        standardRoutines.forEach(routineName => {
-            let gesternJa = false;
-            let vorgesternJa = false;
-            if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen[routineName]) {
-                if (yesterdayData.routinen[routineName].toLowerCase() === "ja") gesternJa = true;
-            }
-            if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen[routineName]) {
-                if (ereyesterdayData.routinen[routineName].toLowerCase() === "ja") vorgesternJa = true;
-            }
-            if (!gesternJa && !vorgesternJa) tdrGesternKombinationErfuellt = false;
-        });
-
+        let tdrHeuteJa = false;
+        if (todayData && todayData.routinen && todayData.routinen["TwoDayRule"]) {
+            if (todayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrHeuteJa = true;
+        }
+        let tdrGesternJa = false;
+        if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen["TwoDayRule"]) {
+            if (yesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrGesternJa = true;
+        }
         let tdrVorgesternJa = false;
         if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen["TwoDayRule"]) {
             if (ereyesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrVorgesternJa = true;
         }
 
-        const tdrHeute = tdrHeuteKombinationErfuellt ? "ja" : "nein";
-        const tdrGestern = tdrGesternKombinationErfuellt ? "ja" : "nein";
+        habitState["TwoDayRule"] = { total: 0, done: 0, isApproved: tdrHeuteJa };
 
-        habitState["TwoDayRule"] = { total: 0, done: 0, isApproved: (tdrHeute === "ja") };
-
-        if (document.getElementById("dot-TwoDayRule-heute")) document.getElementById("dot-TwoDayRule-heute").className = "yesterday-dot " + tdrHeute;
-        if (document.getElementById("dot-TwoDayRule-gestern")) document.getElementById("dot-TwoDayRule-gestern").className = "yesterday-dot " + tdrGestern;
+        if (document.getElementById("dot-TwoDayRule-heute")) document.getElementById("dot-TwoDayRule-heute").className = "yesterday-dot " + (tdrHeuteJa ? "ja" : "nein");
+        if (document.getElementById("dot-TwoDayRule-gestern")) document.getElementById("dot-TwoDayRule-gestern").className = "yesterday-dot " + (tdrGesternJa ? "ja" : "nein");
         if (document.getElementById("dot-TwoDayRule-vorgestern")) document.getElementById("dot-TwoDayRule-vorgestern").className = "yesterday-dot " + (tdrVorgesternJa ? "ja" : "nein");
     }
 
@@ -895,14 +875,25 @@
                 const yesterday = new Date(); yesterday.setDate(today.getDate() - 1);
                 const ereyesterday = new Date(); ereyesterday.setDate(today.getDate() - 2);
 
+                const todayStr = formatDateToString(today);
                 const yesterdayStr = formatDateToString(yesterday);
                 const ereyesterdayStr = formatDateToString(ereyesterday);
 
+                const todayData = historyArray.find(item => item.datum === todayStr);
                 const yesterdayData = historyArray.find(item => item.datum === yesterdayStr);
                 const ereyesterdayData = historyArray.find(item => item.datum === ereyesterdayStr);
 
                 const routineNames = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine"];
                 routineNames.forEach(routineName => {
+                    const heuteDot = document.getElementById(`dot-${routineName}-heute`);
+                    if (heuteDot) {
+                        let statusHeute = "nein";
+                        if (todayData && todayData.routinen && todayData.routinen[routineName]) {
+                            statusHeute = todayData.routinen[routineName].toLowerCase();
+                        }
+                        heuteDot.className = "yesterday-dot " + statusHeute;
+                    }
+
                     const gesternDot = document.getElementById(`dot-${routineName}-gestern`);
                     if (gesternDot) {
                         let statusGestern = "nein";
@@ -922,7 +913,7 @@
                     }
                 });
 
-                updateGlobalProgress(true);
+                updateTwoDayRuleStatus();
                 
                 if (document.getElementById('view-stats').classList.contains('active')) {
                     renderDashboard(historyArray);
