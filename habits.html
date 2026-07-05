@@ -54,19 +54,24 @@
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             display: flex;
             flex-direction: column;
+            align-items: center;
             gap: 12px;
         }
 
         .header-top { 
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             width: 100%;
+            position: relative;
         }
         
         .header-left { 
             display: flex; 
             align-items: center; 
+            position: absolute;
+            left: 0;
+            z-index: 10;
         }
 
         .back-container { 
@@ -99,10 +104,22 @@
             line-height: 1;
         }
 
-        .switchers-right {
+        /* Zentrierter erster Switch im Header */
+        .header-switch-container {
+            margin: 0 auto;
             display: flex;
-            align-items: center;
-            gap: 8px;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        /* Zentrierter Bereich für den zweiten Switch außerhalb vom Header */
+        .outside-switch-area {
+            display: flex;
+            justify-content: center;
+            margin: 12px auto 4px auto;
+            width: 100%;
+            max-width: 600px;
+            padding: 0 16px;
         }
 
         .main-view-switch {
@@ -110,7 +127,7 @@
             background: var(--apple-switch-bg); 
             border-radius: 9px;
             padding: 2px; 
-            width: 140px; 
+            width: 160px; 
             height: 32px; 
             flex-shrink: 0;
         }
@@ -121,6 +138,7 @@
             display: flex; 
             align-items: center; 
             justify-content: center;
+            gap: 4px;
             font-size: 0.78rem; 
             font-weight: 700; 
             border-radius: 7px; 
@@ -345,7 +363,7 @@
         .switch-content.active { display: flex; flex-direction: column; }
 
         @media (max-width: 420px) {
-            .main-view-switch { width: 120px; }
+            .main-view-switch { width: 150px; }
             .main-switch-btn { font-size: 0.72rem; }
         }
 
@@ -356,6 +374,8 @@
             .day-label { height: 20px; line-height: 20px; }
         }
     </style>
+    <!-- Externe Konfigurationsdatei laden -->
+    <script src="habits_input.js"></script>
 </head>
 <body>
 
@@ -369,22 +389,25 @@
                 <span>Routinen</span>
             </a>
         </div>
-        
-        <div class="switchers-right">
+        <!-- Erster Switch oben zentral im Header -->
+        <div class="header-switch-container">
             <div class="main-view-switch">
-                <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')">🏹 Tracker</button>
-                <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')">Stats 📊</button>
-            </div>
-
-            <div class="apple-switch-container" id="mode-switch-wrapper">
-                <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')" title="Zuhause">🏡</button>
-                <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')" title="Unterwegs">🧳</button>
+                <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')"><span>🎯</span> <span>Tracker</span></button>
+                <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')"><span>📊</span> <span>Stats</span></button>
             </div>
         </div>
     </div>
 </header>
 
 <div class="cloud-error-banner" id="cloud-error-box">Sync-Fehler: Keine Verbindung zur Cloud möglich.</div>
+
+<!-- Zweiter Switch zentriert außerhalb vom Header -->
+<div class="outside-switch-area">
+    <div class="apple-switch-container" id="mode-switch-wrapper">
+        <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')" title="Zuhause">🏡</button>
+        <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')" title="Unterwegs">🧳</button>
+    </div>
+</div>
 
 <main>
     <!-- TRACKER VIEW -->
@@ -480,83 +503,7 @@
 </main>
 
 <div id="routine-templates" style="display: none;">
-    <div class="category-group" data-routine="Morgenroutine" id="routine-block-Morgenroutine">
-        <div class="category-header" onclick="toggleGroup(this)">
-            <div class="category-title"><div class="category-icon">☀️</div><span>Morgenroutine</span></div>
-            <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-heute"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-gestern"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Morgenroutine-vorgestern"></span></div>
-            </div>
-            <div class="arrow">▼</div>
-        </div>
-        <div class="category-content" data-habits='["Aufstehen ohne Snooze", "Stoisches Kapitel", "Wiegen", "alle Rollladen / Fenster", "Tageslicht", "Klo", "Wasser mit Salz / Elektrolyte", "Zunge reinigen", "Zähne putzen", "Schlafzimmer aufräumen", "Morning Healthdrink", "Küche aufräumen und putzen", "Whoop checken", "Ziele + ToDos des Tages anschauen", "Mails checken", "ggf. Sport", "duschen", "anziehen", "bis 8:00 keine Geräte"]'></div>
-    </div>
-
-    <div class="category-group" data-routine="Sportroutine" id="routine-block-Sportroutine">
-        <div class="category-header" onclick="toggleGroup(this)">
-            <div class="category-title"><div class="category-icon">🏃‍♂️</div><span>Sportroutine</span></div>
-            <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-heute"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-gestern"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Sportroutine-vorgestern"></span></div>
-            </div>
-            <div class="arrow">▼</div>
-        </div>
-        <div class="category-content" data-habits='["Athletik- / Krafteinheit", "Dehnen und Mobility", "Schritte-Ziel erreicht", "Erholungs-Check", "Protein-Zufuhr gedeckt"]'></div>
-    </div>
-
-    <div class="category-group" data-routine="Gesundheitsroutine" id="routine-block-Gesundheitsroutine">
-        <div class="category-header" onclick="toggleGroup(this)">
-            <div class="category-title"><div class="category-icon">🥗</div><span>Gesundheitsroutine</span></div>
-            <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-heute"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-gestern"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Gesundheitsroutine-vorgestern"></span></div>
-            </div>
-            <div class="arrow">▼</div>
-        </div>
-        <div class="category-content" data-habits='["Ernährungsplan eingehalten", "Supplements genommen", "Kein verarbeiteter Zucker", "Genug Wasser getrunken", "Intervallfasten-Fenster"]'></div>
-    </div>
-
-    <div class="category-group" data-routine="Fokusroutine" id="routine-block-Fokusroutine">
-        <div class="category-header" onclick="toggleGroup(this)">
-            <div class="category-title"><div class="category-icon">🧠</div><span>Fokusroutine</span></div>
-            <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-heute"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-gestern"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Fokusroutine-vorgestern"></span></div>
-            </div>
-            <div class="arrow">▼</div>
-        </div>
-        <div class="category-content" data-habits='["Deep Work Block 1", "Deep Work Block 2", "Kein Social Media während Fokus", "Immobilien-Task erledigt", "Schreibtisch clean gehalten"]'></div>
-    </div>
-
-    <div class="category-group" data-routine="Abendroutine" id="routine-block-Abendroutine">
-        <div class="category-header" onclick="toggleGroup(this)">
-            <div class="category-title"><div class="category-icon">🌙</div><span>Abendroutine</span></div>
-            <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-heute"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-gestern"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Abendroutine-vorgestern"></span></div>
-            </div>
-            <div class="arrow">▼</div>
-        </div>
-        <div class="category-content" data-habits='["Tagesabschluss-Journal", "Digital Detox ab 21:30", "Klamotten / Setup für morgen", "Lesen (15 Seiten)", "Licht gedimmt"]'></div>
-    </div>
-
-    <div class="category-group" data-routine="Schlafroutine" id="routine-block-Schlafroutine">
-        <div class="category-header" onclick="toggleGroup(this)">
-            <div class="category-title"><div class="category-icon">🛌</div><span>Schlafroutine</span></div>
-            <div class="category-meta">
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-heute"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-gestern"></span></div>
-                <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-Schlafroutine-vorgestern"></span></div>
-            </div>
-            <div class="arrow">▼</div>
-        </div>
-        <div class="category-content" data-habits='["Kein Koffein nach 14:00", "Zimmer gelüftet und kühl", "Keine schweren Mahlzeiten spät", "Magnesium genommen", "Fixe Aufstehzeit vorbereitet"]'></div>
-    </div>
+    <!-- Wird dynamisch aus der JavaScript-Datei generiert -->
 </div>
 
 <script>
@@ -681,6 +628,30 @@
         const activeContainer = document.getElementById('active-routines-container');
         activeContainer.innerHTML = '';
         
+        const templatesContainer = document.getElementById('routine-templates');
+        templatesContainer.innerHTML = '';
+        
+        Object.keys(ROUTINE_CONFIG).forEach(routineName => {
+            const config = ROUTINE_CONFIG[routineName];
+            const habits = config[currentGlobalMode] || config.zuhause || [];
+            const habitsJson = JSON.stringify(habits);
+            
+            templatesContainer.innerHTML += `
+                <div class="category-group" data-routine="${routineName}" id="routine-block-${routineName}">
+                    <div class="category-header" onclick="toggleGroup(this)">
+                        <div class="category-title"><div class="category-icon">${config.icon}</div><span>${routineName}</span></div>
+                        <div class="category-meta">
+                            <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-heute"></span></div>
+                            <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-gestern"></span></div>
+                            <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-vorgestern"></span></div>
+                        </div>
+                        <div class="arrow">▼</div>
+                    </div>
+                    <div class="category-content" data-habits='${habitsJson}'></div>
+                </div>
+            `;
+        });
+
         const templates = document.querySelectorAll('#routine-templates .category-group');
         templates.forEach(tpl => {
             const clone = tpl.cloneNode(true);
@@ -693,12 +664,8 @@
         groups.forEach((group, groupIdx) => {
             const routineName = group.getAttribute('data-routine');
             const contentDiv = group.querySelector('.category-content');
-            let habits = JSON.parse(contentDiv.getAttribute('data-habits'));
+            const habits = JSON.parse(contentDiv.getAttribute('data-habits'));
             
-            if (currentGlobalMode === "unterwegs" && habits.length > 3) {
-                habits = habits.slice(0, habits.length - 3);
-            }
-
             const jokerId = `${groupIdx}-joker`;
             const isJokerChecked = savedStates[jokerId] || false;
             
