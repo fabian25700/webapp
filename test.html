@@ -512,8 +512,7 @@
     </div>
 </main>
 
-<div id="routine-templates" style="display: none;">
-    </div>
+<div id="routine-templates" style="display: none;"></div>
 
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbhl1k_pgXinca2FA2hxqzMJzW--7Hfo54XHtVm_vfrxndA-GFF57UsQ2ILn6drZnu2w/exec";
@@ -522,6 +521,7 @@
     const habitState = {};
     let globalHistoryArray = [];
     let currentGlobalMode = "zuhause";
+    let cloudSyncTimeout = null;
 
     const routineIcons = {
         "Morgenroutine": "☀️",
@@ -537,11 +537,21 @@
         const indicator = document.getElementById('cloud-status-text');
         if (!indicator) return;
         
+        if (cloudSyncTimeout && status !== "Cloud synced") {
+            clearTimeout(cloudSyncTimeout);
+            cloudSyncTimeout = null;
+        }
+
         indicator.textContent = status;
         if (status === "Cloud Fehler") {
             indicator.style.color = "var(--danger)";
         } else if (status === "Cloud synced") {
             indicator.style.color = "var(--success)";
+            cloudSyncTimeout = setTimeout(() => {
+                indicator.textContent = "Cloud Live";
+                indicator.style.color = "var(--text-secondary)";
+                cloudSyncTimeout = null;
+            }, 3000);
         } else {
             indicator.style.color = "var(--text-secondary)";
         }
@@ -898,7 +908,6 @@
             .then(res => res.json())
             .then(historyArray => {
                 document.getElementById('cloud-error-box').style.display = 'none';
-                updateCloudStatus("Cloud synced");
                 if (!Array.isArray(historyArray)) return;
                 globalHistoryArray = historyArray;
 
