@@ -3,7 +3,6 @@ const ROUTINE_CONFIG = {
         icon: "☀️",
         zuhause: [
             "Aufstehen ohne Snooze",
-            "Stoisches Kapitel",
             "Wiegen",
             "alle Rollladen / Fenster",
             "Tageslicht",
@@ -14,109 +13,99 @@ const ROUTINE_CONFIG = {
             "Schlafzimmer aufräumen",
             "Morning Healthdrink",
             "Küche aufräumen und putzen",
+            "Stoisches Kapitel",
             "Whoop checken",
-            "Ziele + ToDos des Tages anschauen",
+            "Ziele + ToDo’s des Tages anschauen",
             "Mails checken",
             "ggf. Sport",
             "duschen",
             "anziehen",
-            "bis 8:00 keine Geräte"
+            "bis 8:00 keine Geräte (außer Call Sally, Erinnerungen, Routine)"
         ],
         unterwegs: [
             "Aufstehen ohne Snooze",
-            "Stoisches Kapitel",
+            "alle Rollladen / Fenster",
             "Tageslicht",
             "Klo",
-            "Wasser mit Salz / Elektrolyte",
-            "Zunge reinigen",
+            "Wasser",
             "Zähne putzen",
+            "Schlafzimmer aufräumen",
+            "Stoisches Kapitel",
             "Whoop checken",
-            "Ziele + ToDos des Tages anschauen",
+            "Ziele + ToDo’s des Tages anschauen",
             "Mails checken",
             "ggf. Sport",
             "duschen",
-            "anziehen"
+            "anziehen",
+            "bis 8:00 keine Geräte (außer Call Sally, Erinnerungen, Routine)"
         ]
     },
     "Sportroutine": {
         icon: "🏃‍♂️",
         zuhause: [
-            "Athletik- / Krafteinheit",
-            "Dehnen und Mobility",
-            "Schritte-Ziel erreicht",
-            "Erholungs-Check",
-            "Protein-Zufuhr gedeckt"
+            "Sporteinheit aus Notizen gemacht"
         ],
         unterwegs: [
-            "Athletik- / Krafteinheit",
-            "Dehnen und Mobility",
-            "Schritte-Ziel erreicht",
-            "Erholungs-Check",
-            "Protein-Zufuhr gedeckt"
+            "8.000 Schritte gemacht"
         ]
     },
     "Gesundheitsroutine": {
         icon: "🥗",
         zuhause: [
-            "Ernährungsplan eingehalten",
-            "Supplements genommen",
-            "Kein verarbeiteter Zucker",
-            "Genug Wasser getrunken",
-            "Intervallfasten-Fenster"
+            "3 Liter Wasser"
         ],
         unterwegs: [
-            "Ernährungsplan eingehalten",
-            "Supplements genommen",
-            "Kein verarbeiteter Zucker",
-            "Genug Wasser getrunken",
-            "Intervallfasten-Fenster"
+            "10h+ gefastet über Nacht"
         ]
     },
     "Fokusroutine": {
         icon: "🧠",
         zuhause: [
-            "Deep Work Block 1",
-            "Deep Work Block 2",
-            "Kein Social Media während Fokus",
-            "Immobilien-Task erledigt",
-            "Schreibtisch clean gehalten"
+            "vor Abendroutine “heute” in Erinnerungen leer"
         ],
         unterwegs: [
-            "Deep Work Block 1",
-            "Deep Work Block 2",
-            "Kein Social Media während Fokus",
-            "Immobilien-Task erledigt"
+            "bis 12:30 Uhr nicht stören an"
         ]
     },
     "Abendroutine": {
         icon: "🌙",
         zuhause: [
-            "Tagesabschluss-Journal",
-            "Digital Detox ab 21:30",
-            "Klamotten / Setup für morgen",
-            "Lesen (15 Seiten)",
-            "Licht gedimmt"
+            "Kalender und Aufgaben nächster Tag",
+            "Finanzen und Habits heutiger Tag tracken",
+            "Habits nächster Tag durchgehen",
+            "21:30 Geräte aus (max. Call)",
+            "Küche aufräumen",
+            "Wasser und Gläser parat",
+            "Schlafzimmer aufräumen",
+            "Kleidung rauslegen",
+            "Rollladen und Fenster",
+            "Wecker stellen",
+            "warm duschen",
+            "Zahnseide",
+            "Zähne putzen",
+            "lesen"
         ],
         unterwegs: [
-            "Tagesabschluss-Journal",
-            "Digital Detox ab 21:30",
-            "Lesen (15 Seiten)"
+            "Kalender und Aufgaben nächster Tag",
+            "Finanzen und Habits heutiger Tag tracken",
+            "Habits nächster Tag durchgehen",
+            "Wasser parat",
+            "Schlafzimmer aufräumen",
+            "Kleidung rauslegen",
+            "Rollladen und Fenster",
+            "Wecker stellen",
+            "warm duschen",
+            "Zähne putzen",
+            "lesen"
         ]
     },
     "Schlafroutine": {
         icon: "🛌",
         zuhause: [
-            "Kein Koffein nach 14:00",
-            "Zimmer gelüftet und kühl",
-            "Keine schweren Mahlzeiten spät",
-            "Magnesium genommen",
-            "Fixe Aufstehzeit vorbereitet"
+            "7h+ schlafen"
         ],
         unterwegs: [
-            "Kein Koffein nach 14:00",
-            "Keine schweren Mahlzeiten spät",
-            "Magnesium genommen",
-            "Fixe Aufstehzeit vorbereitet"
+            "6,5h+ schlafen"
         ]
     }
 };
