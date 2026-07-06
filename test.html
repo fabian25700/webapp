@@ -5,480 +5,798 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Startseite</title>
-    <script src="daten.js"></script>
+    <title>Alkohol</title>
     <style>
         :root {
-            --primary: #2ecc71;
-            --primary-dark: #27ae60;
-            --secondary: #3498db;
+            --accent: #e67e22;
+            --accent-soft: rgba(230, 126, 34, 0.1);
+            --success: #27ae60;
+            --success-soft: rgba(39, 174, 96, 0.1);
+            --danger: #e74c3c;
+            --danger-soft: rgba(231, 76, 60, 0.3);
             --bg: #f0f2f5;
-            --surface: rgba(255, 255, 255, 0.95);
+            --surface: #ffffff;
             --text-primary: #1e293b;
             --text-secondary: #64748b;
-            --border: rgba(203, 213, 225, 0.8);
-            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            --card-hover: rgba(240, 240, 240, 0.95);
-            --snake-btn-bg: white;
-            --snake-btn-border: #cbd5e1;
-            --snake-btn-color: #64748b;
-            --arrow-color: #cbd5e1;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --apple-switch-bg: #e3e3e6;
+            --overlay-bg: rgba(15, 23, 42, 0.4);
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg: #0f172a;
-                --surface: rgba(30, 41, 59, 0.95);
+                --surface: #1e293b;
                 --text-primary: #f1f5f9;
                 --text-secondary: #94a3b8;
-                --border: rgba(51, 65, 85, 0.8);
-                --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-                --card-hover: rgba(51, 65, 85, 0.95);
-                --snake-btn-bg: #1e293b;
-                --snake-btn-border: #334155;
-                --snake-btn-color: #94a3b8;
-                --arrow-color: #475569;
+                --border: #2d3f55;
+                --border-light: #253347;
+                --apple-switch-bg: #1c1c1e;
+                --overlay-bg: rgba(0, 0, 0, 0.6);
             }
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
             background: var(--bg);
-            margin: 0;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            -webkit-tap-highlight-color: transparent;
-            transition: background 0.3s ease;
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 40px;
         }
 
         header {
-            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .header-title {
-            font-weight: 800;
-            font-size: 1.1rem;
-            letter-spacing: 0.04em;
-            color: var(--text-primary);
-        }
-
-        .menu-container {
-            display: flex;
-            flex-direction: column;
-            gap: 13px;
-            width: 85%;
-            max-width: 360px;
-            margin: auto;
-            z-index: 10;
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        .menu-card {
-            background: var(--surface);
-            padding: 18px 22px;
-            border-radius: 20px;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            transition: transform 0.12s ease, background 0.2s ease;
-            border: 1px solid var(--border);
-            cursor: pointer;
-        }
-
-        .menu-card:active { transform: scale(0.96); background: var(--card-hover); }
-
-        .icon { font-size: 1.35rem; line-height: 1; }
-        .title { font-weight: 600; color: var(--text-primary); font-size: 1.05rem; flex-grow: 1; }
-        .arrow { color: var(--arrow-color); font-size: 1rem; }
-
-        /* Anpassung der Deckkraft für Buttons während des Spiels */
-        body.game-running .menu-card, 
-        body.game-running header {
-            opacity: 0.3;
-            pointer-events: none;
-        }
-
-        #games-overlay, #misc-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 300;
-            animation: fadeIn 0.2s ease;
-        }
-
-        .overlay-content {
-            width: 85%;
-            max-width: 320px;
-            background: var(--surface);
-            border-radius: 24px;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border);
-        }
-
-        .overlay-item {
+            position: sticky; top: 0; z-index: 100;
             background: var(--bg);
-            padding: 16px;
-            border-radius: 16px;
-            text-decoration: none;
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             display: flex;
+            flex-direction: column;
             align-items: center;
             gap: 12px;
-            color: var(--text-primary);
-            font-weight: 600;
-            border: 1px solid var(--border);
         }
 
-        .overlay-item:active { transform: scale(0.97); }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to   { opacity: 1; }
-        }
-
-        #game-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 1;
-            display: none;
-        }
-
-        #score-display {
-            position: fixed;
-            top: 80px;
-            width: 100%;
-            text-align: center;
-            font-weight: 900;
-            color: var(--primary);
-            display: none;
-            z-index: 100;
-            font-size: 2.2rem;
-            opacity: 0.5;
-            pointer-events: none;
-        }
-
-        #instructions {
-            position: fixed;
-            inset: 0;
-            display: none;
+        .header-top { 
+            display: flex;
             align-items: center;
-            justify-content: center;
-            z-index: 400;
-            pointer-events: none;
+            justify-content: flex-start;
+            width: 100%;
+            position: relative;
         }
 
-        #instructions.visible { display: flex; }
-
-        .instr-box {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 22px;
-            padding: 26px 32px;
-            max-width: 300px;
-            text-align: center;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            animation: fadeInScale 0.35s ease;
+        .header-left { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+        
+        .back-btn {
+            background: none; border: none; font-size: 1.15rem; color: var(--accent);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            text-decoration: none; padding-right: 4px; font-weight: 400;
         }
 
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.88); }
-            to   { opacity: 1; transform: scale(1); }
+        .header-left span { font-size: 0.95rem; font-weight: 700; line-height: 1; }
+
+        .header-right {
+            display: flex; align-items: center; position: absolute; right: 0; z-index: 10;
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+            color: var(--text-secondary); transition: color 0.2s ease;
         }
 
-        .instr-box h2 { margin: 0 0 10px 0; font-size: 1.2rem; font-weight: 800; color: var(--text-primary); }
-        .instr-box p { margin: 0 0 6px 0; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; }
-        .instr-key { display: inline-block; background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; padding: 3px 8px; font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin: 2px; }
-        .instr-touch { font-size: 1.6rem; margin: 6px 0; }
+        .header-switch-container { margin: 0 auto; display: flex; justify-content: center; z-index: 5; }
 
-        #stop-btn {
-            position: fixed;
-            top: calc(env(safe-area-inset-top) + 16px);
-            right: 20px;
-            background: var(--surface);
-            border: 1.5px solid var(--border);
-            color: var(--text-primary);
-            padding: 8px 16px;
-            border-radius: 12px;
-            font-weight: 700;
-            z-index: 500;
-            display: none;
+        .main-view-switch { display: flex; background: var(--apple-switch-bg); border-radius: 9px; padding: 2px; width: 160px; height: 32px; flex-shrink: 0; }
+        
+        .main-switch-btn {
+            flex: 1; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;
+            font-size: 0.78rem; font-weight: 700; border-radius: 7px; border: none; background: transparent;
+            color: var(--text-secondary); cursor: pointer; transition: all 0.2s; height: 100%; line-height: 1;
+        }
+        
+        .main-switch-btn.active {
+            background: var(--surface); color: var(--text-primary);
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
+        }
+
+        .cloud-error-banner {
+            display: none; background: var(--danger-soft); border: 1px solid var(--danger);
+            color: var(--text-primary); padding: 8px 12px; border-radius: 10px; font-size: 0.75rem;
+            font-weight: 700; text-align: center; margin: 12px 16px 0;
+        }
+
+        .toast-notification {
+            position: fixed; top: calc(env(safe-area-inset-top) + 110px); left: 50%; transform: translateX(-50%) translateY(-20px);
+            background: var(--success); color: white; padding: 10px 20px; border-radius: 12px; font-size: 0.85rem;
+            font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; z-index: 1000;
+            transition: all 0.3s ease; pointer-events: none;
+        }
+        .toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+        .view-section { display: none; flex-direction: column; gap: 12px; width: 100%; }
+        .view-section.active { display: flex; }
+
+        .category-group { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); position: relative; }
+        
+        .category-header { padding: 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; transition: background 0.2s; }
+        .category-header:active { background: var(--border-light); }
+
+        .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; flex: 1; }
+        .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        
+        .arrow { font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.3s ease; flex-shrink: 0; }
+        .category-group.open .arrow { transform: rotate(180deg); }
+
+        .category-content { display: none; padding: 0 16px 16px; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 16px; }
+        .category-group.open .category-content { display: flex; }
+
+        .drink-card {
+            background: var(--bg); border-radius: 12px; border: 1px solid var(--border);
+            padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px;
+            cursor: pointer; user-select: none; transition: all 0.2s ease;
+        }
+        .drink-card:active { transform: scale(0.99); }
+        
+        .drink-info { display: flex; flex-direction: column; gap: 2px; }
+        .drink-name { font-weight: 600; font-size: 0.95rem; }
+        .drink-size { font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; }
+
+        .plus-btn {
+            width: 28px; height: 28px; border-radius: 8px; background: var(--accent-soft); color: var(--accent);
+            display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1rem;
+        }
+
+        .form-block {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px;
+        }
+        .form-block h3 { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group.full { grid-column: span 2; }
+        
+        .form-group label { font-size: 0.7rem; height: 16px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); }
+        .form-group input, .form-group select {
+            width: 100%; height: 38px; border-radius: 9px; border: 1px solid var(--border);
+            background: var(--bg); color: var(--text-primary); padding: 0 10px; font-size: 0.9rem; font-family: inherit;
+        }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); }
+        
+        .checkbox-group { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; margin-top: 4px; }
+        .checkbox-group input { width: 18px; height: 18px; accent-color: var(--accent); }
+        .checkbox-group label { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); cursor: pointer; }
+
+        .submit-btn {
+            width: 100%; height: 40px; border-radius: 10px; background: var(--accent); color: white;
+            border: none; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;
+            cursor: pointer; transition: opacity 0.2s; margin-top: 4px;
+        }
+        .submit-btn:active { opacity: 0.9; }
+
+        .suggestion-btn {
+            background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent);
+            padding: 8px 12px; border-radius: 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+            text-align: left; width: 100%; transition: background 0.2s; margin-bottom: 4px;
+        }
+        .suggestion-btn:active { background: var(--border); }
+
+        /* Modal Design */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--overlay-bg); z-index: 1000; display: none;
+            align-items: center; justify-content: center; padding: 16px;
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-card {
+            background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 450px;
+            border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); padding: 20px;
+            display: flex; flex-direction: column; gap: 16px; animation: modalSlidUp 0.25s ease-out;
+        }
+        @keyframes modalSlidUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-title { font-size: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+        .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+        .cancel-btn {
+            width: 100%; height: 40px; border-radius: 10px; background: transparent; color: var(--text-secondary);
+            border: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; cursor: pointer;
+        }
+
+        /* Stats Dashboard Layout */
+        .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .kpi-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; height: 95px;
+        }
+        .kpi-value { font-size: 1.35rem; font-weight: 800; color: var(--text-primary); }
+        .kpi-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+
+        .section-block { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px; }
+        .block-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+
+        .perf-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-light); height: 32px; }
+        .perf-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .perf-info { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+        .perf-icon { font-size: 0.95rem; flex-shrink: 0; }
+        .perf-name { font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .perf-bar-wrapper { display: flex; align-items: center; gap: 8px; width: 204px; flex-shrink: 0; }
+        .perf-bar-bg { flex: 1; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
+        .perf-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; }
+        .perf-pct { font-size: 0.75rem; font-weight: 700; width: 32px; text-align: right; }
+
+        @media (max-width: 420px) {
+            .main-view-switch { width: 150px; }
+            .main-switch-btn { font-size: 0.72rem; }
+        }
+        @media (max-width: 395px) {
+            .perf-name { font-size: 0.78rem; }
+            .perf-bar-wrapper { width: 168px; gap: 4px; }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="header-title">FABIANS APP</div>
-    </header>
 
-    <button id="stop-btn" onclick="stopGame()">■ STOP</button>
+<div class="toast-notification" id="toast-notice">Eintrag erfolgreich verbucht!</div>
 
-    <div id="score-display"><span id="current-score">0</span></div>
-
-    <div class="menu-container" id="main-menu">
-        <a href="reise_stats.html" class="menu-card">
-            <span class="icon">🌍</span>
-            <span class="title">Reisen</span>
-            <span class="arrow">→</span>
-        </a>
-        <a href="https://fabian25700.github.io/webapp/habits3.html" class="menu-card">
-            <span class="icon">📊</span>
-            <span class="title">Habits</span>
-            <span class="arrow">→</span>
-        </a>
-        <a href="alkohol.html" class="menu-card">
-            <span class="icon">🍷</span>
-            <span class="title">Alkohol</span>
-            <span class="arrow">→</span>
-        </a>
-        <a href="Alltag.html" class="menu-card">
-            <span class="icon">🏠</span>
-            <span class="title">Alltag</span>
-            <span class="arrow">→</span>
-        </a>
-        <div class="menu-card" onclick="toggleOverlay('games-overlay', true)">
-            <span class="icon">🎮</span>
-            <span class="title">Spiele</span>
-            <span class="arrow">→</span>
+<div class="modal-overlay" id="quick-log-modal">
+    <div class="modal-card">
+        <div class="modal-title" id="modal-drink-title">Getränk bestätigen</div>
+        
+        <div id="modal-suggestion-box" style="display:none;">
+            <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 4px;">Letzter aktiver Anlass</div>
+            <button type="button" class="suggestion-btn" id="modal-use-last-btn" onclick="applyLastAnlassToModal()">Bisherigen Anlass übernehmen</button>
         </div>
-        <div class="menu-card" onclick="toggleOverlay('misc-overlay', true)">
-            <span class="icon">📁</span>
-            <span class="title">Sonstiges</span>
-            <span class="arrow">→</span>
-        </div>
-    </div>
 
-    <div id="games-overlay" onclick="toggleOverlay('games-overlay', false)">
-        <div class="overlay-content" onclick="event.stopPropagation()">
-            <h2 style="margin: 0 0 10px 0; color: var(--text-primary); text-align: center;">Spiele</h2>
-            <div class="overlay-item" onclick="toggleOverlay('games-overlay', false); toggleGame();">
-                <span class="icon">🐍</span> Snake
+        <div class="form-grid">
+            <div class="form-group full">
+                <label for="modal-anlass-name">Anlass Name</label>
+                <input type="text" id="modal-anlass-name" placeholder="z.B. Bremen (A)">
             </div>
-            <a href="darts.html" class="overlay-item">
-                <span class="icon">🎯</span> Darts
-            </a>
-            <a href="imposter.html" class="overlay-item">
-                <span class="icon">🕵️‍♂️</span> Imposter
-            </a>
-            <button onclick="toggleOverlay('games-overlay', false)" style="margin-top: 10px; background: none; border: none; color: var(--text-secondary); font-weight: 600;">Schließen</button>
+            <div class="form-group full">
+                <label for="modal-anlass-kategorie">Anlass Kategorie</label>
+                <select id="modal-anlass-kategorie"></select>
+            </div>
+            <div class="form-group full">
+                <label for="modal-anlass-kategorie-neu">Oder neue Anlass Kategorie</label>
+                <input type="text" id="modal-anlass-kategorie-neu" placeholder="z.B. Fußball">
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="cancel-btn" onclick="closeQuickLogModal()">Abbrechen</button>
+            <button class="submit-btn" onclick="submitQuickLogFromModal()">Loggen</button>
+        </div>
+    </div>
+</div>
+
+<header>
+    <div class="header-top">
+        <div class="header-left">
+            <a href="index.html" class="back-btn">‹</a>
+            <span>Alkohol</span>
+        </div>
+        <div class="header-switch-container">
+            <div class="main-view-switch">
+                <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')">🎯 Tracker</button>
+                <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')">📊 Stats</button>
+            </div>
+        </div>
+        <div class="header-right" id="cloud-status-text">Cloud Live</div>
+    </div>
+</header>
+
+<div class="cloud-error-banner" id="cloud-error-box">Sync-Fehler: Verbindung zur Cloud fehlgeschlagen.</div>
+
+<main>
+    <div id="view-tracker" class="view-section active">
+        <div id="categories-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
+
+        <div class="form-block">
+            <h3>Neues Getränk erfassen</h3>
+            <form id="manual-drink-form" onsubmit="handleManualSubmit(event)">
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label for="form-name-select">Bisheriges Getränk wählen</label>
+                        <select id="form-name-select" onchange="handleDrinkDropdownChange()"></select>
+                    </div>
+                    <div class="form-group full">
+                        <label for="form-name-input">Oder neues Getränk Name</label>
+                        <input type="text" id="form-name-input" placeholder="z.B. Reissdorf">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-kategorie">Kategorie</label>
+                        <select id="form-kategorie" required>
+                            <option value="Bier">Bier</option>
+                            <option value="Wein">Wein</option>
+                            <option value="Spirituose">Spirituose</option>
+                            <option value="Mixgetränk">Mixgetränk</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-groesse">Größe (in Liter)</label>
+                        <input type="number" id="form-groesse" step="0.01" min="0.01" placeholder="z.B. 0.33" required>
+                    </div>
+
+                    <div class="form-group full" style="margin-top: 6px; border-top: 1px solid var(--border-light); padding-top: 12px;">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="form-anlass-wie-zuvor" onchange="toggleFormAnlassWieZuvor()">
+                            <label for="form-anlass-wie-zuvor">Anlass wie zuvor übernehmen?</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full form-anlass-input-group">
+                        <label for="form-anlass-name">Anlass Name</label>
+                        <input type="text" id="form-anlass-name" placeholder="z.B. Bremen (A)">
+                    </div>
+                    <div class="form-group form-anlass-input-group">
+                        <label for="form-anlass-kategorie">Anlass Kategorie</label>
+                        <select id="form-anlass-kategorie"></select>
+                    </div>
+                    <div class="form-group form-anlass-input-group">
+                        <label for="form-anlass-kategorie-neu">Neue Kategorie</label>
+                        <input type="text" id="form-anlass-kategorie-neu" placeholder="z.B. Fußball">
+                    </div>
+                </div>
+                
+                <div class="form-group" style="margin-top: 8px;">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="form-regelmaessig">
+                        <label for="form-regelmaessig">Bei Regelmäßig speichern?</label>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">Eintragen & Loggen</button>
+            </form>
         </div>
     </div>
 
-    <div id="misc-overlay" onclick="toggleOverlay('misc-overlay', false)">
-        <div class="overlay-content" onclick="event.stopPropagation()">
-            <h2 style="margin: 0 0 10px 0; color: var(--text-primary); text-align: center;">Sonstiges</h2>
-            <a href="gastspiel2.html" class="overlay-item">
-                <span class="icon">⚽</span> Gastspiel
-            </a>
-            <a href="https://bit.ly/m/kcrakete" class="overlay-item">
-                <span class="icon">🚀</span> KC Rakete
-            </a>
-            <a href="test.html" class="overlay-item">
-                <span class="icon">🧪</span> Test
-            </a>
-            <button onclick="toggleOverlay('misc-overlay', false)" style="margin-top: 10px; background: none; border: none; color: var(--text-secondary); font-weight: 600;">Schließen</button>
+    <div id="view-stats" class="view-section">
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-value" id="kpi-today">0,00 L</div>
+                <div class="kpi-label">Heute Gesamt</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="kpi-streak">0 Tage</div>
+                <div class="kpi-label">Nüchtern-Konto</div>
+            </div>
+        </div>
+
+        <div class="section-block">
+            <div class="block-title">Getränke-Ranking (Frequenz)</div>
+            <div id="routine-performance-container" style="display: flex; flex-direction: column; gap: 2px;"></div>
+        </div>
+
+        <div class="section-block">
+            <div class="block-title">Getränke-Kategorien</div>
+            <div id="drink-category-performance-container" style="display: flex; flex-direction: column; gap: 2px;"></div>
+        </div>
+
+        <div class="section-block">
+            <div class="block-title">Anlass-Kategorien</div>
+            <div id="event-category-performance-container" style="display: flex; flex-direction: column; gap: 2px;"></div>
         </div>
     </div>
+</main>
 
-    <div id="instructions">
-        <div class="instr-box" id="instr-content"></div>
-    </div>
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzeqqPJFUqU6FgVVbeBMTid4gfhY2nf6cx0g7R6KMpMoIv74x4L0uphyFQKKBXO7ojHDw/exec";
 
-    <canvas id="game-canvas"></canvas>
+    let globalFavorites = [];
+    let globalHistory = [];
+    let globalAnlassKategorien = [];
+    let cloudSyncTimeout = null;
+    let activeModalDrink = null;
 
-    <script>
-        const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-        const canvas = document.getElementById("game-canvas");
-        const ctx = canvas.getContext("2d");
-        const scoreDisplay = document.getElementById("score-display");
-        const scoreVal = document.getElementById("current-score");
-        const instrEl = document.getElementById("instructions");
-        const instrContent = document.getElementById("instr-content");
-        const stopBtn = document.getElementById("stop-btn");
+    const categoryIcons = { "Bier": "🍺", "Wein": "🍷", "Spirituose": "🥃", "Mixgetränk": "🍹" };
+    const eventIcons = { "Fußball": "⚽", "Kegeln": "🎳", "Restaurant": "🍽️", "Party": "🎉", "Feier": "🥳", "Konzert": "🎸", "Bar": "🍸" };
 
-        let gameActive = false;
-        let snake, direction, nextDirection, food;
-        let score = 0;
+    function updateCloudStatus(status) {
+        const indicator = document.getElementById('cloud-status-text');
+        if (!indicator) return;
+        if (cloudSyncTimeout && status !== "Cloud synced") { clearTimeout(cloudSyncTimeout); cloudSyncTimeout = null; }
+        indicator.textContent = status;
+        if (status === "Cloud Fehler") { indicator.style.color = "var(--danger)"; }
+        else if (status === "Cloud synced") {
+            indicator.style.color = "var(--success)";
+            cloudSyncTimeout = setTimeout(() => { indicator.textContent = "Cloud Live"; indicator.style.color = "var(--text-secondary)"; }, 3000);
+        } else if (status === "Cloud lädt") { indicator.style.color = "var(--accent)"; }
+        else { indicator.style.color = "var(--text-secondary)"; }
+    }
 
-        const laender = (typeof MEINE_REISEN !== 'undefined')
-            ? MEINE_REISEN.map(r => r.flagge || "📍")
-            : ["🇩🇪","🇮🇹","🇺🇸"];
+    function toggleMainView(view) {
+        document.getElementById('view-btn-tracker').classList.toggle('active', view === 'tracker');
+        document.getElementById('view-btn-stats').classList.toggle('active', view === 'stats');
+        document.getElementById('view-tracker').classList.toggle('active', view === 'tracker');
+        document.getElementById('view-stats').classList.toggle('active', view === 'stats');
+        if (view === 'stats') calculateStats();
+    }
 
-        const GRID = 32;
-        const SPEED_START = 110;
-        const SPEED_MIN = 45;
-        const SPEED_STEP = 5;
+    function toggleGroup(header) { header.parentElement.classList.toggle('open'); }
+    function showSuccessToast() { const toast = document.getElementById('toast-notice'); toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 2000); }
+    
+    function formatDateToString(date) {
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        return `${dd}.${mm}.${date.getFullYear()}`;
+    }
 
-        function toggleOverlay(id, show) {
-            document.getElementById(id).style.display = show ? 'flex' : 'none';
-        }
+    function fetchData() {
+        updateCloudStatus("Cloud lädt");
+        fetch(GOOGLE_SCRIPT_URL)
+            .then(res => { if (!res.ok) throw new Error('Network error'); return res.json(); })
+            .then(data => {
+                document.getElementById('cloud-error-box').style.display = 'none';
+                if (data && !data.error) {
+                    globalFavorites = data.favorites || [];
+                    globalHistory = data.history || [];
+                    globalAnlassKategorien = data.anlassKategorien || [];
+                } else {
+                    globalFavorites = []; globalHistory = []; globalAnlassKategorien = [];
+                }
+                renderTrackerUI();
+                populateDropdowns();
+                updateCloudStatus("Cloud Live");
+            })
+            .catch(err => {
+                document.getElementById('cloud-error-box').style.display = 'block';
+                updateCloudStatus("Cloud Fehler");
+                console.error(err);
+            });
+    }
 
-        function toggleGame() {
-            if (!gameActive) showInstructions();
-            else stopGame();
-        }
+    function populateDropdowns() {
+        // 1. Anlass-Kategorien füllen
+        const d1 = document.getElementById('modal-anlass-kategorie');
+        const d2 = document.getElementById('form-anlass-kategorie');
+        
+        let optionsHtml = `<option value="">-- Option wählen --</option>`;
+        globalAnlassKategorien.forEach(kat => {
+            if(kat.trim() !== "") optionsHtml += `<option value="${kat}">${kat}</option>`;
+        });
 
-        function showInstructions() {
-            if (!isTouchDevice) {
-                instrContent.innerHTML = `<h2>🐍 Snake</h2><p>Pfeiltasten zum Steuern</p><p><span class="instr-key">↑</span> <span class="instr-key">↓</span> <span class="instr-key">←</span> <span class="instr-key">→</span></p>`;
-            } else {
-                instrContent.innerHTML = `<h2>🐍 Snake</h2><div class="instr-touch">👆</div><p>Wische in die Richtung,<br>in die du steuern willst.</p>`;
+        d1.innerHTML = optionsHtml;
+        d2.innerHTML = optionsHtml;
+
+        // 2. Getränke-Auswahl füllen (aus Historie extrahieren)
+        const dDrink = document.getElementById('form-name-select');
+        let uniqueDrinks = [];
+        globalHistory.forEach(item => {
+            if(item.name && !uniqueDrinks.includes(item.name)) uniqueDrinks.push(item.name);
+        });
+        uniqueDrinks.sort();
+
+        let drinkOptionsHtml = `<option value="">-- Option wählen --</option>`;
+        uniqueDrinks.forEach(drink => {
+            drinkOptionsHtml += `<option value="${drink}">${drink}</option>`;
+        });
+        dDrink.innerHTML = drinkOptionsHtml;
+    }
+
+    function handleDrinkDropdownChange() {
+        const selectedDrink = document.getElementById('form-name-select').value;
+        const inputField = document.getElementById('form-name-input');
+        
+        if (selectedDrink !== "") {
+            inputField.value = "";
+            // Automatisch Kategorie und Größe vorschlagen, falls in Historie gefunden
+            const match = globalHistory.find(item => item.name === selectedDrink);
+            if (match) {
+                document.getElementById('form-kategorie').value = match.kategorie;
+                document.getElementById('form-groesse').value = match.groesse;
             }
-            instrEl.classList.add("visible");
-            setTimeout(() => { instrEl.classList.remove("visible"); startGame(); }, 2500);
+        }
+    }
+
+    function renderTrackerUI() {
+        const container = document.getElementById('categories-container');
+        container.innerHTML = '';
+        const categorized = {};
+
+        globalFavorites.forEach(item => {
+            if (item.regelmaessig === "ja") {
+                if (!categorized[item.kategorie]) categorized[item.kategorie] = [];
+                categorized[item.kategorie].push(item);
+            }
+        });
+
+        const keys = Object.keys(categorized);
+        if (keys.length === 0) {
+            container.innerHTML = `<div style="font-size:0.85rem; text-align:center; color:var(--text-secondary); padding:20px 0;">Keine regelmäßigen Getränke vorhanden. Nutze das Formular unten.</div>`;
+            return;
         }
 
-        function startGame() {
-            gameActive = true;
-            document.body.classList.add("game-running"); // Deckkraft-Klasse hinzufügen
-            canvas.style.display = "block";
-            scoreDisplay.style.display = "block";
-            stopBtn.style.display = "block";
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            score = 0;
-            scoreVal.innerText = score;
+        keys.forEach(cat => {
+            const icon = categoryIcons[cat] || "🥤";
+            let drinksHtml = categorized[cat].map(drink => {
+                return `
+                    <div class="drink-card" onclick="openQuickLogModal('${drink.name}', '${drink.kategorie}', '${drink.groesse}')">
+                        <div class="drink-info">
+                            <span class="drink-name">${drink.name}</span>
+                            <span class="drink-size">${drink.groesse.toFixed(2)} L</span>
+                        </div>
+                        <div class="plus-btn">+</div>
+                    </div>
+                `;
+            }).join('');
 
-            const startX = Math.floor(canvas.width / 2 / GRID) * GRID;
-            const startY = Math.floor(canvas.height / 2 / GRID) * GRID;
-            snake = [{ x: startX, y: startY }, { x: startX - GRID, y: startY }, { x: startX - GRID * 2, y: startY }];
-            direction = { x: GRID, y: 0 };
-            nextDirection = { x: GRID, y: 0 };
-            spawnFood();
-            runLoop();
+            container.innerHTML += `
+                <div class="category-group">
+                    <div class="category-header" onclick="toggleGroup(this)">
+                        <div class="category-title"><div class="category-icon">${icon}</div><span>${cat}</span></div>
+                        <div class="arrow">▼</div>
+                    </div>
+                    <div class="category-content">${drinksHtml}</div>
+                </div>
+            `;
+        });
+    }
+
+    function openQuickLogModal(name, kategorie, groesse) {
+        activeModalDrink = { name, kategorie, groesse };
+        document.getElementById('modal-drink-title').textContent = `${name} (${parseFloat(groesse).toFixed(2)} L)`;
+        
+        document.getElementById('modal-anlass-name').value = "";
+        document.getElementById('modal-anlass-kategorie').value = "";
+        document.getElementById('modal-anlass-kategorie-neu').value = "";
+
+        const todayEntries = globalHistory.filter(item => item.anlass_name && item.anlass_name.trim() !== "");
+        const suggBox = document.getElementById('modal-suggestion-box');
+        
+        if (todayEntries.length > 0) {
+            const last = todayEntries[todayEntries.length - 1];
+            document.getElementById('modal-use-last-btn').textContent = `"${last.anlass_name}" (${last.anlass_kategorie}) übernehmen`;
+            suggBox.style.display = "block";
+        } else {
+            suggBox.style.display = "none";
         }
 
-        function runLoop() {
-            if (!gameActive) return;
-            draw();
-            setTimeout(runLoop, Math.max(SPEED_MIN, SPEED_START - score * SPEED_STEP));
+        document.getElementById('quick-log-modal').classList.add('active');
+    }
+
+    function closeQuickLogModal() {
+        document.getElementById('quick-log-modal').classList.remove('active');
+        activeModalDrink = null;
+    }
+
+    function applyLastAnlassToModal() {
+        const todayEntries = globalHistory.filter(item => item.anlass_name && item.anlass_name.trim() !== "");
+        if(todayEntries.length > 0) {
+            const last = todayEntries[todayEntries.length - 1];
+            document.getElementById('modal-anlass-name').value = last.anlass_name;
+            if (globalAnlassKategorien.includes(last.anlass_kategorie)) {
+                document.getElementById('modal-anlass-kategorie').value = last.anlass_kategorie;
+                document.getElementById('modal-anlass-kategorie-neu').value = "";
+            } else {
+                document.getElementById('modal-anlass-kategorie').value = "";
+                document.getElementById('modal-anlass-kategorie-neu').value = last.anlass_kategorie;
+            }
         }
+    }
 
-        function stopGame() {
-            gameActive = false;
-            document.body.classList.remove("game-running"); // Deckkraft-Klasse entfernen
-            canvas.style.display = "none";
-            scoreDisplay.style.display = "none";
-            stopBtn.style.display = "none";
+    function submitQuickLogFromModal() {
+        if (!activeModalDrink) return;
+
+        const aName = document.getElementById('modal-anlass-name').value.trim();
+        const selKat = document.getElementById('modal-anlass-kategorie').value;
+        const neuKat = document.getElementById('modal-anlass-kategorie-neu').value.trim();
+        const aKat = neuKat !== "" ? neuKat : selKat;
+
+        logDrink(activeModalDrink.name, activeModalDrink.kategorie, activeModalDrink.groesse, 'nein', aName, aKat);
+        closeQuickLogModal();
+    }
+
+    function toggleFormAnlassWieZuvor() {
+        const check = document.getElementById('form-anlass-wie-zuvor').checked;
+        const fields = document.querySelectorAll('.form-anlass-input-group');
+        
+        if (check) {
+            fields.forEach(f => f.style.display = "none");
+            const todayEntries = globalHistory.filter(item => item.anlass_name && item.anlass_name.trim() !== "");
+            if (todayEntries.length > 0) {
+                const last = todayEntries[todayEntries.length - 1];
+                document.getElementById('form-anlass-name').value = last.anlass_name;
+                document.getElementById('form-anlass-kategorie').value = last.anlass_kategorie;
+                document.getElementById('form-anlass-kategorie-neu').value = "";
+            }
+        } else {
+            fields.forEach(f => f.style.display = "flex");
+            document.getElementById('form-anlass-name').value = "";
+            document.getElementById('form-anlass-kategorie').value = "";
+            document.getElementById('form-anlass-kategorie-neu').value = "";
         }
+    }
 
-        function spawnFood() {
-            const cols = Math.floor(canvas.width / GRID);
-            const rows = Math.floor(canvas.height / GRID);
-            let pos;
-            do {
-                pos = { x: Math.floor(Math.random() * cols) * GRID, y: Math.floor(Math.random() * rows) * GRID };
-            } while (snake.some(s => s.x === pos.x && s.y === pos.y));
-            food = { ...pos, symbol: laender[Math.floor(Math.random() * laender.length)] };
+    function handleManualSubmit(event) {
+        event.preventDefault();
+        
+        const selDrink = document.getElementById('form-name-select').value;
+        const inputDrink = document.getElementById('form-name-input').value.trim();
+        const name = inputDrink !== "" ? inputDrink : selDrink;
+
+        const kategorie = document.getElementById('form-kategorie').value;
+        const groesse = document.getElementById('form-groesse').value;
+        const regelmaessig = document.getElementById('form-regelmaessig').checked ? "ja" : "nein";
+
+        let aName = document.getElementById('form-anlass-name').value.trim();
+        const selKat = document.getElementById('form-anlass-kategorie').value;
+        const neuKat = document.getElementById('form-anlass-kategorie-neu').value.trim();
+        let aKat = neuKat !== "" ? neuKat : selKat;
+
+        if (!name || !groesse) return;
+
+        logDrink(name, kategorie, groesse, regelmaessig, aName, aKat);
+        
+        document.getElementById('manual-drink-form').reset();
+        document.getElementById('form-anlass-wie-zuvor').checked = false;
+        toggleFormAnlassWieZuvor();
+    }
+
+    function logDrink(name, kategorie, groesse, regelmaessig, anlassName, anlassKategorie) {
+        updateCloudStatus("Cloud lädt");
+        const formBody = new URLSearchParams();
+        formBody.append('name', name);
+        formBody.append('kategorie', kategorie);
+        formBody.append('groesse', groesse);
+        formBody.append('regelmaessig', regelmaessig);
+        formBody.append('anlass_name', anlassName);
+        formBody.append('anlass_kategorie', anlassKategorie);
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formBody.toString()
+        })
+        .then(() => {
+            document.getElementById('cloud-error-box').style.display = 'none';
+            updateCloudStatus("Cloud synced");
+            showSuccessToast();
+            setTimeout(fetchData, 600);
+        })
+        .catch(err => {
+            document.getElementById('cloud-error-box').style.display = 'block';
+            updateCloudStatus("Cloud Fehler");
+            console.error(err);
+        });
+    }
+
+    function calculateStats() {
+        const todayStr = formatDateToString(new Date());
+        
+        let todayVolume = 0;
+        globalHistory.forEach(item => {
+            if (item.datum && item.datum.startsWith(todayStr) && !isNaN(item.groesse)) {
+                todayVolume += item.groesse;
+            }
+        });
+        document.getElementById('kpi-today').textContent = `${todayVolume.toFixed(2).replace('.', ',')} L`;
+
+        let currentStreak = 0;
+        if (globalHistory.length > 0) {
+            let checkDate = new Date();
+            for (let i = 0; i < 365; i++) {
+                const checkDateStr = formatDateToString(checkDate);
+                const hasEntries = globalHistory.some(item => item.datum && item.datum.startsWith(checkDateStr));
+                if (!hasEntries) { currentStreak++; checkDate.setDate(checkDate.getDate() - 1); } 
+                else { break; }
+            }
         }
+        document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
 
-        function draw() {
-            direction = nextDirection;
-            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+        const counts = {};
+        const drinkCatCounts = {};
+        const eventCatCounts = {};
+        
+        let maxCount = 0; let maxDrinkCatCount = 0; let maxEventCatCount = 0;
 
-            if (head.x < 0) head.x = Math.floor((canvas.width - 1) / GRID) * GRID;
-            if (head.x >= canvas.width) head.x = 0;
-            if (head.y < 0) head.y = Math.floor((canvas.height - 1) / GRID) * GRID;
-            if (head.y >= canvas.height) head.y = 0;
+        globalHistory.forEach(item => {
+            if (!item.name || item.name.trim() === "") return;
+            
+            const numSize = Number(item.groesse);
+            if(isNaN(numSize)) return;
+            
+            const sizeFormatted = numSize.toFixed(2);
+            const key = `${item.name} (${sizeFormatted} L)|${item.kategorie || 'Bier'}`;
+            counts[key] = (counts[key] || 0) + 1;
+            if (counts[key] > maxCount) maxCount = counts[key];
 
-            if (snake.some(s => s.x === head.x && s.y === head.y)) { gameOver(); return; }
+            if (item.kategorie) {
+                drinkCatCounts[item.kategorie] = (drinkCatCounts[item.kategorie] || 0) + 1;
+                if (drinkCatCounts[item.kategorie] > maxDrinkCatCount) maxDrinkCatCount = drinkCatCounts[item.kategorie];
+            }
 
-            snake.unshift(head);
-            if (head.x === food.x && head.y === food.y) { score++; scoreVal.innerText = score; spawnFood(); }
-            else { snake.pop(); }
+            if (item.anlass_kategorie && item.anlass_kategorie.trim() !== "") {
+                eventCatCounts[item.anlass_kategorie] = (eventCatCounts[item.anlass_kategorie] || 0) + 1;
+                if (eventCatCounts[item.anlass_kategorie] > maxEventCatCount) maxEventCatCount = eventCatCounts[item.anlass_kategorie];
+            }
+        });
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            ctx.fillStyle = isDark ? "rgba(15,23,42,0.7)" : "rgba(240,242,245,0.7)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const sortedRanking = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+        const perfContainer = document.getElementById('routine-performance-container');
+        perfContainer.innerHTML = '';
 
-            ctx.font = `${GRID - 4}px sans-serif`;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(food.symbol, food.x + GRID / 2, food.y + GRID / 2);
-
-            snake.forEach((s, i) => {
-                ctx.fillStyle = i === 0 ? "#2ecc71" : `rgba(46, 204, 113, ${Math.max(0.3, 1 - i * 0.05)})`;
-                ctx.beginPath();
-                ctx.roundRect(s.x + 2, s.y + 2, GRID - 4, GRID - 4, 8);
-                ctx.fill();
+        if (sortedRanking.length === 0) {
+            perfContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:8px 0;">Noch keine Daten vorhanden.</div>`;
+        } else {
+            sortedRanking.slice(0, 5).forEach(drinkKey => {
+                const count = counts[drinkKey];
+                const pct = maxCount > 0 ? Math.round((count / maxCount) * 100) : 0;
+                const parts = drinkKey.split('|');
+                const labelPart = parts[0];
+                const catPart = parts[1] || 'Bier';
+                
+                const cleanName = labelPart.split(' (')[0];
+                const cleanSize = labelPart.includes(' (') ? labelPart.split(' (')[1].replace(')', '') : '';
+                const icon = categoryIcons[catPart] || "🥤";
+                
+                perfContainer.innerHTML += `
+                    <div class="perf-item">
+                        <div class="perf-info">
+                            <span class="perf-icon">${icon}</span>
+                            <span class="perf-name">${cleanName} <small style="color:var(--text-secondary); font-weight:700;">${cleanSize}</small></span>
+                        </div>
+                        <div class="perf-bar-wrapper">
+                            <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
+                            <span class="perf-pct">${count}x</span>
+                        </div>
+                    </div>
+                `;
             });
         }
 
-        function gameOver() {
-            ctx.fillStyle = "#e74c3c";
-            ctx.font = "bold 32px -apple-system";
-            ctx.textAlign = "center";
-            ctx.fillText(`💀 ${score} Länder`, canvas.width / 2, canvas.height / 2);
-            setTimeout(stopGame, 1500);
+        const sortedDrinkCats = Object.keys(drinkCatCounts).sort((a, b) => drinkCatCounts[b] - drinkCatCounts[a]);
+        const drinkCatContainer = document.getElementById('drink-category-performance-container');
+        drinkCatContainer.innerHTML = '';
+
+        if (sortedDrinkCats.length === 0) {
+            drinkCatContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:8px 0;">Noch keine Daten vorhanden.</div>`;
+        } else {
+            sortedDrinkCats.forEach(catKey => {
+                const count = drinkCatCounts[catKey];
+                const pct = maxDrinkCatCount > 0 ? Math.round((count / maxDrinkCatCount) * 100) : 0;
+                const icon = categoryIcons[catKey] || "🥤";
+
+                drinkCatContainer.innerHTML += `
+                    <div class="perf-item">
+                        <div class="perf-info"><span class="perf-icon">${icon}</span><span class="perf-name">${catKey}</span></div>
+                        <div class="perf-bar-wrapper">
+                            <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
+                            <span class="perf-pct">${count}x</span>
+                        </div>
+                    </div>
+                `;
+            });
         }
 
-        window.addEventListener("keydown", (e) => {
-            if (!gameActive) return;
-            const d = direction;
-            if ((e.key === "ArrowUp" || e.key === "w") && d.y === 0) nextDirection = { x: 0, y: -GRID };
-            if ((e.key === "ArrowDown" || e.key === "s") && d.y === 0) nextDirection = { x: 0, y: GRID };
-            if ((e.key === "ArrowLeft" || e.key === "a") && d.x === 0) nextDirection = { x: -GRID, y: 0 };
-            if ((e.key === "ArrowRight" || e.key === "d") && d.x === 0) nextDirection = { x: GRID, y: 0 };
-        });
+        const sortedEventCats = Object.keys(eventCatCounts).sort((a, b) => eventCatCounts[b] - eventCatCounts[a]);
+        const eventCatContainer = document.getElementById('event-category-performance-container');
+        eventCatContainer.innerHTML = '';
 
-        let touchStartX = 0;
-        let touchStartY = 0;
+        if (sortedEventCats.length === 0) {
+            eventCatContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:8px 0;">Noch keine Anlass-Daten vorhanden.</div>`;
+        } else {
+            sortedEventCats.forEach(catKey => {
+                const count = eventCatCounts[catKey];
+                const pct = maxEventCatCount > 0 ? Math.round((count / maxEventCatCount) * 100) : 0;
+                const icon = eventIcons[catKey] || "📍";
 
-        window.addEventListener("touchstart", (e) => {
-            if (!gameActive) return;
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
+                eventCatContainer.innerHTML += `
+                    <div class="perf-item">
+                        <div class="perf-info"><span class="perf-icon">${icon}</span><span class="perf-name">${catKey}</span></div>
+                        <div class="perf-bar-wrapper">
+                            <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
+                            <span class="perf-pct">${count}x</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    }
 
-        window.addEventListener("touchmove", (e) => {
-            if (!gameActive) return;
-            e.preventDefault(); 
-        }, { passive: false });
-
-        window.addEventListener("touchend", (e) => {
-            if (!gameActive) return;
-            const touchEndX = e.changedTouches[0].clientX;
-            const touchEndY = e.changedTouches[0].clientY;
-            
-            const dx = touchEndX - touchStartX;
-            const dy = touchEndY - touchStartY;
-            const absDx = Math.abs(dx);
-            const absDy = Math.abs(dy);
-            
-            if (Math.max(absDx, absDy) < 20) return; 
-
-            const d = direction;
-            if (absDx > absDy) {
-                if (dx > 0 && d.x === 0) nextDirection = { x: GRID, y: 0 };
-                else if (dx < 0 && d.x === 0) nextDirection = { x: -GRID, y: 0 };
-            } else {
-                if (dy > 0 && d.y === 0) nextDirection = { x: 0, y: GRID };
-                else if (dy < 0 && d.y === 0) nextDirection = { x: 0, y: -GRID };
-            }
-        }, { passive: true });
-    </script>
+    window.onload = fetchData;
+</script>
 </body>
 </html>
