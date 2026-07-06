@@ -118,7 +118,6 @@
             transition: color 0.2s ease;
         }
 
-        /* Zentrierter erster Switch im Header */
         .header-switch-container {
             margin: 0 auto;
             display: flex;
@@ -126,7 +125,6 @@
             z-index: 5;
         }
 
-        /* Zentrierter Bereich für den zweiten Switch außerhalb vom Header */
         .outside-switch-area {
             display: flex;
             justify-content: center;
@@ -924,7 +922,7 @@
                     }
 
                     const gesternDot = document.getElementById(`dot-${routineName}-gestern`);
-                    if (gesternDot) {
+                    if gesternDot) {
                         let statusGestern = "nein";
                         if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen[routineName]) {
                             statusGestern = yesterdayData.routinen[routineName].toLowerCase();
@@ -1092,7 +1090,6 @@
                 let isAllowedPath = false;
                 let isTimeShifted = false;
 
-                // 1. Same-Day-Effekt (Morgenroutine -> Rest, oder Core-Routinen untereinander am selben Tag)
                 if (triggerRoutine === "Morgenroutine") {
                     isAllowedPath = true;
                     isTimeShifted = false;
@@ -1101,7 +1098,6 @@
                     isTimeShifted = false;
                 }
                 
-                // 2. Übertragungs-Effekt (Core-Routinen -> Folgetag, Schlaf -> Folgetag)
                 if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Schlafroutine"].includes(triggerRoutine) && targetRoutine !== "Morgenroutine" && triggerRoutine !== "Schlafroutine") {
                     if (triggerRoutine === "Schlafroutine" || ["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(targetRoutine)) {
                         isAllowedPath = true;
@@ -1109,14 +1105,13 @@
                     }
                 }
 
-                // 3. Verketteter Effekt (Abendroutine -> Schlaf am selben Tag ODER Abendroutine -> Folgetag)
                 if (triggerRoutine === "Abendroutine") {
                     if (targetRoutine === "Schlafroutine") {
                         isAllowedPath = true;
-                        isTimeShifted = false; // Abendroutine und Schlaf gehören zur selben Nacht-Kohorte (selber Tabellenzeilen-Kontext)
+                        isTimeShifted = false;
                     } else {
                         isAllowedPath = true;
-                        isTimeShifted = true; // Abendroutine strahlt auf Core-Routinen des Folgetages aus
+                        isTimeShifted = true;
                     }
                 }
 
@@ -1267,5 +1262,3 @@
 </script>
 </body>
 </html>
-
-
