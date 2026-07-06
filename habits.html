@@ -981,7 +981,8 @@
     }
 
     function renderDashboard(historyArray) {
-        const routineKeys = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine", "TwoDayRule"];
+        const routineKeys = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine"];
+        const allKeysWithTdr = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine", "TwoDayRule"];
         
         const totalMatrixDays = 7;
         const matrixDates = [];
@@ -999,7 +1000,7 @@
         let totalChecks = 0;
         let successfulChecks = 0;
         const routineSuccessCounts = {};
-        routineKeys.forEach(k => routineSuccessCounts[k] = 0);
+        allKeysWithTdr.forEach(k => routineSuccessCounts[k] = 0);
 
         const monthlyData = {};
         const weeklyData = {};
@@ -1016,7 +1017,7 @@
             const weekKey = weekNum ? `KW ${String(weekNum).padStart(2, '0')} / ${year}` : "Unbekannt";
             if (weekKey !== "Unbekannt" && !weeklyData[weekKey]) weeklyData[weekKey] = { total: 0, success: 0 };
 
-            routineKeys.forEach(routine => {
+            allKeysWithTdr.forEach(routine => {
                 if (row.routinen && row.routinen[routine]) {
                     const status = row.routinen[routine].toLowerCase();
                     totalChecks++;
@@ -1087,13 +1088,46 @@
         routineKeys.forEach(triggerRoutine => {
             routineKeys.forEach(targetRoutine => {
                 if (triggerRoutine === targetRoutine) return;
+                
+                let isAllowedPath = false;
+                let isTimeShifted = false;
+
+                // 1. Same-Day-Effekt (Morgenroutine -> Rest, oder Core-Routinen untereinander am selben Tag)
+                if (triggerRoutine === "Morgenroutine") {
+                    isAllowedPath = true;
+                    isTimeShifted = false;
+                } else if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(triggerRoutine) && ["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(targetRoutine)) {
+                    isAllowedPath = true;
+                    isTimeShifted = false;
+                }
+                
+                // 2. Übertragungs-Effekt (Core-Routinen -> Folgetag, Schlaf -> Folgetag)
+                if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Schlafroutine"].includes(triggerRoutine) && targetRoutine !== "Morgenroutine" && triggerRoutine !== "Schlafroutine") {
+                    if (triggerRoutine === "Schlafroutine" || ["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(targetRoutine)) {
+                        isAllowedPath = true;
+                        isTimeShifted = true;
+                    }
+                }
+
+                // 3. Verketteter Effekt (Abendroutine -> Schlaf am selben Tag ODER Abendroutine -> Folgetag)
+                if (triggerRoutine === "Abendroutine") {
+                    if (targetRoutine === "Schlafroutine") {
+                        isAllowedPath = true;
+                        isTimeShifted = false; // Abendroutine und Schlaf gehören zur selben Nacht-Kohorte (selber Tabellenzeilen-Kontext)
+                    } else {
+                        isAllowedPath = true;
+                        isTimeShifted = true; // Abendroutine strahlt auf Core-Routinen des Folgetages aus
+                    }
+                }
+
+                if (!isAllowedPath) return;
+
                 let triggerJaCount = 0;
                 let targetAlsoJaCount = 0;
 
                 for (let i = 1; i < historyArray.length; i++) {
                     const currentRow = historyArray[i]; 
                     const nextDayRow = historyArray[i - 1]; 
-                    const isTimeShifted = (triggerRoutine === "Abendroutine" || triggerRoutine === "Schlafroutine");
                     
                     if (isTimeShifted) {
                         if (currentRow.routinen && currentRow.routinen[triggerRoutine] && nextDayRow.routinen && nextDayRow.routinen[targetRoutine]) {
@@ -1115,21 +1149,25 @@
                 if (triggerJaCount >= 2) {
                     const probability = Math.round((targetAlsoJaCount / triggerJaCount) * 100);
                     if (probability >= 70) {
-                        insights.push({ trigger: triggerRoutine, target: targetRoutine, prob: probability, isShifted: (triggerRoutine === "Abendroutine" || triggerRoutine === "Schlafroutine") });
+                        insights.push({ 
+                            trigger: triggerRoutine, 
+                            target: targetRoutine, 
+                            prob: probability, 
+                            context: isTimeShifted ? "am Folgetag" : (triggerRoutine === "Abendroutine" && targetRoutine === "Schlafroutine" ? "in der Nacht" : "am selben Tag") 
+                        });
                     }
                 }
             });
         });
 
         if (insights.length === 0) {
-            correlationContainer.innerHTML = `<div class="insight-card"><div class="insight-title">⏳ Datenbasis wird aufgebaut</div><div class="insight-desc">Sobald Kausalitäten entstehen, siehst du hier deinen mächtigsten Hebel.</div></div>`;
+            correlationContainer.innerHTML = `<div class="insight-card"><div class="insight-title">⏳ Datenbasis wird aufgebaut</div><div class="insight-desc">Sobald valide Kausalitäten entstehen, siehst du hier deinen mächtigsten Hebel.</div></div>`;
         } else {
             insights.sort((a, b) => b.prob - a.prob);
             insights.slice(0, 3).forEach(ins => {
                 const triggerIcon = routineIcons[ins.trigger] || "🎯";
                 const targetIcon = routineIcons[ins.target] || "🎯";
-                const contextText = ins.isShifted ? "am Folgetag" : "am selben Tag";
-                correlationContainer.innerHTML += `<div class="insight-card"><div class="insight-title">${triggerIcon} ${ins.trigger} &rarr; ${targetIcon} ${ins.target}</div><div class="insight-desc">Sichert deine <strong>${ins.target}</strong> ${contextText} mit einer Wahrscheinlichkeit von <strong>${ins.prob}%</strong>.</div></div>`;
+                correlationContainer.innerHTML += `<div class="insight-card"><div class="insight-title">${triggerIcon} ${ins.trigger} &rarr; ${targetIcon} ${ins.target}</div><div class="insight-desc">Sichert deine <strong>${ins.target}</strong> ${ins.context} mit einer Wahrscheinlichkeit von <strong>${ins.prob}%</strong>.</div></div>`;
             });
         }
 
@@ -1203,7 +1241,7 @@
 
         const rowsContainer = document.getElementById('matrix-rows-container');
         rowsContainer.innerHTML = '';
-        routineKeys.forEach(routine => {
+        allKeysWithTdr.forEach(routine => {
             let cellsHtml = '';
             matrixDates.forEach(dateStr => {
                 const dayData = historyArray.find(item => item.datum === dateStr);
@@ -1217,7 +1255,7 @@
 
         const perfContainer = document.getElementById('routine-performance-container');
         perfContainer.innerHTML = '';
-        routineKeys.forEach(routine => {
+        allKeysWithTdr.forEach(routine => {
             const routineTotal = historyArray.length; const routineSuccess = routineSuccessCounts[routine] || 0;
             const pct = routineTotal > 0 ? Math.round((routineSuccess / routineTotal) * 100) : 0;
             const icon = routineIcons[routine] || "🎯";
