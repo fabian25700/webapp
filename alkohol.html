@@ -533,14 +533,14 @@
         });
         document.getElementById('kpi-today').textContent = `${todayVolume.toFixed(2).replace('.', ',')} L`;
 
-        // 2. Nüchtern-Konto (Streak)
+        // 2. Nüchtern-Konto (Streak - Endlosschleifensicher berechnet)
         let currentStreak = 0;
         let checkDate = new Date();
         
         for (let i = 0; i < 365; i++) {
             const checkDateStr = formatDateToString(checkDate);
-            const foundLog = globalHistory.find(item => item.datum === checkDateStr);
-            if (!foundLog) {
+            const hasEntries = globalHistory.some(item => item.datum === checkDateStr);
+            if (!hasEntries) {
                 currentStreak++;
                 checkDate.setDate(checkDate.getDate() - 1);
             } else {
@@ -553,7 +553,9 @@
         const counts = {};
         let maxCount = 0;
         globalHistory.forEach(item => {
-            const key = `${item.name} (${item.groesse.toFixed(2)} L)|${item.kategorie}`;
+            if (!item.name) return;
+            const sizeFormatted = typeof item.groesse === 'number' ? item.groesse.toFixed(2) : parseFloat(item.groesse).toFixed(2);
+            const key = `${item.name} (${sizeFormatted} L)|${item.kategorie || 'Bier'}`;
             counts[key] = (counts[key] || 0) + 1;
             if (counts[key] > maxCount) maxCount = counts[key];
         });
