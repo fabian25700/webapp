@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Tracker</title>
+    <title>Alkohol</title>
     <style>
         :root {
             --accent: #e67e22;
@@ -66,6 +66,14 @@
             justify-content: flex-start;
             width: 100%;
             position: relative;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+        
+        .back-btn {
+            background: none; border: none; font-size: 1.15rem; color: var(--accent);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            text-decoration: none; padding-right: 4px; font-weight: 400;
         }
 
         .header-left span { font-size: 0.95rem; font-weight: 700; line-height: 1; }
@@ -266,7 +274,10 @@
 
 <header>
     <div class="header-top">
-        <div class="header-left"><span>Kontext</span></div>
+        <div class="header-left">
+            <a href="index.html" class="back-btn">‹</a>
+            <span>Alkohol</span>
+        </div>
         <div class="header-switch-container">
             <div class="main-view-switch">
                 <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')">🎯 Tracker</button>
@@ -287,18 +298,21 @@
             <h3>Neues Getränk erfassen</h3>
             <form id="manual-drink-form" onsubmit="handleManualSubmit(event)">
                 <div class="form-grid">
+                    
                     <div class="form-group full">
-                        <label for="form-name">Getränk Name</label>
-                        <input type="text" id="form-name" placeholder="z.B. Reissdorf" required>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="form-regelmaessig">
+                            <label for="form-regelmaessig">Bei Regelmäßig speichern?</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="form-name-input">Name neues Getränk</label>
+                        <input type="text" id="form-name-input" placeholder="z.B. Reissdorf" required>
                     </div>
                     <div class="form-group">
                         <label for="form-kategorie">Kategorie</label>
-                        <select id="form-kategorie" required>
-                            <option value="Bier">Bier</option>
-                            <option value="Wein">Wein</option>
-                            <option value="Spirituose">Spirituose</option>
-                            <option value="Mixgetränk">Mixgetränk</option>
-                        </select>
+                        <select id="form-kategorie" required></select>
                     </div>
                     <div class="form-group">
                         <label for="form-groesse">Größe (in Liter)</label>
@@ -326,13 +340,7 @@
                     </div>
                 </div>
                 
-                <div class="form-group" style="margin-top: 8px;">
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="form-regelmaessig">
-                        <label for="form-regelmaessig">Bei Regelmäßig speichern?</label>
-                    </div>
-                </div>
-                <button type="submit" class="submit-btn">Eintragen & Loggen</button>
+                <button type="submit" class="submit-btn" style="margin-top: 12px;">Eintragen & Loggen</button>
             </form>
         </div>
     </div>
@@ -367,7 +375,7 @@
 </main>
 
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzeqqPJFUqU6FgVVbeBMTid4gfhY2nf6cx0g7R6KMpMoIv74x4L0uphyFQKKBXO7ojHDw/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2p1m_3iXMJAfIirJcTrh9fAWbllxTBW-LtILGgrNPMREQ9urvVAqLnuMVJv_TKBx8Xg/exec";
 
     let globalFavorites = [];
     let globalHistory = [];
@@ -422,7 +430,7 @@
                     globalFavorites = []; globalHistory = []; globalAnlassKategorien = [];
                 }
                 renderTrackerUI();
-                populateAnlassDropdowns();
+                populateDropdowns();
                 updateCloudStatus("Cloud Live");
             })
             .catch(err => {
@@ -432,7 +440,8 @@
             });
     }
 
-    function populateAnlassDropdowns() {
+    function populateDropdowns() {
+        // 1. Anlass-Kategorien füllen
         const d1 = document.getElementById('modal-anlass-kategorie');
         const d2 = document.getElementById('form-anlass-kategorie');
         
@@ -443,6 +452,26 @@
 
         d1.innerHTML = optionsHtml;
         d2.innerHTML = optionsHtml;
+
+        // 2. Getränke-Kategorien dynamisch aus dem Blatt Getraenke befüllen
+        const dKategorie = document.getElementById('form-kategorie');
+        let uniqueCategories = [];
+        
+        globalFavorites.forEach(item => {
+            if(item.kategorie && !uniqueCategories.includes(item.kategorie)) uniqueCategories.push(item.kategorie);
+        });
+        
+        // Fallback, falls Getraenke leer ist
+        if (uniqueCategories.length === 0) {
+            uniqueCategories = ["Bier", "Wein", "Spirituose", "Mixgetränk"];
+        }
+        uniqueCategories.sort();
+
+        let catOptionsHtml = ``;
+        uniqueCategories.forEach(cat => {
+            catOptionsHtml += `<option value="${cat}">${cat}</option>`;
+        });
+        dKategorie.innerHTML = catOptionsHtml;
     }
 
     function renderTrackerUI() {
@@ -566,7 +595,8 @@
 
     function handleManualSubmit(event) {
         event.preventDefault();
-        const name = document.getElementById('form-name').value.trim();
+        
+        const name = document.getElementById('form-name-input').value.trim();
         const kategorie = document.getElementById('form-kategorie').value;
         const groesse = document.getElementById('form-groesse').value;
         const regelmaessig = document.getElementById('form-regelmaessig').checked ? "ja" : "nein";
