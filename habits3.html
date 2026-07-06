@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Routinen</title>
+    <style>
+        :root {
+            --accent: #e67e22;
+            --accent-soft: rgba(230, 126, 34, 0.1);
+            --success: #27ae60;
+            --success-soft: rgba(39, 174, 96, 0.1);
+            --danger: #e74c3c;
+            --danger-soft: rgba(231, 76, 60, 0.3);
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --apple-switch-bg: #e3e3e6;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: #2d3f55;
+                --border-light: #253347;
+                --apple-switch-bg: #1c1c1e;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        header {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--bg);
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-top { 
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            position: relative;
+        }
+        
+        .header-left { 
+            display: flex; 
+            align-items: center; 
+            position: absolute;
+            left: 0;
+            z-index: 10;
+        }
+
+        .back-container { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            text-decoration: none; 
+            color: var(--text-primary); 
+        }
+        
+        .back-container span { 
+            font-size: 0.95rem; 
+            font-weight: 700; 
+            line-height: 1;
+        }
+
+        .back-btn {
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            width: 32px; 
+            height: 32px; 
+            border-radius: 9px;
+            background: var(--surface); 
+            border: 1px solid var(--border);
+            color: var(--text-primary); 
+            box-shadow: var(--shadow);
+            flex-shrink: 0; 
+            font-size: 0.9rem;
+            line-height: 1;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            position: absolute;
+            right: 0;
+            z-index: 10;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+        }
+
+        /* Zentrierter erster Switch im Header */
+        .header-switch-container {
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        /* Zentrierter Bereich für den zweiten Switch außerhalb vom Header */
+        .outside-switch-area {
+            display: flex;
+            justify-content: center;
+            margin: 12px auto 4px auto;
+            width: 100%;
+            max-width: 600px;
+            padding: 0 16px;
+        }
+
+        .main-view-switch {
+            display: flex; 
+            background: var(--apple-switch-bg); 
+            border-radius: 9px;
+            padding: 2px; 
+            width: 160px; 
+            height: 32px; 
+            flex-shrink: 0;
+        }
+        
+        .main-switch-btn {
+            flex: 1; 
+            text-align: center; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 4px;
+            font-size: 0.78rem; 
+            font-weight: 700; 
+            border-radius: 7px; 
+            border: none; 
+            background: transparent;
+            color: var(--text-secondary); 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            height: 100%;
+            line-height: 1;
+        }
+        
+        .main-switch-btn.active {
+            background: var(--surface); 
+            color: var(--text-primary);
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
+        }
+
+        .apple-switch-container {
+            display: flex; 
+            background: var(--apple-switch-bg); 
+            border-radius: 9px;
+            padding: 2px; 
+            width: 80px; 
+            height: 32px; 
+            flex-shrink: 0;
+        }
+        
+        .apple-switch-btn {
+            flex: 1; 
+            text-align: center; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            font-size: 0.95rem; 
+            border-radius: 7px; 
+            border: none; 
+            background: transparent;
+            cursor: pointer; 
+            transition: all 0.2s; 
+            position: relative; 
+            z-index: 2; 
+            height: 100%;
+            line-height: 1;
+        }
+        
+        .apple-switch-btn.active {
+            background: var(--surface);
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
+        }
+
+        .cloud-error-banner {
+            display: none;
+            background: var(--danger-soft);
+            border: 1px solid var(--danger);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 0 16px;
+        }
+
+        .toast-notification {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 110px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: var(--success);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            opacity: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        .toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+        .view-section { display: none; flex-direction: column; gap: 12px; width: 100%; }
+        .view-section.active { display: flex; }
+
+        #active-routines-container, #done-routines-list { display: flex; flex-direction: column; gap: 12px; }
+
+        .done-routines-master-container { display: none; margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 16px; }
+        .done-routines-trigger {
+            font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+            padding: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);
+        }
+        .done-routines-hidden-wrapper { display: none; flex-direction: column; gap: 12px; margin-top: 12px; }
+        .done-routines-master-container.expanded .done-routines-hidden-wrapper { display: flex; }
+
+        .category-group { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); position: relative; }
+        .category-group.routine-done-state { opacity: 0.75; }
+
+        .category-header {
+            padding: 16px; display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; user-select: none; transition: background 0.2s;
+        }
+        .category-header:active { background: var(--border-light); }
+
+        .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; flex: 1; }
+        .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        
+        .category-meta { display: flex; align-items: center; gap: 6px; margin-left: auto; margin-right: 12px; flex-shrink: 0; }
+        .status-dot-wrapper { display: flex; flex-direction: column; align-items: center; }
+
+        .arrow { font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.3s ease; flex-shrink: 0; }
+        .category-group.open .arrow { transform: rotate(180deg); }
+
+        .category-content { display: none; padding: 0 16px 16px; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 16px; }
+        .category-group.open .category-content { display: flex; }
+
+        .bucket-card {
+            background: var(--bg); border-radius: 12px; border: 1px solid var(--border);
+            padding: 14px 16px; display: flex; align-items: center; gap: 14px;
+            cursor: pointer; user-select: none; transition: all 0.2s ease;
+        }
+        .bucket-card:active { transform: scale(0.99); }
+        .bucket-card.done { opacity: 0.5; border-style: dashed; background: var(--border-light); }
+
+        .status-circle {
+            width: 22px; height: 22px; border-radius: 6px;
+            border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            transition: all 0.2s ease; order: -1;
+        }
+        .done .status-circle { background: var(--success); border-color: var(--success); }
+        .status-circle::after { content: '✓'; color: white; font-size: 13px; font-weight: bold; display: none; }
+        .done .status-circle::after { display: block; }
+
+        .location-name { font-weight: 600; font-size: 0.95rem; flex: 1; }
+        
+        .yesterday-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; background: var(--border); }
+        .yesterday-dot.ja { background: var(--success); box-shadow: 0 0 6px var(--success); }
+        .yesterday-dot.nein { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
+
+        .close-routine-trigger {
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 12px; margin-top: 8px; border-radius: 12px;
+            background: var(--border-light); border: 1px dashed var(--border);
+            color: var(--text-secondary); font-size: 0.8rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+            user-select: none; transition: background 0.2s;
+        }
+        .close-routine-trigger:active { background: var(--border); }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .kpi-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; height: 95px;
+        }
+        .kpi-value { font-size: 1.35rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .kpi-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+        
+        .gauge-container { position: relative; width: 85px; height: 42px; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
+        .gauge-arc { width: 76px; height: 76px; border-radius: 50%; border: 4px solid var(--border-light); border-bottom-color: transparent; border-left-color: transparent; transform: rotate(-45deg); position: absolute; bottom: -38px; }
+        .gauge-needle { width: 2px; height: 35px; background: var(--text-primary); position: absolute; bottom: 0; transform-origin: bottom center; transform: rotate(0deg); transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .gauge-center { width: 6px; height: 6px; background: var(--text-primary); border-radius: 50%; position: absolute; bottom: -3px; }
+        .gauge-labels { display: flex; justify-content: space-between; width: 100%; padding: 0 2px; font-size: 0.55rem; font-weight: 700; color: var(--text-secondary); margin-top: -2px; }
+
+        .section-block {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px;
+        }
+        
+        .switch-header { display: flex; background: var(--bg); border-radius: 10px; padding: 2px; border: 1px solid var(--border); width: 100%; }
+        .switch-tab { flex: 1; text-align: center; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); padding: 7px 4px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .switch-tab.active { background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow); }
+
+        .matrix-grid { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+        .matrix-row { display: flex; align-items: center; width: 100%; height: 28px; }
+        
+        .matrix-label { 
+            flex: 1; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; 
+            gap: 6px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+        }
+        
+        .matrix-cells { 
+            display: flex; gap: 6px; flex-shrink: 0; align-items: center; justify-content: flex-end; width: 204px; 
+        }
+        
+        .matrix-cell { width: 24px; height: 24px; border-radius: 6px; background: var(--border-light); border: 1px solid var(--border); transition: all 0.2s; flex-shrink: 0; }
+        .matrix-cell.ja { background: var(--success); border-color: var(--success); }
+        .matrix-cell.nein { background: var(--danger-soft); border-color: var(--danger); opacity: 0.3; }
+        
+        .days-header { display: flex; width: 100%; margin-bottom: 2px; height: 16px; align-items: center; }
+        .days-header-spacer { flex: 1; }
+        .days-header-labels { display: flex; gap: 6px; flex-shrink: 0; justify-content: flex-end; width: 204px; }
+        .day-label { font-size: 0.6rem; font-weight: 700; color: var(--text-secondary); text-align: center; width: 24px; text-transform: uppercase; flex-shrink: 0; }
+
+        .perf-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-light); height: 32px; }
+        .perf-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .perf-info { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+        .perf-icon { font-size: 0.95rem; flex-shrink: 0; }
+        .perf-name { font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .perf-bar-wrapper { display: flex; align-items: center; gap: 8px; width: 204px; flex-shrink: 0; }
+        .perf-bar-bg { flex: 1; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
+        .perf-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; }
+        .perf-pct { font-size: 0.75rem; font-weight: 700; width: 32px; text-align: right; }
+
+        .trend-container { display: flex; flex-direction: column; gap: 8px; }
+        .trend-row { display: flex; align-items: center; justify-content: space-between; padding: 2px 0; }
+        .trend-month-label { font-size: 0.88rem; font-weight: 700; }
+        .trend-badge { font-size: 0.7rem; font-weight: 700; padding: 3px 6px; border-radius: 6px; }
+        .trend-badge.up { background: var(--success-soft); color: var(--success); }
+        .trend-badge.neutral { background: var(--border-light); color: var(--text-secondary); }
+
+        .insight-card { background: var(--bg); border-radius: 10px; border: 1px solid var(--border); padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+        .insight-title { font-size: 0.82rem; font-weight: 700; }
+        .insight-desc { font-size: 0.72rem; color: var(--text-secondary); line-height: 1.3; }
+        
+        .switch-content { display: none; }
+        .switch-content.active { display: flex; flex-direction: column; }
+
+        @media (max-width: 420px) {
+            .main-view-switch { width: 150px; }
+            .main-switch-btn { font-size: 0.72rem; }
+        }
+
+        @media (max-width: 395px) {
+            .matrix-label, .perf-name { font-size: 0.78rem; }
+            .matrix-cells, .days-header-labels, .perf-bar-wrapper { width: 168px; gap: 4px; }
+            .matrix-cell, .day-label { width: 20px; height: 20px; font-size: 0.55rem; }
+            .day-label { height: 20px; line-height: 20px; }
+        }
+    </style>
+    <script src="habits_input.js"></script>
+</head>
+<body>
+
+<div class="toast-notification" id="toast-notice">Habit erledigt, weiter so!</div>
+
+<header>
+    <div class="header-top">
+        <div class="header-left">
+            <a href="index.html" class="back-container">
+                <div class="back-btn">&larr;</div>
+                <span>Routinen</span>
+            </a>
+        </div>
+        <div class="header-switch-container">
+            <div class="main-view-switch">
+                <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')"><span>🎯</span> <span>Tracker</span></button>
+                <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')"><span>📊</span> <span>Stats</span></button>
+            </div>
+        </div>
+        <div class="header-right" id="cloud-status-text">Cloud Live</div>
+    </div>
+</header>
+
+<div class="cloud-error-banner" id="cloud-error-box">Sync-Fehler: Keine Verbindung zur Cloud möglich.</div>
+
+<div class="outside-switch-area">
+    <div class="apple-switch-container" id="mode-switch-wrapper">
+        <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')" title="Zuhause">🏡</button>
+        <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')" title="Unterwegs">🧳</button>
+    </div>
+</div>
+
+<main>
+    <div id="view-tracker" class="view-section active">
+        <div class="category-group" data-routine="TwoDayRule" id="routine-block-TwoDayRule">
+            <div class="category-header" style="cursor: default;">
+                <div class="category-title"><div class="category-icon">⚡</div><span>2-Day Rule</span></div>
+                <div class="category-meta">
+                    <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-heute"></span></div>
+                    <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-gestern"></span></div>
+                    <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-vorgestern"></span></div>
+                </div>
+                <div class="arrow" style="visibility: hidden;">▼</div>
+            </div>
+            <div class="category-content" data-habits='[]'></div>
+        </div>
+
+        <div id="active-routines-container"></div>
+
+        <div class="done-routines-master-container" id="done-routines-master-box">
+            <div class="done-routines-trigger" onclick="toggleDoneRoutinesMaster()">Erledigte Routinen anzeigen ▼</div>
+            <div class="done-routines-hidden-wrapper" id="done-routines-list"></div>
+        </div>
+    </div>
+
+    <div id="view-stats" class="view-section">
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-value" id="kpi-streak">-</div>
+                <div class="kpi-label">TwoDayRule Streak</div>
+            </div>
+            <div class="kpi-card" style="justify-content: flex-start; padding-top: 10px; gap: 2px;">
+                <div class="gauge-container">
+                    <div class="gauge-arc"></div>
+                    <div class="gauge-needle" id="gauge-needle"></div>
+                    <div class="gauge-center"></div>
+                </div>
+                <div class="gauge-labels">
+                    <span id="gauge-lbl-max">Max</span>
+                    <span id="gauge-lbl-avg">Ø</span>
+                    <span>0.0 T</span>
+                </div>
+                <div class="kpi-label" style="margin-top: 4px;">Erholungs-Zeit</div>
+            </div>
+        </div>
+
+        <div class="section-block">
+            <div class="switch-header">
+                <div class="switch-tab active" onclick="switchBlock('mid', 'domino')">Kausalitäten</div>
+                <div class="switch-tab" onclick="switchBlock('mid', 'cluster')">Synergien</div>
+            </div>
+            <div id="content-domino" class="switch-content active">
+                <div style="display: flex; flex-direction: column; gap: 8px;" id="correlation-container"></div>
+            </div>
+            <div id="content-cluster" class="switch-content">
+                <div style="display: flex; flex-direction: column; gap: 8px;" id="cluster-container"></div>
+            </div>
+        </div>
+
+        <div class="section-block">
+            <div class="switch-header">
+                <div class="switch-tab active" onclick="switchBlock('top', 'matrix')">7-Tage Matrix</div>
+                <div class="switch-tab" onclick="switchBlock('top', 'perf')">Routine Auswertung</div>
+            </div>
+            <div id="content-matrix" class="switch-content active">
+                <div class="matrix-grid">
+                    <div class="days-header">
+                        <div class="days-header-spacer"></div>
+                        <div class="days-header-labels" id="matrix-days"></div>
+                    </div>
+                    <div id="matrix-rows-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                </div>
+            </div>
+            <div id="content-perf" class="switch-content">
+                <div id="routine-performance-container" style="display: flex; flex-direction: column; gap: 2px;"></div>
+            </div>
+        </div>
+
+        <div class="section-block">
+            <div class="switch-header">
+                <div class="switch-tab active" onclick="switchBlock('bottom', 'month')">Monatsvergleich</div>
+                <div class="switch-tab" onclick="switchBlock('bottom', 'week')">Wochenvergleich</div>
+            </div>
+            <div id="content-month" class="switch-content active">
+                <div class="trend-container" id="month-trend-container"></div>
+            </div>
+            <div id="content-week" class="switch-content">
+                <div class="trend-container" id="week-trend-container"></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="routine-templates" style="display: none;"></div>
+
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbhl1k_pgXinca2FA2hxqzMJzW--7Hfo54XHtVm_vfrxndA-GFF57UsQ2ILn6drZnu2w/exec";
+    
+    const TARGET_RATIO = 0.8;
+    const habitState = {};
+    let globalHistoryArray = [];
+    let currentGlobalMode = "zuhause";
+    let cloudSyncTimeout = null;
+
+    const routineIcons = {
+        "Morgenroutine": "☀️",
+        "Sportroutine": "🏃‍♂️",
+        "Gesundheitsroutine": "🥗",
+        "Fokusroutine": "🧠",
+        "Abendroutine": "🌙",
+        "Schlafroutine": "🛌",
+        "TwoDayRule": "⚡"
+    };
+
+    function updateCloudStatus(status) {
+        const indicator = document.getElementById('cloud-status-text');
+        if (!indicator) return;
+        
+        if (cloudSyncTimeout && status !== "Cloud synced") {
+            clearTimeout(cloudSyncTimeout);
+            cloudSyncTimeout = null;
+        }
+
+        indicator.textContent = status;
+        if (status === "Cloud Fehler") {
+            indicator.style.color = "var(--danger)";
+        } else if (status === "Cloud synced") {
+            indicator.style.color = "var(--success)";
+            cloudSyncTimeout = setTimeout(() => {
+                indicator.textContent = "Cloud Live";
+                indicator.style.color = "var(--text-secondary)";
+                cloudSyncTimeout = null;
+            }, 3000);
+        } else if (status === "Cloud lädt") {
+            indicator.style.color = "var(--accent)";
+        } else {
+            indicator.style.color = "var(--text-secondary)";
+        }
+    }
+
+    function toggleMainView(view) {
+        document.getElementById('view-btn-tracker').classList.toggle('active', view === 'tracker');
+        document.getElementById('view-btn-stats').classList.toggle('active', view === 'stats');
+        
+        document.getElementById('view-tracker').classList.toggle('active', view === 'tracker');
+        document.getElementById('view-stats').classList.toggle('active', view === 'stats');
+
+        document.getElementById('mode-switch-wrapper').style.display = view === 'tracker' ? 'flex' : 'none';
+
+        if (view === 'stats' && globalHistoryArray.length > 0) {
+            renderDashboard(globalHistoryArray);
+        }
+    }
+
+    function switchBlock(position, type) {
+        if (!event || !event.target) return;
+        const header = event.target.parentElement;
+        const tabs = header.querySelectorAll('.switch-tab');
+        tabs.forEach(tab => tab.classList.remove('active'));
+        event.target.classList.add('active');
+
+        if (position === 'top') {
+            document.getElementById('content-matrix').classList.remove('active');
+            document.getElementById('content-perf').classList.remove('active');
+            document.getElementById('content-' + type).classList.add('active');
+        } else if (position === 'mid') {
+            document.getElementById('content-domino').classList.remove('active');
+            document.getElementById('content-cluster').classList.remove('active');
+            document.getElementById('content-' + type).classList.add('active');
+        } else if (position === 'bottom') {
+            document.getElementById('content-month').classList.remove('active');
+            document.getElementById('content-week').classList.remove('active');
+            document.getElementById('content-' + type).classList.add('active');
+        }
+    }
+
+    function checkMidnightReset() {
+        const todayStr = new Date().toDateString();
+        const savedDate = localStorage.getItem('routine_date');
+        if (savedDate && savedDate !== todayStr) {
+            localStorage.removeItem('routine_storage');
+        }
+        localStorage.setItem('routine_date', todayStr);
+    }
+
+    function getSavedStates() {
+        const saved = localStorage.getItem('routine_storage');
+        return saved ? JSON.parse(saved) : {};
+    }
+
+    function formatDateToString(date) {
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const yyyy = date.getFullYear();
+        return `${dd}.${mm}.${yyyy}`;
+    }
+
+    function parseMonthYear(dateStr) {
+        const parts = dateStr.split('.');
+        if (parts.length !== 3) return "Unbekannt";
+        const dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+        return dateObj.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+    }
+
+    function getWeekNumber(dateStr) {
+        const parts = dateStr.split('.');
+        if (parts.length !== 3) return null;
+        const target = new Date(parts[2], parts[1] - 1, parts[0]);
+        const dayNr = (target.getDay() + 6) % 7;
+        target.setDate(target.getDate() - dayNr + 3);
+        const firstThursday = target.valueOf();
+        target.setMonth(0, 1);
+        if (target.getDay() !== 4) {
+            target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
+        }
+        return 1 + Math.ceil((firstThursday - target) / 604800000);
+    }
+
+    function setGlobalMode(mode) {
+        currentGlobalMode = mode;
+        document.getElementById('mode-zuhause').classList.toggle('active', mode === 'zuhause');
+        document.getElementById('mode-unterwegs').classList.toggle('active', mode === 'unterwegs');
+        localStorage.setItem('routine_global_mode', mode);
+        
+        buildDOMFromTemplates();
+        fetchHistoryStatus();
+    }
+
+    function initApp() {
+        checkMidnightReset();
+        const savedMode = localStorage.getItem('routine_global_mode');
+        if (savedMode) currentGlobalMode = savedMode;
+        
+        document.getElementById('mode-zuhause').classList.toggle('active', currentGlobalMode === 'zuhause');
+        document.getElementById('mode-unterwegs').classList.toggle('active', currentGlobalMode === 'unterwegs');
+
+        buildDOMFromTemplates();
+        fetchHistoryStatus();
+    }
+
+    function buildDOMFromTemplates() {
+        const activeContainer = document.getElementById('active-routines-container');
+        activeContainer.innerHTML = '';
+        
+        const templatesContainer = document.getElementById('routine-templates');
+        templatesContainer.innerHTML = '';
+        
+        Object.keys(ROUTINE_CONFIG).forEach(routineName => {
+            const config = ROUTINE_CONFIG[routineName];
+            const habits = config[currentGlobalMode] || config.zuhause || [];
+            const habitsJson = JSON.stringify(habits);
+            
+            templatesContainer.innerHTML += `
+                <div class="category-group" data-routine="${routineName}" id="routine-block-${routineName}">
+                    <div class="category-header" onclick="toggleGroup(this)">
+                        <div class="category-title"><div class="category-icon">${config.icon}</div><span>${routineName}</span></div>
+                        <div class="category-meta">
+                            <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-heute"></span></div>
+                            <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-gestern"></span></div>
+                            <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-vorgestern"></span></div>
+                        </div>
+                        <div class="arrow">▼</div>
+                    </div>
+                    <div class="category-content" data-habits='${habitsJson}'></div>
+                </div>
+            `;
+        });
+
+        const templates = document.querySelectorAll('#routine-templates .category-group');
+        templates.forEach(tpl => {
+            const clone = tpl.cloneNode(true);
+            activeContainer.appendChild(clone);
+        });
+
+        const savedStates = getSavedStates();
+        const groups = document.querySelectorAll('#active-routines-container .category-group');
+        
+        groups.forEach((group, groupIdx) => {
+            const routineName = group.getAttribute('data-routine');
+            const contentDiv = group.querySelector('.category-content');
+            const habits = JSON.parse(contentDiv.getAttribute('data-habits'));
+            
+            const jokerId = `${groupIdx}-joker`;
+            const isJokerChecked = savedStates[jokerId] || false;
+            
+            habitState[routineName] = { total: habits.length, done: 0, joker: isJokerChecked };
+
+            let habitsHtml = habits.map((habit, habitIdx) => {
+                const habitId = `${groupIdx}-${habitIdx}`;
+                const isChecked = savedStates[habitId] || false;
+                
+                if (isChecked) { habitState[routineName].done++; }
+
+                return `
+                    <div class="bucket-card ${isChecked ? 'done' : ''}" id="card-${habitId}" onclick="toggleHabit('${routineName}', '${habitId}', this)">
+                        <div class="status-circle"></div>
+                        <div class="location-name">${habit}</div>
+                    </div>
+                `;
+            }).join('');
+
+            habitsHtml += `
+                <div class="bucket-card ${isJokerChecked ? 'done' : ''}" id="card-${jokerId}" onclick="toggleJoker('${routineName}', '${jokerId}', this)" data-joker="true">
+                    <div class="status-circle"></div>
+                    <div class="location-name" style="color: var(--danger); font-style: italic;">Krank / Verhindert 🏳️</div>
+                </div>
+            `;
+
+            habitsHtml += `
+                <div class="close-routine-trigger" onclick="event.stopPropagation(); closeCurrentGroup('${routineName}')">
+                    Routine einklappen ▲
+                </div>
+            `;
+
+            contentDiv.innerHTML = habitsHtml;
+        });
+
+        updateGlobalProgress(true);
+    }
+
+    function toggleGroup(header) {
+        const targetGroup = header.parentElement;
+        const isOpen = targetGroup.classList.contains('open');
+        
+        document.querySelectorAll('.category-group').forEach(group => {
+            if(group.getAttribute('data-routine') !== 'TwoDayRule') {
+                group.classList.remove('open');
+            }
+        });
+
+        if (!isOpen) {
+            targetGroup.classList.add('open');
+        }
+    }
+
+    function closeCurrentGroup(routineName) {
+        const group = document.getElementById(`routine-block-${routineName}`);
+        if (group) {
+            group.classList.remove('open');
+        }
+    }
+
+    function toggleDoneRoutinesMaster() {
+        const container = document.getElementById('done-routines-master-box');
+        container.classList.toggle('expanded');
+        const trigger = container.querySelector('.done-routines-trigger');
+        if (container.classList.contains('expanded')) {
+            trigger.textContent = "Erledigte Routinen ausblenden ▲";
+        } else {
+            trigger.textContent = "Erledigte Routinen anzeigen ▼";
+        }
+    }
+
+    function showSuccessToast() {
+        const toast = document.getElementById('toast-notice');
+        toast.classList.add('show');
+        setTimeout(() => { toast.classList.remove('show'); }, 2000);
+    }
+
+    function toggleHabit(routineName, habitId, card) {
+        const isDone = card.classList.toggle('done');
+        const currentData = getSavedStates();
+        currentData[habitId] = isDone;
+        localStorage.setItem('routine_storage', JSON.stringify(currentData));
+        
+        const oldRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
+        if (isDone) { habitState[routineName].done++; } else { habitState[routineName].done--; }
+        const newRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
+
+        updateGlobalProgress(false);
+        if (oldRoutineState === "nein" && newRoutineState === "ja") showSuccessToast();
+        if (oldRoutineState !== newRoutineState) syncModuleToCloud(routineName, newRoutineState);
+    }
+
+    function toggleJoker(routineName, jokerId, card) {
+        const isDone = card.classList.toggle('done');
+        const currentData = getSavedStates();
+        currentData[jokerId] = isDone;
+        localStorage.setItem('routine_storage', JSON.stringify(currentData));
+        
+        const oldRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
+        habitState[routineName].joker = isDone;
+        const newRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
+
+        updateGlobalProgress(false);
+        if (oldRoutineState === "nein" && newRoutineState === "ja") showSuccessToast();
+        if (oldRoutineState !== newRoutineState) syncModuleToCloud(routineName, newRoutineState);
+    }
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+            checkMidnightReset();
+            buildDOMFromTemplates();
+            fetchHistoryStatus();
+        }
+    });
+
+    function isRoutineApproved(routineName) {
+        const state = habitState[routineName];
+        if (!state) return false;
+        if (state.joker) return true;
+        if (state.total === 0) return false;
+        return (state.done / state.total) >= TARGET_RATIO;
+    }
+
+    function updateGlobalProgress(suppressCloudSync = false) {
+        const routineNames = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine"];
+        
+        routineNames.forEach(routineName => {
+            const group = document.getElementById(`routine-block-${routineName}`);
+            if (!group) return;
+
+            const state = habitState[routineName];
+            if (!state) return;
+            
+            const isDoneNow = isRoutineApproved(routineName) ? "ja" : "nein";
+
+            if (isDoneNow === "ja") {
+                group.classList.add('routine-done-state');
+            } else {
+                group.classList.remove('routine-done-state');
+            }
+        });
+
+        const oldTdrState = habitState["TwoDayRule"] ? (habitState["TwoDayRule"].isApproved ? "ja" : "nein") : "nein";
+        updateTwoDayRuleStatus();
+        const newTdrState = habitState["TwoDayRule"].isApproved ? "ja" : "nein";
+
+        if (oldTdrState !== newTdrState && !suppressCloudSync) {
+            syncModuleToCloud("TwoDayRule", newTdrState);
+        }
+    }
+
+    function updateTwoDayRuleStatus() {
+        const today = new Date();
+        const yesterday = new Date(); yesterday.setDate(today.getDate() - 1);
+        const ereyesterday = new Date(); ereyesterday.setDate(today.getDate() - 2);
+
+        const todayStr = formatDateToString(today);
+        const yesterdayStr = formatDateToString(yesterday);
+        const ereyesterdayStr = formatDateToString(ereyesterday);
+
+        let todayData = null;
+        let yesterdayData = null;
+        let ereyesterdayData = null;
+
+        if (Array.isArray(globalHistoryArray) && globalHistoryArray.length > 0) {
+            todayData = globalHistoryArray.find(item => item.datum === todayStr);
+            yesterdayData = globalHistoryArray.find(item => item.datum === yesterdayStr);
+            ereyesterdayData = globalHistoryArray.find(item => item.datum === ereyesterdayStr);
+        }
+
+        let tdrHeuteJa = false;
+        if (todayData && todayData.routinen && todayData.routinen["TwoDayRule"]) {
+            if (todayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrHeuteJa = true;
+        }
+        let tdrGesternJa = false;
+        if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen["TwoDayRule"]) {
+            if (yesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrGesternJa = true;
+        }
+        let tdrVorgesternJa = false;
+        if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen["TwoDayRule"]) {
+            if (ereyesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrVorgesternJa = true;
+        }
+
+        habitState["TwoDayRule"] = { total: 0, done: 0, isApproved: tdrHeuteJa };
+
+        if (document.getElementById("dot-TwoDayRule-heute")) document.getElementById("dot-TwoDayRule-heute").className = "yesterday-dot " + (tdrHeuteJa ? "ja" : "nein");
+        if (document.getElementById("dot-TwoDayRule-gestern")) document.getElementById("dot-TwoDayRule-gestern").className = "yesterday-dot " + (tdrGesternJa ? "ja" : "nein");
+        if (document.getElementById("dot-TwoDayRule-vorgestern")) document.getElementById("dot-TwoDayRule-vorgestern").className = "yesterday-dot " + (tdrVorgesternJa ? "ja" : "nein");
+    }
+
+    function fetchHistoryStatus() {
+        updateCloudStatus("Cloud lädt");
+        fetch(GOOGLE_SCRIPT_URL, { method: "GET" })
+            .then(res => res.json())
+            .then(historyArray => {
+                document.getElementById('cloud-error-box').style.display = 'none';
+                if (!Array.isArray(historyArray)) return;
+                globalHistoryArray = historyArray;
+
+                const today = new Date();
+                const yesterday = new Date(); yesterday.setDate(today.getDate() - 1);
+                const ereyesterday = new Date(); ereyesterday.setDate(today.getDate() - 2);
+
+                const todayStr = formatDateToString(today);
+                const yesterdayStr = formatDateToString(yesterday);
+                const ereyesterdayStr = formatDateToString(ereyesterday);
+
+                const todayData = historyArray.find(item => item.datum === todayStr);
+                const yesterdayData = historyArray.find(item => item.datum === yesterdayStr);
+                const ereyesterdayData = historyArray.find(item => item.datum === ereyesterdayStr);
+
+                const routineNames = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine"];
+                routineNames.forEach(routineName => {
+                    const heuteDot = document.getElementById(`dot-${routineName}-heute`);
+                    if (heuteDot) {
+                        let statusHeute = "nein";
+                        if (todayData && todayData.routinen && todayData.routinen[routineName]) {
+                            statusHeute = todayData.routinen[routineName].toLowerCase();
+                        }
+                        heuteDot.className = "yesterday-dot " + statusHeute;
+                    }
+
+                    const gesternDot = document.getElementById(`dot-${routineName}-gestern`);
+                    if (gesternDot) {
+                        let statusGestern = "nein";
+                        if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen[routineName]) {
+                            statusGestern = yesterdayData.routinen[routineName].toLowerCase();
+                        }
+                        gesternDot.className = "yesterday-dot " + statusGestern;
+                    }
+
+                    const vorgesternDot = document.getElementById(`dot-${routineName}-vorgestern`);
+                    if (vorgesternDot) {
+                        let statusVorgestern = "nein";
+                        if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen[routineName]) {
+                            statusVorgestern = ereyesterdayData.routinen[routineName].toLowerCase();
+                        }
+                        vorgesternDot.className = "yesterday-dot " + statusVorgestern;
+                    }
+                });
+
+                updateTwoDayRuleStatus();
+                updateCloudStatus("Cloud Live");
+                
+                if (document.getElementById('view-stats').classList.contains('active')) {
+                    renderDashboard(historyArray);
+                }
+            })
+            .catch(err => {
+                document.getElementById('cloud-error-box').style.display = 'block';
+                updateCloudStatus("Cloud Fehler");
+                console.error(err);
+            });
+    }
+
+    function syncModuleToCloud(routineName, statusString) {
+        updateCloudStatus("Cloud lädt");
+        const formBody = new URLSearchParams();
+        formBody.append('routine', routineName);
+        formBody.append('status', statusString);
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formBody.toString()
+        })
+        .then(() => { 
+            document.getElementById('cloud-error-box').style.display = 'none'; 
+            updateCloudStatus("Cloud synced");
+            fetchHistoryStatus();
+        })
+        .catch(err => {
+            document.getElementById('cloud-error-box').style.display = 'block';
+            updateCloudStatus("Cloud Fehler");
+            console.error(err);
+        });
+    }
+
+    function renderDashboard(historyArray) {
+        const routineKeys = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine"];
+        const allKeysWithTdr = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine", "TwoDayRule"];
+        
+        const totalMatrixDays = 7;
+        const matrixDates = [];
+        const daysHeader = document.getElementById('matrix-days');
+        daysHeader.innerHTML = '';
+
+        for (let i = 0; i < totalMatrixDays; i++) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            matrixDates.push(formatDateToString(d));
+            const dayName = d.toLocaleDateString('de-DE', { weekday: 'short' }).charAt(0);
+            daysHeader.innerHTML += `<div class="day-label">${dayName}</div>`;
+        }
+
+        let totalChecks = 0;
+        let successfulChecks = 0;
+        const routineSuccessCounts = {};
+        allKeysWithTdr.forEach(k => routineSuccessCounts[k] = 0);
+
+        const monthlyData = {};
+        const weeklyData = {};
+        const chronologicalHistory = [...historyArray].reverse();
+
+        historyArray.forEach(row => {
+            if (!row.datum) return;
+            
+            const monthKey = parseMonthYear(row.datum);
+            if (!monthlyData[monthKey]) monthlyData[monthKey] = { total: 0, success: 0 };
+
+            const weekNum = getWeekNumber(row.datum);
+            const year = row.datum.split('.')[2];
+            const weekKey = weekNum ? `KW ${String(weekNum).padStart(2, '0')} / ${year}` : "Unbekannt";
+            if (weekKey !== "Unbekannt" && !weeklyData[weekKey]) weeklyData[weekKey] = { total: 0, success: 0 };
+
+            allKeysWithTdr.forEach(routine => {
+                if (row.routinen && row.routinen[routine]) {
+                    const status = row.routinen[routine].toLowerCase();
+                    totalChecks++;
+                    monthlyData[monthKey].total++;
+                    if (weekKey !== "Unbekannt") weeklyData[weekKey].total++;
+                    
+                    if (status === "ja") {
+                        successfulChecks++;
+                        routineSuccessCounts[routine]++;
+                        monthlyData[monthKey].success++;
+                        if (weekKey !== "Unbekannt") weeklyData[weekKey].success++;
+                    }
+                }
+            });
+        });
+
+        const trendContainer = document.getElementById('month-trend-container');
+        trendContainer.innerHTML = '';
+        const sortedMonths = Object.keys(monthlyData).reverse();
+
+        if (sortedMonths.length === 0) {
+            trendContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary);">Keine Monatsdaten verfügbar.</div>`;
+        } else {
+            sortedMonths.forEach((month, idx) => {
+                const data = monthlyData[month];
+                const pct = data.total > 0 ? Math.round((data.success / data.total) * 100) : 0;
+                let badgeHtml = `<span class="trend-badge neutral">${pct}% Erfüllung</span>`;
+                if (idx < sortedMonths.length - 1) {
+                    const prevMonth = sortedMonths[idx + 1];
+                    const prevData = monthlyData[prevMonth];
+                    const prevPct = prevData.total > 0 ? Math.round((prevData.success / prevData.total) * 100) : 0;
+                    const diff = pct - prevPct;
+                    if (diff > 0) badgeHtml = `<span class="trend-badge up">▲ +${diff}% vs. Vormonat (${pct}%)</span>`;
+                    else if (diff < 0) badgeHtml = `<span class="trend-badge" style="background: rgba(231, 76, 60, 0.1); color: var(--danger);">▼ ${diff}% vs. Vormonat (${pct}%)</span>`;
+                }
+                trendContainer.innerHTML += `<div class="trend-row"><span class="trend-month-label">${month}</span>${badgeHtml}</div>`;
+            });
+        }
+
+        const weekTrendContainer = document.getElementById('week-trend-container');
+        weekTrendContainer.innerHTML = '';
+        const sortedWeeks = Object.keys(weeklyData).sort().reverse();
+        const limitedWeeks = sortedWeeks.slice(0, 4);
+
+        if (limitedWeeks.length === 0) {
+            weekTrendContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary);">Keine Wochendaten verfügbar.</div>`;
+        } else {
+            limitedWeeks.forEach((week, idx) => {
+                const data = weeklyData[week];
+                const pct = data.total > 0 ? Math.round((data.success / data.total) * 100) : 0;
+                let badgeHtml = `<span class="trend-badge neutral">${pct}% Erfüllung</span>`;
+                if (idx < limitedWeeks.length - 1) {
+                    const prevWeek = limitedWeeks[idx + 1];
+                    const prevData = weeklyData[prevWeek];
+                    const prevPct = prevData.total > 0 ? Math.round((prevData.success / prevData.total) * 100) : 0;
+                    const diff = pct - prevPct;
+                    if (diff > 0) badgeHtml = `<span class="trend-badge up">▲ +${diff}% vs. Vorwoche (${pct}%)</span>`;
+                    else if (diff < 0) badgeHtml = `<span class="trend-badge" style="background: rgba(231, 76, 60, 0.1); color: var(--danger);">▼ ${diff}% vs. Vorwoche (${pct}%)</span>`;
+                }
+                weekTrendContainer.innerHTML += `<div class="trend-row"><span class="trend-month-label">${week}</span>${badgeHtml}</div>`;
+            });
+        }
+
+        const correlationContainer = document.getElementById('correlation-container');
+        correlationContainer.innerHTML = '';
+        const insights = [];
+        
+        routineKeys.forEach(triggerRoutine => {
+            routineKeys.forEach(targetRoutine => {
+                if (triggerRoutine === targetRoutine) return;
+                
+                let isAllowedPath = false;
+                let isTimeShifted = false;
+
+                // 1. Same-Day-Effekt (Morgenroutine -> Rest, oder Core-Routinen untereinander am selben Tag)
+                if (triggerRoutine === "Morgenroutine") {
+                    isAllowedPath = true;
+                    isTimeShifted = false;
+                } else if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(triggerRoutine) && ["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(targetRoutine)) {
+                    isAllowedPath = true;
+                    isTimeShifted = false;
+                }
+                
+                // 2. Übertragungs-Effekt (Core-Routinen -> Folgetag, Schlaf -> Folgetag)
+                if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Schlafroutine"].includes(triggerRoutine) && targetRoutine !== "Morgenroutine" && triggerRoutine !== "Schlafroutine") {
+                    if (triggerRoutine === "Schlafroutine" || ["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(targetRoutine)) {
+                        isAllowedPath = true;
+                        isTimeShifted = true;
+                    }
+                }
+
+                // 3. Verketteter Effekt (Abendroutine -> Schlaf am selben Tag ODER Abendroutine -> Folgetag)
+                if (triggerRoutine === "Abendroutine") {
+                    if (targetRoutine === "Schlafroutine") {
+                        isAllowedPath = true;
+                        isTimeShifted = false; // Abendroutine und Schlaf gehören zur selben Nacht-Kohorte (selber Tabellenzeilen-Kontext)
+                    } else {
+                        isAllowedPath = true;
+                        isTimeShifted = true; // Abendroutine strahlt auf Core-Routinen des Folgetages aus
+                    }
+                }
+
+                if (!isAllowedPath) return;
+
+                let triggerJaCount = 0;
+                let targetAlsoJaCount = 0;
+
+                for (let i = 1; i < historyArray.length; i++) {
+                    const currentRow = historyArray[i]; 
+                    const nextDayRow = historyArray[i - 1]; 
+                    
+                    if (isTimeShifted) {
+                        if (currentRow.routinen && currentRow.routinen[triggerRoutine] && nextDayRow.routinen && nextDayRow.routinen[targetRoutine]) {
+                            if (currentRow.routinen[triggerRoutine].toLowerCase() === 'ja') {
+                                triggerJaCount++;
+                                if (nextDayRow.routinen[targetRoutine].toLowerCase() === 'ja') targetAlsoJaCount++;
+                            }
+                        }
+                    } else {
+                        if (currentRow.routinen && currentRow.routinen[triggerRoutine] && currentRow.routinen[targetRoutine]) {
+                            if (currentRow.routinen[triggerRoutine].toLowerCase() === 'ja') {
+                                triggerJaCount++;
+                                if (currentRow.routinen[targetRoutine].toLowerCase() === 'ja') targetAlsoJaCount++;
+                            }
+                        }
+                    }
+                }
+
+                if (triggerJaCount >= 2) {
+                    const probability = Math.round((targetAlsoJaCount / triggerJaCount) * 100);
+                    if (probability >= 70) {
+                        insights.push({ 
+                            trigger: triggerRoutine, 
+                            target: targetRoutine, 
+                            prob: probability, 
+                            context: isTimeShifted ? "am Folgetag" : (triggerRoutine === "Abendroutine" && targetRoutine === "Schlafroutine" ? "in der Nacht" : "am selben Tag") 
+                        });
+                    }
+                }
+            });
+        });
+
+        if (insights.length === 0) {
+            correlationContainer.innerHTML = `<div class="insight-card"><div class="insight-title">⏳ Datenbasis wird aufgebaut</div><div class="insight-desc">Sobald valide Kausalitäten entstehen, siehst du hier deinen mächtigsten Hebel.</div></div>`;
+        } else {
+            insights.sort((a, b) => b.prob - a.prob);
+            insights.slice(0, 3).forEach(ins => {
+                const triggerIcon = routineIcons[ins.trigger] || "🎯";
+                const targetIcon = routineIcons[ins.target] || "🎯";
+                correlationContainer.innerHTML += `<div class="insight-card"><div class="insight-title">${triggerIcon} ${ins.trigger} &rarr; ${targetIcon} ${ins.target}</div><div class="insight-desc">Sichert deine <strong>${ins.target}</strong> ${ins.context} mit einer Wahrscheinlichkeit von <strong>${ins.prob}%</strong>.</div></div>`;
+            });
+        }
+
+        const clusterContainer = document.getElementById('cluster-container');
+        clusterContainer.innerHTML = '';
+        const clusters = [];
+
+        for (let i = 0; i < routineKeys.length; i++) {
+            for (let j = i + 1; j < routineKeys.length; j++) {
+                const r1 = routineKeys[i]; const r2 = routineKeys[j];
+                let commonDays = 0; let totalActiveDays = historyArray.length;
+
+                historyArray.forEach(row => {
+                    if (row.routinen && row.routinen[r1] && row.routinen[r2]) {
+                        if (row.routinen[r1].toLowerCase() === 'ja' && row.routinen[r2].toLowerCase() === 'ja') commonDays++;
+                    }
+                });
+
+                if (commonDays >= 2) {
+                    const pairProb = Math.round((commonDays / totalActiveDays) * 100);
+                    clusters.push({ routine1: r1, routine2: r2, strength: pairProb, count: commonDays });
+                }
+            }
+        }
+
+        if (clusters.length === 0) {
+            clusterContainer.innerHTML = `<div class="insight-card"><div class="insight-title">⏳ Berechne Synergien...</div><div class="insight-desc">Hier erscheinen Kombinationen, die du besonders oft zusammen meisterst.</div></div>`;
+        } else {
+            clusters.sort((a, b) => b.strength - a.strength);
+            clusters.slice(0, 3).forEach(c => {
+                const icon1 = routineIcons[c.routine1] || "🎯"; const icon2 = routineIcons[c.routine2] || "🎯";
+                clusterContainer.innerHTML += `<div class="insight-card"><div class="insight-title">${icon1} ${c.routine1} + ${icon2} ${c.routine2}</div><div class="insight-desc">Dieses Routine-Paket tritt in <strong>${c.strength}%</strong> aller aufgezeichneten Tage als geschlossene Einheit auf.</div></div>`;
+            });
+        }
+
+        let currentStreak = 0; let checkDate = new Date(); checkDate.setDate(checkDate.getDate() - 1); 
+        while (true) {
+            const checkDateStr = formatDateToString(checkDate);
+            const foundDay = historyArray.find(item => item.datum === checkDateStr);
+            if (foundDay && foundDay.routinen && foundDay.routinen["TwoDayRule"] && foundDay.routinen["TwoDayRule"].toLowerCase() === 'ja') {
+                currentStreak++; checkDate.setDate(checkDate.getDate() - 1);
+            } else { break; }
+        }
+        document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
+
+        let totalRecoveryDays = 0; let recoveryTracksCount = 0; let maxRecoveryDays = 0; let currentGap = 0; let trackingGap = false;
+        chronologicalHistory.forEach(row => {
+            if (row.routinen && row.routinen["TwoDayRule"]) {
+                const status = row.routinen["TwoDayRule"].toLowerCase();
+                if (status === 'nein') {
+                    if (!trackingGap) { trackingGap = true; currentGap = 1; } else { currentGap++; }
+                } else if (status === 'ja' && trackingGap) {
+                    totalRecoveryDays += currentGap;
+                    if (currentGap > maxRecoveryDays) maxRecoveryDays = currentGap;
+                    recoveryTracksCount++; trackingGap = false; currentGap = 0;
+                }
+            }
+        });
+
+        const avgRecovery = recoveryTracksCount > 0 ? parseFloat((totalRecoveryDays / recoveryTracksCount).toFixed(1)) : 0.0;
+        const finalMax = maxRecoveryDays > 0 ? maxRecoveryDays : 3.0;
+        document.getElementById('gauge-lbl-max').textContent = `${finalMax.toFixed(1)} T`;
+        document.getElementById('gauge-lbl-avg').textContent = `Ø ${avgRecovery.toFixed(1)}`;
+
+        let degrees = 75; 
+        if (recoveryTracksCount > 0 && finalMax > 0) {
+            degrees = 75 - ((avgRecovery / finalMax) * 150);
+            if (degrees < -75) degrees = -75; if (degrees > 75) degrees = 75;
+        }
+        document.getElementById('gauge-needle').style.transform = `rotate(${degrees}deg)`;
+
+        const rowsContainer = document.getElementById('matrix-rows-container');
+        rowsContainer.innerHTML = '';
+        allKeysWithTdr.forEach(routine => {
+            let cellsHtml = '';
+            matrixDates.forEach(dateStr => {
+                const dayData = historyArray.find(item => item.datum === dateStr);
+                let status = 'nein';
+                if (dayData && dayData.routinen && dayData.routinen[routine]) status = dayData.routinen[routine].toLowerCase();
+                cellsHtml += `<div class="matrix-cell ${status}"></div>`;
+            });
+            const icon = routineIcons[routine] || "🎯";
+            rowsContainer.innerHTML += `<div class="matrix-row"><div class="matrix-label"><span class="perf-icon">${icon}</span><span class="perf-name">${routine}</span></div><div class="matrix-cells">${cellsHtml}</div></div>`;
+        });
+
+        const perfContainer = document.getElementById('routine-performance-container');
+        perfContainer.innerHTML = '';
+        allKeysWithTdr.forEach(routine => {
+            const routineTotal = historyArray.length; const routineSuccess = routineSuccessCounts[routine] || 0;
+            const pct = routineTotal > 0 ? Math.round((routineSuccess / routineTotal) * 100) : 0;
+            const icon = routineIcons[routine] || "🎯";
+            perfContainer.innerHTML += `<div class="perf-item"><div class="perf-info"><span class="perf-icon">${icon}</span><span class="perf-name">${routine}</span></div><div class="perf-bar-wrapper"><div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div><span class="perf-pct">${pct}%</span></div></div>`;
+        });
+    }
+
+    window.onload = initApp;
+</script>
+</body>
+</html>
