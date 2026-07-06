@@ -343,7 +343,7 @@
 </main>
 
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKFTaLEZUpS4pCufqeTy--ug-urlN7hCgfROuS_HWh2zZr_aM2vBOSAt9bOPT-ES3KGA/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw83nwkFPKGxOFXwKJ4nrcktTMi4rgMFuHUeS0hiwhjnj8ZXDynkudBBiW2R2z2CN4OLQ/exec";
     
     let globalFavorites = [];
     let globalHistory = [];
@@ -415,7 +415,10 @@
     function fetchData() {
         updateCloudStatus("Cloud lädt");
         fetch(GOOGLE_SCRIPT_URL)
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error('Network error');
+                return res.json();
+            })
             .then(data => {
                 document.getElementById('cloud-error-box').style.display = 'none';
                 globalFavorites = data.favorites || [];
@@ -442,7 +445,13 @@
             }
         });
 
-        Object.keys(categorized).forEach(cat => {
+        const keys = Object.keys(categorized);
+        if (keys.length === 0) {
+            container.innerHTML = `<div style="font-size:0.85rem; text-align:center; color:var(--text-secondary); padding:20px 0;">Keine regelmäßigen Getränke vorhanden. Nutze das Formular unten.</div>`;
+            return;
+        }
+
+        keys.forEach(cat => {
             const icon = categoryIcons[cat] || "🥤";
             let drinksHtml = categorized[cat].map(drink => {
                 return `
@@ -490,7 +499,7 @@
             document.getElementById('cloud-error-box').style.display = 'none';
             updateCloudStatus("Cloud synced");
             showSuccessToast();
-            fetchData();
+            setTimeout(fetchData, 500);
         })
         .catch(err => {
             document.getElementById('cloud-error-box').style.display = 'block';
@@ -527,7 +536,8 @@
         // 2. Nüchtern-Konto (Streak)
         let currentStreak = 0;
         let checkDate = new Date();
-        while (true) {
+        
+        for (let i = 0; i < 365; i++) {
             const checkDateStr = formatDateToString(checkDate);
             const foundLog = globalHistory.find(item => item.datum === checkDateStr);
             if (!foundLog) {
@@ -539,11 +549,11 @@
         }
         document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
 
-        // 3. Ranking nach Frequenz (Fortschrittsbalken-Stil)
+        // 3. Ranking nach Frequenz
         const counts = {};
         let maxCount = 0;
         globalHistory.forEach(item => {
-            const key = `${item.name} (${item.groesse.toFixed(2)} L)`;
+            const key = `${item.name} (${item.groesse.toFixed(2)} L)|${item.kategorie}`;
             counts[key] = (counts[key] || 0) + 1;
             if (counts[key] > maxCount) maxCount = counts[key];
         });
@@ -560,13 +570,18 @@
         sortedRanking.slice(0, 5).forEach(drinkKey => {
             const count = counts[drinkKey];
             const pct = maxCount > 0 ? Math.round((count / maxCount) * 100) : 0;
-            const cleanName = drinkKey.split(' (')[0];
-            const cleanSize = drinkKey.includes(' (') ? drinkKey.split(' (')[1].replace(')', '') : '';
+            const parts = drinkKey.split('|');
+            const labelPart = parts[0];
+            const catPart = parts[1] || 'Bier';
+            
+            const cleanName = labelPart.split(' (')[0];
+            const cleanSize = labelPart.includes(' (') ? labelPart.split(' (')[1].replace(')', '') : '';
+            const icon = categoryIcons[catPart] || "🥤";
             
             perfContainer.innerHTML += `
                 <div class="perf-item">
                     <div class="perf-info">
-                        <span class="perf-icon">🥤</span>
+                        <span class="perf-icon">${icon}</span>
                         <span class="perf-name">${cleanName} <small style="color:var(--text-secondary); font-weight:700;">${cleanSize}</small></span>
                     </div>
                     <div class="perf-bar-wrapper">
