@@ -299,6 +299,13 @@
             <form id="manual-drink-form" onsubmit="handleManualSubmit(event)">
                 <div class="form-grid">
                     <div class="form-group full">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="form-regelmaessig">
+                            <label for="form-regelmaessig">Bei Regelmäßig speichern?</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group full">
                         <label for="form-name-select">Bisheriges Getränk wählen</label>
                         <select id="form-name-select" onchange="handleDrinkDropdownChange()"></select>
                     </div>
@@ -306,9 +313,13 @@
                         <label for="form-name-input">Oder neues Getränk Name</label>
                         <input type="text" id="form-name-input" placeholder="z.B. Reissdorf">
                     </div>
+                    <div class="form-group full">
+                        <label for="form-groesse">Größe (in Liter)</label>
+                        <input type="number" id="form-groesse" step="0.01" min="0.01" placeholder="z.B. 0.33" required>
+                    </div>
                     <div class="form-group">
                         <label for="form-kategorie">Kategorie</label>
-                        <select id="form-kategorie" required>
+                        <select id="form-kategorie">
                             <option value="Bier">Bier</option>
                             <option value="Wein">Wein</option>
                             <option value="Spirituose">Spirituose</option>
@@ -316,8 +327,8 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="form-groesse">Größe (in Liter)</label>
-                        <input type="number" id="form-groesse" step="0.01" min="0.01" placeholder="z.B. 0.33" required>
+                        <label for="form-kategorie-neu">Neue Kategorie</label>
+                        <input type="text" id="form-kategorie-neu" placeholder="z.B. Cidre">
                     </div>
 
                     <div class="form-group full" style="margin-top: 6px; border-top: 1px solid var(--border-light); padding-top: 12px;">
@@ -341,13 +352,7 @@
                     </div>
                 </div>
                 
-                <div class="form-group" style="margin-top: 8px;">
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="form-regelmaessig">
-                        <label for="form-regelmaessig">Bei Regelmäßig speichern?</label>
-                    </div>
-                </div>
-                <button type="submit" class="submit-btn">Eintragen & Loggen</button>
+                <button type="submit" class="submit-btn" style="margin-top: 12px;">Eintragen & Loggen</button>
             </form>
         </div>
     </div>
@@ -473,6 +478,20 @@
             drinkOptionsHtml += `<option value="${drink}">${drink}</option>`;
         });
         dDrink.innerHTML = drinkOptionsHtml;
+
+        // Dynamische Befüllung des Getränke-Kategorie-Dropdowns basierend auf der Historie
+        const dCat = document.getElementById('form-kategorie');
+        let uniqueCats = ["Bier", "Wein", "Spirituose", "Mixgetränk"];
+        globalHistory.forEach(item => {
+            if(item.kategorie && !uniqueCats.includes(item.kategorie)) uniqueCats.push(item.kategorie);
+        });
+        uniqueCats.sort();
+        
+        let catOptionsHtml = "";
+        uniqueCats.forEach(cat => {
+            catOptionsHtml += `<option value="${cat}">${cat}</option>`;
+        });
+        dCat.innerHTML = catOptionsHtml;
     }
 
     function handleDrinkDropdownChange() {
@@ -616,7 +635,10 @@
         const inputDrink = document.getElementById('form-name-input').value.trim();
         const name = inputDrink !== "" ? inputDrink : selDrink;
 
-        const kategorie = document.getElementById('form-kategorie').value;
+        const selCat = document.getElementById('form-kategorie').value;
+        const neuCat = document.getElementById('form-kategorie-neu').value.trim();
+        const kategorie = neuCat !== "" ? neuCat : selCat;
+
         const groesse = document.getElementById('form-groesse').value;
         const regelmaessig = document.getElementById('form-regelmaessig').checked ? "ja" : "nein";
 
@@ -668,6 +690,7 @@
         
         let todayVolume = 0;
         globalHistory.forEach(item => {
+            // Prüfung auf Datum in Spalte A (item.datum)
             if (item.datum && item.datum.startsWith(todayStr) && !isNaN(item.groesse)) {
                 todayVolume += item.groesse;
             }
