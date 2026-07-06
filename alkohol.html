@@ -421,8 +421,16 @@
             })
             .then(data => {
                 document.getElementById('cloud-error-box').style.display = 'none';
-                globalFavorites = data.favorites || [];
-                globalHistory = data.history || [];
+                
+                // Fallback für den Fall, dass das Google Sheet komplett leer ist
+                if (data && !data.error) {
+                    globalFavorites = data.favorites || [];
+                    globalHistory = data.history || [];
+                } else {
+                    globalFavorites = [];
+                    globalHistory = [];
+                }
+                
                 renderTrackerUI();
                 updateCloudStatus("Cloud Live");
             })
@@ -533,18 +541,19 @@
         });
         document.getElementById('kpi-today').textContent = `${todayVolume.toFixed(2).replace('.', ',')} L`;
 
-        // 2. Nüchtern-Konto (Streak - Endlosschleifensicher berechnet)
+        // 2. Nüchtern-Konto (Streak) - bricht sofort ab, wenn History komplett leer ist
         let currentStreak = 0;
-        let checkDate = new Date();
-        
-        for (let i = 0; i < 365; i++) {
-            const checkDateStr = formatDateToString(checkDate);
-            const hasEntries = globalHistory.some(item => item.datum === checkDateStr);
-            if (!hasEntries) {
-                currentStreak++;
-                checkDate.setDate(checkDate.getDate() - 1);
-            } else {
-                break;
+        if (globalHistory.length > 0) {
+            let checkDate = new Date();
+            for (let i = 0; i < 365; i++) {
+                const checkDateStr = formatDateToString(checkDate);
+                const hasEntries = globalHistory.some(item => item.datum === checkDateStr);
+                if (!hasEntries) {
+                    currentStreak++;
+                    checkDate.setDate(checkDate.getDate() - 1);
+                } else {
+                    break;
+                }
             }
         }
         document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
