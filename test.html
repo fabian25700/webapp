@@ -522,6 +522,7 @@
                 renderTrackerUI();
                 populateDropdowns();
                 updateCloudStatus("Cloud Live");
+                calculateStats();
             })
             .catch(err => {
                 document.getElementById('cloud-error-box').style.display = 'block';
@@ -586,7 +587,7 @@
                     <div class="drink-card" onclick="openQuickLogModal('${drink.name}', '${drink.kategorie}', '${drink.groesse}')">
                         <div class="drink-info">
                             <span class="drink-name">${drink.name}</span>
-                            <span class="drink-size">${drink.groesse.toFixed(2)} L</span>
+                            <span class="drink-size">${parseFloat(drink.groesse).toFixed(2)} L</span>
                         </div>
                         <div class="plus-btn">+</div>
                     </div>
@@ -645,6 +646,23 @@
                 document.getElementById('modal-anlass-kategorie-neu').value = last.anlass_kategorie;
             }
         }
+    }
+
+    function submitQuickLogFromModal() {
+        if (!activeModalDrink) return;
+
+        const name = activeModalDrink.name;
+        const kategorie = activeModalDrink.kategorie;
+        const groesse = activeModalDrink.groesse;
+        const regelmaessig = "ja";
+
+        const aName = document.getElementById('modal-anlass-name').value.trim();
+        const selKat = document.getElementById('modal-anlass-kategorie').value;
+        const neuKat = document.getElementById('modal-anlass-kategorie-neu').value.trim();
+        const aKat = neuKat !== "" ? neuKat : selKat;
+
+        logDrink(name, kategorie, groesse, regelmaessig, aName, aKat);
+        closeQuickLogModal();
     }
 
     function toggleFormAnlassWieZuvor() {
@@ -760,15 +778,15 @@
         let catTodayCounts = {};
 
         globalHistory.forEach(item => {
-            if (item.datum && item.datum.startsWith(todayStr) && !isNaN(item.groesse)) {
-                todayVolume += item.groesse;
+            if (item.datum && item.datum.includes(todayStr) && !isNaN(item.groesse)) {
+                todayVolume += Number(item.groesse);
                 drinkTodayCounts[item.name] = (drinkTodayCounts[item.name] || 0) + 1;
                 catTodayCounts[item.kategorie] = (catTodayCounts[item.kategorie] || 0) + 1;
             }
         });
         document.getElementById('kpi-today').textContent = `${todayVolume.toFixed(2).replace('.', ',')} L`;
 
-        let todayEntries = globalHistory.filter(item => item.datum && item.datum.startsWith(todayStr));
+        let todayEntries = globalHistory.filter(item => item.datum && item.datum.includes(todayStr));
         if (todayEntries.length === 0) {
             todayLogsContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:4px 0; text-align:center;">Heute noch keine Einträge protokolliert.</div>`;
         } else {
@@ -800,7 +818,7 @@
             let checkDate = new Date();
             for (let i = 0; i < 365; i++) {
                 const checkDateStr = formatDateToString(checkDate);
-                const hasEntries = globalHistory.some(item => item.datum && item.datum.startsWith(checkDateStr));
+                const hasEntries = globalHistory.some(item => item.datum && item.datum.includes(checkDateStr));
                 if (!hasEntries) { currentStreak++; checkDate.setDate(checkDate.getDate() - 1); } 
                 else { break; }
             }
