@@ -150,14 +150,9 @@
 
         .form-block {
             background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-            padding: 0; box-shadow: var(--shadow); display: flex; flex-direction: column; overflow: hidden;
+            padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px;
         }
-        .form-toggle-header { padding: 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; transition: background 0.2s; }
-        .form-toggle-header:active { background: var(--border-light); }
-        .form-toggle-header h3 { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); display: flex; align-items: center; gap: 10px; }
-        .form-block-content { display: none; padding: 0 16px 16px; flex-direction: column; gap: 12px; border-top: 1px solid var(--border-light); padding-top: 16px; }
-        .form-block.open .form-block-content { display: flex; }
-        .form-block.open .form-toggle-header .arrow { transform: rotate(180deg); }
+        .form-block h3 { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); }
         
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .form-group { display: flex; flex-direction: column; gap: 4px; }
@@ -299,57 +294,54 @@
     <div id="view-tracker" class="view-section active">
         <div id="categories-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
 
-        <div class="form-block" id="manual-form-block">
-            <div class="form-toggle-header" onclick="toggleFormGroup()">
-                <h3>Neues Getränk erfassen</h3>
-                <div class="arrow">▼</div>
-            </div>
-            <div class="form-block-content">
-                <form id="manual-drink-form" onsubmit="handleManualSubmit(event)">
-                    <div class="form-grid">
-                        <div class="form-group full">
-                            <label for="form-name-input">Name neues Getränk</label>
-                            <input type="text" id="form-name-input" placeholder="z.B. Reissdorf" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="form-kategorie">Kategorie</label>
-                            <select id="form-kategorie" required></select>
-                        </div>
-                        <div class="form-group">
-                            <label for="form-groesse">Größe (in Liter)</label>
-                            <input type="number" id="form-groesse" step="0.01" min="0.01" placeholder="z.B. 0.33" required>
-                        </div>
-
-                        <div class="form-group full" style="margin-top: 6px; border-top: 1px solid var(--border-light); padding-top: 12px;">
-                            <div class="checkbox-group">
-                                <input type="checkbox" id="form-anlass-wie-zuvor" onchange="toggleFormAnlassWieZuvor()">
-                                <label for="form-anlass-wie-zuvor">Anlass wie zuvor übernehmen?</label>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group full form-anlass-input-group">
-                            <label for="form-anlass-name">Anlass Name</label>
-                            <input type="text" id="form-anlass-name" placeholder="z.B. Bremen (A)">
-                        </div>
-                        <div class="form-group form-anlass-input-group">
-                            <label for="form-anlass-kategorie">Anlass Kategorie</label>
-                            <select id="form-anlass-kategorie"></select>
-                        </div>
-                        <div class="form-group form-anlass-input-group">
-                            <label for="form-anlass-kategorie-neu">Neue Kategorie</label>
-                            <input type="text" id="form-anlass-kategorie-neu" placeholder="z.B. Fußball">
-                        </div>
-                    </div>
+        <div class="form-block">
+            <h3>Neues Getränk erfassen</h3>
+            <form id="manual-drink-form" onsubmit="handleManualSubmit(event)">
+                <div class="form-grid">
                     
-                    <div class="form-group" style="margin-top: 8px;">
+                    <div class="form-group full">
                         <div class="checkbox-group">
                             <input type="checkbox" id="form-regelmaessig">
                             <label for="form-regelmaessig">Bei Regelmäßig speichern?</label>
                         </div>
                     </div>
-                    <button type="submit" class="submit-btn">Eintragen & Loggen</button>
-                </form>
-            </div>
+
+                    <div class="form-group full">
+                        <label for="form-name-input">Name neues Getränk</label>
+                        <input type="text" id="form-name-input" placeholder="z.B. Reissdorf" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-kategorie">Kategorie</label>
+                        <select id="form-kategorie" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-groesse">Größe (in Liter)</label>
+                        <input type="number" id="form-groesse" step="0.01" min="0.01" placeholder="z.B. 0.33" required>
+                    </div>
+
+                    <div class="form-group full" style="margin-top: 6px; border-top: 1px solid var(--border-light); padding-top: 12px;">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="form-anlass-wie-zuvor" onchange="toggleFormAnlassWieZuvor()">
+                            <label for="form-anlass-wie-zuvor">Anlass wie zuvor übernehmen?</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full form-anlass-input-group">
+                        <label for="form-anlass-name">Anlass Name</label>
+                        <input type="text" id="form-anlass-name" placeholder="z.B. Bremen (A)">
+                    </div>
+                    <div class="form-group form-anlass-input-group">
+                        <label for="form-anlass-kategorie">Anlass Kategorie</label>
+                        <select id="form-anlass-kategorie"></select>
+                    </div>
+                    <div class="form-group form-anlass-input-group">
+                        <label for="form-anlass-kategorie-neu">Neue Kategorie</label>
+                        <input type="text" id="form-anlass-kategorie-neu" placeholder="z.B. Fußball">
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn" style="margin-top: 12px;">Eintragen & Loggen</button>
+            </form>
         </div>
     </div>
 
@@ -383,7 +375,7 @@
 </main>
 
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzeqqPJFUqU6FgVVbeBMTid4gfhY2nf6cx0g7R6KMpMoIv74x4L0uphyFQKKBXO7ojHDw/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2p1m_3iXMJAfIirJcTrh9fAWbllxTBW-LtILGgrNPMREQ9urvVAqLnuMVJv_TKBx8Xg/exec";
 
     let globalFavorites = [];
     let globalHistory = [];
@@ -416,7 +408,6 @@
     }
 
     function toggleGroup(header) { header.parentElement.classList.toggle('open'); }
-    function toggleFormGroup() { document.getElementById('manual-form-block').classList.toggle('open'); }
     function showSuccessToast() { const toast = document.getElementById('toast-notice'); toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 2000); }
     
     function formatDateToString(date) {
@@ -462,12 +453,18 @@
         d1.innerHTML = optionsHtml;
         d2.innerHTML = optionsHtml;
 
-        // 2. Getränke-Kategorien aus Historie extrahieren (Spalte D / kategorie)
+        // 2. Getränke-Kategorien dynamisch aus dem Blatt Getraenke befüllen
         const dKategorie = document.getElementById('form-kategorie');
         let uniqueCategories = [];
-        globalHistory.forEach(item => {
+        
+        globalFavorites.forEach(item => {
             if(item.kategorie && !uniqueCategories.includes(item.kategorie)) uniqueCategories.push(item.kategorie);
         });
+        
+        // Fallback, falls Getraenke leer ist
+        if (uniqueCategories.length === 0) {
+            uniqueCategories = ["Bier", "Wein", "Spirituose", "Mixgetränk"];
+        }
         uniqueCategories.sort();
 
         let catOptionsHtml = ``;
