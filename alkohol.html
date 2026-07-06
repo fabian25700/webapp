@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Tracker</title>
+    <style>
+        :root {
+            --accent: #e67e22;
+            --accent-soft: rgba(230, 126, 34, 0.1);
+            --success: #27ae60;
+            --success-soft: rgba(39, 174, 96, 0.1);
+            --danger: #e74c3c;
+            --danger-soft: rgba(231, 76, 60, 0.3);
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --apple-switch-bg: #e3e3e6;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: #2d3f55;
+                --border-light: #253347;
+                --apple-switch-bg: #1c1c1e;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        header {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--bg);
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-top { 
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            position: relative;
+        }
+
+        .header-left span { 
+            font-size: 0.95rem; 
+            font-weight: 700; 
+            line-height: 1;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            position: absolute;
+            right: 0;
+            z-index: 10;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
+        }
+
+        .header-switch-container {
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        .main-view-switch {
+            display: flex; 
+            background: var(--apple-switch-bg); 
+            border-radius: 9px;
+            padding: 2px; 
+            width: 160px; 
+            height: 32px; 
+            flex-shrink: 0;
+        }
+        
+        .main-switch-btn {
+            flex: 1; 
+            text-align: center; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 4px;
+            font-size: 0.78rem; 
+            font-weight: 700; 
+            border-radius: 7px; 
+            border: none; 
+            background: transparent;
+            color: var(--text-secondary); 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            height: 100%;
+            line-height: 1;
+        }
+        
+        .main-switch-btn.active {
+            background: var(--surface); 
+            color: var(--text-primary);
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
+        }
+
+        .cloud-error-banner {
+            display: none;
+            background: var(--danger-soft);
+            border: 1px solid var(--danger);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 12px 16px 0;
+        }
+
+        .toast-notification {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 110px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: var(--success);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            opacity: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        .toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+        .view-section { display: none; flex-direction: column; gap: 12px; width: 100%; }
+        .view-section.active { display: flex; }
+
+        .category-group { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); position: relative; }
+        
+        .category-header {
+            padding: 16px; display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; user-select: none; transition: background 0.2s;
+        }
+        .category-header:active { background: var(--border-light); }
+
+        .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; flex: 1; }
+        .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        
+        .arrow { font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.3s ease; flex-shrink: 0; }
+        .category-group.open .arrow { transform: rotate(180deg); }
+
+        .category-content { display: none; padding: 0 16px 16px; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 16px; }
+        .category-group.open .category-content { display: flex; }
+
+        .drink-card {
+            background: var(--bg); border-radius: 12px; border: 1px solid var(--border);
+            padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px;
+            cursor: pointer; user-select: none; transition: all 0.2s ease;
+        }
+        .drink-card:active { transform: scale(0.99); }
+        
+        .drink-info { display: flex; flex-direction: column; gap: 2px; }
+        .drink-name { font-weight: 600; font-size: 0.95rem; }
+        .drink-size { font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; }
+
+        .plus-btn {
+            width: 28px; height: 28px; border-radius: 8px; background: var(--accent-soft); color: var(--accent);
+            display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1rem;
+        }
+
+        .form-block {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px;
+        }
+        .form-block h3 { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group.full { grid-column: span 2; }
+        
+        .form-group label { font-size: 0.7rem; height: 16px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); }
+        .form-group input, .form-group select {
+            width: 100%; height: 38px; border-radius: 9px; border: 1px solid var(--border);
+            background: var(--bg); color: var(--text-primary); padding: 0 10px; font-size: 0.9rem; font-family: inherit;
+        }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); }
+        
+        .checkbox-group { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; margin-top: 4px; }
+        .checkbox-group input { width: 18px; height: 18px; accent-color: var(--accent); }
+        .checkbox-group label { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); cursor: pointer; }
+
+        .submit-btn {
+            width: 100%; height: 40px; border-radius: 10px; background: var(--accent); color: white;
+            border: none; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;
+            cursor: pointer; transition: opacity 0.2s; margin-top: 4px;
+        }
+        .submit-btn:active { opacity: 0.9; }
+
+        /* Stats Dashboard Layout */
+        .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .kpi-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; height: 95px;
+        }
+        .kpi-value { font-size: 1.35rem; font-weight: 800; color: var(--text-primary); }
+        .kpi-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+
+        .section-block {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px;
+        }
+        
+        .block-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+
+        .perf-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-light); height: 32px; }
+        .perf-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .perf-info { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+        .perf-icon { font-size: 0.95rem; flex-shrink: 0; }
+        .perf-name { font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .perf-bar-wrapper { display: flex; align-items: center; gap: 8px; width: 204px; flex-shrink: 0; }
+        .perf-bar-bg { flex: 1; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
+        .perf-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; }
+        .perf-pct { font-size: 0.75rem; font-weight: 700; width: 32px; text-align: right; }
+
+        @media (max-width: 420px) {
+            .main-view-switch { width: 150px; }
+            .main-switch-btn { font-size: 0.72rem; }
+        }
+
+        @media (max-width: 395px) {
+            .perf-name { font-size: 0.78rem; }
+            .perf-bar-wrapper { width: 168px; gap: 4px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="toast-notification" id="toast-notice">Eintrag erfolgreich verbucht!</div>
+
+<header>
+    <div class="header-top">
+        <div class="header-left">
+            <span>Kontext</span>
+        </div>
+        <div class="header-switch-container">
+            <div class="main-view-switch">
+                <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')">🎯 Tracker</button>
+                <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')">📊 Stats</button>
+            </div>
+        </div>
+        <div class="header-right" id="cloud-status-text">Cloud Live</div>
+    </div>
+</header>
+
+<div class="cloud-error-banner" id="cloud-error-box">Sync-Fehler: Verbindung zur Cloud fehlgeschlagen.</div>
+
+<main>
+    <div id="view-tracker" class="view-section active">
+        <div id="categories-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
+
+        <div class="form-block">
+            <h3>Neues Getränk erfassen</h3>
+            <form id="manual-drink-form" onsubmit="handleManualSubmit(event)">
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label for="form-name">Getränk Name</label>
+                        <input type="text" id="form-name" placeholder="z.B. Reissdorf" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-kategorie">Kategorie</label>
+                        <select id="form-kategorie" required>
+                            <option value="Bier">Bier</option>
+                            <option value="Wein">Wein</option>
+                            <option value="Spirituose">Spirituose</option>
+                            <option value="Mixgetränk">Mixgetränk</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-groesse">Größe (in Liter)</label>
+                        <input type="number" id="form-groesse" step="0.01" min="0.01" placeholder="z.B. 0.33" required>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-top: 8px;">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="form-regelmaessig">
+                        <label for="form-regelmaessig">Bei Regelmäßig speichern?</label>
+                    </div>
+                </div>
+                <button type="submit" class="submit-btn">Eintragen & Loggen</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="view-stats" class="view-section">
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-value" id="kpi-today">0,00 L</div>
+                <div class="kpi-label">Heute Gesamt</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="kpi-streak">0 Tage</div>
+                <div class="kpi-label">Nüchtern-Konto</div>
+            </div>
+        </div>
+
+        <div class="section-block">
+            <div class="block-title">Getränke-Ranking (Frequenz)</div>
+            <div id="routine-performance-container" style="display: flex; flex-direction: column; gap: 2px;">
+                </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKFTaLEZUpS4pCufqeTy--ug-urlN7hCgfROuS_HWh2zZr_aM2vBOSAt9bOPT-ES3KGA/exec";
+    
+    let globalFavorites = [];
+    let globalHistory = [];
+    let cloudSyncTimeout = null;
+
+    const categoryIcons = {
+        "Bier": "🍺",
+        "Wein": "🍷",
+        "Spirituose": "🥃",
+        "Mixgetränk": "🍹"
+    };
+
+    function updateCloudStatus(status) {
+        const indicator = document.getElementById('cloud-status-text');
+        if (!indicator) return;
+        
+        if (cloudSyncTimeout && status !== "Cloud synced") {
+            clearTimeout(cloudSyncTimeout);
+            cloudSyncTimeout = null;
+        }
+
+        indicator.textContent = status;
+        if (status === "Cloud Fehler") {
+            indicator.style.color = "var(--danger)";
+        } else if (status === "Cloud synced") {
+            indicator.style.color = "var(--success)";
+            cloudSyncTimeout = setTimeout(() => {
+                indicator.textContent = "Cloud Live";
+                indicator.style.color = "var(--text-secondary)";
+                cloudSyncTimeout = null;
+            }, 3000);
+        } else if (status === "Cloud lädt") {
+            indicator.style.color = "var(--accent)";
+        } else {
+            indicator.style.color = "var(--text-secondary)";
+        }
+    }
+
+    function toggleMainView(view) {
+        document.getElementById('view-btn-tracker').classList.toggle('active', view === 'tracker');
+        document.getElementById('view-btn-stats').classList.toggle('active', view === 'stats');
+        
+        document.getElementById('view-tracker').classList.toggle('active', view === 'tracker');
+        document.getElementById('view-stats').classList.toggle('active', view === 'stats');
+
+        if (view === 'stats') {
+            calculateStats();
+        }
+    }
+
+    function toggleGroup(header) {
+        const targetGroup = header.parentElement;
+        targetGroup.classList.toggle('open');
+    }
+
+    function showSuccessToast() {
+        const toast = document.getElementById('toast-notice');
+        toast.classList.add('show');
+        setTimeout(() => { toast.classList.remove('show'); }, 2000);
+    }
+
+    function formatDateToString(date) {
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const yyyy = date.getFullYear();
+        return `${dd}.${mm}.${yyyy}`;
+    }
+
+    function fetchData() {
+        updateCloudStatus("Cloud lädt");
+        fetch(GOOGLE_SCRIPT_URL)
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('cloud-error-box').style.display = 'none';
+                globalFavorites = data.favorites || [];
+                globalHistory = data.history || [];
+                renderTrackerUI();
+                updateCloudStatus("Cloud Live");
+            })
+            .catch(err => {
+                document.getElementById('cloud-error-box').style.display = 'block';
+                updateCloudStatus("Cloud Fehler");
+                console.error(err);
+            });
+    }
+
+    function renderTrackerUI() {
+        const container = document.getElementById('categories-container');
+        container.innerHTML = '';
+
+        const categorized = {};
+        globalFavorites.forEach(item => {
+            if (item.regelmaessig === "ja") {
+                if (!categorized[item.kategorie]) categorized[item.kategorie] = [];
+                categorized[item.kategorie].push(item);
+            }
+        });
+
+        Object.keys(categorized).forEach(cat => {
+            const icon = categoryIcons[cat] || "🥤";
+            let drinksHtml = categorized[cat].map(drink => {
+                return `
+                    <div class="drink-card" onclick="logDrink('${drink.name}', '${drink.kategorie}', '${drink.groesse.toString()}', 'nein')">
+                        <div class="drink-info">
+                            <span class="drink-name">${drink.name}</span>
+                            <span class="drink-size">${drink.groesse.toFixed(2)} L</span>
+                        </div>
+                        <div class="plus-btn">+</div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML += `
+                <div class="category-group">
+                    <div class="category-header" onclick="toggleGroup(this)">
+                        <div class="category-title">
+                            <div class="category-icon">${icon}</div>
+                            <span>${cat}</span>
+                        </div>
+                        <div class="arrow">▼</div>
+                    </div>
+                    <div class="category-content">${drinksHtml}</div>
+                </div>
+            `;
+        });
+    }
+
+    function logDrink(name, kategorie, groesse, regelmaessig) {
+        updateCloudStatus("Cloud lädt");
+        
+        const formBody = new URLSearchParams();
+        formBody.append('name', name);
+        formBody.append('kategorie', kategorie);
+        formBody.append('groesse', groesse);
+        formBody.append('regelmaessig', regelmaessig);
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formBody.toString()
+        })
+        .then(() => {
+            document.getElementById('cloud-error-box').style.display = 'none';
+            updateCloudStatus("Cloud synced");
+            showSuccessToast();
+            fetchData();
+        })
+        .catch(err => {
+            document.getElementById('cloud-error-box').style.display = 'block';
+            updateCloudStatus("Cloud Fehler");
+            console.error(err);
+        });
+    }
+
+    function handleManualSubmit(event) {
+        event.preventDefault();
+        const name = document.getElementById('form-name').value.trim();
+        const kategorie = document.getElementById('form-kategorie').value;
+        const groesse = document.getElementById('form-groesse').value;
+        const regelmaessig = document.getElementById('form-regelmaessig').checked ? "ja" : "nein";
+
+        if (!name || !groesse) return;
+
+        logDrink(name, kategorie, groesse, regelmaessig);
+        document.getElementById('manual-drink-form').reset();
+    }
+
+    function calculateStats() {
+        const todayStr = formatDateToString(new Date());
+        
+        // 1. Heute Gesamt (Liter)
+        let todayVolume = 0;
+        globalHistory.forEach(item => {
+            if (item.datum === todayStr) {
+                todayVolume += item.groesse;
+            }
+        });
+        document.getElementById('kpi-today').textContent = `${todayVolume.toFixed(2).replace('.', ',')} L`;
+
+        // 2. Nüchtern-Konto (Streak)
+        let currentStreak = 0;
+        let checkDate = new Date();
+        while (true) {
+            const checkDateStr = formatDateToString(checkDate);
+            const foundLog = globalHistory.find(item => item.datum === checkDateStr);
+            if (!foundLog) {
+                currentStreak++;
+                checkDate.setDate(checkDate.getDate() - 1);
+            } else {
+                break;
+            }
+        }
+        document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
+
+        // 3. Ranking nach Frequenz (Fortschrittsbalken-Stil)
+        const counts = {};
+        let maxCount = 0;
+        globalHistory.forEach(item => {
+            const key = `${item.name} (${item.groesse.toFixed(2)} L)`;
+            counts[key] = (counts[key] || 0) + 1;
+            if (counts[key] > maxCount) maxCount = counts[key];
+        });
+
+        const sortedRanking = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+        const perfContainer = document.getElementById('routine-performance-container');
+        perfContainer.innerHTML = '';
+
+        if (sortedRanking.length === 0) {
+            perfContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:8px 0;">Noch keine Daten vorhanden.</div>`;
+            return;
+        }
+
+        sortedRanking.slice(0, 5).forEach(drinkKey => {
+            const count = counts[drinkKey];
+            const pct = maxCount > 0 ? Math.round((count / maxCount) * 100) : 0;
+            const cleanName = drinkKey.split(' (')[0];
+            const cleanSize = drinkKey.includes(' (') ? drinkKey.split(' (')[1].replace(')', '') : '';
+            
+            perfContainer.innerHTML += `
+                <div class="perf-item">
+                    <div class="perf-info">
+                        <span class="perf-icon">🥤</span>
+                        <span class="perf-name">${cleanName} <small style="color:var(--text-secondary); font-weight:700;">${cleanSize}</small></span>
+                    </div>
+                    <div class="perf-bar-wrapper">
+                        <div class="perf-bar-bg">
+                            <div class="perf-bar-fill" style="width: ${pct}%"></div>
+                        </div>
+                        <span class="perf-pct">${count}x</span>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    window.onload = fetchData;
+</script>
+</body>
+</html>
