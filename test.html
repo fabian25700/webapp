@@ -3,39 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Notion Web App</title>
+    <title>Notion Live Sync Web App</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        body, html {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #333333;
             background-color: #ffffff;
+            line-height: 1.6;
+            padding: 40px 20px;
         }
-        .container {
-            width: 100%;
-            height: 100vh;
+        .content-container {
+            max-width: 600px;
+            margin: 0 auto;
         }
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #111111;
+        }
+        p {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            color: #444444;
+        }
+        .loading {
+            color: #888888;
+            font-style: italic;
+        }
+        .error {
+            color: #ff3b30;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <iframe 
-            src="https://fabiangeisbuesch.notion.site/396c36c6fc1f80b8990ae0acaa71786f" 
-            allowfullscreen>
-        </iframe>
+    <div class="content-container">
+        <div id="app-content">
+            <p class="loading">Inhalte werden aus Notion geladen...</p>
+        </div>
     </div>
 
+    <script>
+        // Die ID deiner Notion-Seite aus der URL extrahiert
+        const pageId = "396c36c6fc1f80b8990ae0acaa71786f";
+
+        async function fetchNotionData() {
+            const contentDiv = document.getElementById('app-content');
+            
+            try {
+                // Nutzung des kostenlosen API-Wrappers für öffentliche Notion-Seiten
+                const response = await fetch(`https://notion-api.splitbee.io/v1/page/${pageId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Netzwerk-Antwort war nicht ok');
+                }
+                
+                const data = await response.json();
+                
+                // Container leeren
+                contentDiv.innerHTML = '';
+
+                // Iteration durch die Blöcke der Notion-Seite
+                Object.keys(data).forEach(blockId => {
+                    const block = data[blockId].value;
+                    
+                    if (block && block.properties && block.properties.title) {
+                        const textContent = block.properties.title.map(t => t[0]).join('');
+                        
+                        // Unterscheidung nach Block-Typen (Erweiterbar)
+                        if (block.type === 'page') {
+                            const titleElement = document.createElement('h1');
+                            titleElement.textContent = textContent;
+                            contentDiv.appendChild(titleElement);
+                        } else if (block.type === 'text') {
+                            const pElement = document.createElement('p');
+                            pElement.textContent = textContent;
+                            contentDiv.appendChild(pElement);
+                        }
+                    }
+                });
+
+                if (contentDiv.children.length === 0) {
+                    contentDiv.innerHTML = '<p class="loading">Die Seite scheint leer zu sein oder ist nicht öffentlich freigegeben.</p>';
+                }
+
+            } catch (error) {
+                console.error('Fehler beim Laden der Notion-Daten:', error);
+                contentDiv.innerHTML = '<p class="error">Fehler beim Laden der Inhalte. Bitte überprüfe, ob die Notion-Seite im Web veröffentlicht ist.</p>';
+            }
+        }
+
+        // Funktion beim Laden der Seite ausführen
+        fetchNotionData();
+    </script>
 </body>
 </html>
