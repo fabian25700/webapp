@@ -68,15 +68,44 @@
             position: relative;
         }
 
-        .header-left { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+        .header-left { 
+            display: flex; 
+            align-items: center; 
+            position: absolute;
+            left: 0;
+            z-index: 10;
+            gap: 8px;
+        }
         
-        .back-btn {
-            background: none; border: none; font-size: 1.15rem; color: var(--accent);
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            text-decoration: none; padding-right: 4px; font-weight: 400;
+        .back-container { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            text-decoration: none; 
+            color: var(--text-primary); 
+        }
+        
+        .back-container span { 
+            font-size: 0.95rem; 
+            font-weight: 700; 
+            line-height: 1;
         }
 
-        .header-left span { font-size: 0.95rem; font-weight: 700; line-height: 1; }
+        .back-btn {
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            width: 32px; 
+            height: 32px; 
+            border-radius: 9px;
+            background: var(--surface); 
+            border: 1px solid var(--border);
+            color: var(--text-primary); 
+            box-shadow: var(--shadow);
+            flex-shrink: 0; 
+            font-size: 0.9rem;
+            line-height: 1;
+        }
 
         .header-right {
             display: flex; align-items: center; position: absolute; right: 0; z-index: 10;
@@ -118,6 +147,29 @@
         .view-section { display: none; flex-direction: column; gap: 12px; width: 100%; }
         .view-section.active { display: flex; }
 
+        .delete-last-container {
+            display: flex;
+            justify-content: center;
+            margin: -4px auto 4px auto;
+            width: 100%;
+        }
+
+        .delete-last-btn {
+            background: none;
+            border: none;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.2s ease;
+            padding: 4px 12px;
+        }
+        .delete-last-btn:active {
+            color: var(--danger);
+        }
+
         .category-group { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); position: relative; }
         
         .category-header { padding: 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; transition: background 0.2s; }
@@ -158,7 +210,7 @@
         .form-group { display: flex; flex-direction: column; gap: 4px; }
         .form-group.full { grid-column: span 2; }
         
-        .form-group label { font-size: 0.7rem; height: 16px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); }
+        .form-group label { font-size: 0.7rem; height: 16px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); label-spacing: 0.05em; }
         .form-group input, .form-group select {
             width: 100%; height: 38px; border-radius: 9px; border: 1px solid var(--border);
             background: var(--bg); color: var(--text-primary); padding: 0 10px; font-size: 0.9rem; font-family: inherit;
@@ -215,6 +267,22 @@
 
         .section-block { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px; }
         .block-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+
+        .toggle-trigger {
+            font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+            padding: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);
+        }
+        .toggle-hidden-wrapper { display: none; flex-direction: column; gap: 8px; margin-top: 4px; }
+        .section-block.expanded .toggle-hidden-wrapper { display: flex; }
+
+        .today-log-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+            font-size: 0.82rem; font-weight: 600;
+        }
+        .today-log-meta { font-size: 0.72rem; color: var(--text-secondary); font-weight: 700; }
 
         .perf-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-light); height: 32px; }
         .perf-item:last-child { border-bottom: none; padding-bottom: 0; }
@@ -275,8 +343,10 @@
 <header>
     <div class="header-top">
         <div class="header-left">
-            <a href="index.html" class="back-btn">‹</a>
-            <span>Alkohol</span>
+            <a href="index.html" class="back-container">
+                <div class="back-btn">&larr;</div>
+                <span>Alkohol</span>
+            </a>
         </div>
         <div class="header-switch-container">
             <div class="main-view-switch">
@@ -292,6 +362,10 @@
 
 <main>
     <div id="view-tracker" class="view-section active">
+        <div class="delete-last-container">
+            <button type="button" class="delete-last-btn" onclick="deleteLastLogEntry()">Letztes Getränk löschen</button>
+        </div>
+
         <div id="categories-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
 
         <div class="form-block">
@@ -357,6 +431,11 @@
             </div>
         </div>
 
+        <div class="section-block" id="today-logs-section-block">
+            <div class="toggle-trigger" onclick="toggleTodayLogsBlock()">Getränke von heute anzeigen ▼</div>
+            <div class="toggle-hidden-wrapper" id="today-logs-container"></div>
+        </div>
+
         <div class="section-block">
             <div class="block-title">Getränke-Ranking (Frequenz)</div>
             <div id="routine-performance-container" style="display: flex; flex-direction: column; gap: 2px;"></div>
@@ -410,6 +489,17 @@
     function toggleGroup(header) { header.parentElement.classList.toggle('open'); }
     function showSuccessToast() { const toast = document.getElementById('toast-notice'); toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 2000); }
     
+    function toggleTodayLogsBlock() {
+        const block = document.getElementById('today-logs-section-block');
+        block.classList.toggle('expanded');
+        const trigger = block.querySelector('.toggle-trigger');
+        if (block.classList.contains('expanded')) {
+            trigger.textContent = "Getränke von heute ausblenden ▲";
+        } else {
+            trigger.textContent = "Getränke von heute anzeigen ▼";
+        }
+    }
+
     function formatDateToString(date) {
         const dd = String(date.getDate()).padStart(2, '0');
         const mm = String(date.getMonth() + 1).padStart(2, '0');
@@ -432,6 +522,7 @@
                 renderTrackerUI();
                 populateDropdowns();
                 updateCloudStatus("Cloud Live");
+                calculateStats();
             })
             .catch(err => {
                 document.getElementById('cloud-error-box').style.display = 'block';
@@ -441,7 +532,6 @@
     }
 
     function populateDropdowns() {
-        // 1. Anlass-Kategorien füllen
         const d1 = document.getElementById('modal-anlass-kategorie');
         const d2 = document.getElementById('form-anlass-kategorie');
         
@@ -453,7 +543,6 @@
         d1.innerHTML = optionsHtml;
         d2.innerHTML = optionsHtml;
 
-        // 2. Getränke-Kategorien dynamisch aus dem Blatt Getraenke befüllen
         const dKategorie = document.getElementById('form-kategorie');
         let uniqueCategories = [];
         
@@ -461,7 +550,6 @@
             if(item.kategorie && !uniqueCategories.includes(item.kategorie)) uniqueCategories.push(item.kategorie);
         });
         
-        // Fallback, falls Getraenke leer ist
         if (uniqueCategories.length === 0) {
             uniqueCategories = ["Bier", "Wein", "Spirituose", "Mixgetränk"];
         }
@@ -499,7 +587,7 @@
                     <div class="drink-card" onclick="openQuickLogModal('${drink.name}', '${drink.kategorie}', '${drink.groesse}')">
                         <div class="drink-info">
                             <span class="drink-name">${drink.name}</span>
-                            <span class="drink-size">${drink.groesse.toFixed(2)} L</span>
+                            <span class="drink-size">${parseFloat(drink.groesse).toFixed(2)} L</span>
                         </div>
                         <div class="plus-btn">+</div>
                     </div>
@@ -563,12 +651,17 @@
     function submitQuickLogFromModal() {
         if (!activeModalDrink) return;
 
+        const name = activeModalDrink.name;
+        const kategorie = activeModalDrink.kategorie;
+        const groesse = activeModalDrink.groesse;
+        const regelmaessig = "ja";
+
         const aName = document.getElementById('modal-anlass-name').value.trim();
         const selKat = document.getElementById('modal-anlass-kategorie').value;
         const neuKat = document.getElementById('modal-anlass-kategorie-neu').value.trim();
         const aKat = neuKat !== "" ? neuKat : selKat;
 
-        logDrink(activeModalDrink.name, activeModalDrink.kategorie, activeModalDrink.groesse, 'nein', aName, aKat);
+        logDrink(name, kategorie, groesse, regelmaessig, aName, aKat);
         closeQuickLogModal();
     }
 
@@ -644,23 +737,88 @@
         });
     }
 
+    function deleteLastLogEntry() {
+        updateCloudStatus("Cloud lädt");
+        const formBody = new URLSearchParams();
+        formBody.append('delete_last', 'true');
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formBody.toString()
+        })
+        .then(() => {
+            document.getElementById('cloud-error-box').style.display = 'none';
+            updateCloudStatus("Cloud synced");
+            const toast = document.getElementById('toast-notice');
+            toast.textContent = "Eintrag erfolgreich gelöscht!";
+            toast.classList.add('show');
+            setTimeout(() => { 
+                toast.classList.remove('show'); 
+                toast.textContent = "Eintrag erfolgreich verbucht!";
+            }, 2000);
+            setTimeout(fetchData, 600);
+        })
+        .catch(err => {
+            document.getElementById('cloud-error-box').style.display = 'block';
+            updateCloudStatus("Cloud Fehler");
+            console.error(err);
+        });
+    }
+
     function calculateStats() {
         const todayStr = formatDateToString(new Date());
         
         let todayVolume = 0;
+        const todayLogsContainer = document.getElementById('today-logs-container');
+        todayLogsContainer.innerHTML = '';
+
+        let drinkTodayCounts = {};
+        let catTodayCounts = {};
+
         globalHistory.forEach(item => {
-            if (item.datum && item.datum.startsWith(todayStr) && !isNaN(item.groesse)) {
-                todayVolume += item.groesse;
+            if (item.datum && item.datum.includes(todayStr) && !isNaN(item.groesse)) {
+                todayVolume += Number(item.groesse);
+                drinkTodayCounts[item.name] = (drinkTodayCounts[item.name] || 0) + 1;
+                catTodayCounts[item.kategorie] = (catTodayCounts[item.kategorie] || 0) + 1;
             }
         });
         document.getElementById('kpi-today').textContent = `${todayVolume.toFixed(2).replace('.', ',')} L`;
+
+        let todayEntries = globalHistory.filter(item => item.datum && item.datum.includes(todayStr));
+        if (todayEntries.length === 0) {
+            todayLogsContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:4px 0; text-align:center;">Heute noch keine Einträge protokolliert.</div>`;
+        } else {
+            todayEntries.forEach(item => {
+                let timePart = "00:00";
+                if (item.datum.includes(" ")) {
+                    timePart = item.datum.split(" ")[1].substring(0, 5);
+                }
+                const curDrinkCount = drinkTodayCounts[item.name] || 0;
+                const curCatCount = catTodayCounts[item.kategorie] || 0;
+
+                todayLogsContainer.innerHTML += `
+                    <div class="today-log-item">
+                        <div>
+                            <span>${item.name}</span>
+                            <span class="today-log-meta"> (${curDrinkCount}x heute)</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <div>${parseFloat(item.groesse).toFixed(2)} L</div>
+                            <div class="today-log-meta">${timePart} | ${item.kategorie} (${curCatCount}x)</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
 
         let currentStreak = 0;
         if (globalHistory.length > 0) {
             let checkDate = new Date();
             for (let i = 0; i < 365; i++) {
                 const checkDateStr = formatDateToString(checkDate);
-                const hasEntries = globalHistory.some(item => item.datum && item.datum.startsWith(checkDateStr));
+                const hasEntries = globalHistory.some(item => item.datum && item.datum.includes(checkDateStr));
                 if (!hasEntries) { currentStreak++; checkDate.setDate(checkDate.getDate() - 1); } 
                 else { break; }
             }
