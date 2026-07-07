@@ -6,7 +6,6 @@ const ROUTINE_CONFIG = {
             "Wiegen",
             "alle Rollladen / Fenster",
             "Tageslicht",
-            "Klo",
             "Wasser mit Salz / Elektrolyte",
             "Zunge reinigen",
             "Zähne putzen",
@@ -17,27 +16,20 @@ const ROUTINE_CONFIG = {
             "Whoop checken",
             "Ziele + ToDo’s des Tages anschauen",
             "Mails checken",
-            "ggf. Sport",
             "duschen",
-            "anziehen",
-            "bis 8:00 keine Geräte (außer Call Sally, Erinnerungen, Routine)"
+            "bis 8:00 keine Geräte (außer Sally, Erinnerungen, Routine, Sport)"
         ],
         unterwegs: [
             "Aufstehen ohne Snooze",
             "alle Rollladen / Fenster",
-            "Tageslicht",
-            "Klo",
-            "Wasser",
+            "Wasser trinken",
             "Zähne putzen",
-            "Schlafzimmer aufräumen",
+            "Schlafplatz machen",
             "Stoisches Kapitel",
             "Whoop checken",
             "Ziele + ToDo’s des Tages anschauen",
             "Mails checken",
-            "ggf. Sport",
-            "duschen",
-            "anziehen",
-            "bis 8:00 keine Geräte (außer Call Sally, Erinnerungen, Routine)"
+            "bis 8:00 keine Geräte (außer Sally, Erinnerungen, Routine, Sport)"
         ]
     },
     "Sportroutine": {
