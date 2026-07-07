@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Flüge</title>
+    <!-- Einbindung deiner neuen zentralen API Schnittstelle -->
+    <script src="api_reisen.js"></script>
+    <style>
+        :root {
+            --accent: #e67e22;
+            --accent-soft: rgba(230, 126, 34, 0.1);
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --surface-2: #f8fafc;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --surface-2: #162032;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --text-tertiary: #64748b;
+                --border: #2d3f55;
+                --border-light: #253347;
+                --shadow: 0 2px 8px rgba(0,0,0,0.3);
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: calc(env(safe-area-inset-bottom) + 32px);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            position: sticky; top: 0; z-index: 50;
+            background: var(--bg);
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 0;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        }
+
+        .header-top {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+        }
+
+        .back-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 12px;
+            background: var(--surface); border: 1px solid var(--border);
+            text-decoration: none; color: var(--text-primary);
+            box-shadow: var(--shadow); transition: all 0.15s;
+        }
+        .back-btn:active { transform: scale(0.92); opacity: 0.7; }
+
+        header h1 { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.01em; }
+
+        /* Tabs Reiter */
+        .tabs {
+            display: flex; gap: 24px;
+        }
+
+        .tab {
+            font-size: 0.85rem; font-weight: 700; color: var(--text-secondary);
+            padding-bottom: 12px; cursor: pointer; position: relative;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+
+        .tab.active {
+            color: var(--text-primary);
+        }
+
+        .tab.active::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%;
+            height: 3px; background: var(--accent); border-radius: 3px 3px 0 0;
+        }
+
+        main { padding: 20px 16px 0; max-width: 600px; margin: 0 auto; }
+
+        .tab-content { display: none; flex-direction: column; gap: 12px; }
+        .tab-content.active { display: flex; }
+
+        .section-label {
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.07em; color: var(--text-tertiary); padding: 0 4px;
+            margin-top: 8px; margin-bottom: 4px;
+        }
+
+        /* Flight Card Liste */
+        .flight-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 18px; padding: 16px; box-shadow: var(--shadow);
+            display: flex; flex-direction: column; gap: 10px;
+        }
+
+        .flight-route {
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .airport { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; }
+        .route-line {
+            flex: 1; border-top: 2px dashed var(--border); margin: 0 16px;
+            position: relative; display: flex; justify-content: center; align-items: center;
+        }
+        .route-icon { position: absolute; background: var(--surface); padding: 0 6px; font-size: 0.85rem; color: var(--text-tertiary); }
+
+        .flight-meta {
+            display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-secondary);
+            border-top: 1px solid var(--border-light); padding-top: 10px;
+        }
+        .flight-notiz {
+            font-size: 0.75rem; color: var(--text-tertiary); font-style: italic; background: var(--surface-2);
+            padding: 6px 10px; border-radius: 8px;
+        }
+
+        /* Stats Design */
+        .stats-grid { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; margin-bottom: 12px; }
+        .stat-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 18px; padding: 16px 14px; text-align: center; box-shadow: var(--shadow);
+        }
+        .stat-val { display: block; font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+        .stat-label { font-size: 0.62rem; font-weight: 700; color: var(--text-tertiary); text-transform: uppercase; margin-top: 4px; }
+
+        /* Ranglisten Karten */
+        .ranking-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 18px; padding: 14px 16px; box-shadow: var(--shadow);
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .ranking-item {
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.85rem; padding: 6px 0; border-bottom: 1px solid var(--border-light);
+        }
+        .ranking-item:last-child { border-bottom: none; }
+        .rank-name { font-weight: 600; }
+        .rank-count { font-weight: 700; color: var(--accent); background: var(--accent-soft); padding: 2px 8px; border-radius: 20px; font-size: 0.75rem; }
+
+        /* Loader */
+        .loader {
+            text-align: center; color: var(--text-secondary); font-size: 0.85rem; padding: 40px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-top">
+            <a href="reise_stats.html" class="back-btn">←</a>
+            <h1>Flüge</h1>
+        </div>
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('liste')">Liste</div>
+            <div class="tab" onclick="switchTab('stats')">Stats</div>
+        </div>
+    </header>
+
+    <main>
+        <div id="loading" class="loader">Lade Daten aus Google Sheets...</div>
+
+        <!-- REITER: LISTE -->
+        <div id="content-liste" class="tab-content active">
+            <!-- Cards werden dynamisch injiziert -->
+        </div>
+
+        <!-- REITER: STATS -->
+        <div id="content-stats" class="tab-content">
+            <div class="section-label">Übersicht</div>
+            <div class="stats-grid">
+                <div class="stat-card"><span class="stat-val" id="stat-total">-</span><span class="stat-label">Flüge Gesamt</span></div>
+                <div class="stat-card"><span class="stat-val" id="stat-airlines">-</span><span class="stat-label">Airlines</span></div>
+            </div>
+
+            <div class="section-label">Top Abflughäfen</div>
+            <div class="ranking-card" id="rank-abflug"></div>
+
+            <div class="section-label">Top Airlines</div>
+            <div class="ranking-card" id="rank-airlines"></div>
+            
+            <div class="section-label">Häufigste Flugzeuge</div>
+            <div class="ranking-card" id="rank-flugzeuge"></div>
+        </div>
+    </main>
+
+    <script>
+        let flugDaten = [];
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            if(tabId === 'liste') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('content-liste').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('content-stats').classList.add('active');
+            }
+        }
+
+        window.onload = async function() {
+            // Holt die Live-Daten über dein universelles api_reisen.js
+            flugDaten = await fetchDataFromSheet("Flüge");
+            
+            document.getElementById('loading').style.display = 'none';
+            
+            // Daten chronologisch sortieren (Neueste zuerst)
+            flugDaten.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
+
+            renderListe();
+            renderStats();
+        };
+
+        function renderListe() {
+            const container = document.getElementById('content-liste');
+            container.innerHTML = '';
+
+            if(flugDaten.length === 0) {
+                container.innerHTML = '<div class="loader">Keine Flüge aufgezeichnet.</div>';
+                return;
+            }
+
+            flugDaten.forEach(f => {
+                const dateStr = f.Datum ? new Date(f.Datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '–';
+                
+                const card = document.createElement('div');
+                card.className = 'flight-card';
+                card.innerHTML = `
+                    <div class="flight-route">
+                        <span class="airport">${f.Abflug || '???'}</span>
+                        <div class="route-line"><span class="route-icon">✈️</span></div>
+                        <span class="airport">${f.Ankunft || '???'}</span>
+                    </div>
+                    <div class="flight-meta">
+                        <span>${dateStr}</span>
+                        <span>${f.Airline || '–'} ${f.Flugzeug ? `• ${f.Flugzeug}` : ''}</span>
+                        <span>${f.mit && f.mit !== '-' ? `mit ${f.mit}` : 'Allein'}</span>
+                    </div>
+                    ${f.Notiz ? `<div class="flight-notiz">${f.Notiz}</div>` : ''}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderStats() {
+            // 1. Gesamtzahlen
+            document.getElementById('stat-total').textContent = flugDaten.length;
+            
+            const airlines = [...new Set(flugDaten.map(f => f.Airline).filter(Boolean))];
+            document.getElementById('stat-airlines').textContent = airlines.length;
+
+            // 2. Häufigkeiten berechnen Helper
+            const getTopCounts = (field) => {
+                const counts = {};
+                flugDaten.forEach(f => {
+                    const val = f[field];
+                    if(val && val !== '-') counts[val] = (counts[val] || 0) + 1;
+                });
+                return Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 5);
+            };
+
+            // 3. Top Listen rendern
+            renderRanking('rank-abflug', getTopCounts('Abflug'));
+            renderRanking('rank-airlines', getTopCounts('Airline'));
+            renderRanking('rank-flugzeuge', getTopCounts('Flugzeug'));
+        }
+
+        function renderRanking(elementId, dataArray) {
+            const el = document.getElementById(elementId);
+            el.innerHTML = '';
+            if(dataArray.length === 0) {
+                el.innerHTML = '<div style="font-size:0.75rem; color:var(--text-tertiary); text-align:center;">Keine Daten verfügbar</div>';
+                return;
+            }
+            dataArray.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'ranking-item';
+                div.innerHTML = `<span class="rank-name">${item[0]}</span><span class="rank-count">${item[1]}x</span>`;
+                el.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
