@@ -6,7 +6,6 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Flüge</title>
-    <!-- Einbindung deiner neuen zentralen API Schnittstelle -->
     <script src="api_reisen.js"></script>
     <style>
         :root {
@@ -113,7 +112,7 @@
             display: flex; align-items: center; justify-content: space-between;
         }
 
-        .airport { font-size: 1.35rem; font-weight: 800; letter-spacing: -0.02em; }
+        .airport { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; }
         .route-line {
             flex: 1; border-top: 2px dashed var(--border); margin: 0 16px;
             position: relative; display: flex; justify-content: center; align-items: center;
@@ -174,12 +173,8 @@
     <main>
         <div id="loading" class="loader">Lade Daten aus Google Sheets...</div>
 
-        <!-- REITER: LISTE -->
-        <div id="content-liste" class="tab-content active">
-            <!-- Cards werden dynamisch injiziert -->
-        </div>
+        <div id="content-liste" class="tab-content active"></div>
 
-        <!-- REITER: STATS -->
         <div id="content-stats" class="tab-content">
             <div class="section-label">Übersicht</div>
             <div class="stats-grid">
@@ -220,8 +215,14 @@
             
             document.getElementById('loading').style.display = 'none';
             
-            // Daten chronologisch sortieren (Neueste zuerst)
-            flugDaten.sort((a, b) => new Date(b.Datum) - new Date(a.Datum));
+            // Fehlertolerante Sortierung nach Datum (Neueste zuerst)
+            if (Array.isArray(flugDaten) && flugDaten.length > 0) {
+                flugDaten.sort((a, b) => {
+                    const dateA = a.Datum ? new Date(a.Datum) : new Date(0);
+                    const dateB = b.Datum ? new Date(b.Datum) : new Date(0);
+                    return dateB - dateA;
+                });
+            }
 
             renderListe();
             renderStats();
@@ -231,13 +232,19 @@
             const container = document.getElementById('content-liste');
             container.innerHTML = '';
 
-            if(flugDaten.length === 0) {
-                container.innerHTML = '<div class="loader">Keine Flüge aufgezeichnet.</div>';
+            if (!flugDaten || flugDaten.length === 0 || flugDaten.hasOwnProperty('error')) {
+                container.innerHTML = '<div class="loader">Keine Flüge geladen. Überprüfe den Tabellennamen "Flüge" oder deine API-Verbindung.</div>';
                 return;
             }
 
             flugDaten.forEach(f => {
-                const dateStr = f.Datum ? new Date(f.Datum).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '–';
+                let dateStr = '–';
+                if (f.Datum) {
+                    const parsedDate = new Date(f.Datum);
+                    if (!isNaN(parsedDate.getTime())) {
+                        dateStr = parsedDate.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                    }
+                }
                 
                 const card = document.createElement('div');
                 card.className = 'flight-card';
@@ -259,18 +266,23 @@
         }
 
         function renderStats() {
-            // 1. Gesamtzahlen
+            if (!flugDaten || flugDaten.length === 0 || flugDaten.hasOwnProperty('error')) return;
+
+            // 1. Gesamtzahlen berechnen
             document.getElementById('stat-total').textContent = flugDaten.length;
             
-            const airlines = [...new Set(flugDaten.map(f => f.Airline).filter(Boolean))];
-            document.getElementById('stat-airlines').textContent = airlines.length;
+            const uniqueAirlines = [...new Set(flugDaten.map(f => f.Airline).filter(val => val && val !== '-'))];
+            document.getElementById('stat-airlines').textContent = uniqueAirlines.length;
 
             // 2. Häufigkeiten berechnen Helper
             const getTopCounts = (field) => {
                 const counts = {};
                 flugDaten.forEach(f => {
-                    const val = f[field];
-                    if(val && val !== '-') counts[val] = (counts[val] || 0) + 1;
+                    let val = f[field];
+                    if (val && val !== '-') {
+                        val = val.toString().trim();
+                        counts[val] = (counts[val] || 0) + 1;
+                    }
                 });
                 return Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 5);
             };
@@ -284,8 +296,8 @@
         function renderRanking(elementId, dataArray) {
             const el = document.getElementById(elementId);
             el.innerHTML = '';
-            if(dataArray.length === 0) {
-                el.innerHTML = '<div style="font-size:0.75rem; color:var(--text-tertiary); text-align:center;">Keine Daten verfügbar</div>';
+            if (dataArray.length === 0) {
+                el.innerHTML = '<div style="font-size:0.75rem; color:var(--text-tertiary); text-align:center; padding:10px 0;">Keine Daten verfügbar</div>';
                 return;
             }
             dataArray.forEach(item => {
