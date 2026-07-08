@@ -737,7 +737,7 @@
             contentDiv.innerHTML = habitsHtml;
         });
 
-        updateGlobalProgress(true);
+        updateGlobalProgress();
     }
 
     function toggleGroup(header) {
@@ -789,7 +789,7 @@
         if (isDone) { habitState[routineName].done++; } else { habitState[routineName].done--; }
         const newRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
 
-        updateGlobalProgress(false);
+        updateGlobalProgress();
         if (oldRoutineState === "nein" && newRoutineState === "ja") showSuccessToast();
         if (oldRoutineState !== newRoutineState) syncModuleToCloud(routineName, newRoutineState);
     }
@@ -804,7 +804,7 @@
         habitState[routineName].joker = isDone;
         const newRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
 
-        updateGlobalProgress(false);
+        updateGlobalProgress();
         if (oldRoutineState === "nein" && newRoutineState === "ja") showSuccessToast();
         if (oldRoutineState !== newRoutineState) syncModuleToCloud(routineName, newRoutineState);
     }
@@ -825,7 +825,7 @@
         return (state.done / state.total) >= TARGET_RATIO;
     }
 
-    function updateGlobalProgress(suppressCloudSync = false) {
+    function updateGlobalProgress() {
         routineNamesOrdered.forEach(routineName => {
             const group = document.getElementById(`routine-block-${routineName}`);
             if (!group) return;
@@ -842,13 +842,7 @@
             }
         });
 
-        const oldTdrState = habitState["TwoDayRule"] ? (habitState["TwoDayRule"].isApproved ? "ja" : "nein") : "nein";
         updateTwoDayRuleStatus();
-        const newTdrState = habitState["TwoDayRule"].isApproved ? "ja" : "nein";
-
-        if (oldTdrState !== newTdrState && !suppressCloudSync) {
-            syncModuleToCloud("TwoDayRule", newTdrState);
-        }
     }
 
     function updateTwoDayRuleStatus() {
@@ -870,10 +864,39 @@
             ereyesterdayData = globalHistoryArray.find(item => item.datum === ereyesterdayStr);
         }
 
-        let tdrHeuteJa = false;
-        if (todayData && todayData.routinen && todayData.routinen["TwoDayRule"]) {
-            if (todayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrHeuteJa = true;
+        // Lokaler Live-Zustand der heutigen Routinen ermitteln
+        let countRoutinesDoneToday = 0;
+        routineNamesOrdered.forEach(r => {
+            if (isRoutineApproved(r)) countRoutinesDoneToday++;
+        });
+
+        // Die TwoDayRule greift, wenn mindestens eine funktionale Kern-Routine heute erfüllt wurde
+        let shouldTdrBeJa = countRoutinesDoneToday > 0;
+
+        // Falls heute absolut gar nichts geschafft wurde, prüfen wir den Vortag (gestern)
+        if (!shouldTdrBeJa && yesterdayData && yesterdayData.routinen) {
+            let countGestern = 0;
+            routineNamesOrdered.forEach(r => {
+                if (yesterdayData.routinen[r] && yesterdayData.routinen[r].toLowerCase() === "ja") countGestern++;
+            });
+            // Wenn gestern gearbeitet wurde, bricht die Kette heute laut 2-Day-Rule noch nicht
+            if (countGestern > 0) {
+                shouldTdrBeJa = true;
+            }
         }
+
+        let cloudTdrState = "nein";
+        if (todayData && todayData.routinen && todayData.routinen["TwoDayRule"]) {
+            cloudTdrState = todayData.routinen["TwoDayRule"].toLowerCase();
+        }
+
+        habitState["TwoDayRule"] = { total: 0, done: 0, isApproved: shouldTdrBeJa };
+
+        // Falls die lokale Berechnung vom tatsächlichen Cloud-Wert abweicht -> Expliziter Sync in die Cloud
+        if ((shouldTdrBeJa && cloudTdrState !== "ja") || (!shouldTdrBeJa && cloudTdrState === "ja")) {
+            syncModuleToCloud("TwoDayRule", shouldTdrBeJa ? "ja" : "nein");
+        }
+
         let tdrGesternJa = false;
         if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen["TwoDayRule"]) {
             if (yesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrGesternJa = true;
@@ -883,9 +906,7 @@
             if (ereyesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrVorgesternJa = true;
         }
 
-        habitState["TwoDayRule"] = { total: 0, done: 0, isApproved: tdrHeuteJa };
-
-        if (document.getElementById("dot-TwoDayRule-heute")) document.getElementById("dot-TwoDayRule-heute").className = "yesterday-dot " + (tdrHeuteJa ? "ja" : "nein");
+        if (document.getElementById("dot-TwoDayRule-heute")) document.getElementById("dot-TwoDayRule-heute").className = "yesterday-dot " + (shouldTdrBeJa ? "ja" : "nein");
         if (document.getElementById("dot-TwoDayRule-gestern")) document.getElementById("dot-TwoDayRule-gestern").className = "yesterday-dot " + (tdrGesternJa ? "ja" : "nein");
         if (document.getElementById("dot-TwoDayRule-vorgestern")) document.getElementById("dot-TwoDayRule-vorgestern").className = "yesterday-dot " + (tdrVorgesternJa ? "ja" : "nein");
     }
@@ -970,9 +991,12 @@
             document.getElementById('cloud-error-box').style.display = 'none'; 
             updateCloudStatus("Cloud synced");
             
-            // Unmittelbar nach der Änderung die neuen Stati aus dem Sheet lesen,
-            // um die TwoDayRule auf dem aktuellsten Stand neu zu validieren.
-            fetchHistoryStatus();
+            // Wenn eine normale Routine geändert wurde, müssen wir die Historie neu laden
+            // Wenn die TwoDayRule sich gerade selbst gesynct hat, brechen wir hier ab,
+            // um eine unendliche Feedbackschleife zu verhindern.
+            if (routineName !== "TwoDayRule") {
+                fetchHistoryStatus();
+            }
         })
         .catch(err => {
             document.getElementById('cloud-error-box').style.display = 'block';
