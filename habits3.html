@@ -93,7 +93,7 @@
             align-items: center; 
             justify-content: center;
             width: 32px; 
-            height: 32px; 
+height: 32px; 
             border-radius: 9px;
             background: var(--surface); 
             border: 1px solid var(--border);
@@ -279,6 +279,7 @@
         }
         .bucket-card:active { transform: scale(0.99); }
         .bucket-card.done { opacity: 0.5; border-style: dashed; background: var(--border-light); }
+        .bucket-card.hidden-by-mode { display: none !important; }
 
         .status-circle {
             width: 22px; height: 22px; border-radius: 6px;
@@ -643,8 +644,7 @@
         document.getElementById('mode-unterwegs').classList.toggle('active', mode === 'unterwegs');
         localStorage.setItem('routine_global_mode', mode);
         
-        buildDOMFromTemplates();
-        fetchHistoryStatus();
+        applyGlobalModeToDOM();
     }
 
     function initApp() {
@@ -656,6 +656,7 @@
         document.getElementById('mode-unterwegs').classList.toggle('active', currentGlobalMode === 'unterwegs');
 
         buildDOMFromTemplates();
+        applyGlobalModeToDOM();
         fetchHistoryStatus();
     }
 
@@ -663,63 +664,38 @@
         const activeContainer = document.getElementById('active-routines-container');
         activeContainer.innerHTML = '';
         
-        const templatesContainer = document.getElementById('routine-templates');
-        templatesContainer.innerHTML = '';
+        const savedStates = getSavedStates();
         
-        routineNamesOrdered.forEach(routineName => {
+        routineNamesOrdered.forEach((routineName, groupIdx) => {
             const config = ROUTINE_CONFIG[routineName];
             if (!config) return;
-            const habits = config[currentGlobalMode] || config.zuhause || [];
-            const habitsJson = JSON.stringify(habits);
             
-            templatesContainer.innerHTML += `
-                <div class="category-group" data-routine="${routineName}" id="routine-block-${routineName}">
-                    <div class="category-header" onclick="toggleGroup(this)">
-                        <div class="category-title"><div class="category-icon">${config.icon}</div><span>${routineName}</span></div>
-                        <div class="category-meta">
-                            <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-heute"></span></div>
-                            <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-gestern"></span></div>
-                            <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-vorgestern"></span></div>
-                        </div>
-                        <div class="arrow">▼</div>
-                    </div>
-                    <div class="category-content" data-habits='${habitsJson}'></div>
-                </div>
-            `;
-        });
-
-        const templates = document.querySelectorAll('#routine-templates .category-group');
-        templates.forEach(tpl => {
-            const clone = tpl.cloneNode(true);
-            activeContainer.appendChild(clone);
-        });
-
-        const savedStates = getSavedStates();
-        const groups = document.querySelectorAll('#active-routines-container .category-group');
-        
-        groups.forEach((group, groupIdx) => {
-            const routineName = group.getAttribute('data-routine');
-            const contentDiv = group.querySelector('.category-content');
-            const habits = JSON.parse(contentDiv.getAttribute('data-habits'));
+            const zhHabits = config.zuhause || [];
+            const uwHabits = config.unterwegs || [];
+            const allHabitsCombined = Array.from(new Set([...zhHabits, ...uwHabits]));
             
-            const jokerId = `${groupIdx}-joker`;
-            const isJokerChecked = savedStates[jokerId] || false;
-            
-            habitState[routineName] = { total: habits.length, done: 0, joker: isJokerChecked };
-
-            let habitsHtml = habits.map((habit, habitIdx) => {
+            let habitsHtml = allHabitsCombined.map((habit, habitIdx) => {
                 const habitId = `${groupIdx}-${habitIdx}`;
                 const isChecked = savedStates[habitId] || false;
                 
-                if (isChecked) { habitState[routineName].done++; }
+                const belongsToZuhause = zhHabits.includes(habit);
+                const belongsToUnterwegs = uwHabits.includes(habit);
 
                 return `
-                    <div class="bucket-card ${isChecked ? 'done' : ''}" id="card-${habitId}" onclick="toggleHabit('${routineName}', '${habitId}', this)">
+                    <div class="bucket-card ${isChecked ? 'done' : ''}" 
+                         id="card-${habitId}" 
+                         data-habit-text="${habit}"
+                         data-zh="${belongsToZuhause}" 
+                         data-uw="${belongsToUnterwegs}" 
+                         onclick="toggleHabit('${routineName}', '${habitId}', this)">
                         <div class="status-circle"></div>
                         <div class="location-name">${habit}</div>
                     </div>
                 `;
             }).join('');
+
+            const jokerId = `${groupIdx}-joker`;
+            const isJokerChecked = savedStates[jokerId] || false;
 
             habitsHtml += `
                 <div class="bucket-card ${isJokerChecked ? 'done' : ''}" id="card-${jokerId}" onclick="toggleJoker('${routineName}', '${jokerId}', this)" data-joker="true">
@@ -734,7 +710,75 @@
                 </div>
             `;
 
-            contentDiv.innerHTML = habitsHtml;
+            activeContainer.innerHTML += `
+                <div class="category-group" data-routine="${routineName}" id="routine-block-${routineName}">
+                    <div class="category-header" onclick="toggleGroup(this)">
+                        <div class="category-title"><div class="category-icon">${config.icon}</div><span>${routineName}</span></div>
+                        <div class="category-meta">
+                            <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-heute"></span></div>
+                            <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-gestern"></span></div>
+                            <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-vorgestern"></span></div>
+                        </div>
+                        <div class="arrow">▼</div>
+                    </div>
+                    <div class="category-content">${habitsHtml}</div>
+                </div>
+            `;
+        });
+    }
+
+    function applyGlobalModeToDOM() {
+        const savedStates = getSavedStates();
+        const groups = document.querySelectorAll('#active-routines-container .category-group');
+        
+        groups.forEach((group, groupIdx) => {
+            const routineName = group.getAttribute('data-routine');
+            const cards = group.querySelectorAll('.bucket-card:not([data-joker])');
+            const jokerCard = group.querySelector('.bucket-card[data-joker]');
+            
+            let totalForActiveMode = 0;
+            let doneForActiveMode = 0;
+
+            cards.forEach(card => {
+                const isZh = card.getAttribute('data-zh') === 'true';
+                const isUw = card.getAttribute('data-uw') === 'true';
+                const habitId = card.id.replace('card-', '');
+                const isChecked = savedStates[habitId] || false;
+
+                // Visuelle Klasse synchronisieren (falls externer Reset oder Tab-Wechsel)
+                if (isChecked) {
+                    card.classList.add('done');
+                } else {
+                    card.classList.remove('done');
+                }
+
+                let shouldShow = false;
+                if (currentGlobalMode === 'zuhause' && isZh) shouldShow = true;
+                if (currentGlobalMode === 'unterwegs' && isUw) shouldShow = true;
+
+                if (shouldShow) {
+                    card.classList.remove('hidden-by-mode');
+                    totalForActiveMode++;
+                    if (isChecked) doneForActiveMode++;
+                } else {
+                    card.classList.add('hidden-by-mode');
+                }
+            });
+
+            const jokerId = jokerCard.id.replace('card-', '');
+            const isJokerChecked = savedStates[jokerId] || false;
+            
+            if (isJokerChecked) {
+                jokerCard.classList.add('done');
+            } else {
+                jokerCard.classList.remove('done');
+            }
+
+            habitState[routineName] = { 
+                total: totalForActiveMode, 
+                done: doneForActiveMode, 
+                joker: isJokerChecked 
+            };
         });
 
         updateGlobalProgress();
@@ -812,7 +856,7 @@
     document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible") {
             checkMidnightReset();
-            buildDOMFromTemplates();
+            applyGlobalModeToDOM();
             fetchHistoryStatus();
         }
     });
@@ -861,13 +905,11 @@
             ereyesterdayData = globalHistoryArray.find(item => item.datum === ereyesterdayStr);
         }
 
-        // Falls für heute noch kein Datenobjekt existiert, erzeugen wir eins im Speicher
         if (!todayData && Array.isArray(globalHistoryArray)) {
             todayData = { datum: todayStr, routinen: {} };
             globalHistoryArray.push(todayData);
         }
 
-        // Lokaler Live-Zustand der heutigen Routinen ermitteln und direkt in globalHistoryArray schreiben
         routineNamesOrdered.forEach(r => {
             if (todayData && todayData.routinen) {
                 todayData.routinen[r] = isRoutineApproved(r) ? "ja" : "nein";
@@ -898,12 +940,10 @@
 
         habitState["TwoDayRule"] = { total: 0, done: 0, isApproved: shouldTdrBeJa };
 
-        // Wir überschreiben den Speicherzustand SOFORT lokal, um die visuelle Logik und die Kette zu sichern
         if (todayData && todayData.routinen) {
             todayData.routinen["TwoDayRule"] = shouldTdrBeJa ? "ja" : "nein";
         }
 
-        // Weicht der berechnete Zustand von dem ab, was die Cloud zuletzt meldete, pushen wir ihn hoch
         if ((shouldTdrBeJa && cloudTdrState !== "ja") || (!shouldTdrBeJa && cloudTdrState === "ja")) {
             syncModuleToCloud("TwoDayRule", shouldTdrBeJa ? "ja" : "nein");
         }
@@ -921,7 +961,6 @@
         if (document.getElementById("dot-TwoDayRule-gestern")) document.getElementById("dot-TwoDayRule-gestern").className = "yesterday-dot " + (tdrGesternJa ? "ja" : "nein");
         if (document.getElementById("dot-TwoDayRule-vorgestern")) document.getElementById("dot-TwoDayRule-vorgestern").className = "yesterday-dot " + (tdrVorgesternJa ? "ja" : "nein");
 
-        // Wenn wir uns im Statistik-Reiter befinden, das Dashboard direkt aktualisieren
         if (document.getElementById('view-stats').classList.contains('active')) {
             renderDashboard(globalHistoryArray);
         }
@@ -1007,9 +1046,6 @@
             document.getElementById('cloud-error-box').style.display = 'none'; 
             updateCloudStatus("Cloud synced");
             
-            // Wenn eine funktionale Routine hochgeladen wurde, holen wir uns die frischen Daten.
-            // Wurde die TwoDayRule gepusht, ignorieren wir den Fetch, da der lokale Speicher 
-            // bereits im Vorfeld durch updateTwoDayRuleStatus() perfekt synchronisiert wurde.
             if (routineName !== "TwoDayRule") {
                 fetchHistoryStatus();
             }
