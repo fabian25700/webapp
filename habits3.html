@@ -118,7 +118,6 @@
             transition: color 0.2s ease;
         }
 
-        /* Zentrierter erster Switch im Header */
         .header-switch-container {
             margin: 0 auto;
             display: flex;
@@ -126,7 +125,6 @@
             z-index: 5;
         }
 
-        /* Zentrierter Bereich für den zweiten Switch außerhalb vom Header */
         .outside-switch-area {
             display: flex;
             justify-content: center;
@@ -523,13 +521,15 @@
     let currentGlobalMode = "zuhause";
     let cloudSyncTimeout = null;
 
+    const routineNamesOrdered = ["Schlafroutine", "Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine"];
+
     const routineIcons = {
+        "Schlafroutine": "🛌",
         "Morgenroutine": "☀️",
         "Sportroutine": "🏃‍♂️",
         "Gesundheitsroutine": "🥗",
         "Fokusroutine": "🧠",
         "Abendroutine": "🌙",
-        "Schlafroutine": "🛌",
         "TwoDayRule": "⚡"
     };
 
@@ -666,8 +666,9 @@
         const templatesContainer = document.getElementById('routine-templates');
         templatesContainer.innerHTML = '';
         
-        Object.keys(ROUTINE_CONFIG).forEach(routineName => {
+        routineNamesOrdered.forEach(routineName => {
             const config = ROUTINE_CONFIG[routineName];
+            if (!config) return;
             const habits = config[currentGlobalMode] || config.zuhause || [];
             const habitsJson = JSON.stringify(habits);
             
@@ -736,7 +737,7 @@
             contentDiv.innerHTML = habitsHtml;
         });
 
-        updateGlobalProgress(true);
+        updateGlobalProgress();
     }
 
     function toggleGroup(header) {
@@ -788,7 +789,7 @@
         if (isDone) { habitState[routineName].done++; } else { habitState[routineName].done--; }
         const newRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
 
-        updateGlobalProgress(false);
+        updateGlobalProgress();
         if (oldRoutineState === "nein" && newRoutineState === "ja") showSuccessToast();
         if (oldRoutineState !== newRoutineState) syncModuleToCloud(routineName, newRoutineState);
     }
@@ -803,7 +804,7 @@
         habitState[routineName].joker = isDone;
         const newRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
 
-        updateGlobalProgress(false);
+        updateGlobalProgress();
         if (oldRoutineState === "nein" && newRoutineState === "ja") showSuccessToast();
         if (oldRoutineState !== newRoutineState) syncModuleToCloud(routineName, newRoutineState);
     }
@@ -824,16 +825,11 @@
         return (state.done / state.total) >= TARGET_RATIO;
     }
 
-    function updateGlobalProgress(suppressCloudSync = false) {
-        const routineNames = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine"];
-        
-        routineNames.forEach(routineName => {
+    function updateGlobalProgress() {
+        routineNamesOrdered.forEach(routineName => {
             const group = document.getElementById(`routine-block-${routineName}`);
             if (!group) return;
 
-            const state = habitState[routineName];
-            if (!state) return;
-            
             const isDoneNow = isRoutineApproved(routineName) ? "ja" : "nein";
 
             if (isDoneNow === "ja") {
@@ -843,13 +839,7 @@
             }
         });
 
-        const oldTdrState = habitState["TwoDayRule"] ? (habitState["TwoDayRule"].isApproved ? "ja" : "nein") : "nein";
         updateTwoDayRuleStatus();
-        const newTdrState = habitState["TwoDayRule"].isApproved ? "ja" : "nein";
-
-        if (oldTdrState !== newTdrState && !suppressCloudSync) {
-            syncModuleToCloud("TwoDayRule", newTdrState);
-        }
     }
 
     function updateTwoDayRuleStatus() {
@@ -871,10 +861,53 @@
             ereyesterdayData = globalHistoryArray.find(item => item.datum === ereyesterdayStr);
         }
 
-        let tdrHeuteJa = false;
-        if (todayData && todayData.routinen && todayData.routinen["TwoDayRule"]) {
-            if (todayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrHeuteJa = true;
+        // Falls für heute noch kein Datenobjekt existiert, erzeugen wir eins im Speicher
+        if (!todayData && Array.isArray(globalHistoryArray)) {
+            todayData = { datum: todayStr, routinen: {} };
+            globalHistoryArray.push(todayData);
         }
+
+        // Lokaler Live-Zustand der heutigen Routinen ermitteln und direkt in globalHistoryArray schreiben
+        routineNamesOrdered.forEach(r => {
+            if (todayData && todayData.routinen) {
+                todayData.routinen[r] = isRoutineApproved(r) ? "ja" : "nein";
+            }
+        });
+
+        let countRoutinesDoneToday = 0;
+        routineNamesOrdered.forEach(r => {
+            if (isRoutineApproved(r)) countRoutinesDoneToday++;
+        });
+
+        let shouldTdrBeJa = countRoutinesDoneToday > 0;
+
+        if (!shouldTdrBeJa && yesterdayData && yesterdayData.routinen) {
+            let countGestern = 0;
+            routineNamesOrdered.forEach(r => {
+                if (yesterdayData.routinen[r] && yesterdayData.routinen[r].toLowerCase() === "ja") countGestern++;
+            });
+            if (countGestern > 0) {
+                shouldTdrBeJa = true;
+            }
+        }
+
+        let cloudTdrState = "nein";
+        if (todayData && todayData.routinen && todayData.routinen["TwoDayRule"]) {
+            cloudTdrState = todayData.routinen["TwoDayRule"].toLowerCase();
+        }
+
+        habitState["TwoDayRule"] = { total: 0, done: 0, isApproved: shouldTdrBeJa };
+
+        // Wir überschreiben den Speicherzustand SOFORT lokal, um die visuelle Logik und die Kette zu sichern
+        if (todayData && todayData.routinen) {
+            todayData.routinen["TwoDayRule"] = shouldTdrBeJa ? "ja" : "nein";
+        }
+
+        // Weicht der berechnete Zustand von dem ab, was die Cloud zuletzt meldete, pushen wir ihn hoch
+        if ((shouldTdrBeJa && cloudTdrState !== "ja") || (!shouldTdrBeJa && cloudTdrState === "ja")) {
+            syncModuleToCloud("TwoDayRule", shouldTdrBeJa ? "ja" : "nein");
+        }
+
         let tdrGesternJa = false;
         if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen["TwoDayRule"]) {
             if (yesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrGesternJa = true;
@@ -884,16 +917,19 @@
             if (ereyesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrVorgesternJa = true;
         }
 
-        habitState["TwoDayRule"] = { total: 0, done: 0, isApproved: tdrHeuteJa };
-
-        if (document.getElementById("dot-TwoDayRule-heute")) document.getElementById("dot-TwoDayRule-heute").className = "yesterday-dot " + (tdrHeuteJa ? "ja" : "nein");
+        if (document.getElementById("dot-TwoDayRule-heute")) document.getElementById("dot-TwoDayRule-heute").className = "yesterday-dot " + (shouldTdrBeJa ? "ja" : "nein");
         if (document.getElementById("dot-TwoDayRule-gestern")) document.getElementById("dot-TwoDayRule-gestern").className = "yesterday-dot " + (tdrGesternJa ? "ja" : "nein");
         if (document.getElementById("dot-TwoDayRule-vorgestern")) document.getElementById("dot-TwoDayRule-vorgestern").className = "yesterday-dot " + (tdrVorgesternJa ? "ja" : "nein");
+
+        // Wenn wir uns im Statistik-Reiter befinden, das Dashboard direkt aktualisieren
+        if (document.getElementById('view-stats').classList.contains('active')) {
+            renderDashboard(globalHistoryArray);
+        }
     }
 
     function fetchHistoryStatus() {
         updateCloudStatus("Cloud lädt");
-        fetch(GOOGLE_SCRIPT_URL, { method: "GET" })
+        return fetch(GOOGLE_SCRIPT_URL, { method: "GET" })
             .then(res => res.json())
             .then(historyArray => {
                 document.getElementById('cloud-error-box').style.display = 'none';
@@ -912,8 +948,7 @@
                 const yesterdayData = historyArray.find(item => item.datum === yesterdayStr);
                 const ereyesterdayData = historyArray.find(item => item.datum === ereyesterdayStr);
 
-                const routineNames = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine"];
-                routineNames.forEach(routineName => {
+                routineNamesOrdered.forEach(routineName => {
                     const heuteDot = document.getElementById(`dot-${routineName}-heute`);
                     if (heuteDot) {
                         let statusHeute = "nein";
@@ -971,7 +1006,13 @@
         .then(() => { 
             document.getElementById('cloud-error-box').style.display = 'none'; 
             updateCloudStatus("Cloud synced");
-            fetchHistoryStatus();
+            
+            // Wenn eine funktionale Routine hochgeladen wurde, holen wir uns die frischen Daten.
+            // Wurde die TwoDayRule gepusht, ignorieren wir den Fetch, da der lokale Speicher 
+            // bereits im Vorfeld durch updateTwoDayRuleStatus() perfekt synchronisiert wurde.
+            if (routineName !== "TwoDayRule") {
+                fetchHistoryStatus();
+            }
         })
         .catch(err => {
             document.getElementById('cloud-error-box').style.display = 'block';
@@ -981,8 +1022,7 @@
     }
 
     function renderDashboard(historyArray) {
-        const routineKeys = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine"];
-        const allKeysWithTdr = ["Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "Schlafroutine", "TwoDayRule"];
+        const allKeysWithTdr = ["Schlafroutine", "Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "TwoDayRule"];
         
         const totalMatrixDays = 7;
         const matrixDates = [];
@@ -1085,38 +1125,35 @@
         correlationContainer.innerHTML = '';
         const insights = [];
         
-        routineKeys.forEach(triggerRoutine => {
-            routineKeys.forEach(targetRoutine => {
+        routineNamesOrdered.forEach(triggerRoutine => {
+            routineNamesOrdered.forEach(targetRoutine => {
                 if (triggerRoutine === targetRoutine) return;
                 
                 let isAllowedPath = false;
                 let isTimeShifted = false;
 
-                // 1. Same-Day-Effekt (Morgenroutine -> Rest, oder Core-Routinen untereinander am selben Tag)
                 if (triggerRoutine === "Morgenroutine") {
                     isAllowedPath = true;
                     isTimeShifted = false;
-                } else if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(triggerRoutine) && ["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(targetRoutine)) {
+                } else if (["Schlafroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(triggerRoutine) && ["Schlafroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(targetRoutine)) {
                     isAllowedPath = true;
                     isTimeShifted = false;
                 }
                 
-                // 2. Übertragungs-Effekt (Core-Routinen -> Folgetag, Schlaf -> Folgetag)
-                if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Schlafroutine"].includes(triggerRoutine) && targetRoutine !== "Morgenroutine" && triggerRoutine !== "Schlafroutine") {
-                    if (triggerRoutine === "Schlafroutine" || ["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(targetRoutine)) {
+                if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(triggerRoutine) && targetRoutine !== "Morgenroutine" && triggerRoutine !== "Schlafroutine") {
+                    if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(targetRoutine)) {
                         isAllowedPath = true;
                         isTimeShifted = true;
                     }
                 }
 
-                // 3. Verketteter Effekt (Abendroutine -> Schlaf am selben Tag ODER Abendroutine -> Folgetag)
                 if (triggerRoutine === "Abendroutine") {
                     if (targetRoutine === "Schlafroutine") {
                         isAllowedPath = true;
-                        isTimeShifted = false; // Abendroutine und Schlaf gehören zur selben Nacht-Kohorte (selber Tabellenzeilen-Kontext)
+                        isTimeShifted = false; 
                     } else {
                         isAllowedPath = true;
-                        isTimeShifted = true; // Abendroutine strahlt auf Core-Routinen des Folgetages aus
+                        isTimeShifted = true; 
                     }
                 }
 
@@ -1149,11 +1186,15 @@
                 if (triggerJaCount >= 2) {
                     const probability = Math.round((targetAlsoJaCount / triggerJaCount) * 100);
                     if (probability >= 70) {
+                        let contextDesc = isTimeShifted ? "am Folgetag" : "am selben Tag";
+                        if (triggerRoutine === "Abendroutine" && targetRoutine === "Schlafroutine") {
+                            contextDesc = "in der Nacht";
+                        }
                         insights.push({ 
                             trigger: triggerRoutine, 
                             target: targetRoutine, 
                             prob: probability, 
-                            context: isTimeShifted ? "am Folgetag" : (triggerRoutine === "Abendroutine" && targetRoutine === "Schlafroutine" ? "in der Nacht" : "am selben Tag") 
+                            context: contextDesc
                         });
                     }
                 }
@@ -1175,9 +1216,9 @@
         clusterContainer.innerHTML = '';
         const clusters = [];
 
-        for (let i = 0; i < routineKeys.length; i++) {
-            for (let j = i + 1; j < routineKeys.length; j++) {
-                const r1 = routineKeys[i]; const r2 = routineKeys[j];
+        for (let i = 0; i < routineNamesOrdered.length; i++) {
+            for (let j = i + 1; j < routineNamesOrdered.length; j++) {
+                const r1 = routineNamesOrdered[i]; const r2 = routineNamesOrdered[j];
                 let commonDays = 0; let totalActiveDays = historyArray.length;
 
                 historyArray.forEach(row => {
