@@ -6,18 +6,18 @@ const ROUTINE_CONFIG = {
             "Wiegen",
             "alle Rollladen / Fenster",
             "Tageslicht",
-            "Wasser mit Salz / Elektrolyte",
+            "Wasser trinken",
+            "Schlafzimmer aufräumen",
             "Zunge reinigen",
             "Zähne putzen",
-            "Schlafzimmer aufräumen",
-            "Morning Healthdrink",
-            "Küche aufräumen und putzen",
+            "Küche putzen",
             "Stoisches Kapitel",
             "Whoop checken",
             "Ziele + ToDo’s des Tages anschauen",
             "Mails checken",
-            "duschen",
-            "bis 8:00 keine Geräte (außer Sally, Erinnerungen, Routine, Sport)"
+            "Morning Healthdrink",
+            "duschen / Gesicht waschen",
+            "bis 8:00 keine Geräte (außer Sally, To-Do’s, Routine)"
         ],
         unterwegs: [
             "Aufstehen ohne Snooze",
@@ -29,7 +29,8 @@ const ROUTINE_CONFIG = {
             "Whoop checken",
             "Ziele + ToDo’s des Tages anschauen",
             "Mails checken",
-            "bis 8:00 keine Geräte (außer Sally, Erinnerungen, Routine, Sport)"
+            "duschen / Gesicht waschen",
+            "bis 8:00 keine Geräte (außer Sally, To-Do’s, Routine)"
         ]
     },
     "Sportroutine": {
@@ -44,16 +45,18 @@ const ROUTINE_CONFIG = {
     "Gesundheitsroutine": {
         icon: "🥗",
         zuhause: [
-            "3 Liter Wasser"
+            "10h+ gefastet über Nacht",
+            "Supplements genommen"
         ],
         unterwegs: [
-            "10h+ gefastet über Nacht"
+            "10h+ gefastet über Nacht",
+            "3 Liter Wasser getrunken"
         ]
     },
     "Fokusroutine": {
         icon: "🧠",
         zuhause: [
-            "vor Abendroutine “heute” in Erinnerungen leer"
+            "To-Do’s heute leer"
         ],
         unterwegs: [
             "bis 12:30 Uhr nicht stören an"
@@ -62,32 +65,30 @@ const ROUTINE_CONFIG = {
     "Abendroutine": {
         icon: "🌙",
         zuhause: [
-            "Kalender und Aufgaben nächster Tag",
-            "Finanzen und Habits heutiger Tag tracken",
-            "Habits nächster Tag durchgehen",
-            "21:30 Geräte aus (max. Call)",
+            "morgigen Kalender und Aufgaben",
+            "Finanzen und Habits anschauen",
+            "21:30 Geräte aus (max. Sally)",
             "Küche aufräumen",
-            "Wasser und Gläser parat",
+            "Wasser/Gläser parat",
+            "Wecker stellen",
             "Schlafzimmer aufräumen",
             "Kleidung rauslegen",
-            "Rollladen und Fenster",
-            "Wecker stellen",
-            "warm duschen",
+            "alle Rollladen und Fenster",
             "Zahnseide",
             "Zähne putzen",
+            "warm duschen / Gesicht waschen",
             "lesen"
         ],
         unterwegs: [
-            "Kalender und Aufgaben nächster Tag",
-            "Finanzen und Habits heutiger Tag tracken",
-            "Habits nächster Tag durchgehen",
+            "morgigen Kalender und Aufgaben",
+            "Finanzen und Habits anschauen",
             "Wasser parat",
+            "Wecker stellen",
             "Schlafzimmer aufräumen",
             "Kleidung rauslegen",
             "Rollladen und Fenster",
-            "Wecker stellen",
-            "warm duschen",
             "Zähne putzen",
+            "warm duschen / Gesicht waschen",
             "lesen"
         ]
     },
