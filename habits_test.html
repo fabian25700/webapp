@@ -93,7 +93,7 @@
             align-items: center; 
             justify-content: center;
             width: 32px; 
-height: 32px; 
+            height: 32px; 
             border-radius: 9px;
             background: var(--surface); 
             border: 1px solid var(--border);
@@ -713,7 +713,7 @@ height: 32px;
             activeContainer.innerHTML += `
                 <div class="category-group" data-routine="${routineName}" id="routine-block-${routineName}">
                     <div class="category-header" onclick="toggleGroup(this)">
-                        <div class="category-title"><div class="category-icon">${config.icon}</div><span>${routineName}</span></div>
+                        <div class="category-title"><div class="category-icon">${config.icon}</div><span>${routineName}</span><span id="progress-info-${routineName}" style="font-size: 0.72rem; font-weight: 500; color: var(--text-secondary); margin-left: 6px; text-transform: none; letter-spacing: normal;"></span></div>
                         <div class="category-meta">
                             <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-heute"></span></div>
                             <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-gestern"></span></div>
@@ -869,16 +869,37 @@ height: 32px;
     }
 
     function updateGlobalProgress() {
+        const todayStr = formatDateToString(new Date());
+        const todayData = Array.isArray(globalHistoryArray) ? globalHistoryArray.find(item => item.datum === todayStr) : null;
+
         routineNamesOrdered.forEach(routineName => {
             const group = document.getElementById(`routine-block-${routineName}`);
             if (!group) return;
 
-            const isDoneNow = isRoutineApproved(routineName) ? "ja" : "nein";
+            let isDoneNow = isRoutineApproved(routineName) ? "ja" : "nein";
+            if (todayData && todayData.routinen && todayData.routinen[routineName]) {
+                if (todayData.routinen[routineName].toLowerCase() === "ja") {
+                    isDoneNow = "ja";
+                }
+            }
 
             if (isDoneNow === "ja") {
                 group.classList.add('routine-done-state');
             } else {
                 group.classList.remove('routine-done-state');
+            }
+
+            const infoSpan = document.getElementById(`progress-info-${routineName}`);
+            if (infoSpan) {
+                if (isDoneNow === "ja") {
+                    infoSpan.textContent = "";
+                } else {
+                    const state = habitState[routineName];
+                    if (state) {
+                        const needed = Math.ceil(state.total * TARGET_RATIO);
+                        infoSpan.textContent = `(${state.done} / ${needed} / ${state.total})`;
+                    }
+                }
             }
         });
 
@@ -911,13 +932,17 @@ height: 32px;
 
         routineNamesOrdered.forEach(r => {
             if (todayData && todayData.routinen) {
-                todayData.routinen[r] = isRoutineApproved(r) ? "ja" : "nein";
+                const cloudState = (todayData.routinen[r] || "").toLowerCase();
+                todayData.routinen[r] = (cloudState === "ja" || isRoutineApproved(r)) ? "ja" : "nein";
             }
         });
 
         let shouldTdrBeJa = true;
         routineNamesOrdered.forEach(r => {
-            let approvedHeute = isRoutineApproved(r);
+            let approvedHeute = false;
+            if (todayData && todayData.routinen && todayData.routinen[r]) {
+                if (todayData.routinen[r].toLowerCase() === "ja") approvedHeute = true;
+            }
             let approvedGestern = false;
             if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen[r]) {
                 if (yesterdayData.routinen[r].toLowerCase() === "ja") approvedGestern = true;
@@ -935,7 +960,8 @@ height: 32px;
         habitState["TwoDayRule"] = { total: 0, done: 0, isApproved: shouldTdrBeJa };
 
         if (todayData && todayData.routinen) {
-            todayData.routinen["TwoDayRule"] = shouldTdrBeJa ? "ja" : "nein";
+            const currentCloudTdr = (todayData.routinen["TwoDayRule"] || "").toLowerCase();
+            todayData.routinen["TwoDayRule"] = (currentCloudTdr === "ja" || shouldTdrBeJa) ? "ja" : "nein";
         }
 
         if ((shouldTdrBeJa && cloudTdrState !== "ja") || (!shouldTdrBeJa && cloudTdrState === "ja")) {
@@ -951,7 +977,7 @@ height: 32px;
             if (ereyesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrVorgesternJa = true;
         }
 
-        if (document.getElementById("dot-TwoDayRule-heute")) document.getElementById("dot-TwoDayRule-heute").className = "yesterday-dot " + (shouldTdrBeJa ? "ja" : "nein");
+        if (document.getElementById("dot-TwoDayRule-heute")) document.getElementById("dot-TwoDayRule-heute").className = "yesterday-dot " + (todayData && todayData.routinen && todayData.routinen["TwoDayRule"] && todayData.routinen["TwoDayRule"].toLowerCase() === "ja" ? "ja" : "nein");
         if (document.getElementById("dot-TwoDayRule-gestern")) document.getElementById("dot-TwoDayRule-gestern").className = "yesterday-dot " + (tdrGesternJa ? "ja" : "nein");
         if (document.getElementById("dot-TwoDayRule-vorgestern")) document.getElementById("dot-TwoDayRule-vorgestern").className = "yesterday-dot " + (tdrVorgesternJa ? "ja" : "nein");
 
@@ -1011,6 +1037,7 @@ height: 32px;
                 });
 
                 updateTwoDayRuleStatus();
+                updateGlobalProgress();
                 updateCloudStatus("Cloud Live");
                 
                 if (document.getElementById('view-stats').classList.contains('active')) {
@@ -1335,6 +1362,4 @@ height: 32px;
     }
 
     window.onload = initApp;
-</script>
-</body>
-</html>
+</script
