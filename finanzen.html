@@ -2,53 +2,99 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Mein Budget</title>
     <style>
         :root {
-            --bg-color: #2c3e46;
-            --card-bg: #374c55;
-            --text-color: #ffffff;
-            --text-muted: #8fa3ad;
-            --primary-expense: #d65a91;
-            --primary-income: #3cd070;
-            --border-style: 1px dashed #526b75;
-            --input-bg: #f5f5f5;
+            --accent: #e67e22;
+            --accent-soft: rgba(230, 126, 34, 0.1);
+            --success: #27ae60;
+            --success-soft: rgba(39, 174, 96, 0.1);
+            --danger: #e74c3c;
+            --danger-soft: rgba(231, 76, 60, 0.3);
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --apple-switch-bg: #e3e3e6;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: #2d3f55;
+                --border-light: #253347;
+                --apple-switch-bg: #1c1c1e;
+            }
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
             min-height: 100vh;
-            padding-bottom: 70px;
+            padding-bottom: 90px;
+            -webkit-tap-highlight-color: transparent;
         }
 
         header {
-            padding: 15px;
-            text-align: center;
-            font-size: 18px;
-            font-weight: 600;
-            background-color: #24333a;
-            position: sticky;
-            top: 0;
+            position: sticky; top: 0; z-index: 100;
+            background: var(--bg);
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-top { 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            position: relative;
+        }
+
+        .header-title-center {
+            font-size: 1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            z-index: 5;
+        }
+
+        .header-right {
+            position: absolute;
+            right: 0;
             z-index: 10;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            transition: color 0.2s ease;
         }
 
         .container {
-            padding: 15px;
-            max-width: 500px;
-            width: 100%;
+            padding: 16px;
+            max-width: 600px;
             margin: 0 auto;
-            flex: 1;
         }
 
         .app-section {
@@ -56,37 +102,96 @@
         }
 
         .app-section.active {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
-        /* Betragsanzeige */
-        .amount-display {
-            text-align: center;
-            font-size: 42px;
-            font-weight: bold;
-            margin: 25px 0;
-        }
-
-        .amount-display.expense { color: var(--primary-expense); }
-        .amount-display.income { color: var(--primary-income); }
-
-        /* Eingabefelder */
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .text-input {
+        /* Segmented Controls (iOS Switch) */
+        .segmented-control {
+            display: flex;
+            background: var(--apple-switch-bg);
+            padding: 2px;
+            border-radius: 9px;
             width: 100%;
-            padding: 12px;
-            border-radius: 6px;
-            border: 1px dashed #526b75;
-            background-color: transparent;
-            color: var(--text-color);
-            font-size: 16px;
         }
 
-        .text-input::placeholder {
-            color: var(--text-muted);
+        .segmented-btn {
+            flex: 1;
+            padding: 7px 0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .segmented-btn.active {
+            background: var(--surface);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        #sect-entry.income .card-icon {
+            background: var(--success-soft);
+            color: var(--success);
+        }
+
+        /* Inputs */
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .input-group:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .number-input {
@@ -94,130 +199,197 @@
             text-align: center;
             background: transparent;
             border: none;
-            color: inherit;
-            font-size: 42px;
-            font-weight: bold;
+            color: var(--text-primary);
+            font-size: 2.5rem;
+            font-weight: 800;
             outline: none;
+            padding: 10px 0;
         }
 
-        /* Kategorien Grid */
-        .category-title {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 14px;
-            margin-bottom: 15px;
+        #sect-entry.expense .number-input { color: var(--danger); }
+        #sect-entry.income .number-input { color: var(--success); }
+
+        .text-input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            outline: none;
+            transition: border-color 0.2s, background-color 0.2s;
         }
 
+        .text-input:focus {
+            border-color: var(--accent);
+            background: var(--surface);
+        }
+        
+        #sect-entry.income .text-input:focus {
+            border-color: var(--success);
+        }
+
+        /* Bucket Grid */
         .category-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 25px;
+            gap: 10px;
         }
 
         .category-btn {
-            background-color: transparent;
-            border: var(--border-style);
-            border-radius: 8px;
-            padding: 15px 10px;
-            color: var(--text-color);
+            background: var(--bg);
+            border: 1px solid transparent;
+            border-radius: 14px;
+            padding: 14px 8px;
+            color: var(--text-primary);
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 8px;
             cursor: pointer;
-            font-size: 13px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
         }
 
         .category-btn svg {
-            width: 24px;
-            height: 24px;
-            fill: currentColor;
+            width: 22px;
+            height: 22px;
+            fill: var(--text-secondary);
+            transition: fill 0.2s ease;
         }
 
-        .expense .category-btn.selected {
-            background-color: var(--primary-expense);
-            border-color: var(--primary-expense);
+        /* Active Bucket States */
+        #sect-entry.expense .category-btn.selected {
+            background: var(--danger-soft);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        #sect-entry.expense .category-btn.selected svg {
+            fill: var(--danger);
         }
 
-        .income .category-btn.selected {
-            background-color: var(--primary-income);
-            border-color: var(--primary-income);
+        #sect-entry.income .category-btn.selected {
+            background: var(--success-soft);
+            border-color: var(--success);
+            color: var(--success);
+        }
+        #sect-entry.income .category-btn.selected svg {
+            fill: var(--success);
         }
 
-        /* Checkbox Options */
-        .options-group {
-            margin-bottom: 25px;
+        /* Checkbox Option als iOS-Row */
+        .option-row {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
-            color: var(--text-muted);
-            font-size: 14px;
+            justify-content: space-between;
+            padding: 6px 0;
         }
 
-        .options-group input[type="checkbox"] {
-            accent-color: var(--primary-expense);
-            width: 16px;
-            height: 16px;
+        .option-label-wrapper {
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Buttons */
+        .option-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .option-desc {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .apple-switch {
+            position: relative;
+            display: inline-block;
+            width: 51px;
+            height: 31px;
+        }
+
+        .apple-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--apple-switch-bg);
+            transition: .3s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 27px;
+            width: 27px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        }
+
+        #sect-entry.expense input:checked + .slider { background-color: var(--accent); }
+        #sect-entry.income input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Action Buttons */
         .submit-btn {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
+            border-radius: 12px;
             border: none;
-            border-radius: 8px;
             color: white;
-            font-size: 16px;
-            font-weight: bold;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
             cursor: pointer;
-            box-shadow: 0 4px 0px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
         }
 
-        .expense .submit-btn { background-color: var(--primary-expense); }
-        .income .submit-btn { background-color: var(--primary-income); }
-
-        .type-toggle-container {
-            display: flex;
-            background-color: #24333a;
-            border-radius: 8px;
-            padding: 4px;
-            margin-bottom: 20px;
+        #sect-entry.expense .submit-btn {
+            background: var(--accent);
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.2);
         }
 
-        .type-toggle-btn {
-            flex: 1;
-            padding: 10px;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            font-weight: bold;
-            cursor: pointer;
-            border-radius: 6px;
+        #sect-entry.income .submit-btn {
+            background: var(--success);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
         }
 
-        .type-toggle-btn.active.expense-toggle {
-            background-color: var(--primary-expense);
-            color: white;
+        .submit-btn:active {
+            transform: scale(0.99);
+            opacity: 0.9;
         }
 
-        .type-toggle-btn.active.income-toggle {
-            background-color: var(--primary-income);
-            color: white;
-        }
-
-        /* Vorlagen Liste */
+        /* Vorlagen Items (Apple Style) */
         .template-item {
-            background-color: #ffffff;
-            color: #333333;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 10px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s ease, background-color 0.2s;
+        }
+
+        .template-item:active {
+            transform: scale(0.99);
+            background: var(--border-light);
         }
 
         .template-info {
@@ -227,69 +399,92 @@
         }
 
         .template-title {
-            font-weight: bold;
-            font-size: 16px;
+            font-weight: 700;
+            font-size: 0.95rem;
         }
 
         .template-meta {
-            font-size: 12px;
-            color: #666;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
         }
 
         .template-amount {
-            font-weight: bold;
-            font-size: 16px;
+            font-weight: 700;
+            font-size: 1rem;
         }
 
-        .template-amount.expense { color: var(--primary-expense); }
-        .template-amount.income { color: var(--primary-income); }
+        .template-amount.expense { color: var(--danger); }
+        .template-amount.income { color: var(--success); }
 
-        /* Dashboard Platzhalter */
-        .dashboard-card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
-            border: 1px solid #435b66;
-        }
-
+        /* Dashboard & Stats Rows */
         .dashboard-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 15px;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-light);
         }
 
-        /* Navigation Footer */
+        .dashboard-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .dashboard-row span:first-child {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .dashboard-row span:last-child {
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .status-text-loader {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 20px 0;
+        }
+
+        /* Fixed Navigation Footer (iOS Style) */
         footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+            position: fixed; bottom: 0; left: 0; right: 0;
             height: 65px;
-            background-color: #24333a;
+            background: var(--surface);
             display: flex;
             justify-content: space-around;
             align-items: center;
-            border-top: 1px solid #1c292f;
-            z-index: 10;
+            border-top: 1px solid var(--border);
+            padding-bottom: env(safe-area-inset-bottom);
+            z-index: 100;
         }
 
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             text-decoration: none;
-            font-size: 11px;
+            font-size: 0.65rem;
+            font-weight: 700;
             gap: 4px;
             background: none;
             border: none;
             cursor: pointer;
+            flex: 1;
+            height: 100%;
+            justify-content: center;
+            transition: color 0.2s ease;
         }
 
         .nav-item.active {
-            color: #ffffff;
+            color: var(--accent);
         }
 
         .nav-item svg {
@@ -301,101 +496,130 @@
 </head>
 <body>
 
-    <header id="view-title">Ausgabe</header>
+    <header>
+        <div class="header-top">
+            <div class="header-title-center" id="view-title">Ausgabe</div>
+            <div class="header-right" id="cloud-status-text">Cloud Live</div>
+        </div>
+    </header>
 
     <div class="container">
         
         <section id="sect-entry" class="app-section active expense">
-            <div class="type-toggle-container">
-                <button class="type-toggle-btn active expense-toggle" onclick="setEntryType('expense')">Ausgabe</button>
-                <button class="type-toggle-btn income-toggle" onclick="setEntryType('income')">Einnahme</button>
+            <div class="segmented-control">
+                <button class="segmented-btn active expense-toggle" onclick="setEntryType('expense')">Ausgabe</button>
+                <button class="segmented-btn income-toggle" onclick="setEntryType('income')">Einnahme</button>
             </div>
 
-            <div class="input-group">
-                <input type="number" step="0.01" class="number-input" id="amount" placeholder="-0,00 €" onfocus="clearPlaceholder(this)" onblur="restorePlaceholder(this)">
+            <div class="card">
+                <div class="input-group">
+                    <input type="number" step="0.01" class="number-input" id="amount" placeholder="-0,00 €" onfocus="clearPlaceholder(this)" onblur="restorePlaceholder(this)">
+                </div>
             </div>
 
-            <div class="input-group">
-                <input type="text" class="text-input" id="title" placeholder="Titel eintragen">
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-icon">📝</div>
+                    <span>Details</span>
+                </div>
+                <div class="input-group">
+                    <label for="title">Titel</label>
+                    <input type="text" class="text-input" id="title" placeholder="z.B. REWE, Miete, Strom">
+                </div>
             </div>
 
-            <div class="category-title">Kategorie</div>
-            
-            <div id="grid-expense" class="category-grid">
-                <button class="category-btn" onclick="selectCategory(this, 'Kleidung')">
-                    <svg viewBox="0 0 24 24"><path d="M12 3c-1.1 0-2 .9-2 2 .5 0 1 .5 1 1v1H9c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2h-2V6c0-.5.5-1 1-1 0-1.1-.9-2-2-2z"/></svg>
-                    Kleidung
-                </button>
-                <button class="category-btn" onclick="selectCategory(this, 'Urlaub')">
-                    <svg viewBox="0 0 24 24"><path d="M10 21H4c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v6h-2V5H4v14h6v2zm12-4.5c0-2.5-2.5-4.5-5.5-4.5S11 14 11 16.5s2.5 4.5 5.5 4.5 5.5-2 5.5-4.5z"/></svg>
-                    Urlaub
-                </button>
-                <button class="category-btn" onclick="selectCategory(this, 'Gesundheit')">
-                    <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                    Gesundheit
-                </button>
-                <button class="category-btn" onclick="selectCategory(this, 'Freizeit')">
-                    <svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 21h2.1l1.9-8.2 2.1 2V21h2v-7.5l-2.1-2 .6-3c1 .8 2.4 1.5 4.1 1.5V8c-1.5 0-2.7-.6-3.5-1.5l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.6.1-.9.2L4.3 5.9V11h2V7.4l2.5-1.1"/></svg>
-                    Freizeit
-                </button>
-                <button class="category-btn" onclick="selectCategory(this, 'Mobilität')">
-                    <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1-1.5 1zm11 0c-.83 0-1.5-.67-1.5-1s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1-1.5 1z"/></svg>
-                    Mobilität
-                </button>
-                <button class="category-btn" onclick="selectCategory(this, 'Wohnen')">
-                    <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
-                    Wohnen
-                </button>
-                <button class="category-btn" onclick="selectCategory(this, 'Sonstiges')">
-                    <svg viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7c-.83 0-1.5-.67-1.5-1.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
-                    Sonstiges
-                </button>
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-icon">📁</div>
+                    <span>Kategorie wählen</span>
+                </div>
+                
+                <div id="grid-expense" class="category-grid">
+                    <button class="category-btn" onclick="selectCategory(this, 'Kleidung')">
+                        <svg viewBox="0 0 24 24"><path d="M12 3c-1.1 0-2 .9-2 2 .5 0 1 .5 1 1v1H9c-1.1 0-2 .9-2 2 optionv9c0 1.1.9 2 2 2h6c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2h-2V6c0-.5.5-1 1-1 0-1.1-.9-2-2-2z"/></svg>
+                        Kleidung
+                    </button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Urlaub')">
+                        <svg viewBox="0 0 24 24"><path d="M10 21H4c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v6h-2V5H4v14h6v2zm12-4.5c0-2.5-2.5-4.5-5.5-4.5S11 14 11 16.5s2.5 4.5 5.5 4.5 5.5-2 5.5-4.5z"/></svg>
+                        Urlaub
+                    </button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Gesundheit')">
+                        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        Gesundheit
+                    </button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Freizeit')">
+                        <svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 21h2.1l1.9-8.2 2.1 2V21h2v-7.5l-2.1-2 .6-3c1 .8 2.4 1.5 4.1 1.5V8c-1.5 0-2.7-.6-3.5-1.5l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.6.1-.9.2L4.3 5.9V11h2V7.4l2.5-1.1"/></svg>
+                        Freizeit
+                    </button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Mobilität')">
+                        <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1-1.5 1zm11 0c-.83 0-1.5-.67-1.5-1s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1-1.5 1z"/></svg>
+                        Mobilität
+                    </button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Wohnen')">
+                        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                        Wohnen
+                    </button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Sonstiges')">
+                        <svg viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7c-.83 0-1.5-.67-1.5-1.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+                        Sonstiges
+                    </button>
+                </div>
+
+                <div id="grid-income" class="category-grid" style="display: none;">
+                    <button class="category-btn" onclick="selectCategory(this, 'Lohn')">
+                        <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                        Lohn
+                    </button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Sonstige')">
+                        <svg viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7c-.83 0-1.5-.67-1.5-1.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+                        Sonstige
+                    </button>
+                    <button class="category-btn" onclick="selectCategory(this, 'MG')">
+                        <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                        MG
+                    </button>
+                </div>
             </div>
 
-            <div id="grid-income" class="category-grid" style="display: none;">
-                <button class="category-btn" onclick="selectCategory(this, 'Lohn')">
-                    <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-                    Lohn
-                </button>
-                <button class="category-btn" onclick="selectCategory(this, 'Sonstige')">
-                    <svg viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7c-.83 0-1.5-.67-1.5-1.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
-                    Sonstige
-                </button>
-                <button class="category-btn" onclick="selectCategory(this, 'MG')">
-                    <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-                    MG
-                </button>
-            </div>
-
-            <div class="options-group">
-                <input type="checkbox" id="is_template">
-                <label for="is_template">Als Vorlage speichern (Keine Duplikate)</label>
+            <div class="card">
+                <div class="option-row">
+                    <div class="option-label-wrapper">
+                        <span class="option-title">Als Vorlage speichern</span>
+                        <span class="option-desc">Verhindert Duplikate in der Liste</span>
+                    </div>
+                    <label class="apple-switch">
+                        <input type="checkbox" id="is_template">
+                        <span class="slider"></span>
+                    </label>
+                </div>
             </div>
 
             <button class="submit-btn" onclick="submitData()">Speichern</button>
         </section>
 
         <section id="sect-templates" class="app-section">
-            <div id="templates-list">
-                <p style="text-align: center; color: var(--text-muted);">Lade Vorlagen...</p>
+            <div id="templates-list" style="display: flex; flex-direction: column; gap: 12px; width: 100%;">
+                <p class="status-text-loader">Lade Vorlagen...</p>
             </div>
         </section>
 
         <section id="sect-dashboard" class="app-section">
-            <div class="dashboard-card">
-                <h3>Juli 2026</h3>
-                <hr style="margin: 10px 0; border: none; border-top: 1px solid #526b75;">
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-icon">📊</div>
+                    <span>Auswertung Juli 2026</span>
+                </div>
+                
                 <div class="dashboard-row">
                     <span>Einnahmen</span>
-                    <span style="color: var(--primary-income); font-weight: bold;" id="dash-income">0,00 €</span>
+                    <span style="color: var(--success);" id="dash-income">0,00 €</span>
                 </div>
                 <div class="dashboard-row">
                     <span>Ausgaben</span>
-                    <span style="color: var(--primary-expense); font-weight: bold;" id="dash-expense">0,00 €</span>
+                    <span style="color: var(--danger);" id="dash-expense">0,00 €</span>
                 </div>
-                <hr style="margin: 10px 0; border: none; border-top: 1px solid #526b75;">
-                <div class="dashboard-row" style="font-weight: bold;">
-                    <span>Saldo</span>
+                <div class="dashboard-row" style="border-top: 1px dashed var(--border); padding-top: 16px; margin-top: 4px;">
+                    <span>Netto Saldo</span>
                     <span id="dash-saldo">0,00 €</span>
                 </div>
             </div>
@@ -403,15 +627,15 @@
     </div>
 
     <footer>
-        <button class="nav-item active" onclick="switchView('entry', 'Ausgabe')">
+        <button class="nav-item active" id="nav-entry" onclick="switchView('entry', 'Ausgabe')">
             <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
             Eintragen
         </button>
-        <button class="nav-item" onclick="switchView('templates', 'Vorlagen')">
+        <button class="nav-item" id="nav-templates" onclick="switchView('templates', 'Vorlagen')">
             <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
             Vorlagen
         </button>
-        <button class="nav-item" onclick="switchView('dashboard', 'Statistik')">
+        <button class="nav-item" id="nav-dashboard" onclick="switchView('dashboard', 'Statistik')">
             <svg viewBox="0 0 24 24"><path d="M10 20h4V4h-4v16zm-6 0h4v-8H4v8zM16 9v11h4V9h-4z"/></svg>
             Statistik
         </button>
@@ -423,21 +647,48 @@
         let currentType = 'expense';
         let selectedCategoryValue = '';
         let apiEndpoint = '';
+        let cloudSyncTimeout = null;
 
-        // API Endpoint aus der separaten HTML Datei auslesen
         window.addEventListener('message', function(event) {
             if (event.data && event.data.type === 'SET_API_URL') {
                 apiEndpoint = event.data.url;
+                updateCloudStatus("Cloud Live");
                 loadTemplatesAndStats();
             }
         });
+
+        function updateCloudStatus(status) {
+            const indicator = document.getElementById('cloud-status-text');
+            if (!indicator) return;
+            
+            if (cloudSyncTimeout && status !== "Cloud synced") {
+                clearTimeout(cloudSyncTimeout);
+                cloudSyncTimeout = null;
+            }
+
+            indicator.textContent = status;
+            if (status === "Cloud Fehler") {
+                indicator.style.color = "var(--danger)";
+            } else if (status === "Cloud synced") {
+                indicator.style.color = "var(--success)";
+                cloudSyncTimeout = setTimeout(() => {
+                    indicator.textContent = "Cloud Live";
+                    indicator.style.color = "var(--text-secondary)";
+                    cloudSyncTimeout = null;
+                }, 3000);
+            } else if (status === "Cloud lädt") {
+                indicator.style.color = "var(--accent)";
+            } else {
+                indicator.style.color = "var(--text-secondary)";
+            }
+        }
 
         function switchView(view, title) {
             document.querySelectorAll('.app-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             
             document.getElementById('sect-' + view).classList.add('active');
-            event.currentTarget.classList.add('active');
+            document.getElementById('nav-' + view).classList.add('active');
             
             document.getElementById('view-title').innerText = title;
 
@@ -453,7 +704,7 @@
             const incGrid = document.getElementById('grid-income');
             const amountInput = document.getElementById('amount');
             
-            document.querySelectorAll('.type-toggle-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.segmented-btn').forEach(b => b.classList.remove('active'));
             
             if(type === 'expense') {
                 sect.className = "app-section active expense";
@@ -462,14 +713,15 @@
                 document.querySelector('.expense-toggle').classList.add('active');
                 amountInput.placeholder = "-0,00 €";
                 document.getElementById('view-title').innerText = "Ausgabe";
+                document.getElementById('nav-entry').style.setProperty('--accent', '#e67e22');
             } else {
                 sect.className = "app-section active income";
-                expGrid.style.style = 'none';
                 expGrid.style.display = 'none';
                 incGrid.style.display = 'grid';
                 document.querySelector('.income-toggle').classList.add('active');
                 amountInput.placeholder = "+0,00 €";
                 document.getElementById('view-title').innerText = "Einnahme";
+                document.getElementById('nav-entry').style.setProperty('--accent', '#27ae60');
             }
             selectedCategoryValue = '';
             document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
@@ -494,6 +746,7 @@
                 return;
             }
 
+            updateCloudStatus("Cloud lädt");
             const adjustedAmount = currentType === 'expense' ? -Math.abs(amount) : Math.abs(amount);
             
             const now = new Date();
@@ -511,18 +764,19 @@
 
             if(!apiEndpoint) {
                 alert('API URL konnte nicht aus geld_api.html geladen werden.');
+                updateCloudStatus("Cloud Fehler");
                 return;
             }
 
             try {
-                const response = await fetch(apiEndpoint, {
+                await fetch(apiEndpoint, {
                     method: 'POST',
                     mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
                 
-                alert('Erfolgreich eingetragen!');
+                updateCloudStatus("Cloud synced");
                 document.getElementById('amount').value = '';
                 document.getElementById('title').value = '';
                 document.getElementById('is_template').checked = false;
@@ -530,6 +784,7 @@
                 selectedCategoryValue = '';
             } catch(e) {
                 console.error(e);
+                updateCloudStatus("Cloud Fehler");
                 alert('Fehler beim Speichern.');
             }
         }
@@ -551,7 +806,6 @@
             const container = document.getElementById('templates-list');
             container.innerHTML = '';
             
-            // Filter nach Vorlage == 'ja' und entferne Duplikate basierend auf Titel + Betrag + Kategorie
             const cache = new Set();
             const uniqueTemplates = [];
 
@@ -566,7 +820,7 @@
             });
 
             if(uniqueTemplates.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: var(--text-muted);">Keine Vorlagen gespeichert.</p>';
+                container.innerHTML = '<p class="status-text-loader">Keine Vorlagen gespeichert.</p>';
                 return;
             }
 
@@ -595,7 +849,6 @@
             document.getElementById('amount').value = betrag;
             document.getElementById('title').value = titel;
             
-            // Kategorie-Button automatisch selektieren
             document.querySelectorAll('.category-btn').forEach(btn => {
                 if(btn.innerText.trim() === kategorie) {
                     selectCategory(btn, kategorie);
@@ -622,7 +875,7 @@
             
             const saldoEl = document.getElementById('dash-saldo');
             saldoEl.innerText = `${saldo.toFixed(2).replace('.',',')} €`;
-            saldoEl.style.color = saldo >= 0 ? 'var(--primary-income)' : 'var(--primary-expense)';
+            saldoEl.style.color = saldo >= 0 ? 'var(--success)' : 'var(--danger)';
         }
     </script>
 </body>
