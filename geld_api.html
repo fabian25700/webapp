@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <script>
+        // Ersetze diesen Platzhalter mit deiner tatsächlichen Google Web App URL
+        const GOOGLE_SHEET_API_URL = "HIER_DEINE_GOOGLE_APPS_SCRIPT_WEB_APP_URL_EINTRAGEN";
+
+        // Sendet die URL sicher an das übergeordnete Fenster
+        window.parent.postMessage({ type: 'SET_API_URL', url: GOOGLE_SHEET_API_URL }, '*');
+    </script>
+</body>
+</html>
