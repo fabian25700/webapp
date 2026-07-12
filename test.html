@@ -16,7 +16,6 @@
             --border: rgba(203, 213, 225, 0.8);
             --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             --bubble-shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.15);
-            --center-glow: radial-gradient(circle, rgba(46, 204, 113, 0.15) 0%, rgba(240, 242, 245, 0) 70%);
         }
 
         @media (prefers-color-scheme: dark) {
@@ -28,7 +27,6 @@
                 --border: rgba(51, 65, 85, 0.8);
                 --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
                 --bubble-shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.6);
-                --center-glow: radial-gradient(circle, rgba(46, 204, 113, 0.1) 0%, rgba(15, 23, 42, 0) 70%);
             }
         }
 
@@ -69,22 +67,28 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--center-glow);
         }
 
         #bubble-arena {
             position: relative;
             width: 100%;
-            max-width: 750px;
+            max-width: 800px;
             height: 100%;
-            max-height: 750px;
+            max-height: 800px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        .bubble {
+        .bubble-wrapper {
             position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .bubble {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 50%;
@@ -96,37 +100,33 @@
             box-shadow: var(--shadow);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
             cursor: pointer;
             text-align: center;
             
-            /* Basisgrößen */
-            width: calc(var(--score-factor, 1) * 105px);
-            height: calc(var(--score-factor, 1) * 105px);
-            min-width: 75px;
-            min-height: 75px;
-            max-width: 160px;
-            max-height: 160px;
+            width: var(--bubble-size, 100px);
+            height: var(--bubble-size, 100px);
         }
 
-        /* Spezial-Indikator für die Top-Karten */
-        .bubble.top-favorit {
-            border: 1.5px solid rgba(46, 204, 113, 0.4);
-            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.08), var(--shadow);
+        .bubble-wrapper.top-favorit .bubble {
+            border: 1.5px solid rgba(46, 204, 113, 0.3);
         }
 
         .bubble:active { transform: scale(0.93) !important; }
 
         @media (hover: hover) {
-            .bubble:hover {
+            .bubble-wrapper:hover .bubble {
                 border-color: var(--text-secondary);
                 box-shadow: var(--bubble-shadow-hover);
+                transform: translateY(-4px);
+            }
+            .bubble-wrapper:hover {
                 z-index: 50;
             }
         }
 
         .bubble-icon {
-            font-size: calc(var(--score-factor, 1) * 1.6rem);
+            font-size: calc(var(--bubble-size, 100px) * 0.26);
             line-height: 1;
             margin-bottom: 4px;
         }
@@ -134,7 +134,7 @@
         .bubble-title {
             font-weight: 700;
             color: var(--text-primary);
-            font-size: calc(var(--score-factor, 1) * 0.85rem);
+            font-size: calc(var(--bubble-size, 100px) * 0.13);
             padding: 0 6px;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -151,15 +151,14 @@
 
     <main>
         <div id="bubble-arena">
-            <!-- Dynamische Kreise -->
-        </div>
+            </div>
     </main>
 
     <script>
         const APPS = [
             { id: "reisen", title: "Reisen", icon: "🌍", url: "reise_stats.html" },
             { id: "habits", title: "Habits", icon: "📊", url: "https://fabian25700.github.io/webapp/habits2.html" },
-            { id: "alkohol", title: "Alkohol", icon: "🍷", url: "alkohol.html" },
+            { id: "alkohol", title: "Alcohol", icon: "🍷", url: "alkohol.html" },
             { id: "alltag", title: "Alltag", icon: "🏠", url: "Alltag.html" },
             { id: "gastspiel", title: "Gastspiel", icon: "⚽", url: "gastspiel2.html" },
             { id: "kcrakete", title: "KC Rakete", icon: "🚀", url: "https://bit.ly/m/kcrakete" },
@@ -191,7 +190,6 @@
             const arena = document.getElementById("bubble-arena");
             arena.innerHTML = "";
 
-            // Scores berechnen
             const appsWithScores = APPS.map(app => {
                 const stat = stats[app.id] || { count: 0, lastUsed: 0 };
                 const recency = stat.lastUsed ? (1 / (now - stat.lastUsed + 1)) : 0;
@@ -199,7 +197,6 @@
                 return { ...app, score };
             });
 
-            // Gesamte Sortierung nach Score ermitteln
             const sortedApps = [...appsWithScores].sort((a, b) => b.score - a.score);
             
             const scores = sortedApps.map(a => a.score);
@@ -208,38 +205,31 @@
 
             const isMobile = window.innerWidth < 768;
 
-            // Definition der Radien (Zentrum vs. Äußerer Ring)
-            const centerRadius = isMobile ? 55 : 85;
-            const outerRadius = isMobile ? 125 : 210;
+            // Definition der Basisradien für die Verteilung im Raum
+            const centerRadius = isMobile ? 60 : 90;
+            const outerRadius = isMobile ? 135 : 220;
 
-            // Winkelgenerierung für die Verteilung
-            // Top 4 im Zentrum
-            let centerAngles = [45, 135, 225, 315].map(a => a + (Math.random() * 20 - 10));
-            // Die restlichen 6 im äußeren Kreis
-            let outerAngles = [0, 60, 120, 180, 240, 300].map(a => a + (Math.random() * 30 - 15));
+            let centerAngles = [45, 135, 225, 315].map(a => a + (Math.random() * 15 - 7.5));
+            let outerAngles = [0, 60, 120, 180, 240, 300].map(a => a + (Math.random() * 25 - 12.5));
 
-            // Zufällig durchmischen
             centerAngles = centerAngles.sort(() => Math.random() - 0.5);
             outerAngles = outerAngles.sort(() => Math.random() - 0.5);
 
-            sortedApps.forEach((app, index) => {
+            // 1. Objekte temporär erzeugen, um Größen und ideale Positionen im Raum zu berechnen
+            const bubblesData = sortedApps.map((app, index) => {
                 const isTopFour = index < 4;
 
-                // Größenfaktor bestimmen (Wertebereich 0.8 bis 1.5)
                 let factor = 1.0;
                 if (maxScore !== minScore) {
-                    factor = 0.8 + ((app.score - minScore) / (maxScore - minScore)) * 0.7;
+                    factor = 0.8 + ((app.score - minScore) / (maxScore - minScore)) * 0.6;
                 } else if (maxScore > 0) {
-                    factor = 1.2;
+                    factor = 1.1;
                 }
 
-                const bubble = document.createElement("a");
-                bubble.href = app.url;
-                bubble.className = "bubble";
-                if (isTopFour) bubble.classList.add("top-favorit");
-                bubble.style.setProperty("--score-factor", factor);
+                // Größe berechnen (Auf dem Handy skaliert alles etwas kleiner)
+                const baseSize = isMobile ? 74 : 110;
+                const finalSize = Math.round(baseSize * factor);
 
-                // Trigonometrische Positionierung je nach Sektion
                 let posX, posY;
                 if (isTopFour) {
                     const angleRad = (centerAngles[index] * Math.PI) / 180;
@@ -251,15 +241,64 @@
                     posY = Math.sin(angleRad) * outerRadius;
                 }
 
-                bubble.style.transform = `translate(${posX}px, ${posY}px)`;
-                bubble.addEventListener("click", () => trackClick(app.id));
+                return {
+                    app,
+                    isTopFour,
+                    size: finalSize,
+                    radius: finalSize / 2,
+                    x: posX,
+                    y: posY
+                };
+            });
+
+            // 2. Anti-Überlappungs-Schleife (Iterative Entzerrung über Distanzvektoren)
+            for (let step = 0; step < 8; step++) {
+                for (let i = 0; i < bubblesData.length; i++) {
+                    for (let j = i + 1; j < bubblesData.length; j++) {
+                        const b1 = bubblesData[i];
+                        const b2 = bubblesData[j];
+
+                        const dx = b2.x - b1.x;
+                        const dy = b2.y - b1.y;
+                        const dist = Math.hypot(dx, dy);
+                        const minDist = b1.radius + b2.radius + 6; // 6px Pufferzone zwischen den Kreisen
+
+                        if (dist < minDist) {
+                            // Wenn sich Kreise überschneiden, sanft in Gegenrichtung schieben
+                            const overlap = minDist - dist;
+                            const forceX = (dx / (dist || 1)) * (overlap * 0.5);
+                            const forceY = (dy / (dist || 1)) * (overlap * 0.5);
+
+                            b1.x -= forceX;
+                            b1.y -= forceY;
+                            b2.x += forceX;
+                            b2.y += forceY;
+                        }
+                    }
+                }
+            }
+
+            // 3. Finales Rendering der mathematisch exakt platzierten Bubbles
+            bubblesData.forEach(b => {
+                const wrapper = document.createElement("div");
+                wrapper.className = "bubble-wrapper";
+                if (b.isTopFour) wrapper.classList.add("top-favorit");
+                wrapper.style.transform = `translate(${b.x}px, ${b.y}px)`;
+
+                const bubble = document.createElement("a");
+                bubble.href = b.app.url;
+                bubble.className = "bubble";
+                bubble.style.setProperty("--bubble-size", `${b.size}px`);
+
+                bubble.addEventListener("click", () => trackClick(b.app.id));
 
                 bubble.innerHTML = `
-                    <span class="bubble-icon">${app.icon}</span>
-                    <span class="bubble-title">${app.title}</span>
+                    <span class="bubble-icon">${b.app.icon}</span>
+                    <span class="bubble-title">${b.app.title}</span>
                 `;
 
-                arena.appendChild(bubble);
+                wrapper.appendChild(bubble);
+                arena.appendChild(wrapper);
             });
         }
 
