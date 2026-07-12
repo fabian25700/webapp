@@ -5,507 +5,266 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Dashboard</title>
+    <title>Startseite</title>
     <script src="daten.js"></script>
     <style>
         :root {
-            --primary: #2ecc71;
-            --primary-dark: #27ae60;
-            --bg: #f8fafc;
-            --surface: rgba(255, 255, 255, 0.85);
-            --text-primary: #0f172a;
+            --bg: #f0f2f5;
+            --surface: rgba(255, 255, 255, 0.95);
+            --text-primary: #1e293b;
             --text-secondary: #64748b;
-            --border: rgba(226, 232, 240, 0.8);
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-            --card-hover: #ffffff;
+            --border: rgba(203, 213, 225, 0.8);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --bubble-shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.15);
+            --center-glow: radial-gradient(circle, rgba(46, 204, 113, 0.15) 0%, rgba(240, 242, 245, 0) 70%);
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: #090d16;
-                --surface: rgba(17, 24, 39, 0.85);
-                --text-primary: #f8fafc;
+                --bg: #0f172a;
+                --surface: rgba(30, 41, 59, 0.95);
+                --text-primary: #f1f5f9;
                 --text-secondary: #94a3b8;
-                --border: rgba(31, 41, 55, 0.6);
-                --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
-                --card-hover: #1f2937;
+                --border: rgba(51, 65, 85, 0.8);
+                --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+                --bubble-shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.6);
+                --center-glow: radial-gradient(circle, rgba(46, 204, 113, 0.1) 0%, rgba(15, 23, 42, 0) 70%);
             }
         }
 
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif; }
+        * { box-sizing: border-box; }
 
         body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
             background: var(--bg);
             margin: 0;
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             -webkit-tap-highlight-color: transparent;
             transition: background 0.3s ease;
-            overflow-x: hidden;
         }
 
         header {
-            padding: calc(env(safe-area-inset-top) + 24px) 24px 16px 24px;
-            max-width: 800px;
-            width: 100%;
-            margin: 0 auto;
+            padding: calc(env(safe-area-inset-top) + 24px) 20px 14px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 500;
         }
 
         .header-title {
             font-weight: 800;
-            font-size: 1.6rem;
-            letter-spacing: -0.02em;
+            font-size: 1.2rem;
+            letter-spacing: 0.06em;
             color: var(--text-primary);
         }
 
-        /* Dashboard Container */
-        .dashboard {
-            max-width: 800px;
+        main {
+            flex: 1;
+            position: relative;
             width: 100%;
-            margin: 0 auto;
-            padding: 0 24px calc(env(safe-area-inset-bottom) + 32px) 24px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--center-glow);
         }
 
-        .section-title {
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
-            margin: 24px 0 12px 4px;
-            font-weight: 700;
+        #bubble-arena {
+            position: relative;
+            width: 100%;
+            max-width: 750px;
+            height: 100%;
+            max-height: 750px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        /* Grid System: Mobile 2 Spalten, Desktop 3 Spalten */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 14px;
-        }
-
-        @media (min-width: 600px) {
-            .grid {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 18px;
-            }
-        }
-
-        /* Modern Bento Kacheln */
-        .tile {
+        .bubble {
+            position: absolute;
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 20px;
+            border-radius: 50%;
             text-decoration: none;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            aspect-ratio: 1 / 1;
+            align-items: center;
+            justify-content: center;
             box-shadow: var(--shadow);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease, box-shadow 0.2s ease;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
             cursor: pointer;
+            text-align: center;
+            
+            /* Basisgrößen */
+            width: calc(var(--score-factor, 1) * 105px);
+            height: calc(var(--score-factor, 1) * 105px);
+            min-width: 75px;
+            min-height: 75px;
+            max-width: 160px;
+            max-height: 160px;
         }
 
-        .tile:active {
-            transform: scale(0.95);
+        /* Spezial-Indikator für die Top-Karten */
+        .bubble.top-favorit {
+            border: 1.5px solid rgba(46, 204, 113, 0.4);
+            box-shadow: 0 10px 25px rgba(46, 204, 113, 0.08), var(--shadow);
         }
+
+        .bubble:active { transform: scale(0.93) !important; }
 
         @media (hover: hover) {
-            .tile:hover {
-                transform: translateY(-4px);
-                background: var(--card-hover);
-                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            .bubble:hover {
+                border-color: var(--text-secondary);
+                box-shadow: var(--bubble-shadow-hover);
+                z-index: 50;
             }
         }
 
-        .tile-icon {
-            font-size: 1.8rem;
-            background: rgba(255,255,255,0.1);
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
+        .bubble-icon {
+            font-size: calc(var(--score-factor, 1) * 1.6rem);
+            line-height: 1;
+            margin-bottom: 4px;
         }
 
-        .tile-info {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .tile-title {
+        .bubble-title {
             font-weight: 700;
             color: var(--text-primary);
-            font-size: 1.05rem;
-            letter-spacing: -0.01em;
-        }
-
-        .tile-arrow {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            font-weight: 500;
-            opacity: 0.7;
-        }
-
-        /* Fullscreen Spiel-Modus */
-        body.game-running .dashboard, 
-        body.game-running header {
-            display: none;
-        }
-
-        #game-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 1;
-            display: none;
-        }
-
-        #score-display {
-            position: fixed;
-            top: 80px;
+            font-size: calc(var(--score-factor, 1) * 0.85rem);
+            padding: 0 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
             width: 100%;
-            text-align: center;
-            font-weight: 900;
-            color: var(--primary);
-            display: none;
-            z-index: 100;
-            font-size: 2.2rem;
-            opacity: 0.5;
-            pointer-events: none;
-        }
-
-        #instructions {
-            position: fixed;
-            inset: 0;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 400;
-            pointer-events: none;
-        }
-
-        #instructions.visible { display: flex; }
-
-        .instr-box {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 22px;
-            padding: 26px 32px;
-            max-width: 300px;
-            text-align: center;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            animation: fadeInScale 0.35s ease;
-        }
-
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.88); }
-            to   { opacity: 1; transform: scale(1); }
-        }
-
-        .instr-box h2 { margin: 0 0 10px 0; font-size: 1.2rem; font-weight: 800; color: var(--text-primary); }
-        .instr-box p { margin: 0 0 6px 0; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.5; }
-        .instr-key { display: inline-block; background: var(--bg); border: 1.5px solid var(--border); border-radius: 8px; padding: 3px 8px; font-size: 0.78rem; font-weight: 700; color: var(--text-primary); margin: 2px; }
-        .instr-touch { font-size: 1.6rem; margin: 6px 0; }
-
-        #stop-btn {
-            position: fixed;
-            top: calc(env(safe-area-inset-top) + 16px);
-            right: 20px;
-            background: var(--surface);
-            border: 1.5px solid var(--border);
-            color: var(--text-primary);
-            padding: 8px 16px;
-            border-radius: 12px;
-            font-weight: 700;
-            z-index: 500;
-            display: none;
         }
     </style>
 </head>
 <body>
+
     <header>
         <div class="header-title">FABIANS APP</div>
     </header>
 
-    <button id="stop-btn" onclick="stopGame()">■ STOP</button>
-
-    <div id="score-display"><span id="current-score">0</span></div>
-
-    <main class="dashboard">
-        <div class="section-title">Fokus & Tracker</div>
-        <div class="grid">
-            <a href="https://fabian25700.github.io/webapp/habits2.html" class="tile">
-                <div class="tile-icon">📊</div>
-                <div class="tile-info">
-                    <span class="tile-title">Habits</span>
-                    <span class="tile-arrow">Öffnen →</span>
-                </div>
-            </a>
-            <a href="finanzen.html" class="tile">
-                <div class="tile-icon">💶</div>
-                <div class="tile-info">
-                    <span class="tile-title">Finanzen</span>
-                    <span class="tile-arrow">Öffnen →</span>
-                </div>
-            </a>
-            <a href="alkohol.html" class="tile">
-                <div class="tile-icon">🍷</div>
-                <div class="tile-info">
-                    <span class="tile-title">Alkohol</span>
-                    <span class="tile-arrow">Öffnen →</span>
-                </div>
-            </a>
-        </div>
-
-        <div class="section-title">Leben & Freizeit</div>
-        <div class="grid">
-            <a href="Alltag.html" class="tile">
-                <div class="tile-icon">🏠</div>
-                <div class="tile-info">
-                    <span class="tile-title">Alltag</span>
-                    <span class="tile-arrow">Öffnen →</span>
-                </div>
-            </a>
-            <a href="reise_stats.html" class="tile">
-                <div class="tile-icon">🌍</div>
-                <div class="tile-info">
-                    <span class="tile-title">Reisen</span>
-                    <span class="tile-arrow">Öffnen →</span>
-                </div>
-            </a>
-            <a href="gastspiel2.html" class="tile">
-                <div class="tile-icon">⚽</div>
-                <div class="tile-info">
-                    <span class="tile-title">Gastspiel</span>
-                    <span class="tile-arrow">Öffnen →</span>
-                </div>
-            </a>
-        </div>
-
-        <div class="section-title">Spiele</div>
-        <div class="grid">
-            <div class="tile" onclick="toggleGame()">
-                <div class="tile-icon">🐍</div>
-                <div class="tile-info">
-                    <span class="tile-title">Snake</span>
-                    <span class="tile-arrow">Starten →</span>
-                </div>
-            </div>
-            <a href="darts.html" class="tile">
-                <div class="tile-icon">🎯</div>
-                <div class="tile-info">
-                    <span class="tile-title">Darts</span>
-                    <span class="tile-arrow">Öffnen →</span>
-                </div>
-            </a>
-            <a href="imposter.html" class="tile">
-                <div class="tile-icon">🕵️‍♂️</div>
-                <div class="tile-info">
-                    <span class="tile-title">Imposter</span>
-                    <span class="tile-arrow">Öffnen →</span>
-                </div>
-            </a>
-        </div>
-
-        <div class="section-title">Verbindungen</div>
-        <div class="grid">
-            <a href="https://bit.ly/m/kcrakete" class="tile">
-                <div class="tile-icon">🚀</div>
-                <div class="tile-info">
-                    <span class="tile-title">KC Rakete</span>
-                    <span class="tile-arrow">Link →</span>
-                </div>
-            </a>
-            <a href="test.html" class="tile">
-                <div class="tile-icon">🧪</div>
-                <div class="tile-info">
-                    <span class="tile-title">Test</span>
-                    <span class="tile-arrow">Öffnen →</span>
-                </div>
-            </a>
+    <main>
+        <div id="bubble-arena">
+            <!-- Dynamische Kreise -->
         </div>
     </main>
 
-    <div id="instructions">
-        <div class="instr-box" id="instr-content"></div>
-    </div>
-
-    <canvas id="game-canvas"></canvas>
-
     <script>
-        const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-        const canvas = document.getElementById("game-canvas");
-        const ctx = canvas.getContext("2d");
-        const scoreDisplay = document.getElementById("score-display");
-        const scoreVal = document.getElementById("current-score");
-        const instrEl = document.getElementById("instructions");
-        const instrContent = document.getElementById("instr-content");
-        const stopBtn = document.getElementById("stop-btn");
+        const APPS = [
+            { id: "reisen", title: "Reisen", icon: "🌍", url: "reise_stats.html" },
+            { id: "habits", title: "Habits", icon: "📊", url: "https://fabian25700.github.io/webapp/habits2.html" },
+            { id: "alkohol", title: "Alkohol", icon: "🍷", url: "alkohol.html" },
+            { id: "alltag", title: "Alltag", icon: "🏠", url: "Alltag.html" },
+            { id: "gastspiel", title: "Gastspiel", icon: "⚽", url: "gastspiel2.html" },
+            { id: "kcrakete", title: "KC Rakete", icon: "🚀", url: "https://bit.ly/m/kcrakete" },
+            { id: "test", title: "Test", icon: "🧪", url: "test.html" },
+            { id: "test2", title: "Test 2", icon: "🧪", url: "test2.html" },
+            { id: "spiele", title: "Spiele", icon: "🎮", url: "spiele.html" },
+            { id: "familie", title: "Familie", icon: "🏢", url: "familie.html" }
+        ];
 
-        let gameActive = false;
-        let snake, direction, nextDirection, food;
-        let score = 0;
-
-        const laender = (typeof MEINE_REISEN !== 'undefined')
-            ? MEINE_REISEN.map(r => r.flagge || "📍")
-            : ["🇩🇪","🇮🇹","🇺🇸"];
-
-        const GRID = 32;
-        const SPEED_START = 110;
-        const SPEED_MIN = 45;
-        const SPEED_STEP = 5;
-
-        function toggleGame() {
-            if (!gameActive) showInstructions();
-            else stopGame();
+        function getStats() {
+            const defaults = {};
+            APPS.forEach(app => { defaults[app.id] = { count: 0, lastUsed: 0 }; });
+            const stored = localStorage.getItem("fabians_app_stats");
+            return stored ? JSON.parse(stored) : defaults;
         }
 
-        function showInstructions() {
-            if (!isTouchDevice) {
-                instrContent.innerHTML = `<h2>🐍 Snake</h2><p>Pfeiltasten zum Steuern</p><p><span class="instr-key">↑</span> <span class="instr-key">↓</span> <span class="instr-key">←</span> <span class="instr-key">→</span></p>`;
-            } else {
-                instrContent.innerHTML = `<h2>🐍 Snake</h2><div class="instr-touch">👆</div><p>Wische in die Richtung,<br>in die du steuern willst.</p>`;
+        function trackClick(id) {
+            const stats = getStats();
+            if (stats[id]) {
+                stats[id].count += 1;
+                stats[id].lastUsed = Date.now();
+                localStorage.setItem("fabians_app_stats", JSON.stringify(stats));
             }
-            instrEl.classList.add("visible");
-            setTimeout(() => { instrEl.classList.remove("visible"); startGame(); }, 2500);
         }
 
-        function startGame() {
-            gameActive = true;
-            document.body.classList.add("game-running");
-            canvas.style.display = "block";
-            scoreDisplay.style.display = "block";
-            stopBtn.style.display = "block";
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            score = 0;
-            scoreVal.innerText = score;
+        function renderMenu() {
+            const stats = getStats();
+            const now = Date.now();
+            const arena = document.getElementById("bubble-arena");
+            arena.innerHTML = "";
 
-            const startX = Math.floor(canvas.width / 2 / GRID) * GRID;
-            const startY = Math.floor(canvas.height / 2 / GRID) * GRID;
-            snake = [{ x: startX, y: startY }, { x: startX - GRID, y: startY }, { x: startX - GRID * 2, y: startY }];
-            direction = { x: GRID, y: 0 };
-            nextDirection = { x: GRID, y: 0 };
-            spawnFood();
-            runLoop();
-        }
+            // Scores berechnen
+            const appsWithScores = APPS.map(app => {
+                const stat = stats[app.id] || { count: 0, lastUsed: 0 };
+                const recency = stat.lastUsed ? (1 / (now - stat.lastUsed + 1)) : 0;
+                const score = (stat.count * 0.7) + (recency * 1000000 * 0.3);
+                return { ...app, score };
+            });
 
-        function runLoop() {
-            if (!gameActive) return;
-            draw();
-            setTimeout(runLoop, Math.max(SPEED_MIN, SPEED_START - score * SPEED_STEP));
-        }
+            // Gesamte Sortierung nach Score ermitteln
+            const sortedApps = [...appsWithScores].sort((a, b) => b.score - a.score);
+            
+            const scores = sortedApps.map(a => a.score);
+            const maxScore = Math.max(...scores);
+            const minScore = Math.min(...scores);
 
-        function stopGame() {
-            gameActive = false;
-            document.body.classList.remove("game-running");
-            canvas.style.display = "none";
-            scoreDisplay.style.display = "none";
-            stopBtn.style.display = "none";
-        }
+            const isMobile = window.innerWidth < 768;
 
-        function spawnFood() {
-            const cols = Math.floor(canvas.width / GRID);
-            const rows = Math.floor(canvas.height / GRID);
-            let pos;
-            do {
-                pos = { x: Math.floor(Math.random() * cols) * GRID, y: Math.floor(Math.random() * rows) * GRID };
-            } while (snake.some(s => s.x === pos.x && s.y === pos.y));
-            food = { ...pos, symbol: laender[Math.floor(Math.random() * laender.length)] };
-        }
+            // Definition der Radien (Zentrum vs. Äußerer Ring)
+            const centerRadius = isMobile ? 55 : 85;
+            const outerRadius = isMobile ? 125 : 210;
 
-        function draw() {
-            direction = nextDirection;
-            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+            // Winkelgenerierung für die Verteilung
+            // Top 4 im Zentrum
+            let centerAngles = [45, 135, 225, 315].map(a => a + (Math.random() * 20 - 10));
+            // Die restlichen 6 im äußeren Kreis
+            let outerAngles = [0, 60, 120, 180, 240, 300].map(a => a + (Math.random() * 30 - 15));
 
-            if (head.x < 0) head.x = Math.floor((canvas.width - 1) / GRID) * GRID;
-            if (head.x >= canvas.width) head.x = 0;
-            if (head.y < 0) head.y = Math.floor((canvas.height - 1) / GRID) * GRID;
-            if (head.y >= canvas.height) head.y = 0;
+            // Zufällig durchmischen
+            centerAngles = centerAngles.sort(() => Math.random() - 0.5);
+            outerAngles = outerAngles.sort(() => Math.random() - 0.5);
 
-            if (snake.some(s => s.x === head.x && s.y === head.y)) { gameOver(); return; }
+            sortedApps.forEach((app, index) => {
+                const isTopFour = index < 4;
 
-            snake.unshift(head);
-            if (head.x === food.x && head.y === food.y) { score++; scoreVal.innerText = score; spawnFood(); }
-            else { snake.pop(); }
+                // Größenfaktor bestimmen (Wertebereich 0.8 bis 1.5)
+                let factor = 1.0;
+                if (maxScore !== minScore) {
+                    factor = 0.8 + ((app.score - minScore) / (maxScore - minScore)) * 0.7;
+                } else if (maxScore > 0) {
+                    factor = 1.2;
+                }
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            ctx.fillStyle = isDark ? "rgba(15,23,42,0.7)" : "rgba(240,242,245,0.7)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+                const bubble = document.createElement("a");
+                bubble.href = app.url;
+                bubble.className = "bubble";
+                if (isTopFour) bubble.classList.add("top-favorit");
+                bubble.style.setProperty("--score-factor", factor);
 
-            ctx.font = `${GRID - 4}px sans-serif`;
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(food.symbol, food.x + GRID / 2, food.y + GRID / 2);
+                // Trigonometrische Positionierung je nach Sektion
+                let posX, posY;
+                if (isTopFour) {
+                    const angleRad = (centerAngles[index] * Math.PI) / 180;
+                    posX = Math.cos(angleRad) * centerRadius;
+                    posY = Math.sin(angleRad) * centerRadius;
+                } else {
+                    const angleRad = (outerAngles[index - 4] * Math.PI) / 180;
+                    posX = Math.cos(angleRad) * outerRadius;
+                    posY = Math.sin(angleRad) * outerRadius;
+                }
 
-            snake.forEach((s, i) => {
-                ctx.fillStyle = i === 0 ? "#2ecc71" : `rgba(46, 204, 113, ${Math.max(0.3, 1 - i * 0.05)})`;
-                ctx.beginPath();
-                ctx.roundRect(s.x + 2, s.y + 2, GRID - 4, GRID - 4, 8);
-                ctx.fill();
+                bubble.style.transform = `translate(${posX}px, ${posY}px)`;
+                bubble.addEventListener("click", () => trackClick(app.id));
+
+                bubble.innerHTML = `
+                    <span class="bubble-icon">${app.icon}</span>
+                    <span class="bubble-title">${app.title}</span>
+                `;
+
+                arena.appendChild(bubble);
             });
         }
 
-        function gameOver() {
-            ctx.fillStyle = "#e74c3c";
-            ctx.font = "bold 32px -apple-system";
-            ctx.textAlign = "center";
-            ctx.fillText(`💀 ${score} Länder`, canvas.width / 2, canvas.height / 2);
-            setTimeout(stopGame, 1500);
-        }
-
-        window.addEventListener("keydown", (e) => {
-            if (!gameActive) return;
-            const d = direction;
-            if ((e.key === "ArrowUp" || e.key === "w") && d.y === 0) nextDirection = { x: 0, y: -GRID };
-            if ((e.key === "ArrowDown" || e.key === "s") && d.y === 0) nextDirection = { x: 0, y: GRID };
-            if ((e.key === "ArrowLeft" || e.key === "a") && d.x === 0) nextDirection = { x: -GRID, y: 0 };
-            if ((e.key === "ArrowRight" || e.key === "d") && d.x === 0) nextDirection = { x: GRID, y: 0 };
-        });
-
-        let touchStartX = 0;
-        let touchStartY = 0;
-
-        window.addEventListener("touchstart", (e) => {
-            if (!gameActive) return;
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        }, { passive: true });
-
-        window.addEventListener("touchmove", (e) => {
-            if (!gameActive) return;
-            e.preventDefault(); 
-        }, { passive: false });
-
-        window.addEventListener("touchend", (e) => {
-            if (!gameActive) return;
-            const touchEndX = e.changedTouches[0].clientX;
-            const touchEndY = e.changedTouches[0].clientY;
-            
-            const dx = touchEndX - touchStartX;
-            const dy = touchEndY - touchStartY;
-            const absDx = Math.abs(dx);
-            const absDy = Math.abs(dy);
-            
-            if (Math.max(absDx, absDy) < 20) return; 
-
-            const d = direction;
-            if (absDx > absDy) {
-                if (dx > 0 && d.x === 0) nextDirection = { x: GRID, y: 0 };
-                else if (dx < 0 && d.x === 0) nextDirection = { x: -GRID, y: 0 };
-            } else {
-                if (dy > 0 && d.y === 0) nextDirection = { x: 0, y: GRID };
-                else if (dy < 0 && d.y === 0) nextDirection = { x: 0, y: -GRID };
-            }
-        }, { passive: true });
+        window.addEventListener("DOMContentLoaded", renderMenu);
+        window.addEventListener("resize", renderMenu);
     </script>
 </body>
 </html>
