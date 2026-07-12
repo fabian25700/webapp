@@ -151,13 +151,13 @@
 
     <main>
         <div id="bubble-arena">
-            </div>
+        </div>
     </main>
 
     <script>
         const APPS = [
             { id: "reisen", title: "Reisen", icon: "🌍", url: "reise_stats.html" },
-            { id: "habits", title: "Habits", icon: "📊", url: "https://fabian25700.github.io/webapp/habits2.html" },
+            { id: "habits", title: "Habits", icon: "📊", url: "habits.html" },
             { id: "alkohol", title: "Alkohol", icon: "🍷", url: "alkohol.html" },
             { id: "alltag", title: "Alltag", icon: "🏠", url: "Alltag.html" },
             { id: "gastspiel", title: "Gastspiel", icon: "⚽", url: "gastspiel2.html" },
@@ -165,7 +165,8 @@
             { id: "test", title: "Test", icon: "🧪", url: "test.html" },
             { id: "test2", title: "Test 2", icon: "🧪", url: "test2.html" },
             { id: "spiele", title: "Spiele", icon: "🎮", url: "spiele.html" },
-            { id: "familie", title: "Familie", icon: "🏢", url: "familie.html" }
+            { id: "familie", title: "Familie", icon: "🏢", url: "familie.html" },
+            { id: "hopping", title: "Hopping", icon: "🍺", url: "hopping.html" }
         ];
 
         function getStats() {
@@ -215,7 +216,7 @@
             const outerRadius = isMobile ? 155 : 230;
 
             let centerAngles = [45, 135, 225, 315].map(a => a + (Math.random() * 15 - 7.5));
-            let outerAngles = [0, 60, 120, 180, 240, 300].map(a => a + (Math.random() * 25 - 12.5));
+            let outerAngles = [0, 45, 90, 135, 180, 225, 270, 315].map(a => a + (Math.random() * 20 - 10));
 
             centerAngles = centerAngles.sort(() => Math.random() - 0.5);
             outerAngles = outerAngles.sort(() => Math.random() - 0.5);
@@ -238,7 +239,7 @@
                     posX = Math.cos(angleRad) * centerRadius * stretchX;
                     posY = Math.sin(angleRad) * centerRadius * stretchY;
                 } else {
-                    const angleRad = (outerAngles[index - 4] * Math.PI) / 180;
+                    const angleRad = (outerAngles[(index - 4) % outerAngles.length] * Math.PI) / 180;
                     posX = Math.cos(angleRad) * outerRadius * stretchX;
                     posY = Math.sin(angleRad) * outerRadius * stretchY;
                 }
