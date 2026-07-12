@@ -9,16 +9,14 @@
     <script src="daten.js"></script>
     <style>
         :root {
-            --primary: #2ecc71;
-            --secondary: #3498db;
             --bg: #f0f2f5;
             --surface: rgba(255, 255, 255, 0.95);
             --text-primary: #1e293b;
             --text-secondary: #64748b;
             --border: rgba(203, 213, 225, 0.8);
-            --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            --card-hover: rgba(240, 240, 240, 0.95);
-            --arrow-color: #cbd5e1;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --bubble-shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.15);
+            --highlight: rgba(243, 156, 18, 0.4); /* Neues Orange */
         }
 
         @media (prefers-color-scheme: dark) {
@@ -28,9 +26,9 @@
                 --text-primary: #f1f5f9;
                 --text-secondary: #94a3b8;
                 --border: rgba(51, 65, 85, 0.8);
-                --shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-                --card-hover: rgba(51, 65, 85, 0.95);
-                --arrow-color: #475569;
+                --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+                --bubble-shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.6);
+                --highlight: rgba(243, 156, 18, 0.3); /* Neues Orange für Darkmode */
             }
         }
 
@@ -40,7 +38,8 @@
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
             background: var(--bg);
             margin: 0;
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             -webkit-tap-highlight-color: transparent;
@@ -52,6 +51,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            z-index: 500;
         }
 
         .header-title {
@@ -63,116 +63,98 @@
 
         main {
             flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 20px;
-            padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
-        }
-
-        .section-title {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
-            margin: 0 0 10px 10px;
-            font-weight: 700;
-        }
-
-        .menu-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+            position: relative;
             width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-
-        .grid-section {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        @media (min-width: 768px) {
-            .menu-container {
-                max-width: 800px;
-            }
-            .grid-section.top-cards {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 16px;
-            }
-            .grid-section.sub-cards {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 12px;
-            }
-        }
-
-        .menu-card {
-            background: var(--surface);
-            padding: 16px 20px;
-            border-radius: 20px;
-            text-decoration: none;
+            height: 100%;
             display: flex;
             align-items: center;
-            gap: 14px;
+            justify-content: center;
+        }
+
+        #bubble-arena {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bubble-wrapper {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .bubble {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             box-shadow: var(--shadow);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            transition: transform 0.1s ease, background 0.2s ease, border-color 0.2s ease;
-            border: 1px solid var(--border);
+            transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
             cursor: pointer;
+            text-align: center;
+            width: var(--bubble-size, 100px);
+            height: var(--bubble-size, 100px);
         }
 
-        .grid-section.top-cards .menu-card {
-            padding: 20px 24px;
-            border-left: 4px solid var(--primary);
+        /* Umrandung der Favoriten in Orange */
+        .bubble-wrapper.top-favorit .bubble {
+            border: 1.5px solid var(--highlight);
         }
 
-        .menu-card:active { transform: scale(0.97); background: var(--card-hover); }
+        .bubble:active { transform: scale(0.93) !important; }
 
         @media (hover: hover) {
-            .menu-card:hover {
-                transform: translateY(-2px);
+            .bubble-wrapper:hover .bubble {
                 border-color: var(--text-secondary);
-                background: var(--card-hover);
+                box-shadow: var(--bubble-shadow-hover);
+                transform: translateY(-4px);
+            }
+            .bubble-wrapper:hover {
+                z-index: 50;
             }
         }
 
-        .icon { font-size: 1.4rem; line-height: 1; }
-        .title { font-weight: 600; color: var(--text-primary); font-size: 1.05rem; flex-grow: 1; }
-        .arrow { color: var(--arrow-color); font-size: 1rem; transition: transform 0.2s ease; }
-        
-        @media (hover: hover) {
-            .menu-card:hover .arrow { transform: translateX(4px); }
+        .bubble-icon {
+            font-size: calc(var(--bubble-size, 100px) * 0.26);
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .bubble-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: calc(var(--bubble-size, 100px) * 0.12);
+            padding: 0 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
         }
     </style>
 </head>
 <body>
+
     <header>
         <div class="header-title">FABIANS APP</div>
     </header>
 
     <main>
-        <div class="menu-container">
-            <div>
-                <div class="section-title">Häufig & Zuletzt genutzt</div>
-                <div id="frequent-container" class="grid-section top-cards">
-                    </div>
+        <div id="bubble-arena">
             </div>
-
-            <div style="margin-top: 10px;">
-                <div class="section-title">Weitere Anwendungen</div>
-                <div id="others-container" class="grid-section sub-cards">
-                    </div>
-            </div>
-        </div>
     </main>
 
     <script>
-        // Bereinigte Liste aller Hauptanwendungen
         const APPS = [
             { id: "reisen", title: "Reisen", icon: "🌍", url: "reise_stats.html" },
             { id: "habits", title: "Habits", icon: "📊", url: "https://fabian25700.github.io/webapp/habits2.html" },
@@ -205,54 +187,122 @@
         function renderMenu() {
             const stats = getStats();
             const now = Date.now();
+            const arena = document.getElementById("bubble-arena");
+            arena.innerHTML = "";
+
+            const appsWithScores = APPS.map(app => {
+                const stat = stats[app.id] || { count: 0, lastUsed: 0 };
+                const recency = stat.lastUsed ? (1 / (now - stat.lastUsed + 1)) : 0;
+                const score = (stat.count * 0.7) + (recency * 1000000 * 0.3);
+                return { ...app, score };
+            });
+
+            const sortedApps = [...appsWithScores].sort((a, b) => b.score - a.score);
             
-            const sortedApps = [...APPS].sort((a, b) => {
-                const statA = stats[a.id] || { count: 0, lastUsed: 0 };
-                const statB = stats[b.id] || { count: 0, lastUsed: 0 };
-                
-                const recencyA = statA.lastUsed ? (1 / (now - statA.lastUsed + 1)) : 0;
-                const recencyB = statB.lastUsed ? (1 / (now - statB.lastUsed + 1)) : 0;
-                
-                const scoreA = (statA.count * 0.7) + (recencyA * 1000000 * 0.3);
-                const scoreB = (statB.count * 0.7) + (recencyB * 1000000 * 0.3);
-                
-                return scoreB - scoreA;
+            const scores = sortedApps.map(a => a.score);
+            const maxScore = Math.max(...scores);
+            const minScore = Math.min(...scores);
+
+            const isMobile = window.innerWidth < 768;
+            const isPortrait = window.innerHeight > window.innerWidth;
+
+            const baseSize = isMobile ? 96 : 115;
+
+            const stretchX = isPortrait ? 0.75 : 1.35;
+            const stretchY = isPortrait ? 1.45 : 0.75;
+
+            const centerRadius = isMobile ? 65 : 95;
+            const outerRadius = isMobile ? 155 : 230;
+
+            let centerAngles = [45, 135, 225, 315].map(a => a + (Math.random() * 15 - 7.5));
+            let outerAngles = [0, 60, 120, 180, 240, 300].map(a => a + (Math.random() * 25 - 12.5));
+
+            centerAngles = centerAngles.sort(() => Math.random() - 0.5);
+            outerAngles = outerAngles.sort(() => Math.random() - 0.5);
+
+            const bubblesData = sortedApps.map((app, index) => {
+                const isTopFour = index < 4;
+
+                let factor = 1.0;
+                if (maxScore !== minScore) {
+                    factor = 0.85 + ((app.score - minScore) / (maxScore - minScore)) * 0.55;
+                } else if (maxScore > 0) {
+                    factor = 1.15;
+                }
+
+                const finalSize = Math.round(baseSize * factor);
+
+                let posX, posY;
+                if (isTopFour) {
+                    const angleRad = (centerAngles[index] * Math.PI) / 180;
+                    posX = Math.cos(angleRad) * centerRadius * stretchX;
+                    posY = Math.sin(angleRad) * centerRadius * stretchY;
+                } else {
+                    const angleRad = (outerAngles[index - 4] * Math.PI) / 180;
+                    posX = Math.cos(angleRad) * outerRadius * stretchX;
+                    posY = Math.sin(angleRad) * outerRadius * stretchY;
+                }
+
+                return {
+                    app,
+                    isTopFour,
+                    size: finalSize,
+                    radius: finalSize / 2,
+                    x: posX,
+                    y: posY
+                };
             });
 
-            const frequentApps = sortedApps.slice(0, 4);
-            const otherApps = sortedApps.slice(4);
+            for (let step = 0; step < 12; step++) {
+                for (let i = 0; i < bubblesData.length; i++) {
+                    for (let j = i + 1; j < bubblesData.length; j++) {
+                        const b1 = bubblesData[i];
+                        const b2 = bubblesData[j];
 
-            const freqContainer = document.getElementById("frequent-container");
-            const othersContainer = document.getElementById("others-container");
+                        const dx = b2.x - b1.x;
+                        const dy = b2.y - b1.y;
+                        const dist = Math.hypot(dx, dy);
+                        const minDist = b1.radius + b2.radius + 8;
 
-            freqContainer.innerHTML = "";
-            othersContainer.innerHTML = "";
+                        if (dist < minDist) {
+                            const overlap = minDist - dist;
+                            const forceX = (dx / (dist || 1)) * (overlap * 0.5);
+                            const forceY = (dy / (dist || 1)) * (overlap * 0.5);
 
-            frequentApps.forEach(app => {
-                freqContainer.appendChild(createCard(app));
+                            b1.x -= forceX;
+                            b1.y -= forceY;
+                            b2.x += forceX;
+                            b2.y += forceY;
+                        }
+                    }
+                }
+            }
+
+            bubblesData.forEach(b => {
+                const wrapper = document.createElement("div");
+                wrapper.className = "bubble-wrapper";
+                if (b.isTopFour) wrapper.classList.add("top-favorit");
+                wrapper.style.transform = `translate(${b.x}px, ${b.y}px)`;
+
+                const bubble = document.createElement("a");
+                bubble.href = b.app.url;
+                bubble.className = "bubble";
+                bubble.style.setProperty("--bubble-size", `${b.size}px`);
+
+                bubble.addEventListener("click", () => trackClick(b.app.id));
+
+                bubble.innerHTML = `
+                    <span class="bubble-icon">${b.app.icon}</span>
+                    <span class="bubble-title">${b.app.title}</span>
+                `;
+
+                wrapper.appendChild(bubble);
+                arena.appendChild(wrapper);
             });
-
-            otherApps.forEach(app => {
-                othersContainer.appendChild(createCard(app));
-            });
-        }
-
-        function createCard(app) {
-            const card = document.createElement("a");
-            card.href = app.url;
-            card.className = "menu-card";
-            
-            card.addEventListener("click", () => trackClick(app.id));
-
-            card.innerHTML = `
-                <span class="icon">${app.icon}</span>
-                <span class="title">${app.title}</span>
-                <span class="arrow">→</span>
-            `;
-            return card;
         }
 
         window.addEventListener("DOMContentLoaded", renderMenu);
+        window.addEventListener("resize", renderMenu);
     </script>
 </body>
 </html>
