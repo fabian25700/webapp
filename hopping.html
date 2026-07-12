@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Groundhopping Statistik Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #253248;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+            --accent-success: #10b981;
+            --accent-danger: #ef4444;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-main);
+            padding: 24px;
+            line-height: 1.5;
+        }
+
+        header {
+            margin-bottom: 32px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 16px;
+        }
+
+        header h1 {
+            font-size: 22pt;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 11pt;
+            margin-top: 4px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 48px;
+            font-size: 13pt;
+            color: var(--text-muted);
+        }
+
+        /* Globale Stats KPIs */
+        .grid-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .card-stat {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .card-stat .value {
+            font-size: 22pt;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .card-stat .label {
+            font-size: 9pt;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Haupt-Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 32px;
+        }
+
+        @media (min-width: 1024px) {
+            .main-layout {
+                grid-template-columns: 1.6fr 1fr;
+            }
+        }
+
+        .section-box {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 32px;
+            overflow: hidden;
+        }
+
+        .section-title {
+            background-color: #131c2e;
+            padding: 16px 20px;
+            font-size: 11pt;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            letter-spacing: 0.5px;
+        }
+
+        .section-content {
+            padding: 20px;
+        }
+
+        /* Team Dashboard Selektor */
+        .selector-box {
+            margin-bottom: 24px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 11pt;
+            outline: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* Interaktives Dashboard Kachel-Raster */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .dash-tile {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .dash-tile .tile-label {
+            font-size: 8pt;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .dash-tile .tile-value {
+            font-size: 12pt;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .dash-tile.span-2 {
+            grid-column: span 2;
+        }
+
+        .dash-tile.span-3 {
+            grid-column: span 3;
+        }
+
+        /* Tabellen-Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 10pt;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+            background-color: #131c2e;
+        }
+
+        tr:hover td {
+            background-color: var(--bg-card);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 240px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Groundhopping Analytics</h1>
+        <p>Statistiken und interaktive Auswertungen deiner Stadionerlebnisse</p>
+    </header>
+
+    <div id="loading" class="loading">Lade Daten aus dem Google Sheet...</div>
+
+    <div id="dashboard-content" style="display: none;">
+        
+        <div class="grid-overview">
+            <div class="card-stat">
+                <div class="value" id="stat-total-games">0</div>
+                <div class="label">Spiele Gesamt</div>
+            </div>
+            <div class="card-stat">
+                <div class="value" id="stat-total-grounds">0</div>
+                <div class="label">Besuchte Grounds</div>
+            </div>
+            <div class="card-stat">
+                <div class="value" id="stat-total-goals">0</div>
+                <div class="label">Tore Gesehen</div>
+            </div>
+            <div class="card-stat">
+                <div class="value" id="stat-avg-goals">0.0</div>
+                <div class="label">Tore / Spiel</div>
+            </div>
+        </div>
+
+        <div class="main-layout">
+            
+            <div>
+                <div class="section-box">
+                    <div class="section-title">INTERAKTIVES DASHBOARD JE TEAM</div>
+                    <div class="section-content">
+                        <div class="selector-box">
+                            <select id="team-selector" onchange="updateTeamDashboard(this.value)">
+                                </select>
+                        </div>
+
+                        <div class="dashboard-grid">
+                            <div class="dash-tile">
+                                <div class="tile-label">Tore / Gegentore</div>
+                                <div class="tile-value" id="t-tore-gegentore">0:0</div>
+                            </div>
+                            <div class="dash-tile">
+                                <div class="tile-label">Spiele</div>
+                                <div class="tile-value" id="t-spiele">0</div>
+                            </div>
+                            <div class="dash-tile">
+                                <div class="tile-label">Heimspiele</div>
+                                <div class="tile-value" id="t-heim">0</div>
+                            </div>
+
+                            <div class="dash-tile">
+                                <div class="tile-label">Siege / Remis / Niederlagen</div>
+                                <div class="tile-value" id="t-wld" style="color: var(--accent-success);">0 / 0 / 0</div>
+                            </div>
+                            <div class="dash-tile span-2">
+                                <div class="tile-label">Auswärtsspiele</div>
+                                <div class="tile-value" id="t-auswaerts">0</div>
+                            </div>
+
+                            <div class="dash-tile span-2">
+                                <div class="tile-label">Höchster Sieg</div>
+                                <div class="tile-value" id="t-max-win" style="font-size: 10.5pt; color: var(--accent-success);">-</div>
+                            </div>
+                            <div class="dash-tile">
+                                <div class="tile-label">Länder</div>
+                                <div class="tile-value" id="t-laender">-</div>
+                            </div>
+
+                            <div class="dash-tile span-2">
+                                <div class="tile-label">Höchste Niederlage</div>
+                                <div class="tile-value" id="t-max-loss" style="font-size: 10.5pt; color: var(--accent-danger);">-</div>
+                            </div>
+                            <div class="dash-tile">
+                                <div class="tile-label">Zuschauer (Min / Schnitt / Max)</div>
+                                <div class="tile-value" id="t-zuschauer" style="font-size: 10pt;">0 / 0 / 0</div>
+                            </div>
+
+                            <div class="dash-tile">
+                                <div class="tile-label">Wettbewerbe</div>
+                                <div class="tile-value" id="t-wettbewerbe">0</div>
+                            </div>
+                            <div class="dash-tile">
+                                <div class="tile-label">Meistgesehener Wettbewerb</div>
+                                <div class="tile-value" id="t-top-comp" style="font-size: 10.5pt;">-</div>
+                            </div>
+                            <div class="dash-tile">
+                                <div class="tile-label">Meistgesehener Gegner</div>
+                                <div class="tile-value" id="t-top-opp" style="font-size: 10.5pt;">-</div>
+                            </div>
+
+                            <div class="dash-tile span-2">
+                                <div class="tile-label">Meistgesehener Ground</div>
+                                <div class="tile-value" id="t-top-ground" style="font-size: 10.5pt;">-</div>
+                            </div>
+                            <div class="dash-tile">
+                                <div class="tile-label">Grounds / neue Grounds</div>
+                                <div class="tile-value" id="t-grounds-count">0 / 0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <div class="section-title">LETZTE 5 SPIELE</div>
+                    <div style="overflow-x: auto;">
+                        <table id="recent-games-table">
+                            <thead>
+                                <tr>
+                                    <th>Datum</th>
+                                    <th>Begegnung</th>
+                                    <th>Ergebnis</th>
+                                    <th>Stadion</th>
+                                    <th>Wettbewerb</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-box">
+                    <div class="section-title">UNTERGRUND VERTEILUNG</div>
+                    <div class="section-content">
+                        <div class="chart-container">
+                            <canvas id="surfaceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <div class="section-title">TOP 5 MEISTBESUCHTE STADIEN</div>
+                    <div style="overflow-x: auto;">
+                        <table id="top-grounds-table">
+                            <thead>
+                                <tr>
+                                    <th>Stadion</th>
+                                    <th>Spiele</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <div class="section-title">SPIELE PRO SAISON</div>
+                    <div class="section-content">
+                        <div class="chart-container">
+                            <canvas id="seasonChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let rawData = [];
+
+        // Verbindung zum Apps Script Backend herstellen
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof google !== 'undefined' && google.script && google.script.run) {
+                google.script.run
+                    .withSuccessHandler(initializeDashboard)
+                    .withFailureHandler(err => {
+                        document.getElementById('loading').innerText = "Fehler beim Laden der API-Daten: " + err;
+                    })
+                    .getHoppingData();
+            }
+        });
+
+        function initializeDashboard(data) {
+            rawData = data;
+            if (!rawData || rawData.length === 0) {
+                document.getElementById('loading').innerText = "Keine Daten im Google Sheet gefunden.";
+                return;
+            }
+
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('dashboard-content').style.display = 'block';
+
+            calculateGlobalStats();
+            populateTeamSelector();
+            buildGlobalCharts();
+            renderRecentGames();
+        }
+
+        function calculateGlobalStats() {
+            document.getElementById('stat-total-games').innerText = rawData.length;
+            
+            const grounds = new Set(rawData.map(d => d.Stadion).filter(Boolean));
+            document.getElementById('stat-total-grounds').innerText = grounds.size;
+
+            let totalGoals = 0;
+            rawData.forEach(d => {
+                if(d.Ergebnis && d.Ergebnis.includes(':')) {
+                    const parts = d.Ergebnis.split(':');
+                    totalGoals += (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0);
+                }
+            });
+            document.getElementById('stat-total-goals').innerText = totalGoals;
+            document.getElementById('stat-avg-goals').innerText = (totalGoals / rawData.length).toFixed(1);
+        }
+
+        function populateTeamSelector() {
+            const selector = document.getElementById('team-selector');
+            const teams = new Set();
+            
+            rawData.forEach(d => {
+                if(d.Teilnehmer) teams.add(d.Teilnehmer.trim());
+                if(d.Begegnung && d.Begegnung.includes(':')) {
+                    const parts = d.Begegnung.split(':');
+                    if(parts[0]) teams.add(parts[0].trim());
+                    if(parts[1]) teams.add(parts[1].trim());
+                }
+            });
+
+            const sortedTeams = Array.from(teams).sort();
+            sortedTeams.forEach(team => {
+                const opt = document.createElement('option');
+                opt.value = team;
+                opt.innerText = team;
+                selector.appendChild(opt);
+            });
+
+            if(sortedTeams.length > 0) {
+                selector.value = sortedTeams[0];
+                updateTeamDashboard(sortedTeams[0]);
+            }
+        }
+
+        function updateTeamDashboard(teamName) {
+            const matches = rawData.filter(d => d.Begegnung && d.Begegnung.includes(teamName));
+            document.getElementById('t-spiele').innerText = matches.length;
+
+            let goalsFor = 0;
+            let goalsAgainst = 0;
+            let homeGames = 0;
+            let awayGames = 0;
+            let wins = 0;
+            let draws = 0;
+            let losses = 0;
+            
+            let maxWinDiff = -1;
+            let maxWinStr = "-";
+            let maxLossDiff = -1;
+            let maxLossStr = "-";
+            
+            const teamGrounds = new Set();
+            const uniqueSpielorte = new Set();
+            const comps = {};
+            const opponents = {};
+            const groundsFreq = {};
+            const viewerCounts = [];
+
+            matches.forEach(m => {
+                if(!m.Ergebnis || !m.Ergebnis.includes(':')) return;
+                const parts = m.Begegnung.split(':');
+                if (parts.length < 2) return;
+
+                const isHome = parts[0].trim() === teamName;
+                if(isHome) homeGames++; else awayGames++;
+
+                const resParts = m.Ergebnis.split(':');
+                const gHome = parseInt(resParts[0]) || 0;
+                const gAway = parseInt(resParts[1]) || 0;
+
+                const tGoals = isHome ? gHome : gAway;
+                const oGoals = isHome ? gAway : gHome;
+
+                goalsFor += tGoals;
+                goalsAgainst += oGoals;
+
+                if(tGoals > oGoals) {
+                    wins++;
+                    const diff = tGoals - oGoals;
+                    if(diff > maxWinDiff) {
+                        maxWinDiff = diff;
+                        maxWinStr = `${m.Begegnung} / ${m.Ergebnis}`;
+                    }
+                } else if(tGoals === oGoals) {
+                    draws++;
+                } else {
+                    losses++;
+                    const diff = oGoals - tGoals;
+                    if(diff > maxLossDiff) {
+                        maxLossDiff = diff;
+                        maxLossStr = `${m.Begegnung} / ${m.Ergebnis}`;
+                    }
+                }
+
+                if(m.Stadion) {
+                    teamGrounds.add(m.Stadion.trim());
+                    groundsFreq[m.Stadion.trim()] = (groundsFreq[m.Stadion.trim()] || 0) + 1;
+                }
+                if(m.Spielort) uniqueSpielorte.add(m.Spielort.trim());
+                if(m.Wettbewerb) comps[m.Wettbewerb.trim()] = (comps[m.Wettbewerb.trim()] || 0) + 1;
+                
+                const opp = isHome ? parts[1].trim() : parts[0].trim();
+                opponents[opp] = (opponents[opp] || 0) + 1;
+
+                if(m.Zuschauer) {
+                    const cleanViewer = parseInt(String(m.Zuschauer).replace(/\D/g, ''));
+                    if(!isNaN(cleanViewer)) viewerCounts.push(cleanViewer);
+                }
+            });
+
+            document.getElementById('t-tore-gegentore').innerText = `${goalsFor}:${goalsAgainst}`;
+            document.getElementById('t-heim').innerText = homeGames;
+            document.getElementById('t-auswaerts').innerText = awayGames;
+            document.getElementById('t-wld').innerText = `${wins} / ${draws} / ${losses}`;
+            document.getElementById('t-max-win').innerText = maxWinStr;
+            document.getElementById('t-max-loss').innerText = maxLossStr;
+            document.getElementById('t-laender').innerText = uniqueSpielorte.size > 0 ? uniqueSpielorte.size : "1";
+
+            if(viewerCounts.length > 0) {
+                const minV = Math.min(...viewerCounts);
+                const maxV = Math.max(...viewerCounts);
+                const avgV = Math.round(viewerCounts.reduce((a,b)=>a+b, 0) / viewerCounts.length);
+                document.getElementById('t-zuschauer').innerText = `${minV} / ${avgV} / ${maxV}`;
+            } else {
+                document.getElementById('t-zuschauer').innerText = "0 / 0 / 0";
+            }
+
+            const topComp = Object.keys(comps).reduce((a, b) => comps[a] > comps[b] ? a : b, "-");
+            document.getElementById('t-top-comp').innerText = topComp !== "-" ? `${comps[topComp]}x ${topComp}` : "-";
+            
+            const topOpp = Object.keys(opponents).reduce((a, b) => opponents[a] > opponents[b] ? a : b, "-");
+            document.getElementById('t-top-opp').innerText = topOpp !== "-" ? `${opponents[topOpp]}x ${topOpp}` : "-";
+
+            const topGround = Object.keys(groundsFreq).reduce((a, b) => groundsFreq[a] > groundsFreq[b] ? a : b, "-");
+            document.getElementById('t-top-ground').innerText = topGround !== "-" ? `${groundsFreq[topGround]}x ${topGround}` : "-";
+
+            // Neue Grounds entspricht hier der Anzahl der einzigartigen besuchten Stadien dieses Teams
+            document.getElementById('t-grounds-count').innerText = `${teamGrounds.size} / ${teamGrounds.size}`;
+            document.getElementById('t-wettbewerbe').innerText = Object.keys(comps).length;
+        }
+
+        function buildGlobalCharts() {
+            // 1. Untergrund Verteilung
+            const surfaces = {};
+            rawData.forEach(d => { if(d.Untergrund) surfaces[d.Untergrund.trim()] = (surfaces[d.Untergrund.trim()] || 0) + 1; });
+            
+            new Chart(document.getElementById('surfaceChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(surfaces),
+                    datasets: [{
+                        data: Object.values(surfaces),
+                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#f8fafc', font: { size: 11 } } }
+                    }
+                }
+            });
+
+            // 2. Saison Chart
+            const seasons = {};
+            rawData.forEach(d => { if(d.Saison) seasons[d.Saison.trim()] = (seasons[d.Saison.trim()] || 0) + 1; });
+            
+            new Chart(document.getElementById('seasonChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(seasons),
+                    datasets: [{
+                        data: Object.values(seasons),
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8', stepSize: 1 } }
+                    }
+                }
+            });
+
+            // 3. Top Grounds Liste
+            const groundsCount = {};
+            rawData.forEach(d => { if(d.Stadion) groundsCount[d.Stadion.trim()] = (groundsCount[d.Stadion.trim()] || 0) + 1; });
+            const sortedGrounds = Object.entries(groundsCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
+            
+            const tbody = document.querySelector('#top-grounds-table tbody');
+            sortedGrounds.forEach(g => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${g[0]}</td><td><strong>${g[1]}</strong></td>`;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderRecentGames() {
+            const tbody = document.querySelector('#recent-games-table tbody');
+            const recent = rawData.slice(-5).reverse();
+            recent.forEach(g => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${g.Datum || '-'}</td>
+                    <td>${g.Begegnung || '-'}</td>
+                    <td>${g.Ergebnis || '-'}</td>
+                    <td>${g.Stadion || '-'}</td>
+                    <td>${g.Wettbewerb || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
