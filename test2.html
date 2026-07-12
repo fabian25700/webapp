@@ -94,7 +94,6 @@
             gap: 10px;
         }
 
-        /* Dynamische Layout-Anpassung für MacBook / größere Bildschirme */
         @media (min-width: 768px) {
             .menu-container {
                 max-width: 800px;
@@ -127,7 +126,6 @@
             cursor: pointer;
         }
 
-        /* Prominentes Design für die Top-Favoriten */
         .grid-section.top-cards .menu-card {
             padding: 20px 24px;
             border-left: 4px solid var(--primary);
@@ -135,7 +133,6 @@
 
         .menu-card:active { transform: scale(0.97); background: var(--card-hover); }
 
-        /* Hover-Effekt optimiert für MacBook (Maus) */
         @media (hover: hover) {
             .menu-card:hover {
                 transform: translateY(-2px);
@@ -150,16 +147,6 @@
         
         @media (hover: hover) {
             .menu-card:hover .arrow { transform: translateX(4px); }
-        }
-
-        .badge {
-            font-size: 0.7rem;
-            background: var(--bg);
-            color: var(--text-secondary);
-            padding: 2px 6px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            font-weight: 600;
         }
     </style>
 </head>
@@ -185,7 +172,7 @@
     </main>
 
     <script>
-        // Definition aller verfügbaren Apps/Links
+        // Definition aller verfügbaren Apps/Links inklusive der Neuzugänge
         const APPS = [
             { id: "reisen", title: "Reisen", icon: "🌍", url: "reise_stats.html" },
             { id: "habits", title: "Habits", icon: "📊", url: "https://fabian25700.github.io/webapp/habits2.html" },
@@ -196,10 +183,12 @@
             { id: "imposter", title: "Imposter", icon: "🕵️‍♂️", url: "imposter.html" },
             { id: "gastspiel", title: "Gastspiel", icon: "⚽", url: "gastspiel2.html" },
             { id: "kcrakete", title: "KC Rakete", icon: "🚀", url: "https://bit.ly/m/kcrakete" },
-            { id: "test", title: "Test", icon: "🧪", url: "test.html" }
+            { id: "test", title: "Test", icon: "🧪", url: "test.html" },
+            { id: "test2", title: "Test 2", icon: "🧪", url: "test2.html" },
+            { id: "spiele", title: "Spiele", icon: "🎮", url: "spiele.html" },
+            { id: "familie", title: "Familie", icon: "🏢", url: "familie.html" }
         ];
 
-        // Lädt die Klick-Statistiken aus dem LocalStorage
         function getStats() {
             const defaults = {};
             APPS.forEach(app => { defaults[app.id] = { count: 0, lastUsed: 0 }; });
@@ -207,7 +196,6 @@
             return stored ? JSON.parse(stored) : defaults;
         }
 
-        // Registriert einen Klick und aktualisiert die Metriken
         function trackClick(id) {
             const stats = getStats();
             if (stats[id]) {
@@ -217,17 +205,14 @@
             }
         }
 
-        // Rendert das Menü basierend auf der Nutzungsauswertung
         function renderMenu() {
             const stats = getStats();
-            
-            // Berechne einen Score: Kombination aus Häufigkeit (Gewichtung 70%) und Aktualität (Gewichtung 30%)
             const now = Date.now();
+            
             const sortedApps = [...APPS].sort((a, b) => {
                 const statA = stats[a.id] || { count: 0, lastUsed: 0 };
                 const statB = stats[b.id] || { count: 0, lastUsed: 0 };
                 
-                // Score für Aktualität (Zeitdifferenz-Faktor)
                 const recencyA = statA.lastUsed ? (1 / (now - statA.lastUsed + 1)) : 0;
                 const recencyB = statB.lastUsed ? (1 / (now - statB.lastUsed + 1)) : 0;
                 
@@ -237,7 +222,6 @@
                 return scoreB - scoreA;
             });
 
-            // Die Top 4 landen im oberen Bereich, der Rest unten
             const frequentApps = sortedApps.slice(0, 4);
             const otherApps = sortedApps.slice(4);
 
@@ -248,35 +232,29 @@
             othersContainer.innerHTML = "";
 
             frequentApps.forEach(app => {
-                freqContainer.appendChild(createCard(app, true, stats[app.id]?.count || 0));
+                freqContainer.appendChild(createCard(app));
             });
 
             otherApps.forEach(app => {
-                othersContainer.appendChild(createCard(app, false, 0));
+                othersContainer.appendChild(createCard(app));
             });
         }
 
-        // Erstellt das HTML für eine einzelne Karte
-        function createCard(app, isFrequent, count) {
+        function createCard(app) {
             const card = document.createElement("a");
             card.href = app.url;
             card.className = "menu-card";
             
-            // Event-Listener für das Tracking vor dem Weiterleiten
             card.addEventListener("click", () => trackClick(app.id));
-
-            let badgeHTML = (isFrequent && count > 0) ? `<span class="badge">${count}×</span>` : "";
 
             card.innerHTML = `
                 <span class="icon">${app.icon}</span>
                 <span class="title">${app.title}</span>
-                ${badgeHTML}
                 <span class="arrow">→</span>
             `;
             return card;
         }
 
-        // Initialisierung
         window.addEventListener("DOMContentLoaded", renderMenu);
     </script>
 </body>
