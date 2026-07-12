@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>🎮 Spiele</title>
+    <style>
+        :root {
+            --bg: #f0f2f5;
+            --surface: rgba(255, 255, 255, 0.95);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: rgba(203, 213, 225, 0.8);
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --bubble-shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: rgba(30, 41, 59, 0.95);
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: rgba(51, 65, 85, 0.8);
+                --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+                --bubble-shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.6);
+            }
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            -webkit-tap-highlight-color: transparent;
+            transition: background 0.3s ease;
+        }
+
+        header {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 16px);
+            left: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            z-index: 500;
+            pointer-events: none;
+        }
+
+        .btn {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            pointer-events: auto;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .btn:active { transform: scale(0.95); }
+
+        main {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #bubble-arena {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            height: 100%;
+            max-height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bubble {
+            position: absolute;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            text-align: center;
+            
+            /* Basisgröße der Bubbles */
+            width: calc(var(--score-factor, 1) * 110px);
+            height: calc(var(--score-factor, 1) * 110px);
+            min-width: 95px;
+            min-height: 95px;
+            max-width: 175px;
+            max-height: 175px;
+        }
+
+        .bubble:active { transform: scale(0.93) !important; }
+
+        @media (hover: hover) {
+            .bubble:hover {
+                border-color: var(--text-secondary);
+                box-shadow: var(--bubble-shadow-hover);
+                z-index: 10;
+            }
+        }
+
+        .bubble-icon {
+            font-size: calc(var(--score-factor, 1) * 1.8rem);
+            min-size: 1.6rem;
+            max-size: 2.5rem;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .bubble-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: calc(var(--score-factor, 1) * 0.9rem);
+            min-size: 0.8rem;
+            max-size: 1.1rem;
+            padding: 0 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="btn">← Zurück</a>
+    </header>
+
+    <main>
+        <div id="bubble-arena">
+            </div>
+    </main>
+
+    <script>
+        const GAMES = [
+            { id: "snake", title: "Snake", icon: "🐍", url: "snake.html" },
+            { id: "imposter", title: "Imposter", icon: "🕵️‍♂️", url: "imposter.html" },
+            { id: "darts", title: "Darts", icon: "🎯", url: "darts.html" }
+        ];
+
+        function getStats() {
+            const defaults = {};
+            GAMES.forEach(g => { defaults[g.id] = { count: 0, lastUsed: 0 }; });
+            const stored = localStorage.getItem("fabians_games_stats");
+            return stored ? JSON.parse(stored) : defaults;
+        }
+
+        function trackClick(id) {
+            const stats = getStats();
+            if (stats[id]) {
+                stats[id].count += 1;
+                stats[id].lastUsed = Date.now();
+                localStorage.setItem("fabians_games_stats", JSON.stringify(stats));
+            }
+        }
+
+        function renderBubbles() {
+            const stats = getStats();
+            const now = Date.now();
+            const arena = document.getElementById("bubble-arena");
+            arena.innerHTML = "";
+
+            // Berechne Scores für Skalierung und Sortierung
+            const gamesWithScores = GAMES.map(game => {
+                const stat = stats[game.id] || { count: 0, lastUsed: 0 };
+                const recency = stat.lastUsed ? (1 / (now - stat.lastUsed + 1)) : 0;
+                const score = (stat.count * 0.7) + (recency * 1000000 * 0.3);
+                return { ...game, score };
+            });
+
+            // Ermittle Min und Max Scores für die proportionale Skalierung
+            const scores = gamesWithScores.map(g => g.score);
+            const maxScore = Math.max(...scores);
+            const minScore = Math.min(...scores);
+
+            // Generiere zufällige Startwinkel für die Anordnung im Kreis
+            let angles = [0, 120, 240].map(a => a + (Math.random() * 40 - 20)); 
+            // Mische die Winkel zufällig durch
+            angles = angles.sort(() => Math.random() - 0.5);
+
+            gamesWithScores.forEach((game, index) => {
+                // Bestimme den Größen-Skalierungsfaktor (Wert zwischen 0.9 und 1.55)
+                let factor = 1.0;
+                if (maxScore !== minScore) {
+                    factor = 0.9 + ((game.score - minScore) / (maxScore - minScore)) * 0.65;
+                } else if (maxScore > 0) {
+                    factor = 1.2; // Fallback wenn alle Scores identisch aber > 0 sind
+                }
+
+                const bubble = document.createElement("a");
+                bubble.href = game.url;
+                bubble.className = "bubble";
+                bubble.style.setProperty("--score-factor", factor);
+
+                // Physik/Trigonometrie für Kreisplatzierung (Radius verschiebt sich leicht nach Displaygröße)
+                const isMobile = window.innerWidth < 768;
+                const radius = isMobile ? 85 : 130;
+                const angleRad = (angles[index] * Math.PI) / 180;
+                
+                const posX = Math.cos(angleRad) * radius;
+                const posY = Math.sin(angleRad) * radius;
+
+                // Positionierung per CSS Transform umsetzen
+                bubble.style.transform = `translate(${posX}px, ${posY}px)`;
+
+                bubble.addEventListener("click", () => trackClick(game.id));
+
+                bubble.innerHTML = `
+                    <span class="bubble-icon">${game.icon}</span>
+                    <span class="bubble-title">${game.title}</span>
+                `;
+
+                arena.appendChild(bubble);
+            });
+        }
+
+        window.addEventListener("DOMContentLoaded", renderBubbles);
+        window.addEventListener("resize", renderBubbles);
+    </script>
+</body>
+</html>
