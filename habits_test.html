@@ -375,6 +375,40 @@
         .switch-content { display: none; }
         .switch-content.active { display: flex; flex-direction: column; }
 
+        /* Styles für die Detail-Unterseite */
+        .routine-detail-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+            z-index: 200;
+            display: none;
+            flex-direction: column;
+            overflow-y: auto;
+            padding-bottom: 40px;
+        }
+        .routine-detail-overlay.active { display: flex; }
+        
+        .detail-header-btn {
+            background: none; border: none; font-size: 1.5rem; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+
+        .stats-card-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .detail-history-list { display: flex; flex-direction: column; gap: 8px; }
+        .history-row-item {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+            padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow);
+        }
+        .history-date-label { font-size: 0.9rem; font-weight: 700; }
+        .history-status-indicator { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; padding: 4px 10px; border-radius: 8px; }
+        .history-status-indicator.ja { background: var(--success-soft); color: var(--success); }
+        .history-status-indicator.nein { background: var(--danger-soft); color: var(--danger); }
+
+        .routine-trigger-icon-btn {
+            background: var(--border-light); border: 1px solid var(--border); width: 28px; height: 28px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; font-size: 0.75rem;
+        }
+        .routine-trigger-icon-btn:active { background: var(--border); }
+
         @media (max-width: 420px) {
             .main-view-switch { width: 150px; }
             .main-switch-btn { font-size: 0.72rem; }
@@ -393,7 +427,7 @@
 
 <div class="toast-notification" id="toast-notice">Habit erledigt, weiter so!</div>
 
-<header>
+<header id="main-app-header">
     <div class="header-top">
         <div class="header-left">
             <a href="index.html" class="back-container">
@@ -413,24 +447,24 @@
 
 <div class="cloud-error-banner" id="cloud-error-box">Sync-Fehler: Keine Verbindung zur Cloud möglich.</div>
 
-<div class="outside-switch-area">
+<div class="outside-switch-area" id="main-app-mode-switch">
     <div class="apple-switch-container" id="mode-switch-wrapper">
         <button class="apple-switch-btn active" id="mode-zuhause" onclick="setGlobalMode('zuhause')" title="Zuhause">🏡</button>
         <button class="apple-switch-btn" id="mode-unterwegs" onclick="setGlobalMode('unterwegs')" title="Unterwegs">🧳</button>
     </div>
 </div>
 
-<main>
+<main id="main-app-content">
     <div id="view-tracker" class="view-section active">
         <div class="category-group" data-routine="TwoDayRule" id="routine-block-TwoDayRule">
-            <div class="category-header" style="cursor: default;">
+            <div class="category-header" onclick="openRoutineDetail('TwoDayRule')">
                 <div class="category-title"><div class="category-icon">⚡</div><span>2-Day Rule</span></div>
                 <div class="category-meta">
                     <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-heute"></span></div>
                     <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-gestern"></span></div>
                     <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-vorgestern"></span></div>
                 </div>
-                <div class="arrow" style="visibility: hidden;">▼</div>
+                <div class="routine-trigger-icon-btn">📊</div>
             </div>
             <div class="category-content" data-habits='[]'></div>
         </div>
@@ -510,6 +544,64 @@
         </div>
     </div>
 </main>
+
+<div class="routine-detail-overlay" id="routine-detail-screen">
+    <header style="position: sticky; top: 0;">
+        <div class="header-top">
+            <div class="header-left">
+                <button onclick="closeRoutineDetail()" class="back-container" style="background:none; border:none; cursor:pointer;">
+                    <div class="back-btn">&larr;</div>
+                    <span id="detail-back-label">Zurück</span>
+                </button>
+            </div>
+            <div class="header-switch-container">
+                <span id="detail-header-title" style="font-weight: 800; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px;">Routine</span>
+            </div>
+            <div class="header-right" id="detail-cloud-status" style="color: var(--text-secondary);">Fokus-Statistik</div>
+        </div>
+    </header>
+
+    <main style="padding-top: 20px; display: flex; flex-direction: column; gap: 16px;">
+        <div class="stats-card-row">
+            <div class="kpi-card" style="height: 80px;">
+                <div class="kpi-value" id="detail-kpi-success-rate">0%</div>
+                <div class="kpi-label">Erfüllung</div>
+            </div>
+            <div class="kpi-card" style="height: 80px;">
+                <div class="kpi-value" id="detail-kpi-streak">0 T</div>
+                <div class="kpi-label">Akt. Streak</div>
+            </div>
+            <div class="kpi-card" style="height: 80px;">
+                <div class="kpi-value" id="detail-kpi-max-streak">0 T</div>
+                <div class="kpi-label">Max. Streak</div>
+            </div>
+        </div>
+
+        <div class="section-block">
+            <h3 class="kpi-label" style="text-align: left; color: var(--text-primary);">Letzte 7 Tage</h3>
+            <div class="matrix-grid" style="margin-top: 4px;">
+                <div class="days-header">
+                    <div class="days-header-spacer"></div>
+                    <div class="days-header-labels" id="detail-matrix-days"></div>
+                </div>
+                <div class="matrix-row">
+                    <div class="matrix-label" id="detail-matrix-label-text">Status</div>
+                    <div class="matrix-cells" id="detail-matrix-cells-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-block" id="detail-kpi-synergies-card">
+            <h3 class="kpi-label" style="text-align: left; color: var(--text-primary); margin-bottom: 4px;">Routine Kausalitäten & Synergien</h3>
+            <div id="detail-insights-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+
+        <div class="section-block">
+            <h3 class="kpi-label" style="text-align: left; color: var(--text-primary); margin-bottom: 4px;">Vollständige Historie</h3>
+            <div class="detail-history-list" id="detail-history-container"></div>
+        </div>
+    </main>
+</div>
 
 <div id="routine-templates" style="display: none;"></div>
 
@@ -712,19 +804,25 @@
 
             activeContainer.innerHTML += `
                 <div class="category-group" data-routine="${routineName}" id="routine-block-${routineName}">
-                    <div class="category-header" onclick="toggleGroup(this)">
+                    <div class="category-header" onclick="handleCategoryHeaderClick(event, this, '${routineName}')">
                         <div class="category-title"><div class="category-icon">${config.icon}</div><span>${routineName}</span><span id="progress-info-${routineName}" style="font-size: 0.72rem; font-weight: 500; color: var(--text-secondary); margin-left: 6px; text-transform: none; letter-spacing: normal;"></span></div>
                         <div class="category-meta">
                             <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-heute"></span></div>
                             <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-gestern"></span></div>
                             <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-vorgestern"></span></div>
                         </div>
-                        <div class="arrow">▼</div>
+                        <div class="routine-trigger-icon-btn" onclick="event.stopPropagation(); openRoutineDetail('${routineName}')">📊</div>
                     </div>
                     <div class="category-content">${habitsHtml}</div>
                 </div>
             `;
         });
+    }
+
+    function handleCategoryHeaderClick(event, header, routineName) {
+        // Verhindert das Aufklappen, wenn das 📊 Icon geklickt wird
+        if (event.target.classList.contains('routine-trigger-icon-btn')) return;
+        toggleGroup(header);
     }
 
     function applyGlobalModeToDOM() {
@@ -1037,7 +1135,6 @@
                 });
 
                 updateTwoDayRuleStatus();
-                updateGlobalProgress();
                 updateCloudStatus("Cloud Live");
                 
                 if (document.getElementById('view-stats').classList.contains('active')) {
@@ -1078,6 +1175,110 @@
         });
     }
 
+    // Hilfsfunktion zur Ermittlung aller Kausalitäten
+    function calculateInsights(historyArray) {
+        const insights = [];
+        routineNamesOrdered.forEach(triggerRoutine => {
+            routineNamesOrdered.forEach(targetRoutine => {
+                if (triggerRoutine === targetRoutine) return;
+                
+                let isAllowedPath = false;
+                let isTimeShifted = false;
+
+                if (triggerRoutine === "Morgenroutine") {
+                    isAllowedPath = true;
+                    isTimeShifted = false;
+                } else if (["Schlafroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(triggerRoutine) && ["Schlafroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(targetRoutine)) {
+                    isAllowedPath = true;
+                    isTimeShifted = false;
+                }
+                
+                if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(triggerRoutine) && targetRoutine !== "Morgenroutine" && triggerRoutine !== "Schlafroutine") {
+                    if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(targetRoutine)) {
+                        isAllowedPath = true;
+                        isTimeShifted = true;
+                    }
+                }
+
+                if (triggerRoutine === "Abendroutine") {
+                    if (targetRoutine === "Schlafroutine") {
+                        isAllowedPath = true;
+                        isTimeShifted = false; 
+                    } else {
+                        isAllowedPath = true;
+                        isTimeShifted = true; 
+                    }
+                }
+
+                if (!isAllowedPath) return;
+
+                let triggerJaCount = 0;
+                let targetAlsoJaCount = 0;
+
+                for (let i = 1; i < historyArray.length; i++) {
+                    const currentRow = historyArray[i]; 
+                    const nextDayRow = historyArray[i - 1]; 
+                    
+                    if (isTimeShifted) {
+                        if (currentRow.routinen && currentRow.routinen[triggerRoutine] && nextDayRow.routinen && nextDayRow.routinen[targetRoutine]) {
+                            if (currentRow.routinen[triggerRoutine].toLowerCase() === 'ja') {
+                                triggerJaCount++;
+                                if (nextDayRow.routinen[targetRoutine].toLowerCase() === 'ja') targetAlsoJaCount++;
+                            }
+                        }
+                    } else {
+                        if (currentRow.routinen && currentRow.routinen[triggerRoutine] && currentRow.routinen[targetRoutine]) {
+                            if (currentRow.routinen[triggerRoutine].toLowerCase() === 'ja') {
+                                triggerJaCount++;
+                                if (currentRow.routinen[targetRoutine].toLowerCase() === 'ja') targetAlsoJaCount++;
+                            }
+                        }
+                    }
+                }
+
+                if (triggerJaCount >= 2) {
+                    const probability = Math.round((targetAlsoJaCount / triggerJaCount) * 100);
+                    if (probability >= 70) {
+                        let contextDesc = isTimeShifted ? "am Folgetag" : "am selben Tag";
+                        if (triggerRoutine === "Abendroutine" && targetRoutine === "Schlafroutine") {
+                            contextDesc = "in der Nacht";
+                        }
+                        insights.push({ 
+                            trigger: triggerRoutine, 
+                            target: targetRoutine, 
+                            prob: probability, 
+                            context: contextDesc
+                        });
+                    }
+                }
+            });
+        });
+        return insights;
+    }
+
+    // Hilfsfunktion zur Ermittlung aller Synergie-Kombinationen
+    function calculateClusters(historyArray) {
+        const clusters = [];
+        for (let i = 0; i < routineNamesOrdered.length; i++) {
+            for (let j = i + 1; j < routineNamesOrdered.length; j++) {
+                const r1 = routineNamesOrdered[i]; const r2 = routineNamesOrdered[j];
+                let commonDays = 0; let totalActiveDays = historyArray.length;
+
+                historyArray.forEach(row => {
+                    if (row.routinen && row.routinen[r1] && row.routinen[r2]) {
+                        if (row.routinen[r1].toLowerCase() === 'ja' && row.routinen[r2].toLowerCase() === 'ja') commonDays++;
+                    }
+                });
+
+                if (commonDays >= 2) {
+                    const pairProb = Math.round((commonDays / totalActiveDays) * 100);
+                    clusters.push({ routine1: r1, routine2: r2, strength: pairProb, count: commonDays });
+                }
+            }
+        }
+        return clusters;
+    }
+
     function renderDashboard(historyArray) {
         const allKeysWithTdr = ["Schlafroutine", "Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "TwoDayRule"];
         
@@ -1101,7 +1302,6 @@
 
         const monthlyData = {};
         const weeklyData = {};
-        const chronologicalHistory = [...historyArray].reverse();
 
         historyArray.forEach(row => {
             if (!row.datum) return;
@@ -1180,83 +1380,7 @@
 
         const correlationContainer = document.getElementById('correlation-container');
         correlationContainer.innerHTML = '';
-        const insights = [];
-        
-        routineNamesOrdered.forEach(triggerRoutine => {
-            routineNamesOrdered.forEach(targetRoutine => {
-                if (triggerRoutine === targetRoutine) return;
-                
-                let isAllowedPath = false;
-                let isTimeShifted = false;
-
-                if (triggerRoutine === "Morgenroutine") {
-                    isAllowedPath = true;
-                    isTimeShifted = false;
-                } else if (["Schlafroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(triggerRoutine) && ["Schlafroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(targetRoutine)) {
-                    isAllowedPath = true;
-                    isTimeShifted = false;
-                }
-                
-                if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(triggerRoutine) && targetRoutine !== "Morgenroutine" && triggerRoutine !== "Schlafroutine") {
-                    if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(targetRoutine)) {
-                        isAllowedPath = true;
-                        isTimeShifted = true;
-                    }
-                }
-
-                if (triggerRoutine === "Abendroutine") {
-                    if (targetRoutine === "Schlafroutine") {
-                        isAllowedPath = true;
-                        isTimeShifted = false; 
-                    } else {
-                        isAllowedPath = true;
-                        isTimeShifted = true; 
-                    }
-                }
-
-                if (!isAllowedPath) return;
-
-                let triggerJaCount = 0;
-                let targetAlsoJaCount = 0;
-
-                for (let i = 1; i < historyArray.length; i++) {
-                    const currentRow = historyArray[i]; 
-                    const nextDayRow = historyArray[i - 1]; 
-                    
-                    if (isTimeShifted) {
-                        if (currentRow.routinen && currentRow.routinen[triggerRoutine] && nextDayRow.routinen && nextDayRow.routinen[targetRoutine]) {
-                            if (currentRow.routinen[triggerRoutine].toLowerCase() === 'ja') {
-                                triggerJaCount++;
-                                if (nextDayRow.routinen[targetRoutine].toLowerCase() === 'ja') targetAlsoJaCount++;
-                            }
-                        }
-                    } else {
-                        if (currentRow.routinen && currentRow.routinen[triggerRoutine] && currentRow.routinen[targetRoutine]) {
-                            if (currentRow.routinen[triggerRoutine].toLowerCase() === 'ja') {
-                                triggerJaCount++;
-                                if (currentRow.routinen[targetRoutine].toLowerCase() === 'ja') targetAlsoJaCount++;
-                            }
-                        }
-                    }
-                }
-
-                if (triggerJaCount >= 2) {
-                    const probability = Math.round((targetAlsoJaCount / triggerJaCount) * 100);
-                    if (probability >= 70) {
-                        let contextDesc = isTimeShifted ? "am Folgetag" : "am selben Tag";
-                        if (triggerRoutine === "Abendroutine" && targetRoutine === "Schlafroutine") {
-                            contextDesc = "in der Nacht";
-                        }
-                        insights.push({ 
-                            trigger: triggerRoutine, 
-                            target: targetRoutine, 
-                            prob: probability, 
-                            context: contextDesc
-                        });
-                    }
-                }
-            });
-        });
+        const insights = calculateInsights(historyArray);
 
         if (insights.length === 0) {
             correlationContainer.innerHTML = `<div class="insight-card"><div class="insight-title">⏳ Datenbasis wird aufgebaut</div><div class="insight-desc">Sobald valide Kausalitäten entstehen, siehst du hier deinen mächtigsten Hebel.</div></div>`;
@@ -1271,25 +1395,7 @@
 
         const clusterContainer = document.getElementById('cluster-container');
         clusterContainer.innerHTML = '';
-        const clusters = [];
-
-        for (let i = 0; i < routineNamesOrdered.length; i++) {
-            for (let j = i + 1; j < routineNamesOrdered.length; j++) {
-                const r1 = routineNamesOrdered[i]; const r2 = routineNamesOrdered[j];
-                let commonDays = 0; let totalActiveDays = historyArray.length;
-
-                historyArray.forEach(row => {
-                    if (row.routinen && row.routinen[r1] && row.routinen[r2]) {
-                        if (row.routinen[r1].toLowerCase() === 'ja' && row.routinen[r2].toLowerCase() === 'ja') commonDays++;
-                    }
-                });
-
-                if (commonDays >= 2) {
-                    const pairProb = Math.round((commonDays / totalActiveDays) * 100);
-                    clusters.push({ routine1: r1, routine2: r2, strength: pairProb, count: commonDays });
-                }
-            }
-        }
+        const clusters = calculateClusters(historyArray);
 
         if (clusters.length === 0) {
             clusterContainer.innerHTML = `<div class="insight-card"><div class="insight-title">⏳ Berechne Synergien...</div><div class="insight-desc">Hier erscheinen Kombinationen, die du besonders oft zusammen meisterst.</div></div>`;
@@ -1312,6 +1418,7 @@
         document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
 
         let totalRecoveryDays = 0; let recoveryTracksCount = 0; let maxRecoveryDays = 0; let currentGap = 0; let trackingGap = false;
+        const chronologicalHistory = [...historyArray].reverse();
         chronologicalHistory.forEach(row => {
             if (row.routinen && row.routinen["TwoDayRule"]) {
                 const status = row.routinen["TwoDayRule"].toLowerCase();
@@ -1348,7 +1455,7 @@
                 cellsHtml += `<div class="matrix-cell ${status}"></div>`;
             });
             const icon = routineIcons[routine] || "🎯";
-            rowsContainer.innerHTML += `<div class="matrix-row"><div class="matrix-label"><span class="perf-icon">${icon}</span><span class="perf-name">${routine}</span></div><div class="matrix-cells">${cellsHtml}</div></div>`;
+            rowsContainer.innerHTML += `<div class="matrix-row" onclick="openRoutineDetail('${routine}')" style="cursor: pointer;"><div class="matrix-label"><span class="perf-icon">${icon}</span><span class="perf-name">${routine}</span></div><div class="matrix-cells">${cellsHtml}</div></div>`;
         });
 
         const perfContainer = document.getElementById('routine-performance-container');
@@ -1357,9 +1464,160 @@
             const routineTotal = historyArray.length; const routineSuccess = routineSuccessCounts[routine] || 0;
             const pct = routineTotal > 0 ? Math.round((routineSuccess / routineTotal) * 100) : 0;
             const icon = routineIcons[routine] || "🎯";
-            perfContainer.innerHTML += `<div class="perf-item"><div class="perf-info"><span class="perf-icon">${icon}</span><span class="perf-name">${routine}</span></div><div class="perf-bar-wrapper"><div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div><span class="perf-pct">${pct}%</span></div></div>`;
+            perfContainer.innerHTML += `<div class="perf-item" onclick="openRoutineDetail('${routine}')" style="cursor: pointer;"><div class="perf-info"><span class="perf-icon">${icon}</span><span class="perf-name">${routine}</span></div><div class="perf-bar-wrapper"><div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div><span class="perf-pct">${pct}%</span></div></div>`;
         });
     }
 
+    // Detail-Unterseite Logik und Rendering
+    function openRoutineDetail(routineName) {
+        const detailScreen = document.getElementById('routine-detail-screen');
+        const mainHeader = document.getElementById('main-app-header');
+        const mainModeSwitch = document.getElementById('main-app-mode-switch');
+        const mainContent = document.getElementById('main-app-content');
+        
+        // Header anpassen
+        const icon = routineIcons[routineName] || "🎯";
+        document.getElementById('detail-header-title').innerHTML = `<span>${icon}</span> <span>${routineName}</span>`;
+        
+        // Berechne KPI Metriken für diese Routine
+        let successes = 0;
+        let totalDays = globalHistoryArray.length;
+        let currentStreak = 0;
+        let maxStreak = 0;
+        let tempStreak = 0;
+
+        // Kopiere Array chronologisch vorwärts, um Streaks exakt zu berechnen
+        const chronological = [...globalHistoryArray].reverse();
+
+        chronological.forEach(day => {
+            const status = (day.routinen && day.routinen[routineName] ? day.routinen[routineName] : "nein").toLowerCase();
+            if (status === "ja") {
+                successes++;
+                tempStreak++;
+                if (tempStreak > maxStreak) maxStreak = tempStreak;
+            } else {
+                tempStreak = 0;
+            }
+        });
+        
+        // Aktueller Streak (rückwärts von gestern aus prüfen)
+        let checkDate = new Date(); checkDate.setDate(checkDate.getDate() - 1); 
+        while (true) {
+            const checkDateStr = formatDateToString(checkDate);
+            const foundDay = globalHistoryArray.find(item => item.datum === checkDateStr);
+            if (foundDay && foundDay.routinen && foundDay.routinen[routineName] && foundDay.routinen[routineName].toLowerCase() === 'ja') {
+                currentStreak++; checkDate.setDate(checkDate.getDate() - 1);
+            } else { break; }
+        }
+
+        const successRate = totalDays > 0 ? Math.round((successes / totalDays) * 100) : 0;
+        document.getElementById('detail-kpi-success-rate').textContent = `${successRate}%`;
+        document.getElementById('detail-kpi-streak').textContent = `${currentStreak} T`;
+        document.getElementById('detail-kpi-max-streak').textContent = `${maxStreak} T`;
+
+        // Render 7-Tage Detail Matrix
+        const totalMatrixDays = 7;
+        const matrixDates = [];
+        const detailDaysHeader = document.getElementById('detail-matrix-days');
+        detailDaysHeader.innerHTML = '';
+        const detailCellsContainer = document.getElementById('detail-matrix-cells-container');
+        detailCellsContainer.innerHTML = '';
+
+        for (let i = 0; i < totalMatrixDays; i++) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            matrixDates.push(formatDateToString(d));
+            const dayName = d.toLocaleDateString('de-DE', { weekday: 'short' }).charAt(0);
+            detailDaysHeader.innerHTML += `<div class="day-label">${dayName}</div>`;
+        }
+
+        matrixDates.forEach(dateStr => {
+            const dayData = globalHistoryArray.find(item => item.datum === dateStr);
+            let status = 'nein';
+            if (dayData && dayData.routinen && dayData.routinen[routineName]) status = dayData.routinen[routineName].toLowerCase();
+            detailCellsContainer.innerHTML += `<div class="matrix-cell ${status}"></div>`;
+        });
+
+        // Filter und Render Kausalitäten & Synergien nur für diese Routine
+        const detailInsightsList = document.getElementById('detail-insights-list');
+        detailInsightsList.innerHTML = '';
+        
+        const allInsights = calculateInsights(globalHistoryArray);
+        const relevantInsights = allInsights.filter(ins => ins.trigger === routineName || ins.target === routineName);
+        
+        const allClusters = calculateClusters(globalHistoryArray);
+        const relevantClusters = allClusters.filter(c => c.routine1 === routineName || c.routine2 === routineName);
+
+        if (relevantInsights.length === 0 && relevantClusters.length === 0) {
+            detailInsightsList.innerHTML = `<div class="insight-card"><div class="insight-title">⏳ Berechne Wechselwirkungen...</div><div class="insight-desc">Sobald mehr historische Daten vorliegen, erscheinen hier die stärksten Kausalitäten dieser Routine.</div></div>`;
+        } else {
+            // Zeige Kausalität-Insights
+            relevantInsights.slice(0, 2).forEach(ins => {
+                const triggerIcon = routineIcons[ins.trigger] || "🎯";
+                const targetIcon = routineIcons[ins.target] || "🎯";
+                detailInsightsList.innerHTML += `
+                    <div class="insight-card">
+                        <div class="insight-title">${triggerIcon} ${ins.trigger} &rarr; ${targetIcon} ${ins.target}</div>
+                        <div class="insight-desc">Wahrscheinlichkeit: <strong>${ins.prob}%</strong> (${ins.context}).</div>
+                    </div>
+                `;
+            });
+            // Zeige Synergien
+            relevantClusters.slice(0, 1).forEach(c => {
+                const icon1 = routineIcons[c.routine1] || "🎯"; const icon2 = routineIcons[c.routine2] || "🎯";
+                detailInsightsList.innerHTML += `
+                    <div class="insight-card">
+                        <div class="insight-title">Synergie: ${icon1} ${c.routine1} + ${icon2} ${c.routine2}</div>
+                        <div class="insight-desc">Tritt in <strong>${c.strength}%</strong> der Tage gemeinsam auf.</div>
+                    </div>
+                `;
+            });
+        }
+
+        // Render Historienliste
+        const historyContainer = document.getElementById('detail-history-container');
+        historyContainer.innerHTML = '';
+
+        if (globalHistoryArray.length === 0) {
+            historyContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary); text-align:center; padding:10px;">Keine Historie vorhanden.</div>`;
+        } else {
+            globalHistoryArray.forEach(day => {
+                const status = (day.routinen && day.routinen[routineName] ? day.routinen[routineName] : "nein").toLowerCase();
+                const statusLabel = status === 'ja' ? 'Erfüllt' : 'Offen';
+                historyContainer.innerHTML += `
+                    <div class="history-row-item">
+                        <span class="history-date-label">${day.datum}</span>
+                        <span class="history-status-indicator ${status}">${statusLabel}</span>
+                    </div>
+                `;
+            });
+        }
+
+        // Hauptview ausblenden, Overlay einblenden
+        mainHeader.style.display = 'none';
+        mainModeSwitch.style.display = 'none';
+        mainContent.style.display = 'none';
+        detailScreen.classList.add('active');
+        window.scrollTo(0, 0);
+    }
+
+    function closeRoutineDetail() {
+        const detailScreen = document.getElementById('routine-detail-screen');
+        const mainHeader = document.getElementById('main-app-header');
+        const mainModeSwitch = document.getElementById('main-app-mode-switch');
+        const mainContent = document.getElementById('main-app-content');
+
+        detailScreen.classList.remove('active');
+        mainHeader.style.display = 'flex';
+        
+        // Modusschalter nur im Tracker-Modus wieder einblenden
+        const currentView = document.getElementById('view-btn-tracker').classList.contains('active') ? 'tracker' : 'stats';
+        mainModeSwitch.style.display = currentView === 'tracker' ? 'flex' : 'none';
+        
+        mainContent.style.display = 'flex';
+    }
+
     window.onload = initApp;
-</script
+</script>
+</body>
+</html>
