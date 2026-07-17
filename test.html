@@ -5,328 +5,1028 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Startseite</title>
-    <script src="daten.js"></script>
+    <title>Mein Budget</title>
     <style>
         :root {
-            --bg: linear-gradient(135deg, #e0e6ed 0%, #f4f6f9 100%);
-            --surface: rgba(255, 255, 255, 0.45);
+            --accent: #e67e22;
+            --accent-soft: rgba(230, 126, 34, 0.1);
+            --success: #27ae60;
+            --success-soft: rgba(39, 174, 96, 0.1);
+            --danger: #e74c3c;
+            --danger-soft: rgba(231, 76, 60, 0.1);
+            --bg: #f0f2f5;
+            --surface: #ffffff;
             --text-primary: #1e293b;
             --text-secondary: #64748b;
-            --glass-border: rgba(255, 255, 255, 0.6);
-            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06);
-            --bubble-shadow-hover: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
-            --highlight: radial-gradient(circle, rgba(243, 156, 18, 0.25) 0%, rgba(243, 156, 18, 0) 70%);
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --apple-switch-bg: #e3e3e6;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-                --surface: rgba(30, 41, 59, 0.45);
+                --bg: #0f172a;
+                --surface: #1e293b;
                 --text-primary: #f1f5f9;
                 --text-secondary: #94a3b8;
-                --glass-border: rgba(255, 255, 255, 0.08);
-                --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-                --bubble-shadow-hover: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
-                --highlight: radial-gradient(circle, rgba(243, 156, 18, 0.3) 0%, rgba(243, 156, 18, 0) 70%);
+                --border: #2d3f55;
+                --border-light: #253347;
+                --apple-switch-bg: #1c1c1e;
             }
         }
 
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
             background: var(--bg);
-            background-attachment: fixed;
-            margin: 0;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            color: var(--text-primary);
+            min-height: 100vh;
             -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
         }
 
         header {
-            padding: calc(env(safe-area-inset-top) + 24px) 20px 14px 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 500;
-        }
-
-        .header-title {
-            font-weight: 800;
-            font-size: 1.2rem;
-            letter-spacing: 0.06em;
-            color: var(--text-primary);
-        }
-
-        main {
-            flex: 1;
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #bubble-arena {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .bubble-wrapper {
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-
-        /* Hochwertiges Milchglas-Design ohne harten Rahmen */
-        .bubble {
+            position: sticky; top: 0; z-index: 100;
             background: var(--surface);
-            border: 1px solid var(--glass-border);
-            border-radius: 50%;
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 16px;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
             text-decoration: none;
+        }
+
+        .back-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .header-title-left {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .header-right {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        .container {
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Floating Action Button (FAB) */
+        .fab {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 60px;
+            height: 60px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(230, 126, 34, 0.4);
+            cursor: pointer;
+            z-index: 90;
+            border: none;
+            color: white;
+            transition: transform 0.2s;
+        }
+
+        .fab:active {
+            transform: scale(0.92);
+        }
+
+        .fab svg {
+            width: 28px;
+            height: 28px;
+            fill: currentColor;
+        }
+
+        /* Modal Overlay für Buchungen */
+        .modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 200;
+            display: none;
+            align-items: flex-end;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg);
+            width: 100%;
+            max-height: 90vh;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            padding: 20px;
+            overflow-y: auto;
+            box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .close-modal {
+            background: var(--border);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Segmented Controls */
+        .segmented-control {
+            display: flex;
+            background: var(--apple-switch-bg);
+            padding: 2px;
+            border-radius: 9px;
+            width: 100%;
+        }
+
+        .segmented-btn {
+            flex: 1;
+            padding: 8px 0;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .segmented-btn.active {
+            background: var(--surface);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Cards & Lists */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-title {
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .card-title-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .modal-content.income .card-icon {
+            background: var(--success-soft);
+            color: var(--success);
+        }
+
+        /* Inputs */
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .input-group:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .number-input {
+            width: 100%;
+            text-align: center;
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            font-size: 2.5rem;
+            font-weight: 800;
+            outline: none;
+            padding: 10px 0;
+        }
+
+        .modal-content.income .number-input { color: var(--success); }
+
+        .text-input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            outline: none;
+        }
+
+        .text-input:focus {
+            border-color: var(--accent);
+        }
+        
+        .modal-content.income .text-input:focus {
+            border-color: var(--success);
+        }
+
+        /* Category Grid */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .category-btn {
+            background: var(--bg);
+            border: 1px solid transparent;
+            border-radius: 14px;
+            padding: 14px 8px;
+            color: var(--text-primary);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease, box-shadow 0.2s ease;
+            gap: 8px;
             cursor: pointer;
-            text-align: center;
-            width: var(--bubble-size, 100px);
-            height: var(--bubble-size, 100px);
+            font-size: 0.8rem;
+            font-weight: 600;
         }
 
-        /* Subtile, rahmenlose Aura für die Top-Favoriten */
-        .bubble-wrapper.top-favorit::before {
-            content: '';
-            position: absolute;
-            width: calc(var(--bubble-size, 100px) * 1.5);
-            height: calc(var(--bubble-size, 100px) * 1.5);
-            background: var(--highlight);
-            pointer-events: none;
-            z-index: -1;
-            border-radius: 50%;
+        .category-btn svg {
+            width: 22px;
+            height: 22px;
+            fill: var(--text-secondary);
         }
 
-        .bubble:active { 
-            transform: scale(0.93) !important; 
-            background: rgba(255, 255, 255, 0.6);
+        .modal-content.expense .category-btn.selected {
+            background: var(--danger-soft);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+        .modal-content.expense .category-btn.selected svg { fill: var(--danger); }
+
+        .modal-content.income .category-btn.selected {
+            background: var(--success-soft);
+            border-color: var(--success);
+            color: var(--success);
+        }
+        .modal-content.income .category-btn.selected svg { fill: var(--success); }
+
+        /* Switches */
+        .option-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        @media (prefers-color-scheme: dark) {
-            .bubble:active {
-                background: rgba(30, 41, 59, 0.6);
-            }
+        .apple-switch {
+            position: relative;
+            display: inline-block;
+            width: 51px;
+            height: 31px;
         }
 
-        @media (hover: hover) {
-            .bubble-wrapper:hover .bubble {
-                background: rgba(255, 255, 255, 0.55);
-                box-shadow: var(--bubble-shadow-hover);
-                transform: translateY(-4px);
-            }
-            @media (prefers-color-scheme: dark) {
-                .bubble-wrapper:hover .bubble {
-                    background: rgba(30, 41, 59, 0.55);
-                }
-            }
-            .bubble-wrapper:hover {
-                z-index: 50;
-            }
+        .apple-switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--apple-switch-bg);
+            transition: .3s; border-radius: 34px;
         }
 
-        .bubble-icon {
-            font-size: calc(var(--bubble-size, 100px) * 0.26);
-            line-height: 1;
-            margin-bottom: 4px;
+        .slider:before {
+            position: absolute; content: ""; height: 27px; width: 27px; left: 2px; bottom: 2px;
+            background-color: white; transition: .3s; border-radius: 50%;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
         }
 
-        .bubble-title {
+        .modal-content.expense input:checked + .slider { background-color: var(--accent); }
+        .modal-content.income input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Action Buttons */
+        .inline-action-btn {
+            background: var(--border-light);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
             font-weight: 700;
+            cursor: pointer;
             color: var(--text-primary);
-            font-size: calc(var(--bubble-size, 100px) * 0.12);
-            padding: 0 6px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            width: 100%;
         }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .modal-content.expense .submit-btn { background: var(--accent); }
+        .modal-content.income .submit-btn { background: var(--success); }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 20px; height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            display: none;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Vorlagen Sub-Modal / Panel */
+        .templates-drawer {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg);
+            z-index: 210;
+            display: none;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .templates-drawer.active { display: flex; }
+
+        .template-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            margin-bottom: 10px;
+        }
+
+        .template-info { display: flex; flex-direction: column; gap: 4px; }
+        .template-title { font-weight: 700; font-size: 0.95rem; }
+        .template-meta { font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; }
+        .template-amount { font-weight: 700; font-size: 1rem; }
+        .template-amount.expense { color: var(--danger); }
+        .template-amount.income { color: var(--success); }
+
+        /* Dashboard & Stats Visuals */
+        .dashboard-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .dashboard-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .dashboard-row span:first-child { font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); }
+        .dashboard-row span:last-child { font-size: 1rem; font-weight: 700; }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%; height: 8px;
+            background: var(--border-light);
+            border-radius: 4px; margin-top: 10px; overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%; width: 0%; background: var(--accent); transition: width 0.5s ease;
+        }
+
+        /* Distribution Lists */
+        .dist-item {
+            display: flex; align-items: center; justify-content: space-between; padding: 8px 0; font-size: 0.9rem;
+        }
+        .dist-label { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+        .dist-value { font-weight: 700; }
+
+        .status-text-loader {
+            text-align: center; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; padding: 20px 0;
+        }
+
+        /* Visual Toast Feedback */
+        .toast {
+            position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px);
+            background: var(--success); color: white; padding: 12px 24px; border-radius: 30px;
+            font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            z-index: 300; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .toast.active { transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="header-title">FABIANS APP</div>
+        <div class="header-left">
+            <a href="index.html" class="back-btn" aria-label="Zurück">
+                <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            </a>
+            <div class="header-title-left">Mein Budget</div>
+        </div>
+        <div class="header-right" id="cloud-status-text">Cloud Live</div>
     </header>
 
-    <main>
-        <div id="bubble-arena">
+    <div class="container">
+        <!-- Hauptseite: Statistik & Dashboard -->
+        <section id="sect-dashboard" class="app-section active">
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-title-left">
+                        <div class="card-icon">📊</div>
+                        <span>Auswertung Gesamt</span>
+                    </div>
+                </div>
+                
+                <div class="dashboard-row">
+                    <span>Einnahmen</span>
+                    <span style="color: var(--success);" id="dash-income">0,00 €</span>
+                </div>
+                <div class="dashboard-row">
+                    <span>Ausgaben</span>
+                    <span style="color: var(--danger);" id="dash-expense">0,00 €</span>
+                </div>
+                <div class="dashboard-row" style="border-top: 1px dashed var(--border); padding-top: 16px; margin-top: 4px;">
+                    <span>Netto Saldo</span>
+                    <span id="dash-saldo">0,00 €</span>
+                </div>
+                <div class="progress-container">
+                    <div id="dash-progress" class="progress-bar"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-title-left">
+                        <div class="card-icon">🍕</div>
+                        <span>Verteilung Ausgaben</span>
+                    </div>
+                </div>
+                <div id="stats-distribution" style="display: flex; flex-direction: column;">
+                    <p class="status-text-loader">Lade Auswertungen...</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Floating Action Button -->
+    <button class="fab" onclick="openTrackingModal()" aria-label="Eintrag hinzufügen">
+        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+    </button>
+
+    <!-- Modal Maske: Tracken Einnahme / Ausgabe -->
+    <div id="tracking-modal" class="modal" onclick="closeTrackingModalOnOutsideClick(event)">
+        <div class="modal-content expense" id="modal-content-container">
+            <div class="modal-header">
+                <span class="modal-title">Eintrag tracken</span>
+                <button class="close-modal" onclick="closeTrackingModal()">×</button>
+            </div>
+
+            <div class="segmented-control">
+                <button class="segmented-btn active expense-toggle" onclick="setEntryType('expense')">Ausgabe</button>
+                <button class="segmented-btn income-toggle" onclick="setEntryType('income')">Einnahme</button>
+            </div>
+
+            <div class="card">
+                <div class="input-group">
+                    <input type="number" step="0.01" class="number-input" id="amount" placeholder="-0,00 €" onfocus="clearPlaceholder(this)" onblur="restorePlaceholder(this)">
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-title-left">
+                        <div class="card-icon">📝</div>
+                        <span>Details</span>
+                    </div>
+                    <button class="inline-action-btn" onclick="openTemplatesDrawer()">Vorlagen</button>
+                </div>
+                <div class="input-group">
+                    <label for="title">Titel</label>
+                    <input type="text" class="text-input" id="title" placeholder="z.B. REWE, Miete, Strom">
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-title-left">
+                        <div class="card-icon">📁</div>
+                        <span>Kategorie wählen</span>
+                    </div>
+                </div>
+                
+                <div id="grid-expense" class="category-grid">
+                    <button class="category-btn" onclick="selectCategory(this, 'Kleidung')">
+                        <svg viewBox="0 0 24 24"><path d="M18 5.15V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v1.15C4 5.6 3 7.18 3 9v11c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V9c0-1.82-1-3.4-3-3.85zM12 4h2v1h-2V4zM6 6h2v1H6V6zm12 14H6V9c0-.55.45-1 1-1h10c55 0 1 .45 1 1v11z"/></svg>
+                        Kleidung
+                    </button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Urlaub')">
+                        <svg viewBox="0 0 24 24"><path d="M10 21H4c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v6h-2V5H4v14h6v2zm12-4.5c0-2.5-2.5-4.5-5.5-4.5S11 14 11 16.5s2.5 4.5 5.5 4.5 5.5-2 5.5-4.5z"/></svg>
+                        Urlaub
+                    </button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Gesundheit')">
+                        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        Gesundheit
+                    </button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Freizeit')">
+                        <svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 21h2.1l1.9-8.2 2.1 2V21h2v-7.5l-2.1-2 .6-3c1 .8 2.4 1.5 4.1 1.5V8c-1.5 0-2.7-.6-3.5-1.5l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.6.1-.9.2L4.3 5.9V11h2V7.4l2.5-1.1"/></svg>
+                        Freizeit
+                    </button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Mobilität')">
+                        <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1-1.5 1zm11 0c-.83 0-1.5-.67-1.5-1s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1-1.5 1z"/></svg>
+                        Mobilität
+                    </button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Wohnen')">
+                        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                        Wohnen
+                    </button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Sonstiges')">
+                        <svg viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7c-.83 0-1.5-.67-1.5-1.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+                        Sonstiges
+                    </button>
+                </div>
+
+                <div id="grid-income" class="category-grid" style="display: none;">
+                    <button class="category-btn" onclick="selectCategory(this, 'Lohn')">
+                        <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                        Lohn
+                    </button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Sonstige')">
+                        <svg viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7c-.83 0-1.5-.67-1.5-1.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+                        Sonstige
+                    </button>
+                    <button class="category-btn" onclick="selectCategory(this, 'MG')">
+                        <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                        MG
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="option-row">
+                    <span class="option-title" style="font-weight: 600; font-size: 0.95rem;">Als Vorlage speichern</span>
+                    <label class="apple-switch">
+                        <input type="checkbox" id="is_template">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <button class="submit-btn" id="btn-submit-data" onclick="submitData()">
+                <div class="spinner" id="submit-spinner"></div>
+                <span id="submit-btn-text">Speichern</span>
+            </button>
         </div>
-    </main>
+    </div>
+
+    <!-- Vorlagen Drawer -->
+    <div id="templates-drawer" class="templates-drawer">
+        <div class="modal-header">
+            <span class="modal-title">Vorlage wählen</span>
+            <button class="close-modal" onclick="closeTemplatesDrawer()">×</button>
+        </div>
+        <div id="templates-list" style="display: flex; flex-direction: column; gap: 4px; overflow-y: auto; margin-top: 12px;">
+            <p class="status-text-loader">Lade Vorlagen...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="app-toast" class="toast">Erfolgreich gespeichert!</div>
+
+    <iframe id="api-handler" src="geld_api.html" style="display:none;"></iframe>
 
     <script>
-        const APPS = [
-            { id: "reisen", title: "Reisen", icon: "✈️", url: "reise_stats.html" },
-            { id: "habits", title: "Habits", icon: "📊", url: "habits.html" },
-            { id: "alkohol", title: "Alkohol", icon: "🍺", url: "alkohol.html" },
-            { id: "alltag", title: "Alltag", icon: "🏠", url: "Alltag.html" },
-            { id: "gastspiel", title: "Gastspiel", icon: "⚽", url: "gastspiel2.html" },
-            { id: "kcrakete", title: "KC Rakete", icon: "🚀", url: "https://bit.ly/m/kcrakete" },
-            { id: "test", title: "Test", icon: "🧪", url: "test.html" },
-            { id: "test2", title: "Test 2", icon: "⚗️", url: "test2.html" },
-            { id: "finanzen", title: "Finanzen", icon: "💰", url: "finanzen.html" },
-            { id: "spiele", title: "Spiele", icon: "🎮", url: "spiele.html" },
-            { id: "familie", title: "Familie", icon: "🧑‍🧑‍🧒‍🧒", url: "familie.html" },
-            { id: "hopping", title: "Hopping", icon: "⚽", url: "hopping.html" }
-        ];
+        let currentType = 'expense';
+        let selectedCategoryValue = '';
+        let apiEndpoint = '';
+        let cloudSyncTimeout = null;
+        let globalRawData = [];
 
-        function getStats() {
-            const defaults = {};
-            APPS.forEach(app => { defaults[app.id] = { count: 0, lastUsed: 0 }; });
-            const stored = localStorage.getItem("fabians_app_stats");
-            return stored ? JSON.parse(stored) : defaults;
-        }
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.type === 'SET_API_URL') {
+                apiEndpoint = event.data.url;
+                updateCloudStatus("Cloud Live");
+                loadTemplatesAndStats();
+            }
+        });
 
-        function trackClick(id) {
-            const stats = getStats();
-            if (stats[id]) {
-                stats[id].count += 1;
-                stats[id].lastUsed = Date.now();
-                localStorage.setItem("fabians_app_stats", JSON.stringify(stats));
+        function updateCloudStatus(status) {
+            const indicator = document.getElementById('cloud-status-text');
+            if (!indicator) return;
+            
+            if (cloudSyncTimeout && status !== "Cloud synced") {
+                clearTimeout(cloudSyncTimeout);
+                cloudSyncTimeout = null;
+            }
+
+            indicator.textContent = status;
+            if (status === "Cloud Fehler") {
+                indicator.style.color = "var(--danger)";
+            } else if (status === "Cloud synced") {
+                indicator.style.color = "var(--success)";
+                cloudSyncTimeout = setTimeout(() => {
+                    indicator.textContent = "Cloud Live";
+                    indicator.style.color = "var(--text-secondary)";
+                    cloudSyncTimeout = null;
+                }, 3000);
+            } else if (status === "Cloud lädt") {
+                indicator.style.color = "var(--accent)";
+            } else {
+                indicator.style.color = "var(--text-secondary)";
             }
         }
 
-        function renderMenu() {
-            const stats = getStats();
-            const now = Date.now();
-            const arena = document.getElementById("bubble-arena");
-            arena.innerHTML = "";
+        function openTrackingModal() {
+            document.getElementById('tracking-modal').classList.add('active');
+            setEntryType('expense');
+        }
 
-            const appsWithScores = APPS.map(app => {
-                const stat = stats[app.id] || { count: 0, lastUsed: 0 };
-                const recency = stat.lastUsed ? (1 / (now - stat.lastUsed + 1)) : 0;
-                const score = (stat.count * 0.7) + (recency * 1000000 * 0.3);
-                return { ...app, score };
-            });
+        function closeTrackingModal() {
+            document.getElementById('tracking-modal').classList.remove('active');
+        }
 
-            const sortedApps = [...appsWithScores].sort((a, b) => b.score - a.score);
+        function closeTrackingModalOnOutsideClick(e) {
+            if (e.target.id === 'tracking-modal') {
+                closeTrackingModal();
+            }
+        }
+
+        function openTemplatesDrawer() {
+            document.getElementById('templates-drawer').classList.add('active');
+            renderTemplates(globalRawData);
+        }
+
+        function closeTemplatesDrawer() {
+            document.getElementById('templates-drawer').classList.remove('active');
+        }
+
+        function showToast() {
+            const toast = document.getElementById('app-toast');
+            toast.classList.add('active');
+            setTimeout(() => { toast.classList.remove('active'); }, 2500);
+        }
+
+        function setEntryType(type) {
+            currentType = type;
+            const container = document.getElementById('modal-content-container');
+            const expGrid = document.getElementById('grid-expense');
+            const incGrid = document.getElementById('grid-income');
+            const amountInput = document.getElementById('amount');
             
-            const scores = sortedApps.map(a => a.score);
-            const maxScore = Math.max(...scores);
-            const minScore = Math.min(...scores);
+            document.querySelectorAll('.segmented-btn').forEach(b => b.classList.remove('active'));
+            
+            if(type === 'expense') {
+                container.className = "modal-content expense";
+                expGrid.style.display = 'grid';
+                incGrid.style.display = 'none';
+                document.querySelector('.expense-toggle').classList.add('active');
+                amountInput.placeholder = "-0,00 €";
+            } else {
+                container.className = "modal-content income";
+                expGrid.style.display = 'none';
+                incGrid.style.display = 'grid';
+                document.querySelector('.income-toggle').classList.add('active');
+                amountInput.placeholder = "+0,00 €";
+            }
+            selectedCategoryValue = '';
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
+        }
 
-            const isMobile = window.innerWidth < 768;
-            const isPortrait = window.innerHeight > window.innerWidth;
+        function selectCategory(btn, cat) {
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedCategoryValue = cat;
+        }
 
-            const baseSize = isMobile ? 96 : 115;
+        function clearPlaceholder(input) { input.placeholder = ''; }
+        function restorePlaceholder(input) { input.placeholder = currentType === 'expense' ? "-0,00 €" : "+0,00 €"; }
 
-            const stretchX = isPortrait ? 0.75 : 1.35;
-            const stretchY = isPortrait ? 1.45 : 0.75;
+        async function submitData() {
+            const amountEl = document.getElementById('amount');
+            const titleEl = document.getElementById('title');
+            const isTemplateEl = document.getElementById('is_template');
+            const submitBtn = document.getElementById('btn-submit-data');
+            const spinner = document.getElementById('submit-spinner');
+            const btnText = document.getElementById('submit-btn-text');
 
-            const centerRadius = isMobile ? 65 : 95;
-            const outerRadius = isMobile ? 155 : 230;
+            const amount = amountEl.value;
+            const title = titleEl.value;
+            const isTemplate = isTemplateEl.checked ? 'ja' : 'nein';
 
-            let centerAngles = [45, 135, 225, 315].map(a => a + (Math.random() * 15 - 7.5));
-            let outerAngles = [0, 45, 90, 135, 180, 225, 270, 315].map(a => a + (Math.random() * 20 - 10));
+            if(!amount || !selectedCategoryValue || !title) {
+                alert('Bitte Betrag, Titel und Kategorie wählen.');
+                return;
+            }
 
-            centerAngles = centerAngles.sort(() => Math.random() - 0.5);
-            outerAngles = outerAngles.sort(() => Math.random() - 0.5);
+            // UX UI Feedback beim Absenden aktivieren
+            submitBtn.disabled = true;
+            spinner.style.display = 'block';
+            btnText.textContent = "Übertrag läuft...";
+            updateCloudStatus("Cloud lädt");
 
-            const bubblesData = sortedApps.map((app, index) => {
-                const isTopFour = index < 4;
+            const adjustedAmount = currentType === 'expense' ? -Math.abs(parseFloat(amount)) : Math.abs(parseFloat(amount));
+            const now = new Date();
+            const datum = now.toLocaleDateString('de-DE');
+            const uhrzeit = now.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
 
-                let factor = 1.0;
-                if (maxScore !== minScore) {
-                    factor = 0.85 + ((app.score - minScore) / (maxScore - minScore)) * 0.55;
-                } else if (maxScore > 0) {
-                    factor = 1.15;
-                }
+            const payload = {
+                datum: datum,
+                uhrzeit: uhrzeit,
+                kategorie: selectedCategoryValue,
+                titel: title,
+                betrag: adjustedAmount,
+                vorlage: isTemplate
+            };
 
-                const finalSize = Math.round(baseSize * factor);
+            if(!apiEndpoint) {
+                alert('API URL fehlt.');
+                submitBtn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = "Speichern";
+                updateCloudStatus("Cloud Fehler");
+                return;
+            }
 
-                let posX, posY;
-                if (isTopFour) {
-                    const angleRad = (centerAngles[index] * Math.PI) / 180;
-                    posX = Math.cos(angleRad) * centerRadius * stretchX;
-                    posY = Math.sin(angleRad) * centerRadius * stretchY;
-                } else {
-                    const angleRad = (outerAngles[(index - 4) % outerAngles.length] * Math.PI) / 180;
-                    posX = Math.cos(angleRad) * outerRadius * stretchX;
-                    posY = Math.sin(angleRad) * outerRadius * stretchY;
-                }
+            try {
+                // Nutzung von redirect: 'follow' behebt potenzielle CORS/Fetch-Fehler bei Google App Script Web-Apps
+                await fetch(apiEndpoint, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    redirect: 'follow',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                updateCloudStatus("Cloud synced");
+                showToast();
 
-                return {
-                    app,
-                    isTopFour,
-                    size: finalSize,
-                    radius: finalSize / 2,
-                    x: posX,
-                    y: posY
-                };
-            });
+                // UI leeren & schließen
+                amountEl.value = '';
+                titleEl.value = '';
+                isTemplateEl.checked = false;
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
+                selectedCategoryValue = '';
+                
+                closeTrackingModal();
+                setTimeout(loadTemplatesAndStats, 400);
 
-            for (let step = 0; step < 12; step++) {
-                for (let i = 0; i < bubblesData.length; i++) {
-                    for (let j = i + 1; j < bubblesData.length; j++) {
-                        const b1 = bubblesData[i];
-                        const b2 = bubblesData[j];
+            } catch(e) {
+                console.error(e);
+                updateCloudStatus("Cloud Fehler");
+                alert('Fehler beim Speichern.');
+            } finally {
+                submitBtn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = "Speichern";
+            }
+        }
 
-                        const dx = b2.x - b1.x;
-                        const dy = b2.y - b1.y;
-                        const dist = Math.hypot(dx, dy);
-                        const minDist = b1.radius + b2.radius + 8;
+        async function loadTemplatesAndStats() {
+            if(!apiEndpoint) return;
+            try {
+                // redirect: 'follow' behebt Datenabbruch beim GET Request aus Google Sheets
+                const res = await fetch(apiEndpoint, { method: 'GET', redirect: 'follow' });
+                const data = await res.json();
+                
+                globalRawData = data;
+                renderTemplates(data);
+                renderStats(data);
+            } catch(e) {
+                console.error("Fehler beim Abruf der Daten:", e);
+                document.getElementById('stats-distribution').innerHTML = '<p class="status-text-loader" style="color:var(--danger)">Fehler beim Laden aus Google Sheets.</p>';
+            }
+        }
 
-                        if (dist < minDist) {
-                            const overlap = minDist - dist;
-                            const forceX = (dx / (dist || 1)) * (overlap * 0.5);
-                            const forceY = (dy / (dist || 1)) * (overlap * 0.5);
+        function renderTemplates(rows) {
+            const container = document.getElementById('templates-list');
+            if(!container) return;
+            container.innerHTML = '';
+            
+            const cache = new Set();
+            const uniqueTemplates = [];
 
-                            b1.x -= forceX;
-                            b1.y -= forceY;
-                            b2.x += forceX;
-                            b2.y += forceY;
+            if (rows && rows.length > 0) {
+                rows.forEach(row => {
+                    if(row.vorlage && row.vorlage.toLowerCase() === 'ja') {
+                        const identifier = `${row.titel}_${row.betrag}_${row.kategorie}`;
+                        if(!cache.has(identifier)) {
+                            cache.add(identifier);
+                            uniqueTemplates.push(row);
                         }
                     }
-                }
+                });
             }
 
-            bubblesData.forEach(b => {
-                const wrapper = document.createElement("div");
-                wrapper.className = "bubble-wrapper";
-                if (b.isTopFour) wrapper.classList.add("top-favorit");
-                wrapper.style.transform = `translate(${b.x}px, ${b.y}px)`;
+            if(uniqueTemplates.length === 0) {
+                container.innerHTML = '<p class="status-text-loader">Keine Vorlagen gespeichert.</p>';
+                return;
+            }
 
-                const bubble = document.createElement("a");
-                bubble.href = b.app.url;
-                bubble.className = "bubble";
-                bubble.style.setProperty("--bubble-size", `${b.size}px`);
+            uniqueTemplates.forEach(t => {
+                let cleanBetrag = t.betrag.toString().replace(',','.');
+                const val = parseFloat(cleanBetrag);
+                if (isNaN(val)) return;
 
-                bubble.addEventListener("click", () => trackClick(b.app.id));
-
-                bubble.innerHTML = `
-                    <span class="bubble-icon">${b.app.icon}</span>
-                    <span class="bubble-title">${b.app.title}</span>
+                const isExpense = val < 0;
+                const div = document.createElement('div');
+                div.className = 'template-item';
+                div.onclick = () => fillFromTemplate(t.titel, Math.abs(val), t.kategorie, isExpense ? 'expense' : 'income');
+                
+                div.innerHTML = `
+                    <div class="template-info">
+                        <span class="template-title">${t.titel}</span>
+                        <span class="template-meta">${t.kategorie}</span>
+                    </div>
+                    <span class="template-amount ${isExpense ? 'expense' : 'income'}">${Math.abs(val).toFixed(2).replace('.',',')} €</span>
                 `;
-
-                wrapper.appendChild(bubble);
-                arena.appendChild(wrapper);
+                container.appendChild(div);
             });
         }
 
-        window.addEventListener("DOMContentLoaded", renderMenu);
-        window.addEventListener("resize", renderMenu);
+        function fillFromTemplate(titel, betrag, kategorie, type) {
+            closeTemplatesDrawer();
+            setEntryType(type);
+            document.getElementById('amount').value = betrag;
+            document.getElementById('title').value = titel;
+            
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                if(btn.innerText.trim() === kategorie) {
+                    selectCategory(btn, kategorie);
+                }
+            });
+        }
+
+        function renderStats(rows) {
+            let income = 0;
+            let expense = 0;
+            let catDistribution = {};
+
+            if (rows && rows.length > 0) {
+                rows.forEach(row => {
+                    if(row.vorlage && row.vorlage.toLowerCase() === 'ja') return; // Überspringe reine Vorlagendefinitionen bei Echtzeit-Statistiken
+
+                    let cleanBetrag = row.betrag.toString().replace(',','.');
+                    const val = parseFloat(cleanBetrag);
+                    if(!isNaN(val)) {
+                        if(val > 0) {
+                            income += val;
+                        } else {
+                            expense += Math.abs(val);
+                            // Kategorien Auswertung aggregieren
+                            const cat = row.kategorie || 'Sonstiges';
+                            catDistribution[cat] = (catDistribution[cat] || 0) + Math.abs(val);
+                        }
+                    }
+                });
+            }
+
+            const saldo = income - expense;
+
+            document.getElementById('dash-income').innerText = `+${income.toFixed(2).replace('.',',')} €`;
+            document.getElementById('dash-expense').innerText = `-${expense.toFixed(2).replace('.',',')} €`;
+            
+            const saldoEl = document.getElementById('dash-saldo');
+            saldoEl.innerText = `${saldo >= 0 ? '+' : ''}${saldo.toFixed(2).replace('.',',')} €`;
+            saldoEl.style.color = saldo >= 0 ? 'var(--success)' : 'var(--danger)';
+
+            // Progress Bar (Verhältnis Ausgaben zu Einnahmen)
+            const progressEl = document.getElementById('dash-progress');
+            if (income > 0) {
+                const percent = Math.min((expense / income) * 100, 100);
+                progressEl.style.width = percent + '%';
+                progressEl.style.background = percent > 90 ? 'var(--danger)' : 'var(--accent)';
+            } else {
+                progressEl.style.width = expense > 0 ? '100%' : '0%';
+                progressEl.style.background = 'var(--danger)';
+            }
+
+            // Kategorien renderen
+            const distContainer = document.getElementById('stats-distribution');
+            distContainer.innerHTML = '';
+
+            const sortedCats = Object.entries(catDistribution).sort((a,b) => b[1] - a[1]);
+
+            if(sortedCats.length === 0) {
+                distContainer.innerHTML = '<p class="status-text-loader">Keine Ausgaben verbucht.</p>';
+                return;
+            }
+
+            sortedCats.forEach(([cat, val]) => {
+                const row = document.createElement('div');
+                row.className = 'dist-item';
+                row.innerHTML = `
+                    <div class="dist-label">📁 <span>${cat}</span></div>
+                    <div class="dist-value">-${val.toFixed(2).replace('.',',')} €</div>
+                `;
+                distContainer.appendChild(row);
+            });
+        }
     </script>
 </body>
 </html>
