@@ -9,13 +9,27 @@
     <script src="daten.js"></script>
     <style>
         :root {
-            --bg: #090d16;
-            --surface: rgba(17, 24, 39, 0.7);
-            --text-primary: #f1f5f9;
+            --bg: linear-gradient(135deg, #e0e6ed 0%, #f4f6f9 100%);
+            --surface: rgba(255, 255, 255, 0.45);
+            --text-primary: #1e293b;
             --text-secondary: #64748b;
-            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            --bubble-shadow-hover: 0 0 20px rgba(243, 156, 18, 0.2);
-            --highlight: radial-gradient(circle, rgba(243, 156, 18, 0.12) 0%, rgba(243, 156, 18, 0) 70%);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06);
+            --bubble-shadow-hover: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
+            --highlight: radial-gradient(circle, rgba(243, 156, 18, 0.25) 0%, rgba(243, 156, 18, 0) 70%);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                --surface: rgba(30, 41, 59, 0.45);
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --glass-border: rgba(255, 255, 255, 0.08);
+                --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+                --bubble-shadow-hover: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+                --highlight: radial-gradient(circle, rgba(243, 156, 18, 0.3) 0%, rgba(243, 156, 18, 0) 70%);
+            }
         }
 
         * { box-sizing: border-box; }
@@ -23,6 +37,7 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
             background: var(--bg);
+            background-attachment: fixed;
             margin: 0;
             height: 100vh;
             overflow: hidden;
@@ -41,9 +56,9 @@
 
         .header-title {
             font-weight: 800;
-            font-size: 1.1rem;
-            letter-spacing: 0.15em;
-            color: #334155;
+            font-size: 1.2rem;
+            letter-spacing: 0.06em;
+            color: var(--text-primary);
         }
 
         main {
@@ -73,10 +88,10 @@
             z-index: 10;
         }
 
-        /* Edle, matte Obsidian-Optik ohne Rahmen */
+        /* Hochwertiges Milchglas-Design ohne harten Rahmen */
         .bubble {
             background: var(--surface);
-            border: none;
+            border: 1px solid var(--glass-border);
             border-radius: 50%;
             text-decoration: none;
             display: flex;
@@ -84,21 +99,21 @@
             align-items: center;
             justify-content: center;
             box-shadow: var(--shadow);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease, box-shadow 0.2s ease;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease, box-shadow 0.2s ease;
             cursor: pointer;
             text-align: center;
             width: var(--bubble-size, 100px);
             height: var(--bubble-size, 100px);
         }
 
-        /* Weicher, rahmenloser Fokus für Favoriten */
+        /* Subtile, rahmenlose Aura für die Top-Favoriten */
         .bubble-wrapper.top-favorit::before {
             content: '';
             position: absolute;
-            width: calc(var(--bubble-size, 100px) * 1.6);
-            height: calc(var(--bubble-size, 100px) * 1.6);
+            width: calc(var(--bubble-size, 100px) * 1.5);
+            height: calc(var(--bubble-size, 100px) * 1.5);
             background: var(--highlight);
             pointer-events: none;
             z-index: -1;
@@ -106,15 +121,26 @@
         }
 
         .bubble:active { 
-            transform: scale(0.94) !important;
-            background: rgba(17, 24, 39, 0.9);
+            transform: scale(0.93) !important; 
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .bubble:active {
+                background: rgba(30, 41, 59, 0.6);
+            }
         }
 
         @media (hover: hover) {
             .bubble-wrapper:hover .bubble {
-                background: rgba(30, 41, 59, 0.8);
-                box-shadow: var(--bubble-shadow-hover), var(--shadow);
-                transform: scale(1.04);
+                background: rgba(255, 255, 255, 0.55);
+                box-shadow: var(--bubble-shadow-hover);
+                transform: translateY(-4px);
+            }
+            @media (prefers-color-scheme: dark) {
+                .bubble-wrapper:hover .bubble {
+                    background: rgba(30, 41, 59, 0.55);
+                }
             }
             .bubble-wrapper:hover {
                 z-index: 50;
@@ -122,22 +148,20 @@
         }
 
         .bubble-icon {
-            font-size: calc(var(--bubble-size, 100px) * 0.25);
+            font-size: calc(var(--bubble-size, 100px) * 0.26);
             line-height: 1;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .bubble-title {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text-primary);
-            font-size: calc(var(--bubble-size, 100px) * 0.11);
-            padding: 0 8px;
+            font-size: calc(var(--bubble-size, 100px) * 0.12);
+            padding: 0 6px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
             width: 100%;
-            letter-spacing: 0.03em;
-            opacity: 0.9;
         }
     </style>
 </head>
