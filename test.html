@@ -9,25 +9,13 @@
     <script src="daten.js"></script>
     <style>
         :root {
-            --bg: #eef2f7;
-            --surface: linear-gradient(145deg, #ffffff, #d7dbdf);
-            --text-primary: #334155;
+            --bg: #090d16;
+            --surface: rgba(17, 24, 39, 0.7);
+            --text-primary: #f1f5f9;
             --text-secondary: #64748b;
-            --shadow: 6px 6px 16px #d1d5db, -6px -6px 16px #ffffff;
-            --bubble-shadow-hover: 10px 10px 25px #c2c6cc, -10px -10px 25px #ffffff;
-            --highlight: radial-gradient(circle, rgba(243, 156, 18, 0.15) 0%, rgba(243, 156, 18, 0) 70%);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #0b0f19;
-                --surface: linear-gradient(145deg, #1e293b, #0f172a);
-                --text-primary: #f8fafc;
-                --text-secondary: #94a3b8;
-                --shadow: 4px 4px 12px rgba(0, 0, 0, 0.4), -2px -2px 8px rgba(255, 255, 255, 0.02);
-                --bubble-shadow-hover: 6px 6px 20px rgba(0, 0, 0, 0.6), -2px -2px 12px rgba(255, 255, 255, 0.04);
-                --highlight: radial-gradient(circle, rgba(243, 156, 18, 0.2) 0%, rgba(243, 156, 18, 0) 75%);
-            }
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            --bubble-shadow-hover: 0 0 20px rgba(243, 156, 18, 0.2);
+            --highlight: radial-gradient(circle, rgba(243, 156, 18, 0.12) 0%, rgba(243, 156, 18, 0) 70%);
         }
 
         * { box-sizing: border-box; }
@@ -41,7 +29,6 @@
             display: flex;
             flex-direction: column;
             -webkit-tap-highlight-color: transparent;
-            transition: background 0.3s ease;
         }
 
         header {
@@ -55,8 +42,8 @@
         .header-title {
             font-weight: 800;
             font-size: 1.1rem;
-            letter-spacing: 0.12em;
-            color: var(--text-secondary);
+            letter-spacing: 0.15em;
+            color: #334155;
         }
 
         main {
@@ -86,6 +73,7 @@
             z-index: 10;
         }
 
+        /* Edle, matte Obsidian-Optik ohne Rahmen */
         .bubble {
             background: var(--surface);
             border: none;
@@ -96,18 +84,21 @@
             align-items: center;
             justify-content: center;
             box-shadow: var(--shadow);
-            transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.18s ease;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease, box-shadow 0.2s ease;
             cursor: pointer;
             text-align: center;
             width: var(--bubble-size, 100px);
             height: var(--bubble-size, 100px);
         }
 
+        /* Weicher, rahmenloser Fokus für Favoriten */
         .bubble-wrapper.top-favorit::before {
             content: '';
             position: absolute;
-            width: calc(var(--bubble-size, 100px) * 1.5);
-            height: calc(var(--bubble-size, 100px) * 1.5);
+            width: calc(var(--bubble-size, 100px) * 1.6);
+            height: calc(var(--bubble-size, 100px) * 1.6);
             background: var(--highlight);
             pointer-events: none;
             z-index: -1;
@@ -115,20 +106,15 @@
         }
 
         .bubble:active { 
-            transform: scale(0.95) !important;
-            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.05), inset -3px -3px 6px rgba(255,255,255,0.5) !important;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            .bubble:active {
-                box-shadow: inset 3px 3px 6px rgba(0,0,0,0.5), inset -1px -1px 4px rgba(255,255,255,0.05) !important;
-            }
+            transform: scale(0.94) !important;
+            background: rgba(17, 24, 39, 0.9);
         }
 
         @media (hover: hover) {
             .bubble-wrapper:hover .bubble {
-                box-shadow: var(--bubble-shadow-hover);
-                transform: translateY(-2px) scale(1.02);
+                background: rgba(30, 41, 59, 0.8);
+                box-shadow: var(--bubble-shadow-hover), var(--shadow);
+                transform: scale(1.04);
             }
             .bubble-wrapper:hover {
                 z-index: 50;
@@ -136,10 +122,9 @@
         }
 
         .bubble-icon {
-            font-size: calc(var(--bubble-size, 100px) * 0.24);
+            font-size: calc(var(--bubble-size, 100px) * 0.25);
             line-height: 1;
             margin-bottom: 6px;
-            filter: drop-shadow(1px 2px 4px rgba(0,0,0,0.05));
         }
 
         .bubble-title {
@@ -151,7 +136,8 @@
             text-overflow: ellipsis;
             white-space: nowrap;
             width: 100%;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.03em;
+            opacity: 0.9;
         }
     </style>
 </head>
