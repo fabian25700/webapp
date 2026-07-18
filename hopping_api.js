@@ -1,67 +1,60 @@
 /**
- * Groundhopping WebApp API Backend
- * Ruft die Daten von der externen Apps Script API ab und reicht sie an das Frontend weiter.
+ * Groundhopping WebApp API Backend (GitHub / Extern)
+ * Kommuniziert direkt mit dem Google Apps Script Web-App-Interface.
  */
 
-// Die neue API-URL als zentrale Datenquelle
-const EXTERNAL_API_URL = "https://script.google.com/macros/s/AKfycbzDJXXO1jN_hQojSJAciBgPJ1WFFO9cXQ3iYvmJ6bKSfMzSRy1wq3Q2u2em1Wz9W-sf/exec";
-
-/**
- * Stellt die HTML-Oberfläche (das Dashboard) bereit
- */
-function doGet() {
-  return HtmlService.createHtmlOutputFromFile('hopping')
-      .setTitle('Groundhopping Analytics')
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
-      .addMetaTag('viewport', 'width=device-width, initial-scale=1');
-}
+// Deine aktuelle API-URL als feste Datenquelle
+const EXTERNAL_API_URL = "https://script.google.com/macros/s/AKfycbyHuDbvlV4OAmqvfXdqTfBQwi_3Lxqc0AW3ng-i_8vJWGFVXKHmnsdk72UcChaXJUV9/exec";
 
 /**
- * Holt die Rohdaten von der externen API und bereitet sie für das Frontend vor
+ * Ruft die Daten vom Google Sheet über das Apps Script Interface ab
+ * @returns {Promise<Array>} Ein Promise, das das Array mit den Spieldaten zurückgibt
  */
-function getHoppingData() {
+async function getHoppingData() {
   try {
-    // HTTP-Anfrage an die neue WebApp-API senden
-    var response = UrlFetchApp.fetch(EXTERNAL_API_URL);
-    var jsonText = response.getContentText();
-    
-    // Die erhaltenen Daten parsen
-    var data = JSON.parse(jsonText);
-    
-    // Falls die API die Daten in einer verschachtelten Struktur zurückgibt (z.B. { data: [...] })
-    if (data && !Array.isArray(data) && data.data) {
-      data = data.data;
+    const response = await fetch(EXTERNAL_API_URL);
+    if (!response.ok) {
+      throw new Error(`Netzwerk-Fehler beim Abruf: ${response.status} ${response.statusText}`);
     }
     
-    // Validierung: Falls die Daten leer oder fehlerhaft sind, leeres Array zurückgeben
+    const data = await response.json();
+    
+    // Falls die API die Daten verschachtelt zurückgibt
+    if (data && !Array.isArray(data) && data.data) {
+      return data.data;
+    }
+    
     if (!Array.isArray(data)) {
       return [];
     }
     
     return data;
   } catch (e) {
-    throw new Error("Fehler beim Abrufen der externen API-Daten: " + e.message);
+    console.error("API Fetch Error:", e);
+    throw new Error("Fehler beim Abrufen der Groundhopping-Daten: " + e.message);
   }
 }
 
 /**
- * Sendet neue Spieldaten an die externe API zum Ergänzen oder Überschreiben
- * @param {Object} payload - Das Objekt mit den Parametern (z.B. { action: "add", data: {...} })
+ * Sendet neue oder geänderte Spieldaten an das Google Sheet
+ * @param {Object} payload - Die Aktions-Parameter (z.B. { action: "add", data: {...} })
+ * @returns {Promise<Object>} Antwort des Google Sheets Backends
  */
-function sendHoppingData(payload) {
+async function sendHoppingData(payload) {
   try {
-    var options = {
-      method: "post",
-      contentType: "application/json",
-      payload: JSON.stringify(payload),
-      muteHttpExceptions: true
+    const options = {
+      method: "POST",
+      body: JSON.stringify(payload)
     };
     
-    var response = UrlFetchApp.fetch(EXTERNAL_API_URL, options);
-    var jsonText = response.getContentText();
+    const response = await fetch(EXTERNAL_API_URL, options);
+    if (!response.ok) {
+      throw new Error(`Netzwerk-Fehler beim Senden: ${response.status} ${response.statusText}`);
+    }
     
-    return JSON.parse(jsonText);
+    return await response.json();
   } catch (e) {
-    throw new Error("Fehler beim Senden der Daten an die API: " + e.message);
+    console.error("API Send Error:", e);
+    throw new Error("Fehler beim Senden an die API: " + e.message);
   }
 }
