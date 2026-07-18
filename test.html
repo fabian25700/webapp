@@ -139,7 +139,7 @@
             fill: currentColor;
         }
 
-        /* Modal Overlay (iOS Style für Mobile, Zentriert für Desktop) */
+        /* Modal Overlay */
         .modal {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -169,7 +169,6 @@
             gap: 16px;
         }
 
-        /* Desktop Optimierung für MacBook / PC */
         @media (min-width: 601px) {
             .modal {
                 align-items: center;
@@ -281,7 +280,7 @@
             color: var(--success);
         }
 
-        /* Inputs (Optimiert auf mind. 16px gegen iOS-Auto-Zoom) */
+        /* Inputs */
         .input-group {
             margin-bottom: 14px;
         }
@@ -322,7 +321,7 @@
             background: var(--bg);
             color: var(--text-primary);
             font-family: inherit;
-            font-size: 1rem; /* Verhindert Auto-Zoom auf Mobile */
+            font-size: 1rem;
             font-weight: 600;
             outline: none;
         }
@@ -747,6 +746,14 @@
             </div>
 
             <div class="card">
+                <div class="card-title">
+                    <div class="card-title-left">
+                        <div class="card-icon">📝</div>
+                        <span>Details</span>
+                    </div>
+                    <!-- Hier ist der Vorlagen-Button wieder platziert -->
+                    <button class="inline-action-btn" onclick="openTemplatesDrawer()">Vorlagen</button>
+                </div>
                 <div class="input-group">
                     <label for="title">Titel</label>
                     <input type="text" class="text-input" id="title" placeholder="z.B. REWE, Miete, Strom">
@@ -861,7 +868,6 @@
         let cloudSyncTimeout = null;
         let globalRawData = [];
 
-        // Initialisiere Filter mit dem aktuellen Jahr und Monat
         const initialDate = new Date();
         const initialYearStr = initialDate.getFullYear().toString();
         const initialMonthStr = (initialDate.getMonth() + 1).toString().padStart(2, '0');
@@ -1005,19 +1011,31 @@
         function clearPlaceholder(input) { input.placeholder = ''; }
         function restorePlaceholder(input) { input.placeholder = currentType === 'expense' ? "-0,00 €" : "+0,00 €"; }
 
-        // Hilfsfunktion zur Tausender-Formatierung
         function formatCurrency(val) {
             return val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
         }
 
-        // Hilfsfunktion zur Ermittlung von Jahr und Monat aus dem Datums-String (DD.MM.YYYY)
+        // Robustere Erkennung für dd.mm.jjjj Format aus Google Sheets
         function parseRowDate(dateStr) {
             if (!dateStr) return { year: "", month: "" };
-            const parts = dateStr.split('.');
+            
+            // Bereinigt eventuelle Strings, falls ein ISO-String o.ä. reinkommt
+            const cleanStr = dateStr.toString().trim();
+            const parts = cleanStr.split('.');
+            
             if (parts.length < 3) return { year: "", month: "" };
+            
+            let yearPart = parts[2].trim();
+            let monthPart = parts[1].trim().padStart(2, '0');
+            
+            // Fix für zweistellige Jahreszahlen (z.B. 26 -> 2026)
+            if (yearPart.length === 2) {
+                yearPart = "20" + yearPart;
+            }
+            
             return {
-                year: parts[2].trim(),
-                month: parts[1].trim()
+                year: yearPart,
+                month: monthPart
             };
         }
 
@@ -1110,9 +1128,7 @@
                 
                 globalRawData = data;
                 
-                // Dynamische Filter-Befüllung basierend auf Realdaten
                 initFilterOptions(data);
-                
                 renderTemplates(data);
                 renderStats(data);
             } catch(e) {
@@ -1138,7 +1154,6 @@
                 });
             }
             
-            // Fallback falls keine Daten vorhanden sind
             if (years.size === 0) {
                 years.add(initialYearStr);
             }
@@ -1151,7 +1166,6 @@
                 yearSelect.appendChild(opt);
             });
             
-            // Setze initiale Werte nur beim ersten Laden
             if (!currentYearSelected) {
                 yearSelect.value = years.has(initialYearStr) ? initialYearStr : yearSelect.options[0].value;
                 monthSelect.value = initialMonthStr;
@@ -1225,8 +1239,6 @@
             let expense = 0;
             let catDistribution = {};
             let incomeCatDistribution = {};
-            
-            // Zugehörige Realdaten-Reihen puffern für die Kategorie-Links
             let catItemsMap = {};
 
             const selectedYear = document.getElementById('filter-year').value;
@@ -1236,7 +1248,6 @@
                 rows.forEach(row => {
                     if(row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
 
-                    // Zeit-Filterung anwenden
                     const parsed = parseRowDate(row.datum);
                     if (parsed.year !== selectedYear) return;
                     if (selectedMonth !== 'all' && parsed.month !== selectedMonth) return;
@@ -1261,7 +1272,6 @@
 
             const saldo = income - expense;
 
-            // 1. Basis-Werte im Dashboard mit Tausender-Formatierung
             document.getElementById('dash-income').innerText = `+${formatCurrency(income)}`;
             document.getElementById('dash-expense').innerText = `-${formatCurrency(expense)}`;
             
@@ -1269,7 +1279,6 @@
             saldoEl.innerText = `${saldo >= 0 ? '+' : ''}${formatCurrency(saldo)}`;
             saldoEl.style.color = saldo >= 0 ? 'var(--success)' : 'var(--danger)';
 
-            // Lineare Progress-Bar
             const progressEl = document.getElementById('dash-progress');
             if (income > 0) {
                 const percent = Math.min((expense / income) * 100, 100);
@@ -1280,7 +1289,6 @@
                 progressEl.style.background = 'var(--danger)';
             }
 
-            // 2. Mathematisch korrekte Sparquote
             const savingsRate = income > 0 ? ((income - expense) / income) * 100 : 0;
             document.getElementById('stats-savings-rate').innerText = `${savingsRate.toFixed(1)}%`;
             
@@ -1291,9 +1299,6 @@
             const dailyBudget = saldo > 0 ? (saldo / remainingDays) : 0;
             document.getElementById('stats-daily-budget').innerText = `${formatCurrency(dailyBudget)}`;
 
-            // 3. Grafische Visualisierung (Mehrere Diagramme)
-            
-            // Diagramm A: Einnahmen vs Ausgaben Verhältnis
             const ratioChartContainer = document.getElementById('ratio-chart-container');
             ratioChartContainer.innerHTML = '';
             const totalTurnover = income + expense;
@@ -1326,7 +1331,6 @@
                 ratioChartContainer.innerHTML = '<p class="status-text-loader">Keine Daten vorhanden.</p>';
             }
 
-            // Diagramm B: Ausgaben-Verteilung
             const chartContainer = document.getElementById('stats-chart-container');
             chartContainer.innerHTML = '';
             const sortedCats = Object.entries(catDistribution).sort((a,b) => b[1] - a[1]);
@@ -1353,7 +1357,6 @@
                 });
             }
 
-            // Diagramm C: Einnahmen-Verteilung
             const incomeChartContainer = document.getElementById('income-chart-container');
             incomeChartContainer.innerHTML = '';
             const sortedIncomeCats = Object.entries(incomeCatDistribution).sort((a,b) => b[1] - a[1]);
@@ -1380,11 +1383,9 @@
                 });
             }
 
-            // 4. Tabellarische Liste generieren (Kategorie-Links)
             const distContainer = document.getElementById('stats-distribution');
             distContainer.innerHTML = '';
 
-            // Zusammenfassung aller aktiven Kategorien (Einnahmen und Ausgaben kombiniert)
             const allUniqueCats = new Set([...Object.keys(catDistribution), ...Object.keys(incomeCatDistribution)]);
 
             if(allUniqueCats.size === 0) {
@@ -1399,7 +1400,6 @@
 
                 const tableRow = document.createElement('div');
                 tableRow.className = 'dist-item';
-                // Klick öffnet Detailmaske
                 tableRow.onclick = () => openCategoryModal(cat, catItemsMap[cat] || []);
                 
                 tableRow.innerHTML = `
