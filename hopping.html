@@ -57,7 +57,6 @@
             color: var(--text-muted);
         }
 
-        /* Globale Stats KPIs */
         .grid-overview {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -87,7 +86,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Haupt-Layout */
         .main-layout {
             display: grid;
             grid-template-columns: 1fr;
@@ -121,7 +119,6 @@
             padding: 20px;
         }
 
-        /* Team Dashboard Selektor */
         .selector-box {
             margin-bottom: 24px;
         }
@@ -139,7 +136,6 @@
             font-weight: 500;
         }
 
-        /* Interaktives Dashboard Kachel-Raster */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -174,11 +170,6 @@
             grid-column: span 2;
         }
 
-        .dash-tile.span-3 {
-            grid-column: span 3;
-        }
-
-        /* Tabellen-Styling */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -246,14 +237,10 @@
                     <div class="section-content">
                         <div class="selector-box">
                             <select id="team-selector" onchange="updateTeamDashboard(this.value)">
-                                </select>
+                            </select>
                         </div>
 
                         <div class="dashboard-grid">
-                            <div class="dash-tile">
-                                <div class="tile-label">Tore / Gegentore</div>
-                                <div class="tile-value" id="t-tore-gegentore">0:0</div>
-                            </div>
                             <div class="dash-tile">
                                 <div class="tile-label">Spiele</div>
                                 <div class="tile-value" id="t-spiele">0</div>
@@ -262,14 +249,18 @@
                                 <div class="tile-label">Heimspiele</div>
                                 <div class="tile-value" id="t-heim">0</div>
                             </div>
-
                             <div class="dash-tile">
-                                <div class="tile-label">Siege / Remis / Niederlagen</div>
-                                <div class="tile-value" id="t-wld" style="color: var(--accent-success);">0 / 0 / 0</div>
-                            </div>
-                            <div class="dash-tile span-2">
                                 <div class="tile-label">Auswärtsspiele</div>
                                 <div class="tile-value" id="t-auswaerts">0</div>
+                            </div>
+
+                            <div class="dash-tile">
+                                <div class="tile-label">Tore / Gegentore</div>
+                                <div class="tile-value" id="t-tore-gegentore">0:0</div>
+                            </div>
+                            <div class="dash-tile span-2">
+                                <div class="tile-label">Siege / Remis / Niederlagen</div>
+                                <div class="tile-value" id="t-wld" style="color: var(--accent-success);">0 / 0 / 0</div>
                             </div>
 
                             <div class="dash-tile span-2">
@@ -277,7 +268,7 @@
                                 <div class="tile-value" id="t-max-win" style="font-size: 10.5pt; color: var(--accent-success);">-</div>
                             </div>
                             <div class="dash-tile">
-                                <div class="tile-label">Länder</div>
+                                <div class="tile-label">Besuchte Orte</div>
                                 <div class="tile-value" id="t-laender">-</div>
                             </div>
 
@@ -299,7 +290,7 @@
                                 <div class="tile-value" id="t-top-comp" style="font-size: 10.5pt;">-</div>
                             </div>
                             <div class="dash-tile">
-                                <div class="tile-label">Meistgesehener Gegner</div>
+                                <div class="tile-label">Häufigster Gegner</div>
                                 <div class="tile-value" id="t-top-opp" style="font-size: 10.5pt;">-</div>
                             </div>
 
@@ -308,8 +299,8 @@
                                 <div class="tile-value" id="t-top-ground" style="font-size: 10.5pt;">-</div>
                             </div>
                             <div class="dash-tile">
-                                <div class="tile-label">Grounds / neue Grounds</div>
-                                <div class="tile-value" id="t-grounds-count">0 / 0</div>
+                                <div class="tile-label">Grounds Gesamt</div>
+                                <div class="tile-value" id="t-grounds-count">0</div>
                             </div>
                         </div>
                     </div>
@@ -375,7 +366,6 @@
     <script>
         let rawData = [];
 
-        // Verbindung zum Apps Script Backend herstellen
         window.addEventListener('DOMContentLoaded', () => {
             if (typeof google !== 'undefined' && google.script && google.script.run) {
                 google.script.run
@@ -411,8 +401,8 @@
 
             let totalGoals = 0;
             rawData.forEach(d => {
-                if(d.Ergebnis && d.Ergebnis.includes(':')) {
-                    const parts = d.Ergebnis.split(':');
+                if(d.Ergebnis && String(d.Ergebnis).includes(':')) {
+                    const parts = String(d.Ergebnis).split(':');
                     totalGoals += (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0);
                 }
             });
@@ -425,15 +415,17 @@
             const teams = new Set();
             
             rawData.forEach(d => {
-                if(d.Teilnehmer) teams.add(d.Teilnehmer.trim());
-                if(d.Begegnung && d.Begegnung.includes(':')) {
-                    const parts = d.Begegnung.split(':');
+                if(d.Begegnung && String(d.Begegnung).includes(':')) {
+                    const parts = String(d.Begegnung).split(':');
                     if(parts[0]) teams.add(parts[0].trim());
                     if(parts[1]) teams.add(parts[1].trim());
                 }
+                if(d.Teilnehmer) {
+                    teams.add(String(d.Teilnehmer).trim());
+                }
             });
 
-            const sortedTeams = Array.from(teams).sort();
+            const sortedTeams = Array.from(teams).filter(Boolean).sort();
             sortedTeams.forEach(team => {
                 const opt = document.createElement('option');
                 opt.value = team;
@@ -448,7 +440,7 @@
         }
 
         function updateTeamDashboard(teamName) {
-            const matches = rawData.filter(d => d.Begegnung && d.Begegnung.includes(teamName));
+            const matches = rawData.filter(d => d.Begegnung && String(d.Begegnung).includes(teamName));
             document.getElementById('t-spiele').innerText = matches.length;
 
             let goalsFor = 0;
@@ -472,14 +464,14 @@
             const viewerCounts = [];
 
             matches.forEach(m => {
-                if(!m.Ergebnis || !m.Ergebnis.includes(':')) return;
-                const parts = m.Begegnung.split(':');
+                if(!m.Ergebnis || !String(m.Ergebnis).includes(':')) return;
+                const parts = String(m.Begegnung).split(':');
                 if (parts.length < 2) return;
 
                 const isHome = parts[0].trim() === teamName;
                 if(isHome) homeGames++; else awayGames++;
 
-                const resParts = m.Ergebnis.split(':');
+                const resParts = String(m.Ergebnis).split(':');
                 const gHome = parseInt(resParts[0]) || 0;
                 const gAway = parseInt(resParts[1]) || 0;
 
@@ -494,7 +486,7 @@
                     const diff = tGoals - oGoals;
                     if(diff > maxWinDiff) {
                         maxWinDiff = diff;
-                        maxWinStr = `${m.Begegnung} / ${m.Ergebnis}`;
+                        maxWinStr = `${m.Begegnung} (${m.Ergebnis})`;
                     }
                 } else if(tGoals === oGoals) {
                     draws++;
@@ -503,16 +495,17 @@
                     const diff = oGoals - tGoals;
                     if(diff > maxLossDiff) {
                         maxLossDiff = diff;
-                        maxLossStr = `${m.Begegnung} / ${m.Ergebnis}`;
+                        maxLossStr = `${m.Begegnung} (${m.Ergebnis})`;
                     }
                 }
 
                 if(m.Stadion) {
-                    teamGrounds.add(m.Stadion.trim());
-                    groundsFreq[m.Stadion.trim()] = (groundsFreq[m.Stadion.trim()] || 0) + 1;
+                    const gName = String(m.Stadion).trim();
+                    teamGrounds.add(gName);
+                    groundsFreq[gName] = (groundsFreq[gName] || 0) + 1;
                 }
-                if(m.Spielort) uniqueSpielorte.add(m.Spielort.trim());
-                if(m.Wettbewerb) comps[m.Wettbewerb.trim()] = (comps[m.Wettbewerb.trim()] || 0) + 1;
+                if(m.Spielort) uniqueSpielorte.add(String(m.Spielort).trim());
+                if(m.Wettbewerb) comps[String(m.Wettbewerb).trim()] = (comps[String(m.Wettbewerb).trim()] || 0) + 1;
                 
                 const opp = isHome ? parts[1].trim() : parts[0].trim();
                 opponents[opp] = (opponents[opp] || 0) + 1;
@@ -529,13 +522,13 @@
             document.getElementById('t-wld').innerText = `${wins} / ${draws} / ${losses}`;
             document.getElementById('t-max-win').innerText = maxWinStr;
             document.getElementById('t-max-loss').innerText = maxLossStr;
-            document.getElementById('t-laender').innerText = uniqueSpielorte.size > 0 ? uniqueSpielorte.size : "1";
+            document.getElementById('t-laender').innerText = uniqueSpielorte.size > 0 ? uniqueSpielorte.size : "0";
 
             if(viewerCounts.length > 0) {
                 const minV = Math.min(...viewerCounts);
                 const maxV = Math.max(...viewerCounts);
                 const avgV = Math.round(viewerCounts.reduce((a,b)=>a+b, 0) / viewerCounts.length);
-                document.getElementById('t-zuschauer').innerText = `${minV} / ${avgV} / ${maxV}`;
+                document.getElementById('t-zuschauer').innerText = `${minV.toLocaleString()} / ${avgV.toLocaleString()} / ${maxV.toLocaleString()}`;
             } else {
                 document.getElementById('t-zuschauer').innerText = "0 / 0 / 0";
             }
@@ -549,15 +542,13 @@
             const topGround = Object.keys(groundsFreq).reduce((a, b) => groundsFreq[a] > groundsFreq[b] ? a : b, "-");
             document.getElementById('t-top-ground').innerText = topGround !== "-" ? `${groundsFreq[topGround]}x ${topGround}` : "-";
 
-            // Neue Grounds entspricht hier der Anzahl der einzigartigen besuchten Stadien dieses Teams
-            document.getElementById('t-grounds-count').innerText = `${teamGrounds.size} / ${teamGrounds.size}`;
+            document.getElementById('t-grounds-count').innerText = teamGrounds.size;
             document.getElementById('t-wettbewerbe').innerText = Object.keys(comps).length;
         }
 
         function buildGlobalCharts() {
-            // 1. Untergrund Verteilung
             const surfaces = {};
-            rawData.forEach(d => { if(d.Untergrund) surfaces[d.Untergrund.trim()] = (surfaces[d.Untergrund.trim()] || 0) + 1; });
+            rawData.forEach(d => { if(d.Untergrund) surfaces[String(d.Untergrund).trim()] = (surfaces[String(d.Untergrund).trim()] || 0) + 1; });
             
             new Chart(document.getElementById('surfaceChart'), {
                 type: 'doughnut',
@@ -578,9 +569,8 @@
                 }
             });
 
-            // 2. Saison Chart
             const seasons = {};
-            rawData.forEach(d => { if(d.Saison) seasons[d.Saison.trim()] = (seasons[d.Saison.trim()] || 0) + 1; });
+            rawData.forEach(d => { if(d.Saison) seasons[String(d.Saison).trim()] = (seasons[String(d.Saison).trim()] || 0) + 1; });
             
             new Chart(document.getElementById('seasonChart'), {
                 type: 'bar',
@@ -603,12 +593,12 @@
                 }
             });
 
-            // 3. Top Grounds Liste
             const groundsCount = {};
-            rawData.forEach(d => { if(d.Stadion) groundsCount[d.Stadion.trim()] = (groundsCount[d.Stadion.trim()] || 0) + 1; });
+            rawData.forEach(d => { if(d.Stadion) groundsCount[String(d.Stadion).trim()] = (groundsCount[String(d.Stadion).trim()] || 0) + 1; });
             const sortedGrounds = Object.entries(groundsCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
             
             const tbody = document.querySelector('#top-grounds-table tbody');
+            tbody.innerHTML = "";
             sortedGrounds.forEach(g => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `<td>${g[0]}</td><td><strong>${g[1]}</strong></td>`;
@@ -618,6 +608,7 @@
 
         function renderRecentGames() {
             const tbody = document.querySelector('#recent-games-table tbody');
+            tbody.innerHTML = "";
             const recent = rawData.slice(-5).reverse();
             recent.forEach(g => {
                 const tr = document.createElement('tr');
