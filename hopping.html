@@ -363,21 +363,22 @@
         </div>
     </div>
 
+    <!-- hopping_api.js muss im selben GitHub-Repository/Ordner liegen -->
+    <script src="hopping_api.js"></script>
     <script>
         let rawData = [];
 
         window.addEventListener('DOMContentLoaded', () => {
-            if (typeof google !== 'undefined' && google.script && google.script.run) {
-                google.script.run
-                    .withSuccessHandler(initializeDashboard)
-                    .withFailureHandler(err => {
+            // Führt die asynchrone Funktion aus hopping_api.js aus
+            if (typeof getHoppingData === 'function') {
+                getHoppingData()
+                    .then(data => initializeDashboard(data))
+                    .catch(err => {
                         document.getElementById('loading').innerHTML = 
                             `<span style="color: var(--accent-danger); font-weight: bold;">Fehler beim Laden:</span><br>${err.message || err}`;
-                        console.error("Apps Script Error:", err);
-                    })
-                    .getHoppingData();
+                    });
             } else {
-                document.getElementById('loading').innerText = "Google API-Umgebung nicht gefunden.";
+                document.getElementById('loading').innerText = "hopping_api.js wurde nicht korrekt geladen oder fehlt im Verzeichnis.";
             }
         });
 
