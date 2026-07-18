@@ -20,7 +20,7 @@
             --text-secondary: #64748b;
             --border: #e2e8f0;
             --border-light: #f1f5f9;
-            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow: 0 6px 16px rgba(0,0,0,0.06);
             --apple-switch-bg: #e3e3e6;
         }
 
@@ -101,12 +101,12 @@
         }
 
         .container {
-            padding: 16px;
+            padding: 20px 16px;
             max-width: 600px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 24px;
         }
 
         /* Schwebender Plus-Button (FAB) */
@@ -236,8 +236,8 @@
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 20px;
+            border-radius: 24px;
+            padding: 24px;
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
@@ -249,7 +249,7 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--text-secondary);
-            margin-bottom: 14px;
+            margin-bottom: 18px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -356,10 +356,9 @@
             font-weight: 600;
         }
 
-        .category-btn svg {
-            width: 22px;
-            height: 22px;
-            fill: var(--text-secondary);
+        .category-btn span.icon-wrapper {
+            font-size: 1.3rem;
+            display: block;
         }
 
         .modal-content.expense .category-btn.selected {
@@ -367,14 +366,12 @@
             border-color: var(--danger);
             color: var(--danger);
         }
-        .modal-content.expense .category-btn.selected svg { fill: var(--danger); }
 
         .modal-content.income .category-btn.selected {
             background: var(--success-soft);
             border-color: var(--success);
             color: var(--success);
         }
-        .modal-content.income .category-btn.selected svg { fill: var(--success); }
 
         /* Switches */
         .option-row {
@@ -511,20 +508,20 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
+            padding: 14px 0;
             border-bottom: 1px solid var(--border-light);
         }
 
         .dashboard-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .dashboard-row span:first-child { font-size: 0.9rem; font-weight: 600; color: var(--text-secondary); }
-        .dashboard-row span:last-child { font-size: 1rem; font-weight: 700; }
+        .dashboard-row span:first-child { font-size: 0.95rem; font-weight: 600; color: var(--text-secondary); }
+        .dashboard-row span:last-child { font-size: 1.05rem; font-weight: 700; }
 
         /* Filter Controls */
         .filter-card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 14px 20px;
+            border-radius: 24px;
+            padding: 16px 20px;
             box-shadow: var(--shadow);
             display: flex;
             flex-direction: column;
@@ -548,14 +545,45 @@
             cursor: pointer;
         }
 
-        /* Progress Bar & Grafik-Elemente */
-        .progress-container {
-            width: 100%; height: 10px;
-            background: var(--border-light);
-            border-radius: 5px; margin-top: 12px; overflow: hidden;
+        /* Bidirektionaler Sparquoten-Container */
+        .savings-rate-container {
+            margin-top: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
-        .progress-bar {
-            height: 100%; width: 0%; background: var(--accent); transition: width 0.5s ease;
+        .savings-rate-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+        .savings-track {
+            width: 100%;
+            height: 12px;
+            background: var(--border-light);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+        .savings-center-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: var(--text-secondary);
+            opacity: 0.4;
+            z-index: 2;
+        }
+        .savings-fill-bar {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 0%;
+            transition: all 0.5s cubic-bezier(0.1, 0.8, 0.3, 1);
         }
 
         .bar-visual-wrapper {
@@ -579,14 +607,14 @@
 
         /* Distribution Lists */
         .dist-item {
-            display: flex; align-items: center; justify-content: space-between; padding: 10px 0; font-size: 0.9rem; border-bottom: 1px solid var(--border-light);
+            display: flex; align-items: center; justify-content: space-between; padding: 12px 0; font-size: 0.95rem; border-bottom: 1px solid var(--border-light);
             cursor: pointer; text-decoration: none; transition: background 0.2s;
         }
         .dist-item:hover {
             background: var(--border-light);
         }
         .dist-item:last-child { border-bottom: none; }
-        .dist-label { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--text-primary); }
+        .dist-label { display: flex; align-items: center; gap: 12px; font-weight: 600; color: var(--text-primary); }
         .dist-value { font-weight: 700; }
 
         .status-text-loader {
@@ -735,8 +763,18 @@
                     <span>Sparquote</span>
                     <span id="stats-savings-rate">0%</span>
                 </div>
-                <div class="progress-container">
-                    <div id="dash-progress" class="progress-bar"></div>
+                
+                <!-- Neue zentrierte bidirektionale Sparquoten-Anzeige -->
+                <div class="savings-rate-container">
+                    <div class="savings-rate-labels">
+                        <span id="savings-min-label">Max Sparen</span>
+                        <span>0%</span>
+                        <span id="savings-max-label">Max Verlust</span>
+                    </div>
+                    <div class="savings-track">
+                        <div class="savings-center-line"></div>
+                        <div id="savings-bar-fill" class="savings-fill-bar"></div>
+                    </div>
                 </div>
             </div>
 
@@ -799,7 +837,7 @@
                 <div id="dashboard-recent-bookings" style="display: flex; flex-direction: column;">
                     <p class="status-text-loader">Lade Buchungen...</p>
                 </div>
-                <button class="inline-action-btn" style="margin-top: 12px; width: 100%; padding: 10px; text-transform: uppercase; letter-spacing: 0.05em;" onclick="openHistoryModal()">Alle Buchungen</button>
+                <button class="inline-action-btn" style="margin-top: 14px; width: 100%; padding: 12px; text-transform: uppercase; letter-spacing: 0.05em;" onclick="openHistoryModal()">Alle Buchungen</button>
             </div>
         </section>
     </div>
@@ -852,46 +890,46 @@
                 
                 <div id="grid-expense" class="category-grid">
                     <button class="category-btn" onclick="selectCategory(this, 'Kleidung')">
-                        <svg viewBox="0 0 24 24"><path d="M11.99 18.5c-1.35 0-2.59-.44-3.6-1.18l-3.32 3.32c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41l3.31-3.31c-.74-1.01-1.18-2.25-1.18-3.6 0-3.31 2.69-6 6-6s6 2.69 6 6-2.69 6-6 6zM4 3h16c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2z"/></svg>
+                        <span class="icon-wrapper">👕</span>
                         Kleidung
                     </button>
                     <button class="category-btn" onclick="selectCategory(this, 'Urlaub')">
-                        <svg viewBox="0 0 24 24"><path d="M21.71 11.29l-9-9c-.39-.39-1.02-.39-1.41 0l-9 9c-.39.39-.39 1.02 0 1.41l9 9c.39.39 1.02.39 1.41 0l9-9c.39-.38.39-1.01 0-1.41zM14 14.5V12h-4v2.5c0 .28-.22.5-.5.5h-1c-.28 0-.5-.22-.5-.5v-4c0-.28.22-.5.5-.5h5V8.5c0-.45.54-.67.85-.35l3.15 3.15c.2.2.2.51 0 .71L14.85 15.2c-.31.32-.85.1-.85-.35z"/></svg>
+                        <span class="icon-wrapper">🧳</span>
                         Urlaub
                     </button>
                     <button class="category-btn" onclick="selectCategory(this, 'Gesundheit')">
-                        <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.5 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        <span class="icon-wrapper">🩺</span>
                         Gesundheit
                     </button>
                     <button class="category-btn" onclick="selectCategory(this, 'Freizeit')">
-                        <svg viewBox="0 0 24 24"><path d="M13.5 5.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM9.8 8.9L7 21h2.1l1.9-8.2 2.1 2V21h2v-7.5l-2.1-2 .6-3c1 .8 2.4 1.5 4.1 1.5V8c-1.5 0-2.7-.6-3.5-1.5l-1-1.6c-.4-.6-1-1-1.7-1-.3 0-.6.1-.9.2L4.3 5.9V11h2V7.4l2.5-1.1"/></svg>
+                        <span class="icon-wrapper">🎬</span>
                         Freizeit
                     </button>
                     <button class="category-btn" onclick="selectCategory(this, 'Mobilität')">
-                        <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1-1.5 1zm11 0c-.83 0-1.5-.67-1.5-1s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1-1.5 1z"/></svg>
+                        <span class="icon-wrapper">🚗</span>
                         Mobilität
                     </button>
                     <button class="category-btn" onclick="selectCategory(this, 'Wohnen')">
-                        <svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+                        <span class="icon-wrapper">🏠</span>
                         Wohnen
                     </button>
                     <button class="category-btn" onclick="selectCategory(this, 'Sonstiges')">
-                        <svg viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7c-.83 0-1.5-.67-1.5-1.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+                        <span class="icon-wrapper">📦</span>
                         Sonstiges
                     </button>
                 </div>
 
                 <div id="grid-income" class="category-grid" style="display: none;">
                     <button class="category-btn" onclick="selectCategory(this, 'Lohn')">
-                        <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                        <span class="icon-wrapper">💼</span>
                         Lohn
                     </button>
                     <button class="category-btn" onclick="selectCategory(this, 'Sonstige')">
-                        <svg viewBox="0 0 24 24"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7c-.83 0-1.5-.67-1.5-1.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg>
+                        <span class="icon-wrapper">🪙</span>
                         Sonstige
                     </button>
                     <button class="category-btn" onclick="selectCategory(this, 'MG')">
-                        <svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                        <span class="icon-wrapper">🎖️</span>
                         MG
                     </button>
                 </div>
@@ -914,7 +952,7 @@
         </div>
     </div>
 
-    <!-- Kategorie Detail Maske (Dashboard-Ähnlicher Aufbau mit Zeitverlauf) -->
+    <!-- Kategorie Detail Maske -->
     <div id="category-modal" class="modal" onclick="closeCategoryModalOnOutsideClick(event)">
         <div class="modal-content" style="background: var(--bg); max-height: 95vh;">
             <div class="modal-header" style="background: var(--surface); padding: 12px 16px; margin: -20px -20px 12px -20px; border-bottom: 1px solid var(--border-light); border-top-left-radius: 24px; border-top-right-radius: 24px;">
@@ -923,7 +961,6 @@
             </div>
             
             <div style="display: flex; flex-direction: column; gap: 16px;">
-                <!-- D-Board Kachel für Kategorie -->
                 <div class="card">
                     <div class="card-title">
                         <div class="card-title-left">
@@ -941,7 +978,6 @@
                     </div>
                 </div>
 
-                <!-- Zeitverlauf Kachel für Kategorie -->
                 <div class="card">
                     <div class="card-title">
                         <div class="card-title-left">
@@ -958,7 +994,6 @@
                     </div>
                 </div>
 
-                <!-- Einzelposten Liste -->
                 <div class="card">
                     <div class="card-title">
                         <div class="card-title-left">
@@ -1011,15 +1046,14 @@
         let apiEndpoint = '';
         let cloudSyncTimeout = null;
         let globalRawData = [];
-        let viewMode = 'month'; // 'month' oder 'year'
-        let chartDistributionType = 'expense'; // 'expense' oder 'income'
-        let editingRowIndex = null; // Index für Bearbeitungsmodus
+        let viewMode = 'month';
+        let chartDistributionType = 'expense';
+        let editingRowIndex = null;
 
         const initialDate = new Date();
         const initialYearStr = initialDate.getFullYear().toString();
         const initialMonthStr = (initialDate.getMonth() + 1).toString().padStart(2, '0');
 
-        // Mapping von Kategorien zu Emojis
         const categoryEmojis = {
             'Kleidung': '👕',
             'Urlaub': '🧳',
@@ -1108,7 +1142,7 @@
         }
 
         function openEditModal(row) {
-            editingRowIndex = row.row_index; // Die von der API gelieferte Zeilennummer
+            editingRowIndex = row.row_index;
             document.getElementById('tracking-modal-title').innerText = "Eintrag bearbeiten";
             document.getElementById('modal-type-switcher').style.display = 'none';
             document.getElementById('modal-template-btn').style.display = 'none';
@@ -1148,7 +1182,6 @@
             
             const dynamicRows = globalRawData.filter(r => !(r.vorlage && r.vorlage.toLowerCase() === 'ja'));
             
-            // Sortierung: Neueste zuerst
             const sorted = [...dynamicRows].sort((a, b) => {
                 const parseDateTime = (r) => {
                     const p = parseRowDate(r.datum);
@@ -1230,7 +1263,6 @@
             document.getElementById('cat-dash-income').innerText = `+${formatCurrency(catIncome)}`;
             document.getElementById('cat-dash-expense').innerText = `-${formatCurrency(catExpense)}`;
 
-            // Zeitverlauf für Kategorie generieren
             const timelineChart = document.getElementById('cat-timeline-chart');
             timelineChart.innerHTML = '';
             const sortedMonths = Object.keys(monthlyTimeline).sort();
@@ -1263,14 +1295,12 @@
                 });
             }
 
-            // Buchungen auflisten
             const body = document.getElementById('category-modal-body');
             body.innerHTML = '';
 
             if (rows.length === 0) {
                 body.innerHTML = '<p class="status-text-loader">Keine Einträge gefunden.</p>';
             } else {
-                // Sortiert nach Datum absteigend
                 const sortedRows = [...rows].sort((a,b) => {
                     const pA = parseRowDate(a.datum); const pB = parseRowDate(b.datum);
                     return (`${pB.year}-${pB.month}`) .localeCompare(`${pA.year}-${pA.month}`);
@@ -1426,7 +1456,7 @@
             };
 
             if(editingRowIndex !== null) {
-                payload.row_index = editingRowIndex; // Übergabe für Überschreibung
+                payload.row_index = editingRowIndex;
             }
 
             if(!apiEndpoint) {
@@ -1544,7 +1574,6 @@
                         const val = parseFloat(cleanBetrag);
                         const isExpenseTemplate = val < 0;
 
-                        // Filterung basierend auf dem aktuellen Reiter im Modal (Einnahme/Ausgabe)
                         if(currentType === 'expense' && !isExpenseTemplate) return;
                         if(currentType === 'income' && isExpenseTemplate) return;
 
@@ -1605,31 +1634,52 @@
             let incomeCatDistribution = {};
             let catItemsMap = {};
             
-            let timelineData = {}; // Speichert monatsübergreifende Summen für das Gesamt-Diagramm
+            let timelineData = {};
+            let historicalSavingsRates = []; // Für dynamische Skalierung des Sparquoten-Balkens
 
             const selectedYear = document.getElementById('filter-year').value;
             const selectedMonth = document.getElementById('filter-month').value;
 
-            // Zuerst alle historischen Daten aggregieren für Diagramme
+            // 1. Durchlauf: Alle historischen Monatsblöcke für globale Min/Max Raten ermitteln
             if (rows && rows.length > 0) {
                 rows.forEach(row => {
                     if(row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
-                    
                     let cleanBetrag = row.betrag.toString().replace(',','.');
                     const val = parseFloat(cleanBetrag);
                     if(isNaN(val)) return;
 
                     const parsed = parseRowDate(row.datum);
-                    
-                    // Befüllung des globalen Zeitverlaufs (unabhängig vom Filter für Diagrammanzeige der letzten Monate)
                     if(parsed.year && parsed.month) {
                         const mKey = `${parsed.year}-${parsed.month}`;
                         if(!timelineData[mKey]) timelineData[mKey] = { inc: 0, exp: 0 };
                         if(val > 0) timelineData[mKey].inc += val;
                         else timelineData[mKey].exp += Math.abs(val);
                     }
+                });
+            }
 
-                    // Filterung für das aktuelle Zahlen-Dashboard
+            // Alle historischen Sparquoten berechnen
+            Object.values(timelineData).forEach(m => {
+                if(m.inc > 0) {
+                    historicalSavingsRates.push(((m.inc - m.exp) / m.inc) * 100);
+                } else if(m.exp > 0) {
+                    historicalSavingsRates.push(-100);
+                }
+            });
+
+            // Fallback Extremwerte setzen falls historisch nichts da ist
+            let maxPositiveRate = Math.max(...historicalSavingsRates.filter(r => r >= 0), 100);
+            let maxNegativeRate = Math.min(...historicalSavingsRates.filter(r => r < 0), -100);
+
+            // 2. Durchlauf: Aktuell gefilterte Daten für Dashboard aufbereiten
+            if (rows && rows.length > 0) {
+                rows.forEach(row => {
+                    if(row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
+                    let cleanBetrag = row.betrag.toString().replace(',','.');
+                    const val = parseFloat(cleanBetrag);
+                    if(isNaN(val)) return;
+
+                    const parsed = parseRowDate(row.datum);
                     if (parsed.year !== selectedYear) return;
                     if (viewMode === 'month' && selectedMonth !== 'all' && parsed.month !== selectedMonth) return;
 
@@ -1656,11 +1706,32 @@
             saldoEl.innerText = `${saldo >= 0 ? '+' : ''}${formatCurrency(saldo)}`;
             saldoEl.style.color = saldo >= 0 ? 'var(--success)' : 'var(--danger)';
 
-            // Sparquote Berechnung (kann negativ sein)
+            // Aktuelle Sparquote berechnen
             const savingsRate = income > 0 ? ((income - expense) / income) * 100 : (expense > 0 ? -100 : 0);
             const savingsRateEl = document.getElementById('stats-savings-rate');
             savingsRateEl.innerText = `${savingsRate.toFixed(1)}%`;
             savingsRateEl.style.color = savingsRate >= 0 ? 'var(--success)' : 'var(--danger)';
+
+            // Dynamische Skalierung und Ausrichtung des Sparquoten-Balkens (Zentriert bei 0%)
+            const barFill = document.getElementById('savings-bar-fill');
+            document.getElementById('savings-min-label').innerText = `${maxPositiveRate.toFixed(0)}% Sparen`;
+            document.getElementById('savings-max-label').innerText = `${Math.abs(maxNegativeRate).toFixed(0)}% Verlust`;
+
+            if (savingsRate >= 0) {
+                // Positive Rate wächst nach links (von 50% Richtung 0%)
+                const scaleFactor = maxPositiveRate > 0 ? (savingsRate / maxPositiveRate) : 0;
+                const widthPercent = Math.min(scaleFactor * 50, 50);
+                barFill.style.left = (50 - widthPercent) + '%';
+                barFill.style.width = widthPercent + '%';
+                barFill.style.background = 'var(--success)';
+            } else {
+                // Negative Rate wächst nach rechts (von 50% Richtung 100%)
+                const scaleFactor = maxNegativeRate < 0 ? (savingsRate / maxNegativeRate) : 0;
+                const widthPercent = Math.min(scaleFactor * 50, 50);
+                barFill.style.left = '50%';
+                barFill.style.width = widthPercent + '%';
+                barFill.style.background = 'var(--danger)';
+            }
 
             const progressEl = document.getElementById('dash-progress');
             if (income > 0) {
@@ -1672,16 +1743,9 @@
                 progressEl.style.background = 'var(--danger)';
             }
 
-            // Rendert das umschaltbare Balkendiagramm
             renderChartDistribution(rows, catDistribution, incomeCatDistribution, expense, income);
-            
-            // Rendert das neue historische Verlaufsdiagramm oben
             renderTimelineChart(timelineData);
-
-            // Kategorien Tabelle rendern
             renderCategoriesTable(catDistribution, incomeCatDistribution, catItemsMap);
-
-            // Letzte Buchungen rendern
             renderRecentBookings(rows);
         }
 
@@ -1695,14 +1759,12 @@
                 return;
             }
 
-            // Maximalen Wert zur Skalierung ermitteln
             let maxVal = 0;
             sortedMonths.forEach(m => {
                 const s = timelineData[m].inc - timelineData[m].exp;
                 maxVal = Math.max(maxVal, timelineData[m].inc, timelineData[m].exp, Math.abs(s));
             });
 
-            // Letzten 6 Monate anzeigen
             sortedMonths.slice(-6).forEach(m => {
                 const data = timelineData[m];
                 const sal = data.inc - data.exp;
@@ -1732,7 +1794,6 @@
         }
 
         function renderChartDistribution(rows, catDist, incCatDist, totalExp, totalInc) {
-            // Falls via Trigger direkt aufgerufen, holen wir uns die Werte neu aus der globalen Berechnung
             if(!catDist) {
                 renderStats(globalRawData);
                 return;
@@ -1809,7 +1870,6 @@
 
             const dynamicRows = rows.filter(r => !(r.vorlage && r.vorlage.toLowerCase() === 'ja'));
             
-            // Sortieren nach Datum und Uhrzeit absteigend
             const sorted = [...dynamicRows].sort((a, b) => {
                 const parseDateTime = (r) => {
                     const p = parseRowDate(r.datum);
@@ -1835,17 +1895,17 @@
 
                 const div = document.createElement('div');
                 div.className = 'dist-item';
-                div.style.padding = '10px 0';
+                div.style.padding = '12px 0';
                 div.onclick = () => openEditModal(row);
                 div.innerHTML = `
                     <div class="dist-label">
-                        <span style="font-size: 1.1rem;">${emo}</span>
+                        <span style="font-size: 1.2rem;">${emo}</span>
                         <div style="display:flex; flex-direction:column; align-items:flex-start;">
-                            <span style="font-weight:700; font-size:0.85rem;">${row.titel || 'Ohne Titel'}</span>
-                            <span style="font-size:0.65rem; color:var(--text-secondary);">${row.datum}</span>
+                            <span style="font-weight:700; font-size:0.9rem;">${row.titel || 'Ohne Titel'}</span>
+                            <span style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">${row.datum}</span>
                         </div>
                     </div>
-                    <span style="font-weight:700; color: ${isExpense ? 'var(--danger)' : 'var(--success)'}">
+                    <span style="font-weight:800; font-size:1rem; color: ${isExpense ? 'var(--danger)' : 'var(--success)'}">
                         ${isExpense ? '-' : '+'}${formatCurrency(Math.abs(val))}
                     </span>
                 `;
