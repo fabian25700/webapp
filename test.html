@@ -457,7 +457,7 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* Vorlagen Drawer */
+        /* Vorlagen Drawer (Zweispaltiges Grid-Layout, kompakter) */
         .templates-drawer {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: var(--bg);
@@ -476,23 +476,33 @@
         }
         .templates-drawer.active { display: flex; }
 
+        .templates-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            overflow-y: auto;
+            margin-top: 12px;
+            padding-bottom: 12px;
+        }
+
         .template-item {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 16px;
+            border-radius: 10px;
+            padding: 10px 12px;
             display: flex;
+            flex-direction: column;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
             cursor: pointer;
             box-shadow: var(--shadow);
-            margin-bottom: 10px;
+            gap: 4px;
         }
 
-        .template-info { display: flex; flex-direction: column; gap: 4px; }
-        .template-title { font-weight: 700; font-size: 0.95rem; }
-        .template-meta { font-size: 0.75rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; }
-        .template-amount { font-weight: 700; font-size: 1rem; }
+        .template-info { display: flex; flex-direction: column; gap: 2px; width: 100%; }
+        .template-title { font-weight: 700; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        .template-meta { font-size: 0.65rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; }
+        .template-amount { font-weight: 800; font-size: 0.9rem; margin-top: 2px; align-self: flex-end; }
         .template-amount.expense { color: var(--danger); }
         .template-amount.income { color: var(--success); }
 
@@ -689,7 +699,6 @@
                     </div>
                 </div>
                 <div id="stats-chart-container" style="display: flex; flex-direction: column; gap: 4px;">
-                    <!-- Dynamische Grafiken werden hier generiert -->
                     <p class="status-text-loader">Lade Auswertungen...</p>
                 </div>
             </div>
@@ -751,7 +760,6 @@
                         <div class="card-icon">📝</div>
                         <span>Details</span>
                     </div>
-                    <!-- Hier ist der Vorlagen-Button wieder platziert -->
                     <button class="inline-action-btn" onclick="openTemplatesDrawer()">Vorlagen</button>
                 </div>
                 <div class="input-group">
@@ -845,14 +853,14 @@
         </div>
     </div>
 
-    <!-- Vorlagen Drawer Panel -->
+    <!-- Vorlagen Drawer Panel (Kompakter & Zweispaltig) -->
     <div id="templates-drawer" class="templates-drawer">
         <div class="modal-header">
             <span class="modal-title">Vorlage wählen</span>
             <button class="close-modal" onclick="closeTemplatesDrawer()">×</button>
         </div>
-        <div id="templates-list" style="display: flex; flex-direction: column; gap: 4px; overflow-y: auto; margin-top: 12px;">
-            <p class="status-text-loader">Lade Vorlagen...</p>
+        <div id="templates-list" class="templates-grid">
+            <p class="status-text-loader" style="grid-column: span 2;">Lade Vorlagen...</p>
         </div>
     </div>
 
@@ -1015,28 +1023,33 @@
             return val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
         }
 
-        // Robustere Erkennung für dd.mm.jjjj Format aus Google Sheets
+        // Maximal ausfallsichere Datumserkennung (dd.mm.jjjj / ISO / Fallbacks)
         function parseRowDate(dateStr) {
             if (!dateStr) return { year: "", month: "" };
             
-            // Bereinigt eventuelle Strings, falls ein ISO-String o.ä. reinkommt
-            const cleanStr = dateStr.toString().trim();
+            const cleanStr = dateStr.toString().replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
+            
+            // Versuch 1: Klassisch über Punkte getrennt (dd.mm.yyyy)
             const parts = cleanStr.split('.');
-            
-            if (parts.length < 3) return { year: "", month: "" };
-            
-            let yearPart = parts[2].trim();
-            let monthPart = parts[1].trim().padStart(2, '0');
-            
-            // Fix für zweistellige Jahreszahlen (z.B. 26 -> 2026)
-            if (yearPart.length === 2) {
-                yearPart = "20" + yearPart;
+            if (parts.length >= 3) {
+                let yearPart = parts[2].trim();
+                let monthPart = parts[1].trim().padStart(2, '0');
+                if (yearPart.length === 2) yearPart = "20" + yearPart;
+                if (yearPart.length === 4 && !isNaN(yearPart) && !isNaN(monthPart)) {
+                    return { year: yearPart, month: monthPart };
+                }
             }
             
-            return {
-                year: yearPart,
-                month: monthPart
-            };
+            // Versuch 2: Fallback über JavaScript Native Date Parser (falls ISO oder US Format ankommt)
+            const d = new Date(cleanStr);
+            if (!isNaN(d.getTime())) {
+                return {
+                    year: d.getFullYear().toString(),
+                    month: (d.getMonth() + 1).toString().padStart(2, '0')
+                };
+            }
+            
+            return { year: "", month: "" };
         }
 
         async function submitData() {
@@ -1181,7 +1194,7 @@
             container.innerHTML = '';
             
             const cache = new Set();
-            const uniqueTemplates = [];
+            let uniqueTemplates = [];
 
             if (rows && rows.length > 0) {
                 rows.forEach(row => {
@@ -1196,9 +1209,12 @@
             }
 
             if(uniqueTemplates.length === 0) {
-                container.innerHTML = '<p class="status-text-loader">Keine Vorlagen gespeichert.</p>';
+                container.innerHTML = '<p class="status-text-loader" style="grid-column: span 2;">Keine Vorlagen gespeichert.</p>';
                 return;
             }
+
+            // Alphabetisch nach Titel sortieren
+            uniqueTemplates.sort((a, b) => (a.titel || "").localeCompare(b.titel || ""));
 
             uniqueTemplates.forEach(t => {
                 let cleanBetrag = t.betrag.toString().replace(',','.');
