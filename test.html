@@ -1635,12 +1635,11 @@
             let catItemsMap = {};
             
             let timelineData = {};
-            let historicalSavingsRates = []; // Für dynamische Skalierung des Sparquoten-Balkens
+            let historicalSavingsRates = [];
 
             const selectedYear = document.getElementById('filter-year').value;
             const selectedMonth = document.getElementById('filter-month').value;
 
-            // 1. Durchlauf: Alle historischen Monatsblöcke für globale Min/Max Raten ermitteln
             if (rows && rows.length > 0) {
                 rows.forEach(row => {
                     if(row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
@@ -1658,7 +1657,6 @@
                 });
             }
 
-            // Alle historischen Sparquoten berechnen
             Object.values(timelineData).forEach(m => {
                 if(m.inc > 0) {
                     historicalSavingsRates.push(((m.inc - m.exp) / m.inc) * 100);
@@ -1667,11 +1665,11 @@
                 }
             });
 
-            // Fallback Extremwerte setzen falls historisch nichts da ist
+            // Begrenzung auf maximal 100% Verlust, da Werte unter -100% (z.B. keine Einnahmen, aber hohe Ausgaben) die Leiste sprengen
             let maxPositiveRate = Math.max(...historicalSavingsRates.filter(r => r >= 0), 100);
             let maxNegativeRate = Math.min(...historicalSavingsRates.filter(r => r < 0), -100);
+            if(maxNegativeRate < -100) maxNegativeRate = -100;
 
-            // 2. Durchlauf: Aktuell gefilterte Daten für Dashboard aufbereiten
             if (rows && rows.length > 0) {
                 rows.forEach(row => {
                     if(row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
@@ -1706,44 +1704,36 @@
             saldoEl.innerText = `${saldo >= 0 ? '+' : ''}${formatCurrency(saldo)}`;
             saldoEl.style.color = saldo >= 0 ? 'var(--success)' : 'var(--danger)';
 
-            // Aktuelle Sparquote berechnen
-            const savingsRate = income > 0 ? ((income - expense) / income) * 100 : (expense > 0 ? -100 : 0);
+            let savingsRate = income > 0 ? ((income - expense) / income) * 100 : (expense > 0 ? -100 : 0);
+            
             const savingsRateEl = document.getElementById('stats-savings-rate');
             savingsRateEl.innerText = `${savingsRate.toFixed(1)}%`;
             savingsRateEl.style.color = savingsRate >= 0 ? 'var(--success)' : 'var(--danger)';
 
-            // Dynamische Skalierung und Ausrichtung des Sparquoten-Balkens (Zentriert bei 0%)
+            // Begrenzung für die Skalierung der Leiste abfangen
+            let displaySavingsRate = savingsRate;
+            if(displaySavingsRate < -100) displaySavingsRate = -100;
+
             const barFill = document.getElementById('savings-bar-fill');
             document.getElementById('savings-min-label').innerText = `${maxPositiveRate.toFixed(0)}% Sparen`;
             document.getElementById('savings-max-label').innerText = `${Math.abs(maxNegativeRate).toFixed(0)}% Verlust`;
 
-            if (savingsRate >= 0) {
-                // Positive Rate wächst nach links (von 50% Richtung 0%)
-                const scaleFactor = maxPositiveRate > 0 ? (savingsRate / maxPositiveRate) : 0;
+            if (displaySavingsRate >= 0) {
+                const scaleFactor = maxPositiveRate > 0 ? (displaySavingsRate / maxPositiveRate) : 0;
                 const widthPercent = Math.min(scaleFactor * 50, 50);
                 barFill.style.left = (50 - widthPercent) + '%';
                 barFill.style.width = widthPercent + '%';
                 barFill.style.background = 'var(--success)';
             } else {
-                // Negative Rate wächst nach rechts (von 50% Richtung 100%)
-                const scaleFactor = maxNegativeRate < 0 ? (savingsRate / maxNegativeRate) : 0;
+                const scaleFactor = maxNegativeRate < 0 ? (displaySavingsRate / maxNegativeRate) : 0;
                 const widthPercent = Math.min(scaleFactor * 50, 50);
                 barFill.style.left = '50%';
                 barFill.style.width = widthPercent + '%';
                 barFill.style.background = 'var(--danger)';
             }
 
-            const progressEl = document.getElementById('dash-progress');
-            if (income > 0) {
-                const percent = Math.min((expense / income) * 100, 100);
-                progressEl.style.width = percent + '%';
-                progressEl.style.background = percent > 90 ? 'var(--danger)' : 'var(--accent)';
-            } else {
-                progressEl.style.width = expense > 0 ? '100%' : '0%';
-                progressEl.style.background = 'var(--danger)';
-            }
-
-            renderChartDistribution(rows, catDistribution, incomeCatDistribution, expense, income);
+            // Schleife durch direkten Übergabetyp gelöst
+            renderChartDistribution(null, catDistribution, incomeCatDistribution, expense, income);
             renderTimelineChart(timelineData);
             renderCategoriesTable(catDistribution, incomeCatDistribution, catItemsMap);
             renderRecentBookings(rows);
@@ -1794,15 +1784,38 @@
         }
 
         function renderChartDistribution(rows, catDist, incCatDist, totalExp, totalInc) {
-            if(!catDist) {
-                renderStats(globalRawData);
-                return;
+            // Verhindert das Einfrieren: Wenn Parameter fehlen, greife auf die globalen Daten zurück ohne renderStats zu loopen
+            if(!catDist && globalRawData.length > 0) {
+                const selectedYear = document.getElementById('filter-year').value;
+                const selectedMonth = document.getElementById('filter-month').value;
+                catDist = {}; incCatDist = {}; totalExp = 0; totalInc = 0;
+                
+                globalRawData.forEach(row => {
+                    if(row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
+                    let cleanBetrag = row.betrag.toString().replace(',','.');
+                    const val = parseFloat(cleanBetrag);
+                    if(isNaN(val)) return;
+
+                    const parsed = parseRowDate(row.datum);
+                    if (parsed.year !== selectedYear) return;
+                    if (viewMode === 'month' && selectedMonth !== 'all' && parsed.month !== selectedMonth) return;
+
+                    const cat = row.kategorie || 'Sonstiges';
+                    if(val > 0) {
+                        totalInc += val;
+                        incCatDist[cat] = (incCatDist[cat] || 0) + val;
+                    } else {
+                        totalExp += Math.abs(val);
+                        catDist[cat] = (catDist[cat] || 0) + Math.abs(val);
+                    }
+                });
             }
 
             const chartContainer = document.getElementById('unified-chart-container');
+            if(!chartContainer) return;
             chartContainer.innerHTML = '';
 
-            const activeDist = chartDistributionType === 'expense' ? catDist : incCatDist;
+            const activeDist = chartDistributionType === 'expense' ? (catDist || {}) : (incCatDist || {});
             const totalVal = chartDistributionType === 'expense' ? totalExp : totalInc;
             const prefix = chartDistributionType === 'expense' ? '-' : '+';
             const colorClass = chartDistributionType === 'expense' ? '' : 'income-bar';
