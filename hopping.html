@@ -371,9 +371,13 @@
                 google.script.run
                     .withSuccessHandler(initializeDashboard)
                     .withFailureHandler(err => {
-                        document.getElementById('loading').innerText = "Fehler beim Laden der API-Daten: " + err;
+                        document.getElementById('loading').innerHTML = 
+                            `<span style="color: var(--accent-danger); font-weight: bold;">Fehler beim Laden:</span><br>${err.message || err}`;
+                        console.error("Apps Script Error:", err);
                     })
                     .getHoppingData();
+            } else {
+                document.getElementById('loading').innerText = "Google API-Umgebung nicht gefunden.";
             }
         });
 
@@ -412,6 +416,7 @@
 
         function populateTeamSelector() {
             const selector = document.getElementById('team-selector');
+            selector.innerHTML = "";
             const teams = new Set();
             
             rawData.forEach(d => {
