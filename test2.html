@@ -444,7 +444,7 @@
 
         .delete-btn {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             border-radius: 12px;
             border: 1px solid var(--danger);
             background: transparent;
@@ -454,8 +454,7 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
             cursor: pointer;
-            margin-top: 10px;
-            display: none;
+            display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
@@ -735,10 +734,10 @@
                 <button id="view-mode-year" class="segmented-btn" onclick="setViewMode('year')">Jahresübersicht</button>
             </div>
             <div class="filter-row-inputs">
-                <select id="filter-year" class="filter-select" onchange="onGlobalFilterChange()">
+                <select id="filter-year" class="filter-select" onchange="renderStats(globalRawData)">
                     <!-- Dynamisch befüllt -->
                 </select>
-                <select id="filter-month" class="filter-select" onchange="onGlobalFilterChange()">
+                <select id="filter-month" class="filter-select" onchange="renderStats(globalRawData)">
                     <option value="all">Gesamtes Jahr</option>
                     <option value="01">Januar</option>
                     <option value="02">Februar</option>
@@ -783,7 +782,7 @@
                     <span id="stats-savings-rate">0%</span>
                 </div>
                 
-                <!-- Zentrierte bidirektionale Sparquoten-Anzeige -->
+                <!-- Neue zentrierte bidirektionale Sparquoten-Anzeige -->
                 <div class="savings-rate-container">
                     <div class="savings-rate-labels">
                         <span id="savings-min-label">Max Sparen</span>
@@ -968,7 +967,10 @@
                 <div class="spinner" id="submit-spinner"></div>
                 <span id="submit-btn-text">Speichern</span>
             </button>
-            <button class="delete-btn" id="btn-delete-data" onclick="deleteData()">Löschen</button>
+            
+            <button class="delete-btn" id="btn-delete-data" style="display: none;" onclick="deleteData()">
+                <span>Löschen</span>
+            </button>
         </div>
     </div>
 
@@ -981,6 +983,30 @@
             </div>
             
             <div style="display: flex; flex-direction: column; gap: 16px;">
+                <!-- Filter oben in den Kategorie-Details -->
+                <div class="filter-card">
+                    <div class="filter-row-inputs">
+                        <select id="cat-filter-year" class="filter-select" onchange="updateCategoryModalView()">
+                            <!-- Dynamisch befüllt -->
+                        </select>
+                        <select id="cat-filter-month" class="filter-select" onchange="updateCategoryModalView()">
+                            <option value="all">Gesamtes Jahr</option>
+                            <option value="01">Januar</option>
+                            <option value="02">Februar</option>
+                            <option value="03">März</option>
+                            <option value="04">April</option>
+                            <option value="05">Mai</option>
+                            <option value="06">Juni</option>
+                            <option value="07">Juli</option>
+                            <option value="08">August</option>
+                            <option value="09">September</option>
+                            <option value="10">Oktober</option>
+                            <option value="11">November</option>
+                            <option value="12">Dezember</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="card">
                     <div class="card-title">
                         <div class="card-title-left">
@@ -1069,7 +1095,7 @@
         let viewMode = 'month';
         let chartDistributionType = 'expense';
         let editingRowIndex = null;
-        let activeCategoryModalName = null;
+        let activeCategoryName = '';
 
         const initialDate = new Date();
         const initialYearStr = initialDate.getFullYear().toString();
@@ -1137,14 +1163,7 @@
                 monthSelect.disabled = false;
                 monthSelect.style.opacity = '1';
             }
-            onGlobalFilterChange();
-        }
-
-        function onGlobalFilterChange() {
             renderStats(globalRawData);
-            if (activeCategoryModalName) {
-                updateCategoryModalData();
-            }
         }
 
         function setChartDistributionType(type) {
@@ -1176,7 +1195,7 @@
             document.getElementById('modal-type-switcher').style.display = 'none';
             document.getElementById('modal-template-btn').style.display = 'none';
             document.getElementById('modal-template-toggle-card').style.display = 'none';
-            document.getElementById('btn-delete-data').style.display = 'flex';
+            document.getElementById('btn-delete-data').style.display = 'block';
 
             let cleanBetrag = row.betrag.toString().replace(',','.');
             const val = parseFloat(cleanBetrag);
@@ -1187,7 +1206,7 @@
             document.getElementById('title').value = row.titel || '';
 
             document.querySelectorAll('.category-btn').forEach(btn => {
-                if(btn.innerText.trim().includes(row.kategorie)) {
+                if(btn.innerText.trim() === row.kategorie) {
                     selectCategory(btn, row.kategorie);
                 }
             });
@@ -1212,15 +1231,7 @@
             
             const dynamicRows = globalRawData.filter(r => !(r.vorlage && r.vorlage.toLowerCase() === 'ja'));
             
-            const sorted = [...dynamicRows].sort((a, b) => {
-                const parseDateTime = (r) => {
-                    const p = parseRowDate(r.datum);
-                    const parts = (r.datum || "").split('.');
-                    const dStr = parts.length === 3 ? `${p.year}-${p.month}-${parts[0].trim().padStart(2,'0')}` : "1970-01-01";
-                    return new Date(`${dStr}T${r.uhrzeit || '00:00'}`);
-                };
-                return parseDateTime(b) - parseDateTime(a);
-            });
+            const sorted = [...dynamicRows].sort((a, b) => b.row_index - a.row_index);
 
             if(sorted.length === 0) {
                 body.innerHTML = '<p class="status-text-loader">Keine Einträge vorhanden.</p>';
@@ -1266,49 +1277,68 @@
             }
         }
 
-        function openCategoryModal(categoryName) {
-            activeCategoryModalName = categoryName;
+        function openCategoryModal(categoryName, rows, allRows) {
+            activeCategoryName = categoryName;
             document.getElementById('category-modal-title').innerText = `Kategorie: ${categoryName}`;
-            updateCategoryModalData();
+            
+            const yearSelect = document.getElementById('cat-filter-year');
+            const monthSelect = document.getElementById('cat-filter-month');
+            
+            const years = new Set();
+            globalRawData.forEach(row => {
+                if (row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
+                const parsed = parseRowDate(row.datum);
+                if (parsed.year) years.add(parsed.year);
+            });
+            if (years.size === 0) years.add(initialYearStr);
+
+            yearSelect.innerHTML = '';
+            Array.from(years).sort((a,b) => b - a).forEach(y => {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.innerText = y;
+                yearSelect.appendChild(opt);
+            });
+
+            yearSelect.value = document.getElementById('filter-year').value || initialYearStr;
+            monthSelect.value = document.getElementById('filter-month').value || 'all';
+
+            updateCategoryModalView();
             document.getElementById('category-modal').classList.add('active');
         }
 
-        function updateCategoryModalData() {
-            if (!activeCategoryModalName) return;
+        function updateCategoryModalView() {
+            const selectedYear = document.getElementById('cat-filter-year').value;
+            const selectedMonth = document.getElementById('cat-filter-month').value;
             
-            const selectedYear = document.getElementById('filter-year').value;
-            const selectedMonth = document.getElementById('filter-month').value;
-            
+            const catRows = globalRawData.filter(row => {
+                if (row.vorlage && row.vorlage.toLowerCase() === 'ja') return false;
+                if (row.kategorie !== activeCategoryName) return false;
+                const parsed = parseRowDate(row.datum);
+                if (parsed.year !== selectedYear) return false;
+                if (selectedMonth !== 'all' && parsed.month !== selectedMonth) return false;
+                return true;
+            });
+
             let catIncome = 0;
             let catExpense = 0;
             let monthlyTimeline = {};
-            let filteredRows = [];
 
-            globalRawData.forEach(row => {
-                if (row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
-                if (row.kategorie !== activeCategoryModalName) return;
-
+            catRows.forEach(row => {
                 let cleanBetrag = row.betrag.toString().replace(',','.');
                 const val = parseFloat(cleanBetrag);
-                if (isNaN(val)) return;
+                if(!isNaN(val)) {
+                    if(val > 0) catIncome += val;
+                    else catExpense += Math.abs(val);
 
-                const parsed = parseRowDate(row.datum);
-                
-                // Für den historischen Verlauf sammeln wir alles
-                if (parsed.year && parsed.month) {
-                    const mKey = `${parsed.year}-${parsed.month}`;
-                    if (!monthlyTimeline[mKey]) monthlyTimeline[mKey] = { inc: 0, exp: 0 };
-                    if (val > 0) monthlyTimeline[mKey].inc += val;
-                    else monthlyTimeline[mKey].exp += Math.abs(val);
+                    const parsed = parseRowDate(row.datum);
+                    if(parsed.year && parsed.month) {
+                        const mKey = `${parsed.year}-${parsed.month}`;
+                        if(!monthlyTimeline[mKey]) monthlyTimeline[mKey] = { inc: 0, exp: 0 };
+                        if(val > 0) monthlyTimeline[mKey].inc += val;
+                        else monthlyTimeline[mKey].exp += Math.abs(val);
+                    }
                 }
-
-                // Für die aktuelle Tabellen- und Overview-Anzeige filtern wir nach globaler Ansicht
-                if (parsed.year !== selectedYear) return;
-                if (viewMode === 'month' && selectedMonth !== 'all' && parsed.month !== selectedMonth) return;
-
-                filteredRows.push(row);
-                if (val > 0) catIncome += val;
-                else catExpense += Math.abs(val);
             });
 
             document.getElementById('cat-dash-income').innerText = `+${formatCurrency(catIncome)}`;
@@ -1318,7 +1348,7 @@
             timelineChart.innerHTML = '';
             const sortedMonths = Object.keys(monthlyTimeline).sort();
 
-            if (sortedMonths.length === 0) {
+            if(sortedMonths.length === 0) {
                 timelineChart.innerHTML = '<p class="status-text-loader" style="width:100%">Keine Verlaufsdaten.</p>';
             } else {
                 let maxVal = 0;
@@ -1349,18 +1379,10 @@
             const body = document.getElementById('category-modal-body');
             body.innerHTML = '';
 
-            if (filteredRows.length === 0) {
-                body.innerHTML = '<p class="status-text-loader">Keine Einträge im gewählten Zeitraum gefunden.</p>';
+            if (catRows.length === 0) {
+                body.innerHTML = '<p class="status-text-loader">Keine Einträge gefunden.</p>';
             } else {
-                const sortedRows = [...filteredRows].sort((a,b) => {
-                    const parseDateTime = (r) => {
-                        const p = parseRowDate(r.datum);
-                        const parts = (r.datum || "").split('.');
-                        const dStr = parts.length === 3 ? `${p.year}-${p.month}-${parts[0].trim().padStart(2,'0')}` : "1970-01-01";
-                        return new Date(`${dStr}T${r.uhrzeit || '00:00'}`);
-                    };
-                    return parseDateTime(b) - parseDateTime(a);
-                });
+                const sortedRows = [...catRows].sort((a, b) => b.row_index - a.row_index);
 
                 sortedRows.forEach(row => {
                     let cleanBetrag = row.betrag.toString().replace(',','.');
@@ -1390,7 +1412,6 @@
 
         function closeCategoryModal() {
             document.getElementById('category-modal').classList.remove('active');
-            activeCategoryModalName = null;
         }
 
         function closeCategoryModalOnOutsideClick(e) {
@@ -1557,19 +1578,16 @@
         }
 
         async function deleteData() {
-            if (editingRowIndex === null) return;
-            if (!confirm("Möchtest du diesen Eintrag wirklich unwiderruflich löschen?")) return;
+            if(editingRowIndex === null) return;
+            if(!confirm('Möchtest du diesen Eintrag wirklich löschen?')) return;
 
             const submitBtn = document.getElementById('btn-submit-data');
-            const deleteBtn = document.getElementById('btn-delete-data');
-            
             submitBtn.disabled = true;
-            deleteBtn.disabled = true;
             updateCloudStatus("Cloud lädt");
 
             const payload = {
                 row_index: editingRowIndex,
-                action: 'delete'
+                delete: true
             };
 
             try {
@@ -1582,15 +1600,15 @@
                 });
                 
                 updateCloudStatus("Cloud synced");
+                showToast();
                 closeTrackingModal();
                 setTimeout(loadTemplatesAndStats, 500);
             } catch(e) {
                 console.error(e);
                 updateCloudStatus("Cloud Fehler");
-                alert('Fehler beim Löschen des Eintrags.');
+                alert('Fehler beim Löschen.');
             } finally {
                 submitBtn.disabled = false;
-                deleteBtn.disabled = false;
             }
         }
 
@@ -1609,9 +1627,6 @@
                 initFilterOptions(data);
                 renderTemplates(data);
                 renderStats(data);
-                if (activeCategoryModalName) {
-                    updateCategoryModalData();
-                }
             } catch(e) {
                 console.error("Fehler beim Abruf:", e);
                 document.getElementById('stats-distribution').innerHTML = 
@@ -1718,7 +1733,7 @@
             document.getElementById('title').value = titel;
             
             document.querySelectorAll('.category-btn').forEach(btn => {
-                if(btn.innerText.trim().includes(kategorie)) {
+                if(btn.innerText.trim() === kategorie) {
                     selectCategory(btn, kategorie);
                 }
             });
@@ -1729,6 +1744,7 @@
             let expense = 0;
             let catDistribution = {};
             let incomeCatDistribution = {};
+            let catItemsMap = {};
             
             let timelineData = {};
             let historicalSavingsRates = [];
@@ -1736,6 +1752,7 @@
             const selectedYear = document.getElementById('filter-year').value;
             const selectedMonth = document.getElementById('filter-month').value;
 
+            // 1. Berechnung aller historischen Raten zur dynamischen Skalen-Bestimmung
             if (rows && rows.length > 0) {
                 rows.forEach(row => {
                     if(row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
@@ -1761,12 +1778,15 @@
                 }
             });
 
+            // Ermittlung der Höchstwerte (neue 100% Grenzen über den Dreisatz)
             let maxPositiveRate = Math.max(...historicalSavingsRates.filter(r => r >= 0), 0);
             let maxNegativeRate = Math.min(...historicalSavingsRates.filter(r => r < 0), 0);
+            
+            if (maxPositiveRate === 0) maxPositiveRate = 100;
+            if (maxNegativeRate === 0) maxNegativeRate = -100;
+            if (maxNegativeRate < -100) maxNegativeRate = -100;
 
-            if(maxPositiveRate === 0) maxPositiveRate = 100;
-            if(maxNegativeRate === 0) maxNegativeRate = -100;
-
+            // 2. Filterung auf den aktuell gewählten Zeitraum
             if (rows && rows.length > 0) {
                 rows.forEach(row => {
                     if(row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
@@ -1779,6 +1799,8 @@
                     if (viewMode === 'month' && selectedMonth !== 'all' && parsed.month !== selectedMonth) return;
 
                     const cat = row.kategorie || 'Sonstiges';
+                    if (!catItemsMap[cat]) catItemsMap[cat] = [];
+                    catItemsMap[cat].push(row);
 
                     if(val > 0) {
                         income += val;
@@ -1805,28 +1827,31 @@
             savingsRateEl.innerText = `${savingsRate.toFixed(1)}%`;
             savingsRateEl.style.color = savingsRate >= 0 ? 'var(--success)' : 'var(--danger)';
 
+            let displaySavingsRate = savingsRate;
+            if(displaySavingsRate < -100) displaySavingsRate = -100;
+
             const barFill = document.getElementById('savings-bar-fill');
             document.getElementById('savings-min-label').innerText = `${maxPositiveRate.toFixed(0)}% Sparen`;
             document.getElementById('savings-max-label').innerText = `${Math.abs(maxNegativeRate).toFixed(0)}% Verlust`;
 
-            if (savingsRate >= 0) {
-                const widthPercent = maxPositiveRate > 0 ? (savingsRate / maxPositiveRate) * 50 : 0;
-                const finalWidth = Math.min(widthPercent, 50);
-                barFill.style.left = (50 - finalWidth) + '%';
-                barFill.style.width = finalWidth + '%';
+            // Dreisatz-Skalierung auf der Leiste (50% ist die Mitte)
+            if (displaySavingsRate >= 0) {
+                const scaleFactor = maxPositiveRate > 0 ? (displaySavingsRate / maxPositiveRate) : 0;
+                const widthPercent = Math.min(scaleFactor * 50, 50);
+                barFill.style.left = (50 - widthPercent) + '%';
+                barFill.style.width = widthPercent + '%';
                 barFill.style.background = 'var(--success)';
             } else {
-                const currentNegativePercent = savingsRate;
-                const widthPercent = maxNegativeRate < 0 ? (currentNegativePercent / maxNegativeRate) * 50 : 0;
-                const finalWidth = Math.min(widthPercent, 50);
+                const scaleFactor = maxNegativeRate < 0 ? (displaySavingsRate / maxNegativeRate) : 0;
+                const widthPercent = Math.min(scaleFactor * 50, 50);
                 barFill.style.left = '50%';
-                barFill.style.width = finalWidth + '%';
+                barFill.style.width = widthPercent + '%';
                 barFill.style.background = 'var(--danger)';
             }
 
             renderChartDistribution(null, catDistribution, incomeCatDistribution, expense, income);
             renderTimelineChart(timelineData);
-            renderCategoriesTable(catDistribution, incomeCatDistribution);
+            renderCategoriesTable(catDistribution, incomeCatDistribution, catItemsMap);
             renderRecentBookings(rows);
         }
 
@@ -1936,7 +1961,7 @@
             });
         }
 
-        function renderCategoriesTable(catDistribution, incomeCatDistribution) {
+        function renderCategoriesTable(catDistribution, incomeCatDistribution, catItemsMap) {
             const distContainer = document.getElementById('stats-distribution');
             distContainer.innerHTML = '';
 
@@ -1955,7 +1980,7 @@
 
                 const tableRow = document.createElement('div');
                 tableRow.className = 'dist-item';
-                tableRow.onclick = () => openCategoryModal(cat);
+                tableRow.onclick = () => openCategoryModal(cat, catItemsMap[cat] || [], globalRawData);
                 
                 tableRow.innerHTML = `
                     <div class="dist-label"><span>${emo}</span> <span>${cat}</span></div>
@@ -1973,15 +1998,8 @@
 
             const dynamicRows = rows.filter(r => !(r.vorlage && r.vorlage.toLowerCase() === 'ja'));
             
-            const sorted = [...dynamicRows].sort((a, b) => {
-                const parseDateTime = (r) => {
-                    const p = parseRowDate(r.datum);
-                    const parts = (r.datum || "").split('.');
-                    const dStr = parts.length === 3 ? `${p.year}-${p.month}-${parts[0].trim().padStart(2,'0')}` : "1970-01-01";
-                    return new Date(`${dStr}T${r.uhrzeit || '00:00'}`);
-                };
-                return parseDateTime(b) - parseDateTime(a);
-            });
+            // Richtige Sortierung: Höchster Zeilenindex (neueste Buchung ganz unten im Sheet) nach oben
+            const sorted = [...dynamicRows].sort((a, b) => b.row_index - a.row_index);
 
             const last5 = sorted.slice(0, 5);
 
