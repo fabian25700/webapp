@@ -458,6 +458,7 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            margin-top: 8px;
         }
 
         /* Spinner */
@@ -821,9 +822,9 @@
                         <div class="card-icon">🍕</div>
                         <span>Kategorie-Verteilungen</span>
                     </div>
-                    <div class="segmented-control" style="width: auto; max-width: 160px; padding: 1px; border-radius: 6px;">
-                        <button id="chart-toggle-exp" class="segmented-btn active" style="padding: 4px 8px; font-size: 0.7rem; border-radius: 5px;" onclick="setChartDistributionType('expense')">Aus</button>
-                        <button id="chart-toggle-inc" class="segmented-btn" style="padding: 4px 8px; font-size: 0.7rem; border-radius: 5px;" onclick="setChartDistributionType('income')">Ein</button>
+                    <div class="segmented-control" style="width: auto; max-width: 100px; padding: 1px; border-radius: 6px;">
+                        <button id="chart-toggle-exp" class="segmented-btn active" style="padding: 4px 8px; font-size: 0.8rem; border-radius: 5px; font-weight: 800;" onclick="setChartDistributionType('expense')">─</button>
+                        <button id="chart-toggle-inc" class="segmented-btn" style="padding: 4px 8px; font-size: 0.8rem; border-radius: 5px; font-weight: 800;" onclick="setChartDistributionType('income')">┼</button>
                     </div>
                 </div>
                 <div id="unified-chart-container" style="display: flex; flex-direction: column; gap: 4px;">
@@ -986,39 +987,24 @@
                 <!-- Filter oben in den Kategorie-Details -->
                 <div class="filter-card">
                     <div class="filter-row-inputs">
-                        <select id="cat-filter-year" class="filter-select" onchange="updateCategoryModalView()">
+                        <select id="cat-filter-year" class="filter-select" style="width: 100%;" onchange="updateCategoryModalView()">
                             <!-- Dynamisch befüllt -->
-                        </select>
-                        <select id="cat-filter-month" class="filter-select" onchange="updateCategoryModalView()">
-                            <option value="all">Gesamtes Jahr</option>
-                            <option value="01">Januar</option>
-                            <option value="02">Februar</option>
-                            <option value="03">März</option>
-                            <option value="04">April</option>
-                            <option value="05">Mai</option>
-                            <option value="06">Juni</option>
-                            <option value="07">Juli</option>
-                            <option value="08">August</option>
-                            <option value="09">September</option>
-                            <option value="10">Oktober</option>
-                            <option value="11">November</option>
-                            <option value="12">Dezember</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="card">
+                <div class="card" id="cat-overview-card">
                     <div class="card-title">
                         <div class="card-title-left">
                             <div class="card-icon">📊</div>
                             <span>Kategorie-Übersicht</span>
                         </div>
                     </div>
-                    <div class="dashboard-row">
+                    <div class="dashboard-row" id="cat-row-income">
                         <span>Einnahmen</span>
                         <span style="color: var(--success);" id="cat-dash-income">0,00 €</span>
                     </div>
-                    <div class="dashboard-row">
+                    <div class="dashboard-row" id="cat-row-expense">
                         <span>Ausgaben</span>
                         <span style="color: var(--danger);" id="cat-dash-expense">0,00 €</span>
                     </div>
@@ -1028,15 +1014,15 @@
                     <div class="card-title">
                         <div class="card-title-left">
                             <div class="card-icon">📈</div>
-                            <span>Zeitverlauf (Monate)</span>
+                            <span>Jahresverlauf (Monate)</span>
                         </div>
                     </div>
                     <div id="cat-timeline-chart" class="timeline-chart">
                         <!-- Dynamische Kategorie Balken -->
                     </div>
                     <div style="display: flex; gap: 12px; justify-content: center; margin-top: 10px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">
-                        <div style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; background: var(--success); border-radius: 2px;"></div>Ein</div>
-                        <div style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; background: var(--danger); border-radius: 2px;"></div>Aus</div>
+                        <div id="cat-legend-inc" style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; background: var(--success); border-radius: 2px;"></div>Ein</div>
+                        <div id="cat-legend-exp" style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; background: var(--danger); border-radius: 2px;"></div>Aus</div>
                     </div>
                 </div>
 
@@ -1113,6 +1099,8 @@
             'Sonstige': '🪙',
             'MG': '🎖️'
         };
+
+        const incomeOnlyCategories = ['Lohn', 'Sonstige', 'MG'];
 
         window.addEventListener('message', function(event) {
             if (event.data && event.data.type === 'SET_API_URL') {
@@ -1225,13 +1213,71 @@
             }
         }
 
+        function formatDate(dateInput) {
+            if (!dateInput) return '';
+            
+            if (dateInput instanceof Date) {
+                if (isNaN(dateInput.getTime())) return '';
+                const d = dateInput.getDate().toString().padStart(2, '0');
+                const m = (dateInput.getMonth() + 1).toString().padStart(2, '0');
+                const y = dateInput.getFullYear();
+                return `${d}.${m}.${y}`;
+            }
+
+            const cleanStr = dateInput.toString().replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
+            if (!cleanStr) return '';
+
+            const deRegex = /^(\d{1,2})\.(\d{1,2})\.(\d{2,4})$/;
+            const match = cleanStr.match(deRegex);
+            if (match) {
+                const d = match[1].padStart(2, '0');
+                const m = match[2].padStart(2, '0');
+                let y = match[3];
+                if (y.length === 2) y = "20" + y;
+                return `${d}.${m}.${y}`;
+            }
+
+            const parsedDate = new Date(cleanStr);
+            if (!isNaN(parsedDate.getTime())) {
+                const d = parsedDate.getDate().toString().padStart(2, '0');
+                const m = (parsedDate.getMonth() + 1).toString().padStart(2, '0');
+                const y = parsedDate.getFullYear();
+                return `${d}.${m}.${y}`;
+            }
+
+            return cleanStr;
+        }
+
+        function helperParseDate(dateStr) {
+            if (!dateStr) return new Date(0);
+            const cleanStr = dateStr.toString().replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
+            const parts = cleanStr.split('.');
+            if (parts.length === 3) {
+                let d = parseInt(parts[0], 10);
+                let m = parseInt(parts[1], 10) - 1;
+                let y = parseInt(parts[2], 10);
+                if (y < 100) y += 2000;
+                return new Date(y, m, d);
+            }
+            const d = new Date(cleanStr);
+            return isNaN(d.getTime()) ? new Date(0) : d;
+        }
+
+        function sortBookings(a, b) {
+            const timeA = helperParseDate(a.datum).getTime();
+            const timeB = helperParseDate(b.datum).getTime();
+            if (timeB !== timeA) {
+                return timeB - timeA;
+            }
+            return (b.row_index || 0) - (a.row_index || 0);
+        }
+
         function openHistoryModal() {
             const body = document.getElementById('history-modal-body');
             body.innerHTML = '';
             
             const dynamicRows = globalRawData.filter(r => !(r.vorlage && r.vorlage.toLowerCase() === 'ja'));
-            
-            const sorted = [...dynamicRows].sort((a, b) => b.row_index - a.row_index);
+            const sorted = [...dynamicRows].sort(sortBookings);
 
             if(sorted.length === 0) {
                 body.innerHTML = '<p class="status-text-loader">Keine Einträge vorhanden.</p>';
@@ -1254,7 +1300,7 @@
                             <span style="font-size:1.2rem;">${emo}</span>
                             <div style="display:flex; flex-direction:column;">
                                 <span style="font-weight:700; color:var(--text-primary); font-size:0.9rem;">${row.titel || 'Ohne Titel'}</span>
-                                <span style="font-size:0.7rem; color:var(--text-secondary); font-weight:600;">${row.datum} (${row.kategorie})</span>
+                                <span style="font-size:0.7rem; color:var(--text-secondary); font-weight:600;">${formatDate(row.datum)} (${row.kategorie})</span>
                             </div>
                         </div>
                         <span style="color: ${isExpense ? 'var(--danger)' : 'var(--success)'}; font-weight:800; font-size:0.95rem;">
@@ -1281,9 +1327,12 @@
             activeCategoryName = categoryName;
             document.getElementById('category-modal-title').innerText = `Kategorie: ${categoryName}`;
             
-            const yearSelect = document.getElementById('cat-filter-year');
-            const monthSelect = document.getElementById('cat-filter-month');
-            
+            const isIncomeOnly = incomeOnlyCategories.includes(activeCategoryName);
+            document.getElementById('cat-row-income').style.display = isIncomeOnly ? 'flex' : 'none';
+            document.getElementById('cat-legend-inc').style.display = isIncomeOnly ? 'flex' : 'none';
+            document.getElementById('cat-row-expense').style.display = isIncomeOnly ? 'none' : 'flex';
+            document.getElementById('cat-legend-exp').style.display = isIncomeOnly ? 'none' : 'flex';
+
             const years = new Set();
             globalRawData.forEach(row => {
                 if (row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
@@ -1292,6 +1341,7 @@
             });
             if (years.size === 0) years.add(initialYearStr);
 
+            const yearSelect = document.getElementById('cat-filter-year');
             yearSelect.innerHTML = '';
             Array.from(years).sort((a,b) => b - a).forEach(y => {
                 const opt = document.createElement('option');
@@ -1301,7 +1351,6 @@
             });
 
             yearSelect.value = document.getElementById('filter-year').value || initialYearStr;
-            monthSelect.value = document.getElementById('filter-month').value || 'all';
 
             updateCategoryModalView();
             document.getElementById('category-modal').classList.add('active');
@@ -1309,20 +1358,22 @@
 
         function updateCategoryModalView() {
             const selectedYear = document.getElementById('cat-filter-year').value;
-            const selectedMonth = document.getElementById('cat-filter-month').value;
+            const isIncomeOnly = incomeOnlyCategories.includes(activeCategoryName);
             
             const catRows = globalRawData.filter(row => {
                 if (row.vorlage && row.vorlage.toLowerCase() === 'ja') return false;
                 if (row.kategorie !== activeCategoryName) return false;
                 const parsed = parseRowDate(row.datum);
-                if (parsed.year !== selectedYear) return false;
-                if (selectedMonth !== 'all' && parsed.month !== selectedMonth) return false;
-                return true;
+                return parsed.year === selectedYear;
             });
 
             let catIncome = 0;
             let catExpense = 0;
+            
             let monthlyTimeline = {};
+            for (let i = 1; i <= 12; i++) {
+                monthlyTimeline[i.toString().padStart(2, '0')] = { inc: 0, exp: 0 };
+            }
 
             catRows.forEach(row => {
                 let cleanBetrag = row.betrag.toString().replace(',','.');
@@ -1332,11 +1383,9 @@
                     else catExpense += Math.abs(val);
 
                     const parsed = parseRowDate(row.datum);
-                    if(parsed.year && parsed.month) {
-                        const mKey = `${parsed.year}-${parsed.month}`;
-                        if(!monthlyTimeline[mKey]) monthlyTimeline[mKey] = { inc: 0, exp: 0 };
-                        if(val > 0) monthlyTimeline[mKey].inc += val;
-                        else monthlyTimeline[mKey].exp += Math.abs(val);
+                    if(parsed.month && monthlyTimeline[parsed.month]) {
+                        if(val > 0) monthlyTimeline[parsed.month].inc += val;
+                        else monthlyTimeline[parsed.month].exp += Math.abs(val);
                     }
                 }
             });
@@ -1346,34 +1395,43 @@
 
             const timelineChart = document.getElementById('cat-timeline-chart');
             timelineChart.innerHTML = '';
-            const sortedMonths = Object.keys(monthlyTimeline).sort();
 
-            if(sortedMonths.length === 0) {
-                timelineChart.innerHTML = '<p class="status-text-loader" style="width:100%">Keine Verlaufsdaten.</p>';
-            } else {
-                let maxVal = 0;
-                sortedMonths.forEach(m => {
-                    maxVal = Math.max(maxVal, monthlyTimeline[m].inc, monthlyTimeline[m].exp);
-                });
+            let maxVal = 0;
+            Object.values(monthlyTimeline).forEach(m => {
+                maxVal = Math.max(maxVal, m.inc, m.exp);
+            });
 
-                sortedMonths.slice(-6).forEach(m => {
-                    const data = monthlyTimeline[m];
-                    const label = m.split('-')[1] + '/' + m.split('-')[0].substring(2);
-                    const incH = maxVal > 0 ? (data.inc / maxVal) * 100 : 0;
-                    const expH = maxVal > 0 ? (data.exp / maxVal) * 100 : 0;
+            const monthLabelsShort = ['Jan', 'Feb', 'Mrz', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+            
+            for (let i = 1; i <= 12; i++) {
+                const mStr = i.toString().padStart(2, '0');
+                const data = monthlyTimeline[mStr];
+                const label = monthLabelsShort[i - 1];
+                
+                const incH = maxVal > 0 ? (data.inc / maxVal) * 100 : 0;
+                const expH = maxVal > 0 ? (data.exp / maxVal) * 100 : 0;
 
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'timeline-bar-wrapper';
+                const wrapper = document.createElement('div');
+                wrapper.className = 'timeline-bar-wrapper';
+                
+                if (isIncomeOnly) {
                     wrapper.innerHTML = `
-                        <div class="timeline-tooltip">Ein: +${formatCurrency(data.inc)}<br>Aus: -${formatCurrency(data.exp)}</div>
+                        <div class="timeline-tooltip">Ein: +${formatCurrency(data.inc)}</div>
                         <div class="timeline-bar-multi">
                             <div class="timeline-subbar inc" style="height: ${incH}%"></div>
+                        </div>
+                        <div class="timeline-label">${label}</div>
+                    `;
+                } else {
+                    wrapper.innerHTML = `
+                        <div class="timeline-tooltip">Aus: -${formatCurrency(data.exp)}</div>
+                        <div class="timeline-bar-multi">
                             <div class="timeline-subbar exp" style="height: ${expH}%"></div>
                         </div>
                         <div class="timeline-label">${label}</div>
                     `;
-                    timelineChart.appendChild(wrapper);
-                });
+                }
+                timelineChart.appendChild(wrapper);
             }
 
             const body = document.getElementById('category-modal-body');
@@ -1382,9 +1440,10 @@
             if (catRows.length === 0) {
                 body.innerHTML = '<p class="status-text-loader">Keine Einträge gefunden.</p>';
             } else {
-                const sortedRows = [...catRows].sort((a, b) => b.row_index - a.row_index);
+                const sortedRows = [...catRows].sort(sortBookings);
+                const top5Rows = sortedRows.slice(0, 5);
 
-                sortedRows.forEach(row => {
+                top5Rows.forEach(row => {
                     let cleanBetrag = row.betrag.toString().replace(',','.');
                     const val = parseFloat(cleanBetrag);
                     const isExpense = val < 0;
@@ -1399,7 +1458,7 @@
                     item.innerHTML = `
                         <div style="display:flex; flex-direction:column;">
                             <span style="font-weight:700; color:var(--text-primary); font-size:0.95rem;">${row.titel || 'Ohne Titel'}</span>
-                            <span style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">${row.datum}</span>
+                            <span style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">${formatDate(row.datum)}</span>
                         </div>
                         <span style="color: ${isExpense ? 'var(--danger)' : 'var(--success)'}; font-weight:700;">
                             ${isExpense ? '-' : '+'}${formatCurrency(Math.abs(val))}
@@ -1520,7 +1579,7 @@
 
             const adjustedAmount = currentType === 'expense' ? -Math.abs(parseFloat(amount)) : Math.abs(parseFloat(amount));
             const now = new Date();
-            const datum = now.toLocaleDateString('de-DE');
+            const datum = formatDate(now);
             const uhrzeit = now.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
 
             const payload = {
@@ -1752,7 +1811,6 @@
             const selectedYear = document.getElementById('filter-year').value;
             const selectedMonth = document.getElementById('filter-month').value;
 
-            // 1. Berechnung aller historischen Raten zur dynamischen Skalen-Bestimmung
             if (rows && rows.length > 0) {
                 rows.forEach(row => {
                     if(row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
@@ -1778,7 +1836,6 @@
                 }
             });
 
-            // Ermittlung der Höchstwerte (neue 100% Grenzen über den Dreisatz)
             let maxPositiveRate = Math.max(...historicalSavingsRates.filter(r => r >= 0), 0);
             let maxNegativeRate = Math.min(...historicalSavingsRates.filter(r => r < 0), 0);
             
@@ -1786,7 +1843,6 @@
             if (maxNegativeRate === 0) maxNegativeRate = -100;
             if (maxNegativeRate < -100) maxNegativeRate = -100;
 
-            // 2. Filterung auf den aktuell gewählten Zeitraum
             if (rows && rows.length > 0) {
                 rows.forEach(row => {
                     if(row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
@@ -1834,7 +1890,6 @@
             document.getElementById('savings-min-label').innerText = `${maxPositiveRate.toFixed(0)}% Sparen`;
             document.getElementById('savings-max-label').innerText = `${Math.abs(maxNegativeRate).toFixed(0)}% Verlust`;
 
-            // Dreisatz-Skalierung auf der Leiste (50% ist die Mitte)
             if (displaySavingsRate >= 0) {
                 const scaleFactor = maxPositiveRate > 0 ? (displaySavingsRate / maxPositiveRate) : 0;
                 const widthPercent = Math.min(scaleFactor * 50, 50);
@@ -1972,20 +2027,30 @@
                 return;
             }
 
+            let computedItems = [];
             Array.from(allUniqueCats).forEach(cat => {
                 const catExpense = catDistribution[cat] || 0;
                 const catIncome = incomeCatDistribution[cat] || 0;
                 const netCatValue = catIncome - catExpense;
-                const emo = categoryEmojis[cat] || '📦';
+                computedItems.push({
+                    cat: cat,
+                    netVal: netCatValue,
+                    absVal: Math.abs(netCatValue)
+                });
+            });
 
+            computedItems.sort((a, b) => b.absVal - a.absVal);
+
+            computedItems.forEach(item => {
+                const emo = categoryEmojis[item.cat] || '📦';
                 const tableRow = document.createElement('div');
                 tableRow.className = 'dist-item';
-                tableRow.onclick = () => openCategoryModal(cat, catItemsMap[cat] || [], globalRawData);
+                tableRow.onclick = () => openCategoryModal(item.cat, catItemsMap[item.cat] || [], globalRawData);
                 
                 tableRow.innerHTML = `
-                    <div class="dist-label"><span>${emo}</span> <span>${cat}</span></div>
-                    <div class="dist-value" style="color: ${netCatValue >= 0 ? 'var(--success)' : 'var(--danger)'};">
-                        ${netCatValue >= 0 ? '+' : '-'}${formatCurrency(Math.abs(netCatValue))}
+                    <div class="dist-label"><span>${emo}</span> <span>${item.cat}</span></div>
+                    <div class="dist-value" style="color: ${item.netVal >= 0 ? 'var(--success)' : 'var(--danger)'};">
+                        ${item.netVal >= 0 ? '+' : '-'}${formatCurrency(item.absVal)}
                     </div>
                 `;
                 distContainer.appendChild(tableRow);
@@ -1997,10 +2062,7 @@
             container.innerHTML = '';
 
             const dynamicRows = rows.filter(r => !(r.vorlage && r.vorlage.toLowerCase() === 'ja'));
-            
-            // Richtige Sortierung: Höchster Zeilenindex (neueste Buchung ganz unten im Sheet) nach oben
-            const sorted = [...dynamicRows].sort((a, b) => b.row_index - a.row_index);
-
+            const sorted = [...dynamicRows].sort(sortBookings);
             const last5 = sorted.slice(0, 5);
 
             if(last5.length === 0) {
@@ -2023,7 +2085,7 @@
                         <span style="font-size: 1.2rem;">${emo}</span>
                         <div style="display:flex; flex-direction:column; align-items:flex-start;">
                             <span style="font-weight:700; font-size:0.9rem;">${row.titel || 'Ohne Titel'}</span>
-                            <span style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">${row.datum}</span>
+                            <span style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">${formatDate(row.datum)}</span>
                         </div>
                     </div>
                     <span style="font-weight:800; font-size:1rem; color: ${isExpense ? 'var(--danger)' : 'var(--success)'}">
