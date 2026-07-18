@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Packliste & Aufgaben</title>
+    <title>Packlisten</title>
     <style>
         :root { 
             --bg: #f0f2f5; 
@@ -14,12 +14,9 @@
             --text-tertiary: #94a3b8; 
             --border: #e2e8f0; 
             --border-light: #f1f5f9; 
-            --shadow: 0 2px 8px rgba(0,0,0,0.06); 
+            --shadow: 0 1px 4px rgba(0,0,0,0.04); 
             --accent: #3498db; 
-            --accent-soft: rgba(52, 152, 219, 0.1); 
-            --toggle-track: #e2e8f0; 
-            --toggle-thumb: #ffffff; 
-            --toggle-active: #3498db; 
+            --accent-soft: rgba(52, 152, 219, 0.06); 
             --success: #2ecc71;
         }
         @media (prefers-color-scheme: dark) { 
@@ -32,63 +29,79 @@
                 --text-tertiary: #64748b; 
                 --border: #2d3f55; 
                 --border-light: #253347; 
-                --shadow: 0 2px 8px rgba(0,0,0,0.3); 
-                --toggle-track: #334155; 
-                --toggle-thumb: #f1f5f9; 
+                --shadow: 0 1px 4px rgba(0,0,0,0.2); 
             } 
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; padding-bottom: 40px; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; padding-bottom: 20px; }
         
         header { 
             position: sticky; 
             top: 0; 
             z-index: 50; 
             background: var(--bg); 
-            padding: 16px 20px; 
+            padding: 10px 16px; 
             display: flex; 
             align-items: center; 
-            gap: 12px; 
+            justify-content: space-between;
             border-bottom: 1px solid var(--border-light); 
             backdrop-filter: blur(12px); 
             -webkit-backdrop-filter: blur(12px); 
         }
+        .header-left { display: flex; align-items: center; gap: 8px; }
         .back-btn { 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            width: 36px; height: 36px; 
-            border-radius: 12px; 
+            width: 28px; height: 28px; 
+            border-radius: 8px; 
             background: var(--surface); 
             border: 1px solid var(--border); 
             text-decoration: none; 
             color: var(--text-primary); 
             box-shadow: var(--shadow); 
             flex-shrink: 0; 
+            font-size: 0.9rem;
         }
-        header h1 { font-size: 1.1rem; font-weight: 800; }
+        header h1 { font-size: 1rem; font-weight: 800; }
+        
+        .reset-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: 0.1s;
+        }
+        .reset-btn:active {
+            background: var(--border-light);
+        }
         
         .mode-selector {
             display: flex;
             background: var(--surface);
-            margin: 16px 16px 4px 16px;
-            padding: 4px;
-            border-radius: 14px;
+            margin: 8px 16px 2px 16px;
+            padding: 2px;
+            border-radius: 10px;
             border: 1px solid var(--border);
             max-width: 600px;
         }
         @media (min-width: 632px) {
-            .mode-selector { margin: 16px auto 4px auto; }
+            .mode-selector { margin: 8px auto 2px auto; }
         }
         .mode-btn {
             flex: 1;
             text-align: center;
-            padding: 10px;
-            font-size: 0.9rem;
+            padding: 6px;
+            font-size: 0.85rem;
             font-weight: 700;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: 0.2s;
+            transition: 0.1s;
             color: var(--text-secondary);
         }
         .mode-btn.active {
@@ -96,42 +109,64 @@
             color: #ffffff;
         }
 
-        main { padding: 12px 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
-        .view-content { display: none; flex-direction: column; gap: 12px; }
+        main { padding: 6px 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 6px; }
+        .view-content { display: none; flex-direction: column; gap: 6px; }
         .view-content.active { display: flex; }
 
-        .toggle-card { background: var(--surface); border-radius: 18px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
-        .toggle-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-        .toggle-header-left { display: flex; align-items: center; gap: 12px; }
-        .toggle-icon { font-size: 1.25rem; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; background: var(--accent-soft); border-radius: 11px; }
-        .toggle-title { font-weight: 700; font-size: 1rem; }
+        .section-separator {
+            height: 1px;
+            background-color: var(--border);
+            margin: 6px 0;
+            border: none;
+        }
+
+        .section-subtitle {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            font-weight: 700;
+            margin: 4px 0 2px 4px;
+        }
+
+        .toggle-card { background: var(--surface); border-radius: 10px; border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; }
+        .toggle-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .toggle-header-left { display: flex; align-items: center; gap: 8px; }
+        .toggle-icon { font-size: 1.1rem; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: var(--accent-soft); border-radius: 6px; }
+        .toggle-title { font-weight: 700; font-size: 0.9rem; }
         
-        .switch { position: relative; width: 50px; height: 30px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; inset: 0; background: var(--toggle-track); border-radius: 30px; transition: 0.25s; cursor: pointer; }
-        .slider::before { content: ""; position: absolute; height: 24px; width: 24px; left: 3px; top: 3px; background: var(--toggle-thumb); border-radius: 50%; transition: 0.25s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
-        input:checked + .slider { background: var(--toggle-active); }
-        input:checked + .slider::before { transform: translateX(20px); }
+        .arrow-icon {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            transition: transform 0.2s ease;
+        }
+        .toggle-panel.open ~ .toggle-header .arrow-icon,
+        .toggle-card.is-open .arrow-icon {
+            transform: rotate(180deg);
+        }
         
-        .toggle-panel { display: none; border-top: 1px solid var(--border-light); padding: 8px 20px 16px 20px; background: var(--surface-2); }
+        .toggle-panel { display: none; border-top: 1px solid var(--border-light); padding: 2px 14px; background: var(--surface-2); }
         .toggle-panel.open { display: block; }
         
-        .todo-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-light); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .todo-item { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border-light); cursor: pointer; -webkit-tap-highlight-color: transparent; }
         .todo-item:last-child { border-bottom: none; }
         
-        .checkbox-custom { width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: var(--surface); }
+        .checkbox-custom { width: 16px; height: 16px; border: 1.5px solid var(--border); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: 0.1s; background: var(--surface); }
         .todo-item.checked .checkbox-custom { background: var(--success); border-color: var(--success); }
-        .checkbox-custom::after { content: "✓"; color: white; font-size: 0.8rem; font-weight: bold; display: none; }
+        .checkbox-custom::after { content: "✓"; color: white; font-size: 0.65rem; font-weight: bold; display: none; }
         .todo-item.checked .checkbox-custom::after { display: block; }
         
-        .todo-text { font-size: 0.95rem; line-height: 1.4; color: var(--text-primary); transition: 0.2s; }
+        .todo-text { font-size: 0.88rem; line-height: 1.3; color: var(--text-primary); transition: 0.1s; }
         .todo-item.checked .todo-text { color: var(--text-tertiary); text-decoration: line-through; }
     </style>
 </head>
 <body>
     <header>
-        <a href="Alltag.html" class="back-btn">←</a>
-        <h1>Packliste & Aufgaben</h1>
+        <div class="header-left">
+            <a href="Alltag.html" class="back-btn">←</a>
+            <h1>Packlisten</h1>
+        </div>
+        <button class="reset-btn" onclick="resetAll()">Reset</button>
     </header>
 
     <div class="mode-selector">
@@ -143,180 +178,159 @@
         <!-- URLAUB CONTENT -->
         <div id="content-urlaub" class="view-content active">
             <!-- Tasks vor Antritt -->
-            <div class="toggle-card">
+            <div class="toggle-card" id="card-u-tasks">
                 <div class="toggle-header" onclick="togglePanel('u-tasks')">
                     <div class="toggle-header-left">
                         <div class="toggle-icon">⏳</div>
                         <div class="toggle-title">Tasks vor Antritt</div>
                     </div>
-                    <label class="switch" onclick="event.stopPropagation()">
-                        <input type="checkbox" id="toggle-u-tasks" onchange="syncToggle('u-tasks')">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="arrow-icon">▼</div>
                 </div>
                 <div class="toggle-panel" id="panel-u-tasks">
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Checken Wetter</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Planen Aktivitäten / Tage</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Packliste dementsprechend anpassen</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Zahnbürste und Rasierer laden</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Ohren, Nägel und generell Körper prüfen</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-tasks-0')"><div class="checkbox-custom"></div><div class="todo-text">Checken Wetter</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-tasks-1')"><div class="checkbox-custom"></div><div class="todo-text">Planen Aktivitäten / Tage</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-tasks-2')"><div class="checkbox-custom"></div><div class="todo-text">Packliste dementsprechend anpassen</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-tasks-3')"><div class="checkbox-custom"></div><div class="todo-text">Zahnbürste und Rasierer laden</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-tasks-4')"><div class="checkbox-custom"></div><div class="todo-text">Ohren, Nägel und generell Körper prüfen</div></div>
                 </div>
             </div>
 
+            <hr class="section-separator">
+            <h2 class="section-subtitle">packen</h2>
+
             <!-- Packen Hygiene -->
-            <div class="toggle-card">
+            <div class="toggle-card" id="card-u-hygiene">
                 <div class="toggle-header" onclick="togglePanel('u-hygiene')">
                     <div class="toggle-header-left">
                         <div class="toggle-icon">🧼</div>
                         <div class="toggle-title">Packen: Hygiene</div>
                     </div>
-                    <label class="switch" onclick="event.stopPropagation()">
-                        <input type="checkbox" id="toggle-u-hygiene" onchange="syncToggle('u-hygiene')">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="arrow-icon">▼</div>
                 </div>
                 <div class="toggle-panel" id="panel-u-hygiene">
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">4x Zahnpflege</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Bürste</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Rasur</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Nageletui</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Feuchtigkeitscreme</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Haarstyling</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Deo + Parfüme</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Supplements</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Stück Seife</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Körper Rasierer</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Kondome (Reißverschluss innen)</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Pflaster + Schmerzmittel</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-hygiene-0')"><div class="checkbox-custom"></div><div class="todo-text">4x Zahnpflege</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-hygiene-1')"><div class="checkbox-custom"></div><div class="todo-text">Bürste</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-hygiene-2')"><div class="checkbox-custom"></div><div class="todo-text">Rasur</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-hygiene-3')"><div class="checkbox-custom"></div><div class="todo-text">Nageletui</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-hygiene-4')"><div class="checkbox-custom"></div><div class="todo-text">Feuchtigkeitscreme</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-hygiene-5')"><div class="checkbox-custom"></div><div class="todo-text">Haarstyling</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-hygiene-6')"><div class="checkbox-custom"></div><div class="todo-text">Deo + Parfüme</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-hygiene-7')"><div class="checkbox-custom"></div><div class="todo-text">Supplements</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-hygiene-8')"><div class="checkbox-custom"></div><div class="todo-text">Stück Seife</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-hygiene-9')"><div class="checkbox-custom"></div><div class="todo-text">Körper Rasierer</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-hygiene-10')"><div class="checkbox-custom"></div><div class="todo-text">Kondome (Reißverschluss innen)</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-hygiene-11')"><div class="checkbox-custom"></div><div class="todo-text">Pflaster + Schmerzmittel</div></div>
                 </div>
             </div>
 
             <!-- Sommer -->
-            <div class="toggle-card">
+            <div class="toggle-card" id="card-u-sommer">
                 <div class="toggle-header" onclick="togglePanel('u-sommer')">
                     <div class="toggle-header-left">
                         <div class="toggle-icon">☀️</div>
                         <div class="toggle-title">Sommer</div>
                     </div>
-                    <label class="switch" onclick="event.stopPropagation()">
-                        <input type="checkbox" id="toggle-u-sommer" onchange="syncToggle('u-sommer')">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="arrow-icon">▼</div>
                 </div>
                 <div class="toggle-panel" id="panel-u-sommer">
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">kurze Hose</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Badehose</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Adilette</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Sonnenbrille</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Sonnenmilch</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">After Sun</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Mückenspray</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-sommer-0')"><div class="checkbox-custom"></div><div class="todo-text">kurze Hose</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-sommer-1')"><div class="checkbox-custom"></div><div class="todo-text">Badehose</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-sommer-2')"><div class="checkbox-custom"></div><div class="todo-text">Adilette</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-sommer-3')"><div class="checkbox-custom"></div><div class="todo-text">Sonnenbrille</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-sommer-4')"><div class="checkbox-custom"></div><div class="todo-text">Sonnenmilch</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-sommer-5')"><div class="checkbox-custom"></div><div class="todo-text">After Sun</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-sommer-6')"><div class="checkbox-custom"></div><div class="todo-text">Mückenspray</div></div>
                 </div>
             </div>
 
             <!-- Winter -->
-            <div class="toggle-card">
+            <div class="toggle-card" id="card-u-winter">
                 <div class="toggle-header" onclick="togglePanel('u-winter')">
                     <div class="toggle-header-left">
                         <div class="toggle-icon">❄️</div>
                         <div class="toggle-title">Winter</div>
                     </div>
-                    <label class="switch" onclick="event.stopPropagation()">
-                        <input type="checkbox" id="toggle-u-winter" onchange="syncToggle('u-winter')">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="arrow-icon">▼</div>
                 </div>
                 <div class="toggle-panel" id="panel-u-winter">
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Buff</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Schal</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Mütze</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Handschuhe</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Longsleeve</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-winter-0')"><div class="checkbox-custom"></div><div class="todo-text">Buff</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-winter-1')"><div class="checkbox-custom"></div><div class="todo-text">Schal</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-winter-2')"><div class="checkbox-custom"></div><div class="todo-text">Mütze</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-winter-3')"><div class="checkbox-custom"></div><div class="todo-text">Handschuhe</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-winter-4')"><div class="checkbox-custom"></div><div class="todo-text">Longsleeve</div></div>
                 </div>
             </div>
 
             <!-- Kleidung -->
-            <div class="toggle-card">
+            <div class="toggle-card" id="card-u-kleidung">
                 <div class="toggle-header" onclick="togglePanel('u-kleidung')">
                     <div class="toggle-header-left">
                         <div class="toggle-icon">👕</div>
                         <div class="toggle-title">Kleidung</div>
                     </div>
-                    <label class="switch" onclick="event.stopPropagation()">
-                        <input type="checkbox" id="toggle-u-kleidung" onchange="syncToggle('u-kleidung')">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="arrow-icon">▼</div>
                 </div>
                 <div class="toggle-panel" id="panel-u-kleidung">
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">4x Unterhosen, 4x Socken weiß lang</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">1x Jeans, 2x Chino</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Winter-Jacke</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">3x Pullover</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">1x Hemd, 2x Polo-Shirt, 1x T-Shirt</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-kleidung-0')"><div class="checkbox-custom"></div><div class="todo-text">4x Unterhosen, 4x Socken weiß lang</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-kleidung-1')"><div class="checkbox-custom"></div><div class="todo-text">1x Jeans, 2x Chino</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-kleidung-2')"><div class="checkbox-custom"></div><div class="todo-text">Winter-Jacke</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-kleidung-3')"><div class="checkbox-custom"></div><div class="todo-text">3x Pullover</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-kleidung-4')"><div class="checkbox-custom"></div><div class="todo-text">1x Hemd, 2x Polo-Shirt, 1x T-Shirt</div></div>
                 </div>
             </div>
 
             <!-- Sport -->
-            <div class="toggle-card">
+            <div class="toggle-card" id="card-u-sport">
                 <div class="toggle-header" onclick="togglePanel('u-sport')">
                     <div class="toggle-header-left">
                         <div class="toggle-icon">🏃</div>
                         <div class="toggle-title">Sport</div>
                     </div>
-                    <label class="switch" onclick="event.stopPropagation()">
-                        <input type="checkbox" id="toggle-u-sport" onchange="syncToggle('u-sport')">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="arrow-icon">▼</div>
                 </div>
                 <div class="toggle-panel" id="panel-u-sport">
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Fitness Oberteil</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Fitness Unterteil</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Laufschuhe</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-sport-0')"><div class="checkbox-custom"></div><div class="todo-text">Fitness Oberteil</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-sport-1')"><div class="checkbox-custom"></div><div class="todo-text">Fitness Unterteil</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-sport-2')"><div class="checkbox-custom"></div><div class="todo-text">Laufschuhe</div></div>
                 </div>
             </div>
 
             <!-- Technik -->
-            <div class="toggle-card">
+            <div class="toggle-card" id="card-u-technik">
                 <div class="toggle-header" onclick="togglePanel('u-technik')">
                     <div class="toggle-header-left">
                         <div class="toggle-icon">💻</div>
                         <div class="toggle-title">Technik</div>
                     </div>
-                    <label class="switch" onclick="event.stopPropagation()">
-                        <input type="checkbox" id="toggle-u-technik" onchange="syncToggle('u-technik')">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="arrow-icon">▼</div>
                 </div>
                 <div class="toggle-panel" id="panel-u-technik">
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Handy</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Macbook</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Powerbank</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">AirPods</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Kabel: Monitor</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Kabel: Macbook</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Kabel: iPhone</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Kabel: Watch + Airpods</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-technik-0')"><div class="checkbox-custom"></div><div class="todo-text">Handy</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-technik-1')"><div class="checkbox-custom"></div><div class="todo-text">Macbook</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-technik-2')"><div class="checkbox-custom"></div><div class="todo-text">Powerbank</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-technik-3')"><div class="checkbox-custom"></div><div class="todo-text">AirPods</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-technik-4')"><div class="checkbox-custom"></div><div class="todo-text">Kabel: Monitor</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-technik-5')"><div class="checkbox-custom"></div><div class="todo-text">Kabel: Macbook</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-technik-6')"><div class="checkbox-custom"></div><div class="todo-text">Kabel: iPhone</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-technik-7')"><div class="checkbox-custom"></div><div class="todo-text">Kabel: Watch + Airpods</div></div>
                 </div>
             </div>
 
             <!-- Sonstiges -->
-            <div class="toggle-card">
+            <div class="toggle-card" id="card-u-sonstiges">
                 <div class="toggle-header" onclick="togglePanel('u-sonstiges')">
                     <div class="toggle-header-left">
                         <div class="toggle-icon">🔑</div>
                         <div class="toggle-title">Sonstiges</div>
                     </div>
-                    <label class="switch" onclick="event.stopPropagation()">
-                        <input type="checkbox" id="toggle-u-sonstiges" onchange="syncToggle('u-sonstiges')">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="arrow-icon">▼</div>
                 </div>
                 <div class="toggle-panel" id="panel-u-sonstiges">
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Schlüssel</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Uhr</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Buch</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Kappe</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Gürtel</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-sonstiges-0')"><div class="checkbox-custom"></div><div class="todo-text">Schlüssel</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-sonstiges-1')"><div class="checkbox-custom"></div><div class="todo-text">Uhr</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-sonstiges-2')"><div class="checkbox-custom"></div><div class="todo-text">Buch</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-sonstiges-3')"><div class="checkbox-custom"></div><div class="todo-text">Kappe</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'u-sonstiges-4')"><div class="checkbox-custom"></div><div class="todo-text">Gürtel</div></div>
                 </div>
             </div>
         </div>
@@ -324,156 +338,142 @@
         <!-- DIENSTREISE CONTENT -->
         <div id="content-dienstreise" class="view-content">
             <!-- Tasks -->
-            <div class="toggle-card">
+            <div class="toggle-card" id="card-d-tasks">
                 <div class="toggle-header" onclick="togglePanel('d-tasks')">
                     <div class="toggle-header-left">
                         <div class="toggle-icon">💼</div>
                         <div class="toggle-title">Dienstreise Tasks</div>
                     </div>
-                    <label class="switch" onclick="event.stopPropagation()">
-                        <input type="checkbox" id="toggle-d-tasks" onchange="syncToggle('d-tasks')">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="arrow-icon">▼</div>
                 </div>
                 <div class="toggle-panel" id="panel-d-tasks">
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Checken Wetter</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Checken Aktivitäten</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Packliste dementsprechend anpassen</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Schuhen putzen vor Abfahrt</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-tasks-0')"><div class="checkbox-custom"></div><div class="todo-text">Checken Wetter</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-tasks-1')"><div class="checkbox-custom"></div><div class="todo-text">Checken Aktivitäten</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-tasks-2')"><div class="checkbox-custom"></div><div class="todo-text">Packliste dementsprechend anpassen</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-tasks-3')"><div class="checkbox-custom"></div><div class="todo-text">Schuhen putzen vor Abfahrt</div></div>
                 </div>
             </div>
 
+            <hr class="section-separator">
+            <h2 class="section-subtitle">packen</h2>
+
             <!-- Packen Hygiene -->
-            <div class="toggle-card">
+            <div class="toggle-card" id="card-d-hygiene">
                 <div class="toggle-header" onclick="togglePanel('d-hygiene')">
                     <div class="toggle-header-left">
                         <div class="toggle-icon">🧼</div>
                         <div class="toggle-title">Packen: Hygiene</div>
                     </div>
-                    <label class="switch" onclick="event.stopPropagation()">
-                        <input type="checkbox" id="toggle-d-hygiene" onchange="syncToggle('d-hygiene')">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="arrow-icon">▼</div>
                 </div>
                 <div class="toggle-panel" id="panel-d-hygiene">
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Bürste</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Rasur</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Nageletui</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">4x Zahnpflege</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Feuchtigkeitscreme</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Haarstyling</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Supplements</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Stück Seife</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-hygiene-0')"><div class="checkbox-custom"></div><div class="todo-text">Bürste</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-hygiene-1')"><div class="checkbox-custom"></div><div class="todo-text">Rasur</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-hygiene-2')"><div class="checkbox-custom"></div><div class="todo-text">Nageletui</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-hygiene-3')"><div class="checkbox-custom"></div><div class="todo-text">4x Zahnpflege</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-hygiene-4')"><div class="checkbox-custom"></div><div class="todo-text">Feuchtigkeitscreme</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-hygiene-5')"><div class="checkbox-custom"></div><div class="todo-text">Haarstyling</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-hygiene-6')"><div class="checkbox-custom"></div><div class="todo-text">Supplements</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-hygiene-7')"><div class="checkbox-custom"></div><div class="todo-text">Stück Seife</div></div>
                 </div>
             </div>
 
             <!-- Kleidung -->
-            <div class="toggle-card">
+            <div class="toggle-card" id="card-d-kleidung">
                 <div class="toggle-header" onclick="togglePanel('d-kleidung')">
                     <div class="toggle-header-left">
                         <div class="toggle-icon">👕</div>
                         <div class="toggle-title">Kleidung</div>
                     </div>
-                    <label class="switch" onclick="event.stopPropagation()">
-                        <input type="checkbox" id="toggle-d-kleidung" onchange="syncToggle('d-kleidung')">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="arrow-icon">▼</div>
                 </div>
                 <div class="toggle-panel" id="panel-d-kleidung">
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">4x Unterhosen, 4x Socken weiß lang</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">1x Jeans, 2x Chino</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Winter-Jacke</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">3x Pullover</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">1x Hemd, 2x Polo-Shirt, 1x T-Shirt</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-kleidung-0')"><div class="checkbox-custom"></div><div class="todo-text">4x Unterhosen, 4x Socken weiß lang</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-kleidung-1')"><div class="checkbox-custom"></div><div class="todo-text">1x Jeans, 2x Chino</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-kleidung-2')"><div class="checkbox-custom"></div><div class="todo-text">Winter-Jacke</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-kleidung-3')"><div class="checkbox-custom"></div><div class="todo-text">3x Pullover</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-kleidung-4')"><div class="checkbox-custom"></div><div class="todo-text">1x Hemd, 2x Polo-Shirt, 1x T-Shirt</div></div>
                 </div>
             </div>
 
             <!-- Winter -->
-            <div class="toggle-card">
+            <div class="toggle-card" id="card-d-winter">
                 <div class="toggle-header" onclick="togglePanel('d-winter')">
                     <div class="toggle-header-left">
                         <div class="toggle-icon">❄️</div>
                         <div class="toggle-title">Winter</div>
                     </div>
-                    <label class="switch" onclick="event.stopPropagation()">
-                        <input type="checkbox" id="toggle-d-winter" onchange="syncToggle('d-winter')">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="arrow-icon">▼</div>
                 </div>
                 <div class="toggle-panel" id="panel-d-winter">
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Buff</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Schal</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Mütze</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Handschuhe</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-winter-0')"><div class="checkbox-custom"></div><div class="todo-text">Buff</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-winter-1')"><div class="checkbox-custom"></div><div class="todo-text">Schal</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-winter-2')"><div class="checkbox-custom"></div><div class="todo-text">Mütze</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-winter-3')"><div class="checkbox-custom"></div><div class="todo-text">Handschuhe</div></div>
                 </div>
             </div>
 
             <!-- Sport -->
-            <div class="toggle-card">
+            <div class="toggle-card" id="card-d-sport">
                 <div class="toggle-header" onclick="togglePanel('d-sport')">
                     <div class="toggle-header-left">
                         <div class="toggle-icon">🏃</div>
                         <div class="toggle-title">Sport</div>
                     </div>
-                    <label class="switch" onclick="event.stopPropagation()">
-                        <input type="checkbox" id="toggle-d-sport" onchange="syncToggle('d-sport')">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="arrow-icon">▼</div>
                 </div>
                 <div class="toggle-panel" id="panel-d-sport">
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Fitness Oberteil</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Fitness Unterteil</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Laufschuhe</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-sport-0')"><div class="checkbox-custom"></div><div class="todo-text">Fitness Oberteil</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-sport-1')"><div class="checkbox-custom"></div><div class="todo-text">Fitness Unterteil</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-sport-2')"><div class="checkbox-custom"></div><div class="todo-text">Laufschuhe</div></div>
                 </div>
             </div>
 
             <!-- Technik -->
-            <div class="toggle-card">
+            <div class="toggle-card" id="card-d-technik">
                 <div class="toggle-header" onclick="togglePanel('d-technik')">
                     <div class="toggle-header-left">
                         <div class="toggle-icon">💻</div>
                         <div class="toggle-title">Technik</div>
                     </div>
-                    <label class="switch" onclick="event.stopPropagation()">
-                        <input type="checkbox" id="toggle-d-technik" onchange="syncToggle('d-technik')">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="arrow-icon">▼</div>
                 </div>
                 <div class="toggle-panel" id="panel-d-technik">
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Handy</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Macbook</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Powerbank</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">AirPods</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Kabel: Monitor</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Kabel: Macbook</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Kabel: iPhone</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Kabel: Watch + Airpods</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-technik-0')"><div class="checkbox-custom"></div><div class="todo-text">Handy</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-technik-1')"><div class="checkbox-custom"></div><div class="todo-text">Macbook</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-technik-2')"><div class="checkbox-custom"></div><div class="todo-text">Powerbank</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-technik-3')"><div class="checkbox-custom"></div><div class="todo-text">AirPods</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-technik-4')"><div class="checkbox-custom"></div><div class="todo-text">Kabel: Monitor</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-technik-5')"><div class="checkbox-custom"></div><div class="todo-text">Kabel: Macbook</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-technik-6')"><div class="checkbox-custom"></div><div class="todo-text">Kabel: iPhone</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-technik-7')"><div class="checkbox-custom"></div><div class="todo-text">Kabel: Watch + Airpods</div></div>
                 </div>
             </div>
 
             <!-- Sonstiges -->
-            <div class="toggle-card">
+            <div class="toggle-card" id="card-d-sonstiges">
                 <div class="toggle-header" onclick="togglePanel('d-sonstiges')">
                     <div class="toggle-header-left">
                         <div class="toggle-icon">🔑</div>
                         <div class="toggle-title">Sonstiges</div>
                     </div>
-                    <label class="switch" onclick="event.stopPropagation()">
-                        <input type="checkbox" id="toggle-d-sonstiges" onchange="syncToggle('d-sonstiges')">
-                        <span class="slider"></span>
-                    </label>
+                    <div class="arrow-icon">▼</div>
                 </div>
                 <div class="toggle-panel" id="panel-d-sonstiges">
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Arbeitstasche + Schlüssel + Material</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Haustür + Auto Schlüssel</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Uhr</div></div>
-                    <div class="todo-item" onclick="toggleTodo(this)"><div class="checkbox-custom"></div><div class="todo-text">Buch</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-sonstiges-0')"><div class="checkbox-custom"></div><div class="todo-text">Arbeitstasche + Schlüssel + Material</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-sonstiges-1')"><div class="checkbox-custom"></div><div class="todo-text">Haustür + Auto Schlüssel</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-sonstiges-2')"><div class="checkbox-custom"></div><div class="todo-text">Uhr</div></div>
+                    <div class="todo-item" onclick="toggleTodo(this, 'd-sonstiges-3')"><div class="checkbox-custom"></div><div class="todo-text">Buch</div></div>
                 </div>
             </div>
         </div>
     </main>
 
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadState();
+        });
+
         function switchMode(mode) {
             document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.view-content').forEach(content => content.classList.remove('active'));
@@ -489,20 +489,63 @@
 
         function togglePanel(name) {
             const panel = document.getElementById('panel-' + name);
-            const checkbox = document.getElementById('toggle-' + name);
+            const card = document.getElementById('card-' + name);
             const isOpen = panel.classList.contains('open');
+            
             panel.classList.toggle('open', !isOpen);
-            checkbox.checked = !isOpen;
+            if (card) {
+                card.classList.toggle('is-open', !isOpen);
+            }
+            
+            localStorage.setItem('panel-' + name, !isOpen ? 'open' : 'closed');
         }
 
-        function syncToggle(name) {
-            const panel = document.getElementById('panel-' + name);
-            const checkbox = document.getElementById('toggle-' + name);
-            panel.classList.toggle('open', checkbox.checked);
-        }
-
-        function toggleTodo(element) {
+        function toggleTodo(element, id) {
             element.classList.toggle('checked');
+            const isChecked = element.classList.contains('checked');
+            localStorage.setItem('todo-' + id, isChecked ? 'true' : 'false');
+        }
+
+        function saveState() {
+            // Einzelne States werden direkt bei Interaktion via localStorage gespeichert
+        }
+
+        function loadState() {
+            // Panels wiederherstellen
+            const panels = ['u-tasks', 'u-hygiene', 'u-sommer', 'u-winter', 'u-kleidung', 'u-sport', 'u-technik', 'u-sonstiges', 'd-tasks', 'd-hygiene', 'd-kleidung', 'd-winter', 'd-sport', 'd-technik', 'd-sonstiges'];
+            panels.forEach(name => {
+                const panel = document.getElementById('panel-' + name);
+                const card = document.getElementById('card-' + name);
+                const state = localStorage.getItem('panel-' + name);
+                if (state === 'open') {
+                    panel.classList.add('open');
+                    if (card) card.classList.add('is-open');
+                }
+            });
+
+            // Todos wiederherstellen
+            document.querySelectorAll('.todo-item').forEach(item => {
+                const onclickAttr = item.getAttribute('onclick');
+                const match = onclickAttr.match(/'([^']+)'/);
+                if (match && match[1]) {
+                    const id = match[1];
+                    const isChecked = localStorage.getItem('todo-' + id) === 'true';
+                    if (isChecked) {
+                        item.classList.add('checked');
+                    }
+                }
+            });
+        }
+
+        function resetAll() {
+            document.querySelectorAll('.todo-item').forEach(item => {
+                item.classList.remove('checked');
+                const onclickAttr = item.getAttribute('onclick');
+                const match = onclickAttr.match(/'([^']+)'/);
+                if (match && match[1]) {
+                    localStorage.removeItem('todo-' + match[1]);
+                }
+            });
         }
     </script>
 </body>
