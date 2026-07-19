@@ -2,632 +2,968 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Groundhopping Statistik Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Groundhopping Analytics</title>
     <style>
         :root {
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-card: #253248;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #3b82f6;
-            --accent-success: #10b981;
-            --accent-danger: #ef4444;
-            --border-color: #334155;
+            --accent: #2563eb;
+            --accent-soft: rgba(37, 99, 235, 0.08);
+            --success: #16a34a;
+            --success-soft: rgba(22, 163, 74, 0.08);
+            --danger: #dc2626;
+            --danger-soft: rgba(220, 38, 38, 0.08);
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+            --apple-switch-bg: #e2e8f0;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg-primary);
-            color: var(--text-main);
-            padding: 24px;
-            line-height: 1.5;
-        }
-
-        header {
-            margin-bottom: 32px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 16px;
-        }
-
-        header h1 {
-            font-size: 22pt;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        header p {
-            color: var(--text-muted);
-            font-size: 11pt;
-            margin-top: 4px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 48px;
-            font-size: 13pt;
-            color: var(--text-muted);
-        }
-
-        .grid-overview {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 32px;
-        }
-
-        .card-stat {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .card-stat .value {
-            font-size: 22pt;
-            font-weight: 700;
-            color: var(--accent);
-            margin-bottom: 4px;
-        }
-
-        .card-stat .label {
-            font-size: 9pt;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .main-layout {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 32px;
-        }
-
-        @media (min-width: 1024px) {
-            .main-layout {
-                grid-template-columns: 1.6fr 1fr;
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0b0f19;
+                --surface: #1e293b;
+                --text-primary: #f8fafc;
+                --text-secondary: #94a3b8;
+                --border: #334155;
+                --border-light: #1e293b;
+                --apple-switch-bg: #0f172a;
             }
         }
 
-        .section-box {
-            background-color: var(--bg-secondary);
-            border: 1px solid var(--border-color);
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 20px;
+            overflow-x: hidden;
+        }
+
+        header {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--bg);
+            padding: calc(env(safe-area-inset-top) + 10px) 16px 10px;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-top { 
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            position: relative;
+            height: 32px;
+        }
+        
+        .header-left { 
+            display: flex; 
+            align-items: center; 
+            position: absolute;
+            left: 0;
+            z-index: 10;
+        }
+
+        .back-container { 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            text-decoration: none; 
+            color: var(--text-primary); 
+        }
+        
+        .back-container span { 
+            font-size: 0.85rem; 
+            font-weight: 700; 
+            line-height: 1;
+        }
+
+        .back-btn {
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            width: 28px; 
+            height: 28px; 
             border-radius: 8px;
-            margin-bottom: 32px;
-            overflow: hidden;
+            background: var(--surface); 
+            border: 1px solid var(--border);
+            color: var(--text-primary); 
+            box-shadow: var(--shadow);
+            flex-shrink: 0; 
+            font-size: 0.8rem;
+            line-height: 1;
         }
 
-        .section-title {
-            background-color: #131c2e;
-            padding: 16px 20px;
-            font-size: 11pt;
-            font-weight: 600;
-            border-bottom: 1px solid var(--border-color);
-            letter-spacing: 0.5px;
+        .header-right {
+            display: flex;
+            align-items: center;
+            position: absolute;
+            right: 0;
+            z-index: 10;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
         }
 
-        .section-content {
-            padding: 20px;
+        .header-switch-container {
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            z-index: 5;
         }
 
-        .selector-box {
-            margin-bottom: 24px;
+        .main-view-switch {
+            display: flex; 
+            background: var(--apple-switch-bg); 
+            border-radius: 8px;
+            padding: 2px; 
+            width: 200px; 
+            height: 30px; 
+            flex-shrink: 0;
+        }
+        
+        .main-switch-btn {
+            flex: 1; 
+            text-align: center; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            gap: 4px;
+            font-size: 0.75rem; 
+            font-weight: 700; 
+            border-radius: 6px; 
+            border: none; 
+            background: transparent;
+            color: var(--text-secondary); 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            height: 100%;
+            line-height: 1;
+        }
+        
+        .main-switch-btn.active {
+            background: var(--surface); 
+            color: var(--text-primary);
+            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading-banner {
+            background: var(--accent-soft);
+            border: 1px solid var(--accent);
+            color: var(--text-primary);
+            padding: 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 12px;
+        }
+
+        main { padding: 10px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+
+        .view-section { display: none; flex-direction: column; gap: 8px; width: 100%; }
+        .view-section.active { display: flex; }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .kpi-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+            padding: 8px 4px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 2px; height: 58px;
+        }
+        .kpi-value { font-size: 1.1rem; font-weight: 800; color: var(--accent); display: flex; align-items: center; justify-content: center; gap: 4px; line-height: 1.1; }
+        .kpi-label { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.02em; }
+        
+        .section-block {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+            padding: 10px 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 6px;
+        }
+
+        .section-block-title {
+            font-size: 0.68rem; font-weight: 800; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0px;
+            border-left: 3px solid var(--accent); padding-left: 6px; line-height: 1;
+        }
+        
+        .filter-grid-layout {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .filter-input-box {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .filter-input-box label {
+            font-size: 0.58rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            letter-spacing: 0.02em;
         }
 
         select {
             width: 100%;
-            padding: 12px;
-            background-color: var(--bg-card);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
+            padding: 6px 8px;
+            background: var(--bg);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
             border-radius: 6px;
-            font-size: 11pt;
+            font-size: 0.78rem;
+            font-weight: 700;
             outline: none;
             cursor: pointer;
-            font-weight: 500;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
-        .dashboard-grid {
+        .matrix-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; }
+        .matrix-cell { display: flex; flex-direction: column; padding: 4px 6px; background: var(--bg); border-radius: 8px; min-height: 42px; justify-content: center; }
+        .matrix-label { 
+            font-size: 0.58rem; font-weight: 700; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.02em; margin-bottom: 2px;
+        }
+        .matrix-value { 
+            font-size: 0.82rem; font-weight: 700; color: var(--text-primary);
+        }
+        .matrix-value.success { color: var(--success); }
+        .matrix-value.danger { color: var(--danger); }
+
+        .wiki-link {
+            color: var(--text-primary);
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.1s;
+        }
+        .wiki-link:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        .perf-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-light); min-height: 32px; }
+        .perf-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .perf-info { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; }
+        .perf-name { font-size: 0.78rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .perf-bar-wrapper { display: flex; align-items: center; gap: 6px; width: 90px; flex-shrink: 0; }
+        .perf-bar-bg { flex: 1; height: 5px; background: var(--border-light); border-radius: 2px; overflow: hidden; }
+        .perf-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; }
+        .perf-pct { font-size: 0.75rem; font-weight: 700; width: 22px; text-align: right; }
+
+        .switch-header { display: flex; background: var(--bg); border-radius: 8px; padding: 2px; border: 1px solid var(--border); width: 100%; }
+        .switch-tab { flex: 1; text-align: center; font-size: 0.62rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; color: var(--text-secondary); padding: 5px 2px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+        .switch-tab.active { background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow); }
+
+        .switch-content { display: none; }
+        .switch-content.active { display: flex; flex-direction: column; }
+
+        .split-highlights {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
         }
-
-        .dash-tile {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 14px;
+        
+        .highlight-box {
+            background: var(--bg);
+            padding: 6px 8px;
+            border-radius: 8px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            gap: 2px;
         }
-
-        .dash-tile .tile-label {
-            font-size: 8pt;
-            color: var(--text-muted);
-            margin-bottom: 6px;
+        .highlight-title {
+            font-size: 0.58rem;
+            font-weight: 800;
+            color: var(--text-secondary);
             text-transform: uppercase;
-            letter-spacing: 0.3px;
         }
-
-        .dash-tile .tile-value {
-            font-size: 12pt;
+        .highlight-body {
+            font-size: 0.75rem;
             font-weight: 700;
-            word-break: break-word;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        .dash-tile.span-2 {
-            grid-column: span 2;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th, td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 10pt;
-        }
-
-        th {
-            color: var(--text-muted);
-            font-weight: 600;
-            background-color: #131c2e;
-        }
-
-        tr:hover td {
-            background-color: var(--bg-card);
-        }
-
-        .chart-container {
-            position: relative;
-            height: 240px;
-            width: 100%;
+        .wiki-overlay-block {
+            border: 1.5px dashed var(--accent);
+            background: var(--accent-soft);
+            border-radius: 12px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Groundhopping Analytics</h1>
-        <p>Statistiken und interaktive Auswertungen deiner Stadionerlebnisse</p>
-    </header>
+<header>
+    <div class="header-top">
+        <div class="header-left">
+            <a href="index.html" class="back-container">
+                <div class="back-btn">&larr;</div>
+                <span>Dashboard</span>
+            </a>
+        </div>
+        <div class="header-switch-container">
+            <div class="main-view-switch">
+                <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')"><span>Filter</span></button>
+                <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')"><span>Statistiken</span></button>
+            </div>
+        </div>
+        <div class="header-right">Live</div>
+    </div>
+</header>
 
-    <div id="loading" class="loading">Lade Daten aus dem Google Sheet...</div>
+<div class="loading-banner" id="loading-box">Lade Groundhopping Daten...</div>
 
-    <div id="dashboard-content" style="display: none;">
-        
-        <div class="grid-overview">
-            <div class="card-stat">
-                <div class="value" id="stat-total-games">0</div>
-                <div class="label">Spiele Gesamt</div>
+<main id="main-content" style="display: none;">
+
+    <!-- DYNAMIC WIKI IN-LINE PANEL -->
+    <div id="wiki-inline-panel" class="wiki-overlay-block" style="display: none;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div class="section-block-title" id="wiki-title" style="border-left-color: var(--text-primary);">Statistik Details</div>
+            <span class="wiki-link" onclick="closeWikiInline()" style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: var(--danger);">[Schließen]</span>
+        </div>
+        <div class="kpi-grid">
+            <div class="kpi-card" style="height: 48px;">
+                <div class="kpi-value" id="w-spiele" style="font-size: 1rem;">0</div>
+                <div class="kpi-label" style="font-size: 0.52rem;">Spiele</div>
             </div>
-            <div class="card-stat">
-                <div class="value" id="stat-total-grounds">0</div>
-                <div class="label">Besuchte Grounds</div>
+            <div class="kpi-card" style="height: 48px;">
+                <div class="kpi-value" id="w-tore" style="font-size: 1rem;">0</div>
+                <div class="kpi-label" style="font-size: 0.52rem;">Tore Gesamt</div>
             </div>
-            <div class="card-stat">
-                <div class="value" id="stat-total-goals">0</div>
-                <div class="label">Tore Gesehen</div>
+            <div class="kpi-card" style="height: 48px; grid-column: span 2;">
+                <div class="kpi-value" id="w-tore-avg" style="font-size: 1rem; color: var(--text-primary);">0.0</div>
+                <div class="kpi-label" style="font-size: 0.52rem;">Tore / Spiel</div>
             </div>
-            <div class="card-stat">
-                <div class="value" id="stat-avg-goals">0.0</div>
-                <div class="label">Tore / Spiel</div>
+        </div>
+        <div id="wiki-games-container" style="display: flex; flex-direction: column; gap: 2px; max-height: 110px; overflow-y: auto; background: var(--surface); padding: 4px; border-radius: 6px; border: 1px solid var(--border);"></div>
+    </div>
+    
+    <!-- TRACKER / FILTER VIEW -->
+    <div id="view-tracker" class="view-section active">
+        <div class="section-block">
+            <div class="section-block-title">Multifilter (Stacked)</div>
+            <div class="filter-grid-layout">
+                <div class="filter-input-box">
+                    <label>Team</label>
+                    <select id="filter-team" onchange="processFilters()"></select>
+                </div>
+                <div class="filter-input-box">
+                    <label>Stadion</label>
+                    <select id="filter-stadion" onchange="processFilters()"></select>
+                </div>
+                <div class="filter-input-box">
+                    <label>Wettbewerb</label>
+                    <select id="filter-wettbewerb" onchange="processFilters()"></select>
+                </div>
+                <div class="filter-input-box">
+                    <label>Saison</label>
+                    <select id="filter-saison" onchange="processFilters()"></select>
+                </div>
+                <div class="filter-input-box">
+                    <label>Jahr</label>
+                    <select id="filter-jahr" onchange="processFilters()"></select>
+                </div>
+                <div class="filter-input-box" style="justify-content: flex-end;">
+                    <button onclick="resetFilters()" style="width: 100%; height: 28px; font-size: 0.72rem; font-weight: 700; border: 1px solid var(--border); background: var(--bg); color: var(--text-primary); border-radius: 6px; cursor: pointer;">Reset</button>
+                </div>
             </div>
         </div>
 
-        <div class="main-layout">
-            
-            <div>
-                <div class="section-box">
-                    <div class="section-title">INTERAKTIVES DASHBOARD JE TEAM</div>
-                    <div class="section-content">
-                        <div class="selector-box">
-                            <select id="team-selector" onchange="updateTeamDashboard(this.value)">
-                            </select>
-                        </div>
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-value" id="t-spiele">0</div>
+                <div class="kpi-label">Spiele</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="t-grounds-count">0</div>
+                <div class="kpi-label">Grounds</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="t-tore-f">0</div>
+                <div class="kpi-label">Tore</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="t-tore-a" style="color: var(--text-secondary);">0</div>
+                <div class="kpi-label">Gegentore</div>
+            </div>
+        </div>
 
-                        <div class="dashboard-grid">
-                            <div class="dash-tile">
-                                <div class="tile-label">Spiele</div>
-                                <div class="tile-value" id="t-spiele">0</div>
-                            </div>
-                            <div class="dash-tile">
-                                <div class="tile-label">Heimspiele</div>
-                                <div class="tile-value" id="t-heim">0</div>
-                            </div>
-                            <div class="dash-tile">
-                                <div class="tile-label">Auswärtsspiele</div>
-                                <div class="tile-value" id="t-auswaerts">0</div>
-                            </div>
-
-                            <div class="dash-tile">
-                                <div class="tile-label">Tore / Gegentore</div>
-                                <div class="tile-value" id="t-tore-gegentore">0:0</div>
-                            </div>
-                            <div class="dash-tile span-2">
-                                <div class="tile-label">Siege / Remis / Niederlagen</div>
-                                <div class="tile-value" id="t-wld" style="color: var(--accent-success);">0 / 0 / 0</div>
-                            </div>
-
-                            <div class="dash-tile span-2">
-                                <div class="tile-label">Höchster Sieg</div>
-                                <div class="tile-value" id="t-max-win" style="font-size: 10.5pt; color: var(--accent-success);">-</div>
-                            </div>
-                            <div class="dash-tile">
-                                <div class="tile-label">Besuchte Orte</div>
-                                <div class="tile-value" id="t-laender">-</div>
-                            </div>
-
-                            <div class="dash-tile span-2">
-                                <div class="tile-label">Höchste Niederlage</div>
-                                <div class="tile-value" id="t-max-loss" style="font-size: 10.5pt; color: var(--accent-danger);">-</div>
-                            </div>
-                            <div class="dash-tile">
-                                <div class="tile-label">Zuschauer (Min / Schnitt / Max)</div>
-                                <div class="tile-value" id="t-zuschauer" style="font-size: 10pt;">0 / 0 / 0</div>
-                            </div>
-
-                            <div class="dash-tile">
-                                <div class="tile-label">Wettbewerbe</div>
-                                <div class="tile-value" id="t-wettbewerbe">0</div>
-                            </div>
-                            <div class="dash-tile">
-                                <div class="tile-label">Meistgesehener Wettbewerb</div>
-                                <div class="tile-value" id="t-top-comp" style="font-size: 10.5pt;">-</div>
-                            </div>
-                            <div class="dash-tile">
-                                <div class="tile-label">Häufigster Gegner</div>
-                                <div class="tile-value" id="t-top-opp" style="font-size: 10.5pt;">-</div>
-                            </div>
-
-                            <div class="dash-tile span-2">
-                                <div class="tile-label">Meistgesehener Ground</div>
-                                <div class="tile-value" id="t-top-ground" style="font-size: 10.5pt;">-</div>
-                            </div>
-                            <div class="dash-tile">
-                                <div class="tile-label">Grounds Gesamt</div>
-                                <div class="tile-value" id="t-grounds-count">0</div>
-                            </div>
-                        </div>
-                    </div>
+        <div class="section-block">
+            <div class="section-block-title">Spielbilanz & Orte</div>
+            <div class="matrix-grid">
+                <div class="matrix-cell">
+                    <span class="matrix-label">Heim / Auswärts</span>
+                    <span class="matrix-value" id="t-heim-auswaerts">0 / 0</span>
                 </div>
-
-                <div class="section-box">
-                    <div class="section-title">LETZTE 5 SPIELE</div>
-                    <div style="overflow-x: auto;">
-                        <table id="recent-games-table">
-                            <thead>
-                                <tr>
-                                    <th>Datum</th>
-                                    <th>Begegnung</th>
-                                    <th>Ergebnis</th>
-                                    <th>Stadion</th>
-                                    <th>Wettbewerb</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
+                <div class="matrix-cell">
+                    <span class="matrix-label">S / U / N</span>
+                    <span class="matrix-value success" id="t-wld">0 / 0 / 0</span>
+                </div>
+                <div class="matrix-cell">
+                    <span class="matrix-label">Besuchte Orte</span>
+                    <span class="matrix-value" id="t-laender">0</span>
                 </div>
             </div>
+        </div>
 
-            <div>
-                <div class="section-box">
-                    <div class="section-title">UNTERGRUND VERTEILUNG</div>
-                    <div class="section-content">
-                        <div class="chart-container">
-                            <canvas id="surfaceChart"></canvas>
-                        </div>
-                    </div>
+        <div class="section-block">
+            <div class="section-block-title">Highlights</div>
+            <div class="split-highlights">
+                <div class="highlight-box">
+                    <span class="highlight-title">Höchster Sieg</span>
+                    <span class="highlight-body success" id="t-max-win">-</span>
                 </div>
-
-                <div class="section-box">
-                    <div class="section-title">TOP 5 MEISTBESUCHTE STADIEN</div>
-                    <div style="overflow-x: auto;">
-                        <table id="top-grounds-table">
-                            <thead>
-                                <tr>
-                                    <th>Stadion</th>
-                                    <th>Spiele</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="section-box">
-                    <div class="section-title">SPIELE PRO SAISON</div>
-                    <div class="section-content">
-                        <div class="chart-container">
-                            <canvas id="seasonChart"></canvas>
-                        </div>
-                    </div>
+                <div class="highlight-box">
+                    <span class="highlight-title">Höchste Niederlage</span>
+                    <span class="highlight-body danger" id="t-max-loss">-</span>
                 </div>
             </div>
+        </div>
 
+        <div class="section-block">
+            <div class="section-block-title">Erweiterte Metriken & Frequenzen</div>
+            <div class="matrix-grid">
+                <div class="matrix-cell" style="grid-column: span 3;">
+                    <span class="matrix-label">Zuschauer (Min / Ø / Max)</span>
+                    <span class="matrix-value" id="t-zuschauer" style="font-size: 0.78rem;">0 / 0 / 0</span>
+                </div>
+                <div class="matrix-cell" style="grid-column: span 3;">
+                    <span class="matrix-label">Top Wettbewerb</span>
+                    <span class="matrix-value" id="t-top-comp">-</span>
+                </div>
+                <div class="matrix-cell" style="grid-column: span 3;">
+                    <span class="matrix-label">Häufigster Gegner</span>
+                    <span class="matrix-value" id="t-top-opp">-</span>
+                </div>
+                <div class="matrix-cell" style="grid-column: span 3;">
+                    <span class="matrix-label">Top Ground</span>
+                    <span class="matrix-value" id="t-top-ground">-</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- hopping_api.js muss im selben GitHub-Repository/Ordner liegen -->
-    <script src="hopping_api.js"></script>
-    <script>
-        let rawData = [];
+    <!-- STATS / GLOBAL VIEW -->
+    <div id="view-stats" class="view-section">
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-value" id="stat-total-games">0</div>
+                <div class="kpi-label">Spiele Gesamt</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="stat-total-grounds">0</div>
+                <div class="kpi-label">Grounds Gesamt</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="stat-total-goals">0</div>
+                <div class="kpi-label">Tore Gesamt</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="stat-avg-goals">0.0</div>
+                <div class="kpi-label">Tore pro Spiel</div>
+            </div>
+        </div>
 
-        window.addEventListener('DOMContentLoaded', () => {
-            // Führt die asynchrone Funktion aus hopping_api.js aus
-            if (typeof getHoppingData === 'function') {
-                getHoppingData()
-                    .then(data => initializeDashboard(data))
-                    .catch(err => {
-                        document.getElementById('loading').innerHTML = 
-                            `<span style="color: var(--accent-danger); font-weight: bold;">Fehler beim Laden:</span><br>${err.message || err}`;
-                    });
-            } else {
-                document.getElementById('loading').innerText = "hopping_api.js wurde nicht korrekt geladen oder fehlt im Verzeichnis.";
+        <div class="section-block">
+            <div class="switch-header">
+                <div class="switch-tab active" onclick="switchBlock('top', 'grounds')">Top Stadien</div>
+                <div class="switch-tab" onclick="switchBlock('top', 'seasons')">Saisons</div>
+                <div class="switch-tab" onclick="switchBlock('top', 'surfaces')">Untergrund</div>
+            </div>
+            
+            <div id="content-grounds" class="switch-content active">
+                <div id="top-grounds-container" style="display: flex; flex-direction: column; gap: 1px;"></div>
+            </div>
+            
+            <div id="content-seasons" class="switch-content">
+                <div id="seasons-container" style="display: flex; flex-direction: column; gap: 1px;"></div>
+            </div>
+
+            <div id="content-surfaces" class="switch-content">
+                <div id="surfaces-container" style="display: flex; flex-direction: column; gap: 1px;"></div>
+            </div>
+        </div>
+
+        <div class="section-block">
+            <div class="section-block-title">Letzte 5 Spiele</div>
+            <div id="recent-games-container" style="display: flex; flex-direction: column; gap: 2px;"></div>
+        </div>
+    </div>
+</main>
+
+<script src="hopping_api.js"></script>
+<script>
+    let rawData = [];
+
+    function toggleMainView(view) {
+        document.getElementById('view-btn-tracker').classList.toggle('active', view === 'tracker');
+        document.getElementById('view-btn-stats').classList.toggle('active', view === 'stats');
+        
+        document.getElementById('view-tracker').classList.toggle('active', view === 'tracker');
+        document.getElementById('view-stats').classList.toggle('active', view === 'stats');
+    }
+
+    function switchBlock(position, type) {
+        if (!event || !event.target) return;
+        const header = event.target.parentElement;
+        header.querySelectorAll('.switch-tab').forEach(tab => tab.classList.remove('active'));
+        event.target.classList.add('active');
+
+        if (position === 'top') {
+            document.getElementById('content-grounds').classList.remove('active');
+            document.getElementById('content-seasons').classList.remove('active');
+            document.getElementById('content-surfaces').classList.remove('active');
+            document.getElementById('content-' + type).classList.add('active');
+        }
+    }
+
+    function parseTeams(begegnungStr) {
+        if (!begegnungStr || !begegnungStr.includes(':')) return null;
+        const index = begegnungStr.indexOf(':');
+        const home = begegnungStr.substring(0, index).trim();
+        const away = begegnungStr.substring(index + 1).trim();
+        return { home, away };
+    }
+
+    function extractYear(datumStr) {
+        if (!datumStr) return null;
+        const parts = String(datumStr).split('.');
+        if (parts.length >= 3) {
+            const y = parts[2].trim().substring(0, 4);
+            if (!isNaN(parseInt(y))) return y;
+        }
+        const match = String(datumStr).match(/\b(19|20)\d{2}\b/);
+        return match ? match[0] : null;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        if (typeof getHoppingData === 'function') {
+            getHoppingData()
+                .then(data => initializeDashboard(data))
+                .catch(err => {
+                    const box = document.getElementById('loading-box');
+                    box.style.background = "var(--danger-soft)";
+                    box.style.borderColor = "var(--danger)";
+                    box.innerText = "Fehler beim Laden der API.";
+                    console.error(err);
+                });
+        } else {
+            document.getElementById('loading-box').innerText = "hopping_api.js fehlt.";
+        }
+    });
+
+    function initializeDashboard(data) {
+        rawData = data;
+        if (!rawData || rawData.length === 0) {
+            document.getElementById('loading-box').innerText = "Keine Daten gefunden.";
+            return;
+        }
+
+        document.getElementById('loading-box').style.display = 'none';
+        document.getElementById('main-content').style.display = 'flex';
+
+        calculateGlobalStats();
+        setupFilters();
+        processFilters();
+        buildGlobalStatsViews();
+        renderRecentGames();
+    }
+
+    function calculateGlobalStats() {
+        document.getElementById('stat-total-games').innerText = rawData.length;
+        
+        const grounds = new Set(rawData.map(d => d.Stadion).filter(Boolean));
+        document.getElementById('stat-total-grounds').innerText = grounds.size;
+
+        let totalGoals = 0;
+        rawData.forEach(d => {
+            if(d.Ergebnis && String(d.Ergebnis).includes(':')) {
+                const parts = String(d.Ergebnis).split(':');
+                totalGoals += (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0);
             }
         });
+        document.getElementById('stat-total-goals').innerText = totalGoals;
+        document.getElementById('stat-avg-goals').innerText = (totalGoals / rawData.length).toFixed(1);
+    }
 
-        function initializeDashboard(data) {
-            rawData = data;
-            if (!rawData || rawData.length === 0) {
-                document.getElementById('loading').innerText = "Keine Daten im Google Sheet gefunden.";
-                return;
+    function setupFilters() {
+        const teams = new Set();
+        const grounds = new Set();
+        const comps = new Set();
+        const seasons = new Set();
+        const years = new Set();
+
+        rawData.forEach(d => {
+            const teamsObj = parseTeams(d.Begegnung);
+            if(teamsObj) {
+                if(teamsObj.home) teams.add(teamsObj.home);
+                if(teamsObj.away) teams.add(teamsObj.away);
             }
+            if(d.Stadion) grounds.add(d.Stadion.trim());
+            if(d.Wettbewerb) comps.add(d.Wettbewerb.trim());
+            if(d.Saison) seasons.add(d.Saison.trim());
+            const y = extractYear(d.Datum);
+            if(y) years.add(y);
+        });
 
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('dashboard-content').style.display = 'block';
+        populateSelect('filter-team', Array.from(teams).sort(), 'Alle Teams');
+        populateSelect('filter-stadion', Array.from(grounds).sort(), 'Alle Stadien');
+        populateSelect('filter-wettbewerb', Array.from(comps).sort(), 'Alle Wettbewerbe');
+        populateSelect('filter-saison', Array.from(seasons).sort((a,b)=>b.localeCompare(a)), 'Alle Saisons');
+        populateSelect('filter-jahr', Array.from(years).sort((a,b)=>b.localeCompare(a)), 'Alle Jahre');
+    }
 
-            calculateGlobalStats();
-            populateTeamSelector();
-            buildGlobalCharts();
-            renderRecentGames();
-        }
+    function populateSelect(id, list, placeholder) {
+        const sel = document.getElementById(id);
+        sel.innerHTML = `<option value="">-- ${placeholder} --</option>`;
+        list.filter(Boolean).forEach(val => {
+            const opt = document.createElement('option');
+            opt.value = val;
+            opt.innerText = val;
+            sel.appendChild(opt);
+        });
+    }
 
-        function calculateGlobalStats() {
-            document.getElementById('stat-total-games').innerText = rawData.length;
-            
-            const grounds = new Set(rawData.map(d => d.Stadion).filter(Boolean));
-            document.getElementById('stat-total-grounds').innerText = grounds.size;
+    function resetFilters() {
+        document.getElementById('filter-team').value = "";
+        document.getElementById('filter-stadion').value = "";
+        document.getElementById('filter-wettbewerb').value = "";
+        document.getElementById('filter-saison').value = "";
+        document.getElementById('filter-jahr').value = "";
+        processFilters();
+    }
 
-            let totalGoals = 0;
-            rawData.forEach(d => {
-                if(d.Ergebnis && String(d.Ergebnis).includes(':')) {
-                    const parts = String(d.Ergebnis).split(':');
-                    totalGoals += (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0);
-                }
-            });
-            document.getElementById('stat-total-goals').innerText = totalGoals;
-            document.getElementById('stat-avg-goals').innerText = (totalGoals / rawData.length).toFixed(1);
-        }
+    function processFilters() {
+        const fTeam = document.getElementById('filter-team').value;
+        const fStadion = document.getElementById('filter-stadion').value;
+        const fWettbewerb = document.getElementById('filter-wettbewerb').value;
+        const fSaison = document.getElementById('filter-saison').value;
+        const fJahr = document.getElementById('filter-jahr').value;
 
-        function populateTeamSelector() {
-            const selector = document.getElementById('team-selector');
-            selector.innerHTML = "";
-            const teams = new Set();
-            
-            rawData.forEach(d => {
-                if(d.Begegnung && String(d.Begegnung).includes(':')) {
-                    const parts = String(d.Begegnung).split(':');
-                    if(parts[0]) teams.add(parts[0].trim());
-                    if(parts[1]) teams.add(parts[1].trim());
-                }
-                if(d.Teilnehmer) {
-                    teams.add(String(d.Teilnehmer).trim());
-                }
-            });
-
-            const sortedTeams = Array.from(teams).filter(Boolean).sort();
-            sortedTeams.forEach(team => {
-                const opt = document.createElement('option');
-                opt.value = team;
-                opt.innerText = team;
-                selector.appendChild(opt);
-            });
-
-            if(sortedTeams.length > 0) {
-                selector.value = sortedTeams[0];
-                updateTeamDashboard(sortedTeams[0]);
+        const filtered = rawData.filter(d => {
+            if (fTeam) {
+                const teamsObj = parseTeams(d.Begegnung);
+                if (!teamsObj || (teamsObj.home !== fTeam && teamsObj.away !== fTeam)) return false;
             }
-        }
+            if (fStadion && (!d.Stadion || d.Stadion.trim() !== fStadion)) return false;
+            if (fWettbewerb && (!d.Wettbewerb || d.Wettbewerb.trim() !== fWettbewerb)) return false;
+            if (fSaison && (!d.Saison || d.Saison.trim() !== fSaison)) return false;
+            if (fJahr && extractYear(d.Datum) !== fJahr) return false;
+            return true;
+        });
 
-        function updateTeamDashboard(teamName) {
-            const matches = rawData.filter(d => d.Begegnung && String(d.Begegnung).includes(teamName));
-            document.getElementById('t-spiele').innerText = matches.length;
+        updateFilteredDashboard(filtered, fTeam);
+    }
 
-            let goalsFor = 0;
-            let goalsAgainst = 0;
-            let homeGames = 0;
-            let awayGames = 0;
-            let wins = 0;
-            let draws = 0;
-            let losses = 0;
-            
-            let maxWinDiff = -1;
-            let maxWinStr = "-";
-            let maxLossDiff = -1;
-            let maxLossStr = "-";
-            
-            const teamGrounds = new Set();
-            const uniqueSpielorte = new Set();
-            const comps = {};
-            const opponents = {};
-            const groundsFreq = {};
-            const viewerCounts = [];
+    function updateFilteredDashboard(matches, activeTeamFilter) {
+        document.getElementById('t-spiele').innerText = matches.length;
 
-            matches.forEach(m => {
-                if(!m.Ergebnis || !String(m.Ergebnis).includes(':')) return;
-                const parts = String(m.Begegnung).split(':');
-                if (parts.length < 2) return;
+        let goalsFor = 0;
+        let goalsAgainst = 0;
+        let homeGames = 0;
+        let awayGames = 0;
+        let wins = 0;
+        let draws = 0;
+        let losses = 0;
+        
+        let maxWinDiff = -1;
+        let maxWinStr = "-";
+        let maxWinData = null;
+        let maxLossDiff = -1;
+        let maxLossStr = "-";
+        let maxLossData = null;
+        
+        const teamGrounds = new Set();
+        const uniqueSpielorte = new Set();
+        const comps = {};
+        const opponents = {};
+        const groundsFreq = {};
+        const viewerCounts = [];
 
-                const isHome = parts[0].trim() === teamName;
+        matches.forEach(m => {
+            if(!m.Ergebnis || !String(m.Ergebnis).includes(':')) return;
+            const teamsObj = parseTeams(m.Begegnung);
+            if (!teamsObj) return;
+
+            const resParts = String(m.Ergebnis).split(':');
+            const gHome = parseInt(resParts[0]) || 0;
+            const gAway = parseInt(resParts[1]) || 0;
+
+            let isHome = true;
+            let tGoals = gHome;
+            let oGoals = gAway;
+            let opp = teamsObj.away;
+
+            if (activeTeamFilter) {
+                isHome = teamsObj.home === activeTeamFilter;
+                tGoals = isHome ? gHome : gAway;
+                oGoals = isHome ? gAway : gHome;
+                opp = isHome ? teamsObj.away : teamsObj.home;
+                
                 if(isHome) homeGames++; else awayGames++;
-
-                const resParts = String(m.Ergebnis).split(':');
-                const gHome = parseInt(resParts[0]) || 0;
-                const gAway = parseInt(resParts[1]) || 0;
-
-                const tGoals = isHome ? gHome : gAway;
-                const oGoals = isHome ? gAway : gHome;
-
-                goalsFor += tGoals;
-                goalsAgainst += oGoals;
-
+                
                 if(tGoals > oGoals) {
                     wins++;
                     const diff = tGoals - oGoals;
-                    if(diff > maxWinDiff) {
-                        maxWinDiff = diff;
-                        maxWinStr = `${m.Begegnung} (${m.Ergebnis})`;
-                    }
+                    if(diff > maxWinDiff) { maxWinDiff = diff; maxWinData = m; }
                 } else if(tGoals === oGoals) {
                     draws++;
                 } else {
                     losses++;
                     const diff = oGoals - tGoals;
-                    if(diff > maxLossDiff) {
-                        maxLossDiff = diff;
-                        maxLossStr = `${m.Begegnung} (${m.Ergebnis})`;
-                    }
+                    if(diff > maxLossDiff) { maxLossDiff = diff; maxLossData = m; }
                 }
-
-                if(m.Stadion) {
-                    const gName = String(m.Stadion).trim();
-                    teamGrounds.add(gName);
-                    groundsFreq[gName] = (groundsFreq[gName] || 0) + 1;
-                }
-                if(m.Spielort) uniqueSpielorte.add(String(m.Spielort).trim());
-                if(m.Wettbewerb) comps[String(m.Wettbewerb).trim()] = (comps[String(m.Wettbewerb).trim()] || 0) + 1;
-                
-                const opp = isHome ? parts[1].trim() : parts[0].trim();
-                opponents[opp] = (opponents[opp] || 0) + 1;
-
-                if(m.Zuschauer) {
-                    const cleanViewer = parseInt(String(m.Zuschauer).replace(/\D/g, ''));
-                    if(!isNaN(cleanViewer)) viewerCounts.push(cleanViewer);
-                }
-            });
-
-            document.getElementById('t-tore-gegentore').innerText = `${goalsFor}:${goalsAgainst}`;
-            document.getElementById('t-heim').innerText = homeGames;
-            document.getElementById('t-auswaerts').innerText = awayGames;
-            document.getElementById('t-wld').innerText = `${wins} / ${draws} / ${losses}`;
-            document.getElementById('t-max-win').innerText = maxWinStr;
-            document.getElementById('t-max-loss').innerText = maxLossStr;
-            document.getElementById('t-laender').innerText = uniqueSpielorte.size > 0 ? uniqueSpielorte.size : "0";
-
-            if(viewerCounts.length > 0) {
-                const minV = Math.min(...viewerCounts);
-                const maxV = Math.max(...viewerCounts);
-                const avgV = Math.round(viewerCounts.reduce((a,b)=>a+b, 0) / viewerCounts.length);
-                document.getElementById('t-zuschauer').innerText = `${minV.toLocaleString()} / ${avgV.toLocaleString()} / ${maxV.toLocaleString()}`;
             } else {
-                document.getElementById('t-zuschauer').innerText = "0 / 0 / 0";
+                if(gHome > gAway) wins++; else if(gHome === gAway) draws++; else losses++;
+                const diff = Math.abs(gHome - gAway);
+                if (gHome >= gAway) {
+                    if (diff > maxWinDiff) { maxWinDiff = diff; maxWinData = m; }
+                } else {
+                    if (diff > maxLossDiff) { maxLossDiff = diff; maxLossData = m; }
+                }
+                opponents[teamsObj.home] = (opponents[teamsObj.home] || 0) + 1;
+                opponents[teamsObj.away] = (opponents[teamsObj.away] || 0) + 1;
             }
 
-            const topComp = Object.keys(comps).reduce((a, b) => comps[a] > comps[b] ? a : b, "-");
-            document.getElementById('t-top-comp').innerText = topComp !== "-" ? `${comps[topComp]}x ${topComp}` : "-";
-            
-            const topOpp = Object.keys(opponents).reduce((a, b) => opponents[a] > opponents[b] ? a : b, "-");
-            document.getElementById('t-top-opp').innerText = topOpp !== "-" ? `${opponents[topOpp]}x ${topOpp}` : "-";
+            goalsFor += gHome;
+            goalsAgainst += gAway;
 
-            const topGround = Object.keys(groundsFreq).reduce((a, b) => groundsFreq[a] > groundsFreq[b] ? a : b, "-");
-            document.getElementById('t-top-ground').innerText = topGround !== "-" ? `${groundsFreq[topGround]}x ${topGround}` : "-";
+            if(m.Stadion) {
+                const gName = m.Stadion.trim();
+                teamGrounds.add(gName);
+                groundsFreq[gName] = (groundsFreq[gName] || 0) + 1;
+            }
+            if(m.Spielort) uniqueSpielorte.add(m.Spielort.trim());
+            if(m.Wettbewerb) comps[m.Wettbewerb.trim()] = (comps[m.Wettbewerb.trim()] || 0) + 1;
 
-            document.getElementById('t-grounds-count').innerText = teamGrounds.size;
-            document.getElementById('t-wettbewerbe').innerText = Object.keys(comps).length;
+            if(m.Zuschauer) {
+                const cleanViewer = parseInt(String(m.Zuschauer).replace(/\D/g, ''));
+                if(!isNaN(cleanViewer)) viewerCounts.push(cleanViewer);
+            }
+        });
+
+        if (activeTeamFilter) {
+            document.getElementById('t-tore-f').innerText = goalsFor;
+            document.getElementById('t-tore-a').innerText = goalsAgainst;
+            document.getElementById('t-heim-auswaerts').innerText = `${homeGames} / ${awayGames}`;
+            document.getElementById('t-wld').innerText = `${wins} / ${draws} / ${losses}`;
+        } else {
+            document.getElementById('t-tore-f').innerText = goalsFor;
+            document.getElementById('t-tore-a').innerText = goalsAgainst;
+            document.getElementById('t-heim-auswaerts').innerText = `- / -`;
+            document.getElementById('t-wld').innerText = `${wins} / ${draws} / ${losses}`;
         }
 
-        function buildGlobalCharts() {
-            const surfaces = {};
-            rawData.forEach(d => { if(d.Untergrund) surfaces[String(d.Untergrund).trim()] = (surfaces[String(d.Untergrund).trim()] || 0) + 1; });
-            
-            new Chart(document.getElementById('surfaceChart'), {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(surfaces),
-                    datasets: [{
-                        data: Object.values(surfaces),
-                        backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'right', labels: { color: '#f8fafc', font: { size: 11 } } }
-                    }
-                }
-            });
+        // Build Highlights clickables
+        buildHighlightElement('t-max-win', maxWinData);
+        buildHighlightElement('t-max-loss', maxLossData);
 
-            const seasons = {};
-            rawData.forEach(d => { if(d.Saison) seasons[String(d.Saison).trim()] = (seasons[String(d.Saison).trim()] || 0) + 1; });
-            
-            new Chart(document.getElementById('seasonChart'), {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(seasons),
-                    datasets: [{
-                        data: Object.values(seasons),
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
-                        y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8', stepSize: 1 } }
-                    }
-                }
-            });
+        document.getElementById('t-laender').innerText = uniqueSpielorte.size;
+        document.getElementById('t-grounds-count').innerText = teamGrounds.size;
 
-            const groundsCount = {};
-            rawData.forEach(d => { if(d.Stadion) groundsCount[String(d.Stadion).trim()] = (groundsCount[String(d.Stadion).trim()] || 0) + 1; });
-            const sortedGrounds = Object.entries(groundsCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
-            
-            const tbody = document.querySelector('#top-grounds-table tbody');
-            tbody.innerHTML = "";
-            sortedGrounds.forEach(g => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${g[0]}</td><td><strong>${g[1]}</strong></td>`;
-                tbody.appendChild(tr);
+        if(viewerCounts.length > 0) {
+            const minV = Math.min(...viewerCounts);
+            const maxV = Math.max(...viewerCounts);
+            const avgV = Math.round(viewerCounts.reduce((a,b)=>a+b, 0) / viewerCounts.length);
+            document.getElementById('t-zuschauer').innerText = `${minV.toLocaleString()} / ${avgV.toLocaleString()} / ${maxV.toLocaleString()}`;
+        } else {
+            document.getElementById('t-zuschauer').innerText = "0 / 0 / 0";
+        }
+
+        const topComp = Object.keys(comps).reduce((a, b) => comps[a] > comps[b] ? a : b, "-");
+        document.getElementById('t-top-comp').innerHTML = topComp !== "-" ? `<span class="wiki-link" onclick="openWikiInline('wettbewerb', '${topComp}')">${topComp}</span> (${comps[topComp]}x)` : "-";
+        
+        const topOpp = Object.keys(opponents).reduce((a, b) => opponents[a] > opponents[b] ? a : b, "-");
+        document.getElementById('t-top-opp').innerHTML = topOpp !== "-" ? `<span class="wiki-link" onclick="openWikiInline('team', '${topOpp}')">${topOpp}</span> (${opponents[topOpp]}x)` : "-";
+
+        const topGround = Object.keys(groundsFreq).reduce((a, b) => groundsFreq[a] > groundsFreq[b] ? a : b, "-");
+        document.getElementById('t-top-ground').innerHTML = topGround !== "-" ? `<span class="wiki-link" onclick="openWikiInline('stadion', '${topGround}')">${topGround}</span> (${groundsFreq[topGround]}x)` : "-";
+    }
+
+    function buildHighlightElement(elementId, matchItem) {
+        const el = document.getElementById(elementId);
+        if (!matchItem) {
+            el.innerText = "-";
+            return;
+        }
+        const teamsObj = parseTeams(matchItem.Begegnung);
+        if (!teamsObj) {
+            el.innerText = matchItem.Begegnung || "-";
+            return;
+        }
+        el.innerHTML = `<span class="wiki-link" onclick="openWikiInline('team', '${teamsObj.home}')">${teamsObj.home}</span> : <span class="wiki-link" onclick="openWikiInline('team', '${teamsObj.away}')">${teamsObj.away}</span> (${matchItem.Ergebnis})`;
+    }
+
+    function openWikiInline(type, name) {
+        const panel = document.getElementById('wiki-inline-panel');
+        panel.style.display = 'flex';
+        
+        let labelType = "Details";
+        if (type === 'stadion') labelType = "Stadion";
+        if (type === 'wettbewerb') labelType = "Wettbewerb";
+        if (type === 'team') labelType = "Team";
+        
+        document.getElementById('wiki-title').innerText = `${labelType}: ${name}`;
+
+        let filteredMatches = [];
+        if (type === 'stadion') {
+            filteredMatches = rawData.filter(d => d.Stadion && d.Stadion.trim() === name);
+        } else if (type === 'wettbewerb') {
+            filteredMatches = rawData.filter(d => d.Wettbewerb && d.Wettbewerb.trim() === name);
+        } else if (type === 'team') {
+            filteredMatches = rawData.filter(d => {
+                const teamsObj = parseTeams(d.Begegnung);
+                return teamsObj && (teamsObj.home === name || teamsObj.away === name);
             });
         }
 
-        function renderRecentGames() {
-            const tbody = document.querySelector('#recent-games-table tbody');
-            tbody.innerHTML = "";
-            const recent = rawData.slice(-5).reverse();
-            recent.forEach(g => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${g.Datum || '-'}</td>
-                    <td>${g.Begegnung || '-'}</td>
-                    <td>${g.Ergebnis || '-'}</td>
-                    <td>${g.Stadion || '-'}</td>
-                    <td>${g.Wettbewerb || '-'}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-    </script>
+        document.getElementById('w-spiele').innerText = filteredMatches.length;
+
+        let totalGoals = 0;
+        const container = document.getElementById('wiki-games-container');
+        container.innerHTML = "";
+
+        filteredMatches.forEach(g => {
+            if(g.Ergebnis && String(g.Ergebnis).includes(':')) {
+                const parts = String(g.Ergebnis).split(':');
+                totalGoals += (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0);
+            }
+
+            const teamsObj = parseTeams(g.Begegnung);
+            let encounterHtml = g.Begegnung || '-';
+            if(teamsObj) {
+                encounterHtml = `<span class="wiki-link" onclick="openWikiInline('team', '${teamsObj.home}')">${teamsObj.home}</span> : <span class="wiki-link" onclick="openWikiInline('team', '${teamsObj.away}')">${teamsObj.away}</span>`;
+            }
+
+            container.innerHTML += `
+                <div class="perf-item" style="padding: 4px 0; min-height: 26px;">
+                    <div style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
+                        <span style="font-size: 0.72rem; font-weight: 700;">${encounterHtml}</span>
+                        <span style="font-size: 0.62rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            <span class="wiki-link" onclick="openWikiInline('stadion', '${g.Stadion}')">${g.Stadion || '-'}</span> | 
+                            <span class="wiki-link" onclick="openWikiInline('wettbewerb', '${g.Wettbewerb}')">${g.Wettbewerb || '-'}</span>
+                        </span>
+                    </div>
+                    <span style="font-size: 0.72rem; font-weight: 800; color: var(--accent); margin-left: 8px;">${g.Ergebnis || '-'}</span>
+                </div>`;
+        });
+
+        document.getElementById('w-tore').innerText = totalGoals;
+        document.getElementById('w-tore-avg').innerText = filteredMatches.length > 0 ? (totalGoals / filteredMatches.length).toFixed(1) : "0.0";
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function closeWikiInline() {
+        document.getElementById('wiki-inline-panel').style.display = 'none';
+    }
+
+    function buildGlobalStatsViews() {
+        const groundsCount = {};
+        const seasons = {};
+        const surfaces = {};
+        const maxGames = rawData.length;
+
+        rawData.forEach(d => {
+            if(d.Stadion) groundsCount[String(d.Stadion).trim()] = (groundsCount[String(d.Stadion).trim()] || 0) + 1;
+            if(d.Saison) seasons[String(d.Saison).trim()] = (seasons[String(d.Saison).trim()] || 0) + 1;
+            if(d.Untergrund) surfaces[String(d.Untergrund).trim()] = (surfaces[String(d.Untergrund).trim()] || 0) + 1;
+        });
+
+        // 1. Grounds
+        const sortedGrounds = Object.entries(groundsCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
+        const groundsContainer = document.getElementById('top-grounds-container');
+        groundsContainer.innerHTML = "";
+        sortedGrounds.forEach(g => {
+            const pct = Math.round((g[1] / maxGames) * 100);
+            groundsContainer.innerHTML += `
+                <div class="perf-item">
+                    <div class="perf-info"><span class="perf-name wiki-link" onclick="openWikiInline('stadion', '${g[0]}')">${g[0]}</span></div>
+                    <div class="perf-bar-wrapper">
+                        <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
+                        <span class="perf-pct">${g[1]}</span>
+                    </div>
+                </div>`;
+        });
+
+        // 2. Saisons
+        const sortedSeasons = Object.entries(seasons).sort((a,b) => b[0].localeCompare(a[0]));
+        const seasonsContainer = document.getElementById('seasons-container');
+        seasonsContainer.innerHTML = "";
+        let highestSeasonCount = Math.max(...Object.values(seasons), 1);
+        sortedSeasons.forEach(s => {
+            const pct = Math.round((s[1] / highestSeasonCount) * 100);
+            seasonsContainer.innerHTML += `
+                <div class="perf-item">
+                    <div class="perf-info"><span class="perf-name">${s[0]}</span></div>
+                    <div class="perf-bar-wrapper">
+                        <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
+                        <span class="perf-pct">${s[1]}</span>
+                    </div>
+                </div>`;
+        });
+
+        // 3. Untergrund
+        const sortedSurfaces = Object.entries(surfaces).sort((a,b) => b[1] - a[1]);
+        const surfacesContainer = document.getElementById('surfaces-container');
+        surfacesContainer.innerHTML = "";
+        sortedSurfaces.forEach(surf => {
+            const pct = Math.round((surf[1] / maxGames) * 100);
+            surfacesContainer.innerHTML += `
+                <div class="perf-item">
+                    <div class="perf-info"><span class="perf-name">${surf[0]}</span></div>
+                    <div class="perf-bar-wrapper">
+                        <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
+                        <span class="perf-pct">${surf[1]}</span>
+                    </div>
+                </div>`;
+        });
+    }
+
+    function renderRecentGames() {
+        const container = document.getElementById('recent-games-container');
+        container.innerHTML = "";
+        const recent = rawData.slice(-5).reverse();
+        recent.forEach(g => {
+            const teamsObj = parseTeams(g.Begegnung);
+            let encounterHtml = g.Begegnung || '-';
+            if(teamsObj) {
+                encounterHtml = `<span class="wiki-link" onclick="openWikiInline('team', '${teamsObj.home}')">${teamsObj.home}</span> : <span class="wiki-link" onclick="openWikiInline('team', '${teamsObj.away}')">${teamsObj.away}</span>`;
+            }
+
+            container.innerHTML += `
+                <div class="perf-item" style="padding: 4px 0; min-height: 28px;">
+                    <div style="display: flex; flex-direction: column; flex: 1; min-width: 0;">
+                        <span style="font-size: 0.78rem; font-weight: 700;">${encounterHtml}</span>
+                        <span style="font-size: 0.65rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            <span class="wiki-link" onclick="openWikiInline('stadion', '${g.Stadion}')">${g.Stadion || '-'}</span> | 
+                            <span class="wiki-link" onclick="openWikiInline('wettbewerb', '${g.Wettbewerb}')">${g.Wettbewerb || '-'}</span>
+                        </span>
+                    </div>
+                    <span style="font-size: 0.78rem; font-weight: 800; color: var(--accent); margin-left: 8px;">${g.Ergebnis || '-'}</span>
+                </div>`;
+        });
+    }
+</script>
 </body>
 </html>
