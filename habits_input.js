@@ -6,37 +6,36 @@ const ROUTINE_CONFIG = {
             "Wiegen",
             "alle Rollladen / Fenster",
             "Tageslicht",
-            "Wasser trinken",
             "Schlafzimmer aufräumen",
-            "Zunge reinigen",
+            "Zungenscharber / Zahnseide / Mundspülung",
             "Zähne putzen",
+            "duschen / Gesicht waschen",
             "Küche putzen",
             "Stoisches Kapitel",
             "Whoop checken",
             "Ziele + ToDo’s des Tages anschauen",
             "Mails checken",
-            "Morning Healthdrink",
-            "duschen / Gesicht waschen",
-            "bis 8:00 keine Geräte (außer Sally, To-Do’s, Routine)"
+            "bis 8:00 keine Geräte\n(außer Sally, To-Do’s, Routine)"
         ],
         unterwegs: [
             "Aufstehen ohne Snooze",
+            "Schlafplatz machen",
             "alle Rollladen / Fenster",
             "Wasser trinken",
             "Zähne putzen",
-            "Schlafplatz machen",
+            "duschen / Gesicht waschen",
             "Stoisches Kapitel",
             "Whoop checken",
             "Ziele + ToDo’s des Tages anschauen",
             "Mails checken",
-            "duschen / Gesicht waschen",
-            "bis 8:00 keine Geräte (außer Sally, To-Do’s, Routine)"
+            "bis 8:00 keine Geräte\n(außer Sally, To-Do’s, Routine)"
         ]
     },
     "Sportroutine": {
         icon: "🏃‍♂️",
         zuhause: [
-            "Sporteinheit aus Notizen gemacht"
+            "Sporteinheit aus Notizen gemacht",
+            "mind. 2x 12 Wadenheber an Treppe"
         ],
         unterwegs: [
             "8.000 Schritte gemacht"
@@ -67,17 +66,15 @@ const ROUTINE_CONFIG = {
         zuhause: [
             "morgigen Kalender und Aufgaben",
             "Finanzen und Habits anschauen",
-            "21:30 Geräte aus (max. Sally)",
             "Küche aufräumen",
-            "Wasser/Gläser parat",
+            "Wasser parat",
             "Wecker stellen",
             "Schlafzimmer aufräumen",
             "Kleidung rauslegen",
             "alle Rollladen und Fenster",
-            "Zahnseide",
+            "Zungenscharber / Zahnseide / Mundspülung",
             "Zähne putzen",
-            "warm duschen / Gesicht waschen",
-            "lesen"
+            "warm duschen / Gesicht waschen"
         ],
         unterwegs: [
             "morgigen Kalender und Aufgaben",
@@ -88,17 +85,22 @@ const ROUTINE_CONFIG = {
             "Kleidung rauslegen",
             "Rollladen und Fenster",
             "Zähne putzen",
-            "warm duschen / Gesicht waschen",
-            "lesen"
+            "warm duschen / Gesicht waschen"
         ]
     },
     "Schlafroutine": {
         icon: "🛌",
         zuhause: [
-            "7h+ schlafen"
+            "21:45 Bildschirme aus (außer: Sally / Routinen)",
+            "Magnesium nehmen",
+            "22:15 im Bett",
+            "lesen vor schlafen",
+            "ohne Mac / Handy im Schlafzimmer",
+            "6:00 ohne Snooze aufstehen",
+            "6:05 Tageslicht"
         ],
         unterwegs: [
-            "6,5h+ schlafen"
+            "7h+ schlafen"
         ]
     }
 };
