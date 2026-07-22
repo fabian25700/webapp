@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Focus Lockout</title>
+    <style>
+        :root {
+            --accent: #e67e22;
+            --accent-soft: rgba(230, 126, 34, 0.1);
+            --success: #27ae60;
+            --success-soft: rgba(39, 174, 96, 0.1);
+            --danger: #e74c3c;
+            --danger-soft: rgba(231, 76, 60, 0.3);
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --apple-switch-bg: #e3e3e6;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: #2d3f55;
+                --border-light: #253347;
+                --apple-switch-bg: #1c1c1e;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        header {
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            right: 0;
+            z-index: 100;
+            background: var(--bg);
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-primary);
+        }
+
+        main {
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 60px;
+        }
+
+        .selection-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            text-align: center;
+        }
+
+        .card-title {
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        .rank-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .rank-btn {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+
+        .rank-btn:active {
+            transform: scale(0.96);
+        }
+
+        .rank-num {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .rank-penalty {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .rank-btn.p1 { border-color: rgba(39, 174, 96, 0.4); }
+        .rank-btn.p1 .rank-num { color: var(--success); }
+        
+        .rank-btn.p4 { border-color: rgba(231, 76, 60, 0.4); }
+        .rank-btn.p4 .rank-num { color: var(--danger); }
+
+        /* Lock Screen Overlay */
+        #lock-screen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-align: center;
+        }
+
+        #lock-screen.active {
+            display: flex;
+        }
+
+        .lock-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px 20px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 380px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .badge-lock {
+            background: var(--accent-soft);
+            color: var(--accent);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .timer-display {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            font-variant-numeric: tabular-nums;
+            margin: 4px 0;
+        }
+
+        .quote-box {
+            font-size: 0.95rem;
+            font-weight: 700;
+            line-height: 1.4;
+            color: var(--text-primary);
+            padding: 12px;
+            background: var(--bg);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            width: 100%;
+        }
+
+        .todo-callout {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--success);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-title">Clash Focus Lock</div>
+</header>
+
+<main>
+    <div class="selection-card">
+        <div class="card-title">Clash Royale Platzierung wählen</div>
+        <div class="rank-grid">
+            <div class="rank-btn p1" onclick="startLockout(5)">
+                <span class="rank-num">Platz 1</span>
+                <span class="rank-penalty">5 Min Sperre</span>
+            </div>
+            <div class="rank-btn" onclick="startLockout(10)">
+                <span class="rank-num">Platz 2</span>
+                <span class="rank-penalty">10 Min Sperre</span>
+            </div>
+            <div class="rank-btn" onclick="startLockout(15)">
+                <span class="rank-num">Platz 3</span>
+                <span class="rank-penalty">15 Min Sperre</span>
+            </div>
+            <div class="rank-btn p4" onclick="startLockout(20)">
+                <span class="rank-num">Platz 4</span>
+                <span class="rank-penalty">20 Min Sperre</span>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="lock-screen">
+    <div class="lock-container">
+        <div class="badge-lock">🔒 Focus Mode Active</div>
+        <div class="timer-display" id="timer">00:00</div>
+        <div class="quote-box" id="quote"></div>
+        <div class="todo-callout">🚀 Jetzt ToDos rocken!</div>
+    </div>
+</div>
+
+<script>
+    const quotes = [
+        "Kein Cashflow während du Trophys verlierst. Geh wieder an die Work!",
+        "Low Performer spielen 2v2. High Performer skalierten das Business.",
+        "Macho Mindset: Erst der Grind, dann der Win.",
+        "Der Markt wartet nicht auf deine Elixier-Aufladung. Hustle weiter!",
+        "Krone verloren? Egal. Hauptsache das Portfolio wächst.",
+        "Wenig Spiel, viel Revenue. Geh zurück an die ToDo-Liste!"
+    ];
+
+    let timerInterval = null;
+
+    function startLockout(minutes) {
+        let totalSeconds = minutes * 60;
+        
+        // Zufälligen Gen Z Finance Bro Spruch wählen
+        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+        document.getElementById('quote').innerText = `"${randomQuote}"`;
+        
+        const lockScreen = document.getElementById('lock-screen');
+        lockScreen.classList.add('active');
+
+        updateTimerDisplay(totalSeconds);
+
+        if (timerInterval) clearInterval(timerInterval);
+
+        timerInterval = setInterval(() => {
+            totalSeconds--;
+            
+            if (totalSeconds <= 0) {
+                clearInterval(timerInterval);
+                lockScreen.classList.remove('active');
+            } else {
+                updateTimerDisplay(totalSeconds);
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay(seconds) {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        document.getElementById('timer').innerText = 
+            `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+</script>
+
+</body>
+</html>
