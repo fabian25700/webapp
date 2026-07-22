@@ -83,7 +83,6 @@
             align-items: center;
             justify-content: center;
             width: 100%;
-            max-width: 600px;
             position: relative;
         }
         
@@ -101,12 +100,6 @@
             gap: 8px; 
             text-decoration: none; 
             color: var(--text-primary); 
-        }
-        
-        .back-container span { 
-            font-size: 0.95rem; 
-            font-weight: 700; 
-            line-height: 1;
         }
 
         .back-btn {
@@ -285,7 +278,6 @@
         <div class="header-left">
             <a href="index.html" class="back-container">
                 <div class="back-btn">&larr;</div>
-                <span>Pomodoro</span>
             </a>
         </div>
         <div class="header-title">Pomodoro</div>
@@ -326,7 +318,6 @@
 </div>
 
 <script>
-    // Verhindert Zoom über Gesten auf Safari / iOS
     document.addEventListener('gesturestart', function (e) {
         e.preventDefault();
     });
