@@ -2,10 +2,10 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Focus Lockout</title>
+    <title>Pomodoro</title>
     <style>
         :root {
             --accent: #e67e22;
@@ -21,7 +21,6 @@
             --border: #e2e8f0;
             --border-light: #f1f5f9;
             --shadow: 0 2px 8px rgba(0,0,0,0.06);
-            --apple-switch-bg: #e3e3e6;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -32,11 +31,24 @@
                 --text-secondary: #94a3b8;
                 --border: #2d3f55;
                 --border-light: #253347;
-                --apple-switch-bg: #1c1c1e;
             }
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            touch-action: none;
+        }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
@@ -45,8 +57,8 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             padding: 20px;
         }
 
@@ -62,8 +74,55 @@
             backdrop-filter: blur(12px); 
             -webkit-backdrop-filter: blur(12px);
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
+        }
+
+        .header-top { 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+        }
+        
+        .header-left { 
+            display: flex; 
+            align-items: center; 
+            position: absolute;
+            left: 0;
+            z-index: 10;
+        }
+
+        .back-container { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            text-decoration: none; 
+            color: var(--text-primary); 
+        }
+        
+        .back-container span { 
+            font-size: 0.95rem; 
+            font-weight: 700; 
+            line-height: 1;
+        }
+
+        .back-btn {
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            width: 32px; 
+            height: 32px; 
+            border-radius: 9px;
+            background: var(--surface); 
+            border: 1px solid var(--border);
+            color: var(--text-primary); 
+            box-shadow: var(--shadow);
+            flex-shrink: 0; 
+            font-size: 0.9rem;
+            line-height: 1;
         }
 
         .header-title {
@@ -80,7 +139,6 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
-            margin-top: 60px;
         }
 
         .selection-card {
@@ -113,14 +171,13 @@
             background: var(--bg);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 16px 12px;
+            padding: 18px 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             gap: 6px;
             cursor: pointer;
-            user-select: none;
             transition: all 0.2s ease;
         }
 
@@ -224,12 +281,20 @@
 <body>
 
 <header>
-    <div class="header-title">Clash Focus Lock</div>
+    <div class="header-top">
+        <div class="header-left">
+            <a href="index.html" class="back-container">
+                <div class="back-btn">&larr;</div>
+                <span>Pomodoro</span>
+            </a>
+        </div>
+        <div class="header-title">Pomodoro</div>
+    </div>
 </header>
 
 <main>
     <div class="selection-card">
-        <div class="card-title">Clash Royale Platzierung wählen</div>
+        <div class="card-title">Clash Royale Platzierung</div>
         <div class="rank-grid">
             <div class="rank-btn p1" onclick="startLockout(5)">
                 <span class="rank-num">Platz 1</span>
@@ -261,9 +326,14 @@
 </div>
 
 <script>
+    // Verhindert Zoom über Gesten auf Safari / iOS
+    document.addEventListener('gesturestart', function (e) {
+        e.preventDefault();
+    });
+
     const quotes = [
         "Kein Cashflow während du Trophys verlierst. Geh wieder an die Work!",
-        "Low Performer spielen 2v2. High Performer skalierten das Business.",
+        "Low Performer spielen 2v2. High Performer skalieren das Business.",
         "Macho Mindset: Erst der Grind, dann der Win.",
         "Der Markt wartet nicht auf deine Elixier-Aufladung. Hustle weiter!",
         "Krone verloren? Egal. Hauptsache das Portfolio wächst.",
@@ -275,7 +345,6 @@
     function startLockout(minutes) {
         let totalSeconds = minutes * 60;
         
-        // Zufälligen Gen Z Finance Bro Spruch wählen
         const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
         document.getElementById('quote').innerText = `"${randomQuote}"`;
         
