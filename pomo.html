@@ -334,28 +334,45 @@
     let timerInterval = null;
 
     function startLockout(minutes) {
-        let totalSeconds = minutes * 60;
+        const endTime = Date.now() + minutes * 60 * 1000;
+        localStorage.setItem('pomodoro_end_time', endTime);
         
         const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-        document.getElementById('quote').innerText = `"${randomQuote}"`;
+        localStorage.setItem('pomodoro_quote', randomQuote);
         
-        const lockScreen = document.getElementById('lock-screen');
-        lockScreen.classList.add('active');
+        runTimer();
+    }
 
-        updateTimerDisplay(totalSeconds);
+    function runTimer() {
+        const endTime = localStorage.getItem('pomodoro_end_time');
+        if (!endTime) return;
+
+        const lockScreen = document.getElementById('lock-screen');
+        const quoteBox = document.getElementById('quote');
+        
+        const savedQuote = localStorage.getItem('pomodoro_quote') || quotes[0];
+        quoteBox.innerText = `"${savedQuote}"`;
+        lockScreen.classList.add('active');
 
         if (timerInterval) clearInterval(timerInterval);
 
-        timerInterval = setInterval(() => {
-            totalSeconds--;
-            
-            if (totalSeconds <= 0) {
+        const update = () => {
+            const now = Date.now();
+            const remainingMs = endTime - now;
+            const remainingSeconds = Math.ceil(remainingMs / 1000);
+
+            if (remainingSeconds <= 0) {
                 clearInterval(timerInterval);
+                localStorage.removeItem('pomodoro_end_time');
+                localStorage.removeItem('pomodoro_quote');
                 lockScreen.classList.remove('active');
             } else {
-                updateTimerDisplay(totalSeconds);
+                updateTimerDisplay(remainingSeconds);
             }
-        }, 1000);
+        };
+
+        update();
+        timerInterval = setInterval(update, 1000);
     }
 
     function updateTimerDisplay(seconds) {
@@ -364,6 +381,16 @@
         document.getElementById('timer').innerText = 
             `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }
+
+    // Beim Laden der Seite prüfen, ob noch ein Timer läuft
+    window.addEventListener('load', runTimer);
+
+    // Sobald der Tab wieder aktiv wird (z. B. nach Standby oder Tab-Wechsel) sofort aktualisieren
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            runTimer();
+        }
+    });
 </script>
 
 </body>
