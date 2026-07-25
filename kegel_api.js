@@ -1,19 +1,15 @@
 /**
  * Kegel API Modul
- * Greift auf die Google Apps Script WebApp zu und berechnet Statistiken.
+ * Speichert den Endpunkt zur Google Apps Script WebApp und lädt/berechnet die Daten.
  */
 
 const KEGEL_API_URL = "https://script.google.com/macros/s/AKfycbyFqMtch5u80UgCrRsT_m3jiKxE4xPVWgjz2Bslty9atN6zhuk_3kRJhXH8zp3SLnFx/exec";
 
-/**
- * Lädt die Rohdaten aus dem Google Sheet
- * @returns {Promise<Object>}
- */
 async function fetchKegelData() {
     try {
         const response = await fetch(KEGEL_API_URL);
         if (!response.ok) {
-            throw new Error(`Fehler beim Laden der Daten: ${response.statusText}`);
+            throw new Error(`Fehler beim Abrufen der Daten: ${response.statusText}`);
         }
         return await response.json();
     } catch (error) {
@@ -22,15 +18,10 @@ async function fetchKegelData() {
     }
 }
 
-/**
- * Verarbeitet die Daten und liefert aufbereitete Statistiken für alle Kegler.
- * @returns {Promise<Array<Object>>}
- */
 async function getKegelStats() {
     const data = await fetchKegelData();
     const { players, rows } = data;
 
-    // Initialisiere Statistik-Objekt für jeden Spieler
     const statsMap = {};
     players.forEach(player => {
         statsMap[player] = {
@@ -38,22 +29,21 @@ async function getKegelStats() {
             totalKallen: 0,
             totalParticipations: 0,
             avgKallen: 0,
-            totalKings: 0
+            totalKings: 0,
+            history: [] // Für individuelle Spielerstatistiken
         };
     });
 
-    // Zeilen auswerten
     rows.forEach(row => {
-        // Kallen & Teilnahmen
         row.values.forEach((value, index) => {
             const playerName = players[index];
             if (value !== null && value !== undefined && !isNaN(value)) {
                 statsMap[playerName].totalKallen += value;
                 statsMap[playerName].totalParticipations += 1;
+                statsMap[playerName].history.push({ date: row.date, kallen: value });
             }
         });
 
-        // Kallenkönig auswerten
         if (row.king) {
             const kingName = row.king.trim();
             if (statsMap[kingName]) {
@@ -62,15 +52,14 @@ async function getKegelStats() {
         }
     });
 
-    // Durchschnitte berechnen und Array formatieren
     const statsArray = Object.values(statsMap).map(player => {
         const avg = player.totalParticipations > 0 
-            ? (player.totalKallen / player.totalParticipations).toFixed(1) 
+            ? (player.totalKallen / player.totalParticipations) 
             : 0;
         
         return {
             ...player,
-            avgKallen: parseFloat(avg)
+            avgKallen: Math.round(avg * 10) / 10
         };
     });
 
