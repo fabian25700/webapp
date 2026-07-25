@@ -3,7 +3,7 @@
  * Speichert den Endpunkt zur Google Apps Script WebApp und lädt/berechnet die Daten.
  */
 
-const KEGEL_API_URL = "https://script.google.com/macros/s/AKfycbyFqMtch5u80UgCrRsT_m3jiKxE4xPVWgjz2Bslty9atN6zhuk_3kRJhXH8zp3SLnFx/exec";
+const KEGEL_API_URL = "https://script.google.com/macros/s/AKfycbznHfmvDZz0lpsY2kNlS23E8hcY4O6KEmwclu85Oz4zanJIGRprgi8AZSX6TIaWhrbt/exec";
 
 async function fetchKegelData() {
     try {
