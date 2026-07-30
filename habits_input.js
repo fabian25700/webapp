@@ -2,7 +2,6 @@ const ROUTINE_CONFIG = {
     "Morgenroutine": {
         icon: "☀️",
         zuhause: [
-            "Aufstehen ohne Snooze",
             "Wiegen",
             "alle Rollladen / Fenster",
             "Tageslicht",
@@ -18,7 +17,6 @@ const ROUTINE_CONFIG = {
             "bis 8:00 keine Geräte\n(außer Sally, To-Do’s, Routine)"
         ],
         unterwegs: [
-            "Aufstehen ohne Snooze",
             "Schlafplatz machen",
             "alle Rollladen / Fenster",
             "Wasser trinken",
@@ -45,7 +43,8 @@ const ROUTINE_CONFIG = {
         icon: "🥗",
         zuhause: [
             "10h+ gefastet über Nacht",
-            "Supplements genommen"
+            "Tabletten genommen",
+            "Creatin genommen"
         ],
         unterwegs: [
             "10h+ gefastet über Nacht",
@@ -74,6 +73,7 @@ const ROUTINE_CONFIG = {
             "alle Rollladen und Fenster",
             "Zungenscharber / Zahnseide / Mundspülung",
             "Zähne putzen",
+            "Nasen dusche",
             "warm duschen / Gesicht waschen"
         ],
         unterwegs: [
@@ -100,7 +100,11 @@ const ROUTINE_CONFIG = {
             "6:05 Tageslicht"
         ],
         unterwegs: [
-            "7h+ schlafen"
+            "Magnesium nehmen",
+            "22:30 im Bett",
+            "ohne Mac / Handy im Bett",
+            "ohne Snooze aufstehen",
+            "5Min nach aufstehen Tageslicht"
         ]
     }
 };
