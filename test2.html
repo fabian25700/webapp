@@ -5,34 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Groundhopping Analytics</title>
+    <title>Alkohol</title>
     <style>
         :root {
-            --accent: #2563eb;
-            --accent-soft: rgba(37, 99, 235, 0.08);
-            --success: #16a34a;
-            --success-soft: rgba(22, 163, 74, 0.08);
-            --danger: #dc2626;
-            --danger-soft: rgba(220, 38, 38, 0.08);
-            --bg: #f8fafc;
+            --accent: #e67e22;
+            --accent-soft: rgba(230, 126, 34, 0.1);
+            --success: #27ae60;
+            --success-soft: rgba(39, 174, 96, 0.1);
+            --danger: #e74c3c;
+            --danger-soft: rgba(231, 76, 60, 0.3);
+            --bg: #f0f2f5;
             --surface: #ffffff;
-            --text-primary: #0f172a;
-            --text-secondary: #475569;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
             --border: #e2e8f0;
             --border-light: #f1f5f9;
-            --shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
-            --apple-switch-bg: #e2e8f0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --apple-switch-bg: #e3e3e6;
+            --overlay-bg: rgba(15, 23, 42, 0.4);
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: #0b0f19;
+                --bg: #0f172a;
                 --surface: #1e293b;
-                --text-primary: #f8fafc;
+                --text-primary: #f1f5f9;
                 --text-secondary: #94a3b8;
-                --border: #334155;
-                --border-light: #1e293b;
-                --apple-switch-bg: #0f172a;
+                --border: #2d3f55;
+                --border-light: #253347;
+                --apple-switch-bg: #1c1c1e;
+                --overlay-bg: rgba(0, 0, 0, 0.6);
             }
         }
 
@@ -65,15 +67,16 @@
             width: 100%;
             position: relative;
         }
-        
+
         .header-left { 
             display: flex; 
             align-items: center; 
             position: absolute;
             left: 0;
             z-index: 10;
+            gap: 8px;
         }
-
+        
         .back-container { 
             display: flex; 
             align-items: center; 
@@ -105,726 +108,858 @@
         }
 
         .header-right {
+            display: flex; align-items: center; position: absolute; right: 0; z-index: 10;
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+            color: var(--text-secondary); transition: color 0.2s ease;
+        }
+
+        .header-switch-container { margin: 0 auto; display: flex; justify-content: center; z-index: 5; }
+
+        .main-view-switch { display: flex; background: var(--apple-switch-bg); border-radius: 9px; padding: 2px; width: 160px; height: 32px; flex-shrink: 0; }
+        
+        .main-switch-btn {
+            flex: 1; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;
+            font-size: 0.78rem; font-weight: 700; border-radius: 7px; border: none; background: transparent;
+            color: var(--text-secondary); cursor: pointer; transition: all 0.2s; height: 100%; line-height: 1;
+        }
+        
+        .main-switch-btn.active {
+            background: var(--surface); color: var(--text-primary);
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
+        }
+
+        .cloud-error-banner {
+            display: none; background: var(--danger-soft); border: 1px solid var(--danger);
+            color: var(--text-primary); padding: 8px 12px; border-radius: 10px; font-size: 0.75rem;
+            font-weight: 700; text-align: center; margin: 12px 16px 0;
+        }
+
+        .toast-notification {
+            position: fixed; top: calc(env(safe-area-inset-top) + 110px); left: 50%; transform: translateX(-50%) translateY(-20px);
+            background: var(--success); color: white; padding: 10px 20px; border-radius: 12px; font-size: 0.85rem;
+            font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; z-index: 1000;
+            transition: all 0.3s ease; pointer-events: none;
+        }
+        .toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+        .view-section { display: none; flex-direction: column; gap: 12px; width: 100%; }
+        .view-section.active { display: flex; }
+
+        .delete-last-container {
             display: flex;
+            justify-content: center;
             align-items: center;
-            position: absolute;
-            right: 0;
-            z-index: 10;
+            gap: 12px;
+            margin: -4px auto 4px auto;
+            width: 100%;
+        }
+
+        .delete-last-btn {
+            background: none;
+            border: none;
             font-size: 0.7rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             color: var(--text-secondary);
+            cursor: pointer;
+            transition: color 0.2s ease;
+            padding: 4px 8px;
+        }
+        .delete-last-btn:active {
+            color: var(--danger);
         }
 
-        .header-switch-container {
-            margin: 0 auto;
-            display: flex;
-            justify-content: center;
-            z-index: 5;
-        }
-
-        .main-view-switch {
-            display: flex; 
-            background: var(--apple-switch-bg); 
-            border-radius: 9px;
-            padding: 2px; 
-            width: 200px; 
-            height: 32px; 
-            flex-shrink: 0;
-        }
+        .category-group { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); position: relative; }
         
-        .main-switch-btn {
-            flex: 1; 
-            text-align: center; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            gap: 4px;
-            font-size: 0.78rem; 
-            font-weight: 700; 
-            border-radius: 7px; 
-            border: none; 
-            background: transparent;
-            color: var(--text-secondary); 
-            cursor: pointer; 
-            transition: all 0.2s; 
-            height: 100%;
-            line-height: 1;
-        }
+        .category-header { padding: 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; transition: background 0.2s; }
+        .category-header:active { background: var(--border-light); }
+
+        .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; flex: 1; }
+        .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
         
-        .main-switch-btn.active {
-            background: var(--surface); 
-            color: var(--text-primary);
-            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
+        .arrow { font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.3s ease; flex-shrink: 0; }
+        .category-group.open .arrow { transform: rotate(180deg); }
+
+        .category-content { display: none; padding: 0 16px 16px; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 16px; }
+        .category-group.open .category-content { display: flex; }
+
+        .drink-card {
+            background: var(--bg); border-radius: 12px; border: 1px solid var(--border);
+            padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px;
+            cursor: pointer; user-select: none; transition: all 0.2s ease;
         }
-
-        .loading-banner {
-            background: var(--accent-soft);
-            border: 1px solid var(--accent);
-            color: var(--text-primary);
-            padding: 12px;
-            border-radius: 14px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            text-align: center;
-            margin: 16px;
-        }
-
-        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
-
-        .view-section { display: none; flex-direction: column; gap: 14px; width: 100%; }
-        .view-section.active { display: flex; }
-
-        .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        .kpi-card {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-            padding: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 6px; height: 100px;
-        }
-        .kpi-value { font-size: 1.5rem; font-weight: 800; color: var(--accent); display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .kpi-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+        .drink-card:active { transform: scale(0.99); }
         
-        .section-block {
+        .drink-info { display: flex; flex-direction: column; gap: 2px; }
+        .drink-name { font-weight: 600; font-size: 0.95rem; }
+        .drink-size { font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; }
+
+        .plus-btn {
+            width: 28px; height: 28px; border-radius: 8px; background: var(--accent-soft); color: var(--accent);
+            display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1rem;
+        }
+
+        .form-block {
             background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
             padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px;
         }
-
-        .section-block-title {
-            font-size: 0.75rem; font-weight: 800; color: var(--text-secondary);
-            text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px;
-            border-left: 3px solid var(--accent); padding-left: 8px;
-        }
+        .form-block h3 { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); }
         
-        .selector-wrapper {
-            width: 100%;
-        }
-
-        select {
-            width: 100%;
-            padding: 12px;
-            background: var(--bg);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            outline: none;
-            cursor: pointer;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-
-        .matrix-grid { display: flex; flex-direction: column; gap: 4px; width: 100%; }
-        .matrix-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-light); min-height: 40px; }
-        .matrix-row:last-child { border-bottom: none; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group.full { grid-column: span 2; }
         
-        .matrix-label { 
-            font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);
-            text-transform: uppercase; letter-spacing: 0.05em;
+        .form-group label { font-size: 0.7rem; height: 16px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); label-spacing: 0.05em; }
+        .form-group input, .form-group select {
+            width: 100%; height: 38px; border-radius: 9px; border: 1px solid var(--border);
+            background: var(--bg); color: var(--text-primary); padding: 0 10px; font-size: 0.9rem; font-family: inherit;
         }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); }
         
-        .matrix-value { 
-            font-size: 0.9rem; font-weight: 700; color: var(--text-primary); text-align: right;
+        .checkbox-group { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; margin-top: 4px; }
+        .checkbox-group input { width: 18px; height: 18px; accent-color: var(--accent); }
+        .checkbox-group label { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); cursor: pointer; }
+
+        .submit-btn {
+            width: 100%; height: 40px; border-radius: 10px; background: var(--accent); color: white;
+            border: none; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;
+            cursor: pointer; transition: opacity 0.2s; margin-top: 4px;
+        }
+        .submit-btn:active { opacity: 0.9; }
+
+        .suggestion-btn {
+            background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent);
+            padding: 8px 12px; border-radius: 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+            text-align: left; width: 100%; transition: background 0.2s; margin-bottom: 4px;
+        }
+        .suggestion-btn:active { background: var(--border); }
+
+        /* Modal Design */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--overlay-bg); z-index: 1000; display: none;
+            align-items: center; justify-content: center; padding: 16px;
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-card {
+            background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 450px;
+            border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); padding: 20px;
+            display: flex; flex-direction: column; gap: 16px; animation: modalSlidUp 0.25s ease-out;
+        }
+        @keyframes modalSlidUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-title { font-size: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+        .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+        .cancel-btn {
+            width: 100%; height: 40px; border-radius: 10px; background: transparent; color: var(--text-secondary);
+            border: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; cursor: pointer;
         }
 
-        .matrix-value.success { color: var(--success); }
-        .matrix-value.danger { color: var(--danger); }
-
-        .wiki-link {
-            color: var(--text-primary);
-            text-decoration: none;
-            cursor: pointer;
-            transition: color 0.2s;
+        /* Stats Dashboard Layout */
+        .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .kpi-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; height: 95px;
         }
-        .wiki-link:hover {
-            color: var(--accent);
-            text-decoration: underline;
-        }
+        .kpi-value { font-size: 1.35rem; font-weight: 800; color: var(--text-primary); }
+        .kpi-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
 
-        .perf-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border-light); min-height: 42px; }
+        .section-block { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px; }
+        .block-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+
+        .toggle-trigger {
+            font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+            padding: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);
+        }
+        .toggle-hidden-wrapper { display: none; flex-direction: column; gap: 8px; margin-top: 4px; }
+        .section-block.expanded .toggle-hidden-wrapper { display: flex; }
+
+        .today-log-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+            font-size: 0.82rem; font-weight: 600;
+        }
+        .today-log-meta { font-size: 0.72rem; color: var(--text-secondary); font-weight: 700; }
+
+        .perf-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-light); height: 32px; }
         .perf-item:last-child { border-bottom: none; padding-bottom: 0; }
         .perf-info { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
-        .perf-name { font-size: 0.88rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .perf-icon { font-size: 0.95rem; flex-shrink: 0; }
+        .perf-name { font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        .perf-bar-wrapper { display: flex; align-items: center; gap: 8px; width: 120px; flex-shrink: 0; }
+        .perf-bar-wrapper { display: flex; align-items: center; gap: 8px; width: 204px; flex-shrink: 0; }
         .perf-bar-bg { flex: 1; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
         .perf-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; }
-        .perf-pct { font-size: 0.8rem; font-weight: 700; width: 28px; text-align: right; }
-
-        .switch-header { display: flex; background: var(--bg); border-radius: 10px; padding: 2px; border: 1px solid var(--border); width: 100%; }
-        .switch-tab { flex: 1; text-align: center; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); padding: 7px 4px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
-        .switch-tab.active { background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow); }
-
-        .switch-content { display: none; }
-        .switch-content.active { display: flex; flex-direction: column; }
-
-        .modal-view {
-            display: none;
-            flex-direction: column;
-            gap: 14px;
-        }
-        .modal-view.active {
-            display: flex;
-        }
+        .perf-pct { font-size: 0.75rem; font-weight: 700; width: 32px; text-align: right; }
 
         @media (max-width: 420px) {
-            .main-view-switch { width: 180px; }
+            .main-view-switch { width: 150px; }
             .main-switch-btn { font-size: 0.72rem; }
+        }
+        @media (max-width: 395px) {
+            .perf-name { font-size: 0.78rem; }
+            .perf-bar-wrapper { width: 168px; gap: 4px; }
         }
     </style>
 </head>
 <body>
 
+<div class="toast-notification" id="toast-notice">Eintrag erfolgreich verbucht!</div>
+
+<div class="modal-overlay" id="quick-log-modal">
+    <div class="modal-card">
+        <div class="modal-title" id="modal-drink-title">Getränk bestätigen</div>
+        
+        <div id="modal-suggestion-box" style="display:none;">
+            <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 4px;">Letzter aktiver Anlass</div>
+            <button type="button" class="suggestion-btn" id="modal-use-last-btn" onclick="applyLastAnlassToModal()">Bisherigen Anlass übernehmen</button>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group full">
+                <label for="modal-anlass-name">Anlass Name</label>
+                <input type="text" id="modal-anlass-name" placeholder="z.B. Bremen (A)">
+            </div>
+            <div class="form-group full">
+                <label for="modal-anlass-kategorie">Anlass Kategorie</label>
+                <select id="modal-anlass-kategorie"></select>
+            </div>
+            <div class="form-group full">
+                <label for="modal-anlass-kategorie-neu">Oder neue Anlass Kategorie</label>
+                <input type="text" id="modal-anlass-kategorie-neu" placeholder="z.B. Fußball">
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="cancel-btn" onclick="closeQuickLogModal()">Abbrechen</button>
+            <button class="submit-btn" onclick="submitQuickLogFromModal()">Loggen</button>
+        </div>
+    </div>
+</div>
+
 <header>
     <div class="header-top">
         <div class="header-left">
-            <a href="#" class="back-container" id="back-dashboard-btn" onclick="resetToDashboard(event)" style="display: none;">
+            <a href="index.html" class="back-container">
                 <div class="back-btn">&larr;</div>
-                <span id="back-title">Dashboard</span>
+                <span>Alkohol</span>
             </a>
         </div>
-        <div class="header-switch-container" id="central-switch-box">
+        <div class="header-switch-container">
             <div class="main-view-switch">
-                <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')"><span>Team</span></button>
-                <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')"><span>Global</span></button>
+                <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')">🎯 Tracker</button>
+                <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')">📊 Stats</button>
             </div>
         </div>
-        <div class="header-right">Live</div>
+        <div class="header-right" id="cloud-status-text">Cloud Live</div>
     </div>
 </header>
 
-<div class="loading-banner" id="loading-box">Lade Groundhopping Daten...</div>
+<div class="cloud-error-banner" id="cloud-error-box">Sync-Fehler: Verbindung zur Cloud fehlgeschlagen.</div>
 
-<main id="main-content" style="display: none;">
-    
-    <!-- TRACKER / TEAM VIEW -->
+<main>
     <div id="view-tracker" class="view-section active">
-        <div class="section-block">
-            <div class="section-block-title">Team Filter</div>
-            <div class="selector-wrapper">
-                <select id="team-selector" onchange="updateTeamDashboard(this.value)"></select>
-            </div>
+        <div class="delete-last-container">
+            <button type="button" class="delete-last-btn" onclick="deleteLastLogEntry()">Letztes Getränk löschen</button>
+            <span style="color: var(--text-secondary); font-size: 0.7rem;">|</span>
+            <button type="button" class="delete-last-btn" onclick="repeatLastDrink()">Letztes Getränk erneut</button>
         </div>
 
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-value" id="t-spiele">0</div>
-                <div class="kpi-label">Spiele</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-value" id="t-grounds-count">0</div>
-                <div class="kpi-label">Grounds</div>
-            </div>
-        </div>
+        <div id="categories-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
 
-        <div class="section-block">
-            <div class="section-block-title">Spielbilanz</div>
-            <div class="matrix-grid">
-                <div class="matrix-row">
-                    <span class="matrix-label">Heim / Auswärts</span>
-                    <span class="matrix-value" id="t-heim-auswaerts">0 / 0</span>
-                </div>
-                <div class="matrix-row">
-                    <span class="matrix-label">Torverhältnis</span>
-                    <span class="matrix-value" id="t-tore-gegentore">0:0</span>
-                </div>
-                <div class="matrix-row">
-                    <span class="matrix-label">S / U / N</span>
-                    <span class="matrix-value success" id="t-wld">0 / 0 / 0</span>
-                </div>
-            </div>
-        </div>
+        <div class="form-block">
+            <h3>Neues Getränk erfassen</h3>
+            <form id="manual-drink-form" onsubmit="handleManualSubmit(event)">
+                <div class="form-grid">
+                    
+                    <div class="form-group full">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="form-regelmaessig">
+                            <label for="form-regelmaessig">Bei Regelmäßig speichern?</label>
+                        </div>
+                    </div>
 
-        <div class="section-block">
-            <div class="section-block-title">Highlights</div>
-            <div class="matrix-grid">
-                <div class="matrix-row">
-                    <span class="matrix-label">Höchster Sieg</span>
-                    <span class="matrix-value success" id="t-max-win">-</span>
-                </div>
-                <div class="matrix-row">
-                    <span class="matrix-label">Höchste Niederlage</span>
-                    <span class="matrix-value danger" id="t-max-loss">-</span>
-                </div>
-            </div>
-        </div>
+                    <div class="form-group full">
+                        <label for="form-name-input">Name neues Getränk</label>
+                        <input type="text" id="form-name-input" placeholder="z.B. Reissdorf" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-kategorie">Kategorie</label>
+                        <select id="form-kategorie" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-groesse">Größe (in Liter)</label>
+                        <input type="number" id="form-groesse" step="0.01" min="0.01" placeholder="z.B. 0.33" required>
+                    </div>
 
-        <div class="section-block">
-            <div class="section-block-title">Erweiterte Metriken</div>
-            <div class="matrix-grid">
-                <div class="matrix-row">
-                    <span class="matrix-label">Besuchte Orte</span>
-                    <span class="matrix-value" id="t-laender">0</span>
+                    <div class="form-group full" style="margin-top: 6px; border-top: 1px solid var(--border-light); padding-top: 12px;">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="form-anlass-wie-zuvor" onchange="toggleFormAnlassWieZuvor()">
+                            <label for="form-anlass-wie-zuvor">Anlass wie zuvor übernehmen?</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full form-anlass-input-group">
+                        <label for="form-anlass-name">Anlass Name</label>
+                        <input type="text" id="form-anlass-name" placeholder="z.B. Bremen (A)">
+                    </div>
+                    <div class="form-group form-anlass-input-group">
+                        <label for="form-anlass-kategorie">Anlass Kategorie</label>
+                        <select id="form-anlass-kategorie"></select>
+                    </div>
+                    <div class="form-group form-anlass-input-group">
+                        <label for="form-anlass-kategorie-neu">Neue Kategorie</label>
+                        <input type="text" id="form-anlass-kategorie-neu" placeholder="z.B. Fußball">
+                    </div>
                 </div>
-                <div class="matrix-row">
-                    <span class="matrix-label">Zuschauer (Min/Ø/Max)</span>
-                    <span class="matrix-value" id="t-zuschauer">0 / 0 / 0</span>
-                </div>
-                <div class="matrix-row">
-                    <span class="matrix-label">Top Wettbewerb</span>
-                    <span class="matrix-value" id="t-top-comp">-</span>
-                </div>
-                <div class="matrix-row">
-                    <span class="matrix-label">Häufigster Gegner</span>
-                    <span class="matrix-value" id="t-top-opp">-</span>
-                </div>
-                <div class="matrix-row">
-                    <span class="matrix-label">Top Ground</span>
-                    <span class="matrix-value" id="t-top-ground">-</span>
-                </div>
-            </div>
+                
+                <button type="submit" class="submit-btn" style="margin-top: 12px;">Eintragen & Loggen</button>
+            </form>
         </div>
     </div>
 
-    <!-- STATS / GLOBAL VIEW -->
     <div id="view-stats" class="view-section">
         <div class="kpi-grid">
             <div class="kpi-card">
-                <div class="kpi-value" id="stat-total-games">0</div>
-                <div class="kpi-label">Spiele Gesamt</div>
+                <div class="kpi-value" id="kpi-today">0,00 L</div>
+                <div class="kpi-label">Heute Gesamt</div>
             </div>
             <div class="kpi-card">
-                <div class="kpi-value" id="stat-total-grounds">0</div>
-                <div class="kpi-label">Grounds Gesamt</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-value" id="stat-total-goals">0</div>
-                <div class="kpi-label">Tore Gesamt</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-value" id="stat-avg-goals">0.0</div>
-                <div class="kpi-label">Tore pro Spiel</div>
+                <div class="kpi-value" id="kpi-streak">0 Tage</div>
+                <div class="kpi-label">Nüchtern-Konto</div>
             </div>
         </div>
 
-        <div class="section-block">
-            <div class="switch-header">
-                <div class="switch-tab active" onclick="switchBlock('top', 'grounds')">Top 5 Stadien</div>
-                <div class="switch-tab" onclick="switchBlock('top', 'seasons')">Saisons</div>
-                <div class="switch-tab" onclick="switchBlock('top', 'surfaces')">Untergrund</div>
-            </div>
-            
-            <div id="content-grounds" class="switch-content active">
-                <div id="top-grounds-container" style="display: flex; flex-direction: column; gap: 2px;"></div>
-            </div>
-            
-            <div id="content-seasons" class="switch-content">
-                <div id="seasons-container" style="display: flex; flex-direction: column; gap: 2px;"></div>
-            </div>
-
-            <div id="content-surfaces" class="switch-content">
-                <div id="surfaces-container" style="display: flex; flex-direction: column; gap: 2px;"></div>
-            </div>
+        <div class="section-block" id="today-logs-section-block">
+            <div class="toggle-trigger" onclick="toggleTodayLogsBlock()">Getränke von heute anzeigen ▼</div>
+            <div class="toggle-hidden-wrapper" id="today-logs-container"></div>
         </div>
 
         <div class="section-block">
-            <div class="section-block-title">Letzte 5 Spiele</div>
-            <div id="recent-games-container" style="display: flex; flex-direction: column; gap: 4px;"></div>
-        </div>
-    </div>
-
-    <!-- WIKI MODAL VIEW (STADION / WETTBEWERB) -->
-    <div id="view-wiki" class="modal-view">
-        <div class="section-block">
-            <div class="section-block-title" id="wiki-title">Statistik Details</div>
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <div class="kpi-value" id="w-spiele">0</div>
-                    <div class="kpi-label">Spiele</div>
-                </div>
-                <div class="kpi-card">
-                    <div class="kpi-value" id="w-tore">0</div>
-                    <div class="kpi-label">Tore Gesamt</div>
-                </div>
-            </div>
+            <div class="block-title">Getränke-Ranking (Frequenz)</div>
+            <div id="routine-performance-container" style="display: flex; flex-direction: column; gap: 2px;"></div>
         </div>
 
         <div class="section-block">
-            <div class="section-block-title">Alle Begegnungen</div>
-            <div id="wiki-games-container" style="display: flex; flex-direction: column; gap: 4px;"></div>
+            <div class="block-title">Getränke-Kategorien</div>
+            <div id="drink-category-performance-container" style="display: flex; flex-direction: column; gap: 2px;"></div>
+        </div>
+
+        <div class="section-block">
+            <div class="block-title">Anlass-Kategorien</div>
+            <div id="event-category-performance-container" style="display: flex; flex-direction: column; gap: 2px;"></div>
         </div>
     </div>
 </main>
 
-<script src="hopping_api.js"></script>
 <script>
-    let rawData = [];
-    let currentActiveMainView = 'tracker';
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz2p1m_3iXMJAfIirJcTrh9fAWbllxTBW-LtILGgrNPMREQ9urvVAqLnuMVJv_TKBx8Xg/exec";
+
+    let globalFavorites = [];
+    let globalHistory = [];
+    let globalAnlassKategorien = [];
+    let cloudSyncTimeout = null;
+    let activeModalDrink = null;
+
+    const categoryIcons = { "Bier": "🍺", "Wein": "🍷", "Spirituose": "🥃", "Mixgetränk": "🍹" };
+    const eventIcons = { "Fußball": "⚽", "Kegeln": "🎳", "Restaurant": "🍽️", "Party": "🎉", "Feier": "🥳", "Konzert": "🎸", "Bar": "🍸" };
+
+    function updateCloudStatus(status) {
+        const indicator = document.getElementById('cloud-status-text');
+        if (!indicator) return;
+        if (cloudSyncTimeout && status !== "Cloud synced") { clearTimeout(cloudSyncTimeout); cloudSyncTimeout = null; }
+        indicator.textContent = status;
+        if (status === "Cloud Fehler") { indicator.style.color = "var(--danger)"; }
+        else if (status === "Cloud synced") {
+            indicator.style.color = "var(--success)";
+            cloudSyncTimeout = setTimeout(() => { indicator.textContent = "Cloud Live"; indicator.style.color = "var(--text-secondary)"; }, 3000);
+        } else if (status === "Cloud lädt") { indicator.style.color = "var(--accent)"; }
+        else { indicator.style.color = "var(--text-secondary)"; }
+    }
 
     function toggleMainView(view) {
-        currentActiveMainView = view;
         document.getElementById('view-btn-tracker').classList.toggle('active', view === 'tracker');
         document.getElementById('view-btn-stats').classList.toggle('active', view === 'stats');
-        
         document.getElementById('view-tracker').classList.toggle('active', view === 'tracker');
         document.getElementById('view-stats').classList.toggle('active', view === 'stats');
-        document.getElementById('view-wiki').classList.remove('active');
-        document.getElementById('back-dashboard-btn').style.display = 'none';
-        document.getElementById('central-switch-box').style.display = 'flex';
+        if (view === 'stats') calculateStats();
     }
 
-    function switchBlock(position, type) {
-        if (!event || !event.target) return;
-        const header = event.target.parentElement;
-        header.querySelectorAll('.switch-tab').forEach(tab => tab.classList.remove('active'));
-        event.target.classList.add('active');
-
-        if (position === 'top') {
-            document.getElementById('content-grounds').classList.remove('active');
-            document.getElementById('content-seasons').classList.remove('active');
-            document.getElementById('content-surfaces').classList.remove('active');
-            document.getElementById('content-' + type).classList.add('active');
-        }
-    }
-
-    function parseTeams(begegnungStr) {
-        if (!begegnungStr || !begegnungStr.includes(':')) return null;
-        const index = begegnungStr.indexOf(':');
-        const home = begegnungStr.substring(0, index).trim();
-        const away = begegnungStr.substring(index + 1).trim();
-        return { home, away };
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-        if (typeof getHoppingData === 'function') {
-            getHoppingData()
-                .then(data => initializeDashboard(data))
-                .catch(err => {
-                    const box = document.getElementById('loading-box');
-                    box.style.background = "var(--danger-soft)";
-                    box.style.borderColor = "var(--danger)";
-                    box.innerText = "Fehler beim Laden der API.";
-                    console.error(err);
-                });
+    function toggleGroup(header) { header.parentElement.classList.toggle('open'); }
+    function showSuccessToast() { const toast = document.getElementById('toast-notice'); toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 2000); }
+    
+    function toggleTodayLogsBlock() {
+        const block = document.getElementById('today-logs-section-block');
+        block.classList.toggle('expanded');
+        const trigger = block.querySelector('.toggle-trigger');
+        if (block.classList.contains('expanded')) {
+            trigger.textContent = "Getränke von heute ausblenden ▲";
         } else {
-            document.getElementById('loading-box').innerText = "hopping_api.js fehlt.";
+            trigger.textContent = "Getränke von heute anzeigen ▼";
         }
-    });
+    }
 
-    function initializeDashboard(data) {
-        rawData = data;
-        if (!rawData || rawData.length === 0) {
-            document.getElementById('loading-box').innerText = "Keine Daten gefunden.";
+    function formatDateToString(date) {
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        return `${dd}.${mm}.${date.getFullYear()}`;
+    }
+
+    function fetchData() {
+        updateCloudStatus("Cloud lädt");
+        fetch(GOOGLE_SCRIPT_URL)
+            .then(res => { if (!res.ok) throw new Error('Network error'); return res.json(); })
+            .then(data => {
+                document.getElementById('cloud-error-box').style.display = 'none';
+                if (data && !data.error) {
+                    globalFavorites = data.favorites || [];
+                    globalHistory = data.history || [];
+                    globalAnlassKategorien = data.anlassKategorien || [];
+                } else {
+                    globalFavorites = []; globalHistory = []; globalAnlassKategorien = [];
+                }
+                renderTrackerUI();
+                populateDropdowns();
+                updateCloudStatus("Cloud Live");
+                calculateStats();
+            })
+            .catch(err => {
+                document.getElementById('cloud-error-box').style.display = 'block';
+                updateCloudStatus("Cloud Fehler");
+                console.error(err);
+            });
+    }
+
+    function populateDropdowns() {
+        const d1 = document.getElementById('modal-anlass-kategorie');
+        const d2 = document.getElementById('form-anlass-kategorie');
+        
+        let optionsHtml = `<option value="">-- Option wählen --</option>`;
+        globalAnlassKategorien.forEach(kat => {
+            if(kat.trim() !== "") optionsHtml += `<option value="${kat}">${kat}</option>`;
+        });
+
+        d1.innerHTML = optionsHtml;
+        d2.innerHTML = optionsHtml;
+
+        const dKategorie = document.getElementById('form-kategorie');
+        let uniqueCategories = [];
+        
+        globalFavorites.forEach(item => {
+            if(item.kategorie && !uniqueCategories.includes(item.kategorie)) uniqueCategories.push(item.kategorie);
+        });
+        
+        if (uniqueCategories.length === 0) {
+            uniqueCategories = ["Bier", "Wein", "Spirituose", "Mixgetränk"];
+        }
+        uniqueCategories.sort();
+
+        let catOptionsHtml = ``;
+        uniqueCategories.forEach(cat => {
+            catOptionsHtml += `<option value="${cat}">${cat}</option>`;
+        });
+        dKategorie.innerHTML = catOptionsHtml;
+    }
+
+    function renderTrackerUI() {
+        const container = document.getElementById('categories-container');
+        container.innerHTML = '';
+        const categorized = {};
+
+        globalFavorites.forEach(item => {
+            if (item.regelmaessig === "ja") {
+                if (!categorized[item.kategorie]) categorized[item.kategorie] = [];
+                categorized[item.kategorie].push(item);
+            }
+        });
+
+        const keys = Object.keys(categorized);
+        if (keys.length === 0) {
+            container.innerHTML = `<div style="font-size:0.85rem; text-align:center; color:var(--text-secondary); padding:20px 0;">Keine regelmäßigen Getränke vorhanden. Nutze das Formular unten.</div>`;
             return;
         }
 
-        document.getElementById('loading-box').style.display = 'none';
-        document.getElementById('main-content').style.display = 'flex';
-
-        calculateGlobalStats();
-        populateTeamSelector();
-        buildGlobalStatsViews();
-        renderRecentGames();
-    }
-
-    function calculateGlobalStats() {
-        document.getElementById('stat-total-games').innerText = rawData.length;
-        
-        const grounds = new Set(rawData.map(d => d.Stadion).filter(Boolean));
-        document.getElementById('stat-total-grounds').innerText = grounds.size;
-
-        let totalGoals = 0;
-        rawData.forEach(d => {
-            if(d.Ergebnis && String(d.Ergebnis).includes(':')) {
-                const parts = String(d.Ergebnis).split(':');
-                totalGoals += (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0);
-            }
-        });
-        document.getElementById('stat-total-goals').innerText = totalGoals;
-        document.getElementById('stat-avg-goals').innerText = (totalGoals / rawData.length).toFixed(1);
-    }
-
-    function populateTeamSelector() {
-        const selector = document.getElementById('team-selector');
-        selector.innerHTML = "";
-        const teams = new Set();
-        
-        rawData.forEach(d => {
-            const teamsObj = parseTeams(d.Begegnung);
-            if(teamsObj) {
-                if(teamsObj.home) teams.add(teamsObj.home);
-                if(teamsObj.away) teams.add(teamsObj.away);
-            }
-            if(d.Teilnehmer) {
-                teams.add(String(d.Teilnehmer).trim());
-            }
-        });
-
-        const sortedTeams = Array.from(teams).filter(Boolean).sort();
-        sortedTeams.forEach(team => {
-            const opt = document.createElement('option');
-            opt.value = team;
-            opt.innerText = team;
-            selector.appendChild(opt);
-        });
-
-        if(sortedTeams.length > 0) {
-            selector.value = sortedTeams[0];
-            updateTeamDashboard(sortedTeams[0]);
-        }
-    }
-
-    function openWikiEntity(type, name) {
-        document.getElementById('view-tracker').classList.remove('active');
-        document.getElementById('view-stats').classList.remove('active');
-        
-        document.getElementById('central-switch-box').style.display = 'none';
-        const backBtn = document.getElementById('back-dashboard-btn');
-        backBtn.style.display = 'flex';
-        
-        const wikiView = document.getElementById('view-wiki');
-        wikiView.classList.add('active');
-
-        let filteredMatches = [];
-        if (type === 'stadion') {
-            document.getElementById('wiki-title').innerText = `Stadion: ${name}`;
-            filteredMatches = rawData.filter(d => d.Stadion && d.Stadion.trim() === name);
-        } else if (type === 'wettbewerb') {
-            document.getElementById('wiki-title').innerText = `Wettbewerb: ${name}`;
-            filteredMatches = rawData.filter(d => d.Wettbewerb && d.Wettbewerb.trim() === name);
-        }
-
-        document.getElementById('w-spiele').innerText = filteredMatches.length;
-
-        let totalGoals = 0;
-        const container = document.getElementById('wiki-games-container');
-        container.innerHTML = "";
-
-        filteredMatches.forEach(g => {
-            if(g.Ergebnis && String(g.Ergebnis).includes(':')) {
-                const parts = String(g.Ergebnis).split(':');
-                totalGoals += (parseInt(parts[0]) || 0) + (parseInt(parts[1]) || 0);
-            }
-
-            const teamsObj = parseTeams(g.Begegnung);
-            let encounterHtml = g.Begegnung || '-';
-            if(teamsObj) {
-                encounterHtml = `<span class="wiki-link" onclick="openTeamFromWiki('${teamsObj.home}')">${teamsObj.home}</span> : <span class="wiki-link" onclick="openTeamFromWiki('${teamsObj.away}')">${teamsObj.away}</span>`;
-            }
+        keys.forEach(cat => {
+            const icon = categoryIcons[cat] || "🥤";
+            let drinksHtml = categorized[cat].map(drink => {
+                return `
+                    <div class="drink-card" onclick="openQuickLogModal('${drink.name}', '${drink.kategorie}', '${drink.groesse}')">
+                        <div class="drink-info">
+                            <span class="drink-name">${drink.name}</span>
+                            <span class="drink-size">${parseFloat(drink.groesse).toFixed(2)} L</span>
+                        </div>
+                        <div class="plus-btn">+</div>
+                    </div>
+                `;
+            }).join('');
 
             container.innerHTML += `
-                <div class="perf-item" style="height: auto; padding: 10px 0;">
-                    <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0;">
-                        <span style="font-size: 0.85rem; font-weight: 700;">${encounterHtml}</span>
-                        <span style="font-size: 0.72rem; color: var(--text-secondary);">
-                            <span class="wiki-link" onclick="openWikiEntity('stadion', '${g.Stadion}')">${g.Stadion || '-'}</span> | 
-                            <span class="wiki-link" onclick="openWikiEntity('wettbewerb', '${g.Wettbewerb}')">${g.Wettbewerb || '-'}</span>
-                        </span>
+                <div class="category-group">
+                    <div class="category-header" onclick="toggleGroup(this)">
+                        <div class="category-title"><div class="category-icon">${icon}</div><span>${cat}</span></div>
+                        <div class="arrow">▼</div>
                     </div>
-                    <span style="font-size: 0.85rem; font-weight: 800; color: var(--accent); margin-left: 12px; white-space: nowrap;">${g.Ergebnis || '-'}</span>
-                </div>`;
+                    <div class="category-content">${drinksHtml}</div>
+                </div>
+            `;
         });
-
-        document.getElementById('w-tore').innerText = totalGoals;
     }
 
-    function openTeamFromWiki(teamName) {
-        toggleMainView('tracker');
-        const selector = document.getElementById('team-selector');
-        selector.value = teamName;
-        updateTeamDashboard(teamName);
-    }
-
-    function resetToDashboard(e) {
-        e.preventDefault();
-        toggleMainView(currentActiveMainView);
-    }
-
-    function updateTeamDashboard(teamName) {
-        const matches = rawData.filter(d => {
-            const teamsObj = parseTeams(d.Begegnung);
-            if (!teamsObj) return false;
-            return teamsObj.home === teamName || teamsObj.away === teamName;
-        });
-
-        document.getElementById('t-spiele').innerText = matches.length;
-
-        let goalsFor = 0;
-        let goalsAgainst = 0;
-        let homeGames = 0;
-        let awayGames = 0;
-        let wins = 0;
-        let draws = 0;
-        let losses = 0;
+    function openQuickLogModal(name, kategorie, groesse) {
+        activeModalDrink = { name, kategorie, groesse };
+        document.getElementById('modal-drink-title').textContent = `${name} (${parseFloat(groesse).toFixed(2)} L)`;
         
-        let maxWinDiff = -1;
-        let maxWinStr = "-";
-        let maxLossDiff = -1;
-        let maxLossStr = "-";
+        document.getElementById('modal-anlass-name').value = "";
+        document.getElementById('modal-anlass-kategorie').value = "";
+        document.getElementById('modal-anlass-kategorie-neu').value = "";
+
+        const todayEntries = globalHistory.filter(item => item.anlass_name && item.anlass_name.trim() !== "");
+        const suggBox = document.getElementById('modal-suggestion-box');
         
-        const teamGrounds = new Set();
-        const uniqueSpielorte = new Set();
-        const comps = {};
-        const opponents = {};
-        const groundsFreq = {};
-        const viewerCounts = [];
-
-        matches.forEach(m => {
-            if(!m.Ergebnis || !String(m.Ergebnis).includes(':')) return;
-            const teamsObj = parseTeams(m.Begegnung);
-            if (!teamsObj) return;
-
-            const isHome = teamsObj.home === teamName;
-            if(isHome) homeGames++; else awayGames++;
-
-            const resParts = String(m.Ergebnis).split(':');
-            const gHome = parseInt(resParts[0]) || 0;
-            const gAway = parseInt(resParts[1]) || 0;
-
-            const tGoals = isHome ? gHome : gAway;
-            const oGoals = isHome ? gAway : gHome;
-
-            goalsFor += tGoals;
-            goalsAgainst += oGoals;
-
-            if(tGoals > oGoals) {
-                wins++;
-                const diff = tGoals - oGoals;
-                if(diff > maxWinDiff) {
-                    maxWinDiff = diff;
-                    maxWinStr = `${teamsObj.home} : ${teamsObj.away} (${m.Ergebnis})`;
-                }
-            } else if(tGoals === oGoals) {
-                draws++;
-            } else {
-                losses++;
-                const diff = oGoals - tGoals;
-                if(diff > maxLossDiff) {
-                    maxLossDiff = diff;
-                    maxLossStr = `${teamsObj.home} : ${teamsObj.away} (${m.Ergebnis})`;
-                }
-            }
-
-            if(m.Stadion) {
-                const gName = String(m.Stadion).trim();
-                teamGrounds.add(gName);
-                groundsFreq[gName] = (groundsFreq[gName] || 0) + 1;
-            }
-            if(m.Spielort) uniqueSpielorte.add(String(m.Spielort).trim());
-            if(m.Wettbewerb) comps[String(m.Wettbewerb).trim()] = (comps[String(m.Wettbewerb).trim()] || 0) + 1;
-            
-            const opp = isHome ? teamsObj.away : teamsObj.home;
-            opponents[opp] = (opponents[opp] || 0) + 1;
-
-            if(m.Zuschauer) {
-                const cleanViewer = parseInt(String(m.Zuschauer).replace(/\D/g, ''));
-                if(!isNaN(cleanViewer)) viewerCounts.push(cleanViewer);
-            }
-        });
-
-        document.getElementById('t-tore-gegentore').innerText = `${goalsFor}:${goalsAgainst}`;
-        document.getElementById('t-heim-auswaerts').innerText = `${homeGames} / ${awayGames}`;
-        document.getElementById('t-wld').innerText = `${wins} / ${draws} / ${losses}`;
-        document.getElementById('t-max-win').innerText = maxWinStr;
-        document.getElementById('t-max-loss').innerText = maxLossStr;
-        document.getElementById('t-laender').innerText = uniqueSpielorte.size;
-        document.getElementById('t-grounds-count').innerText = teamGrounds.size;
-
-        if(viewerCounts.length > 0) {
-            const minV = Math.min(...viewerCounts);
-            const maxV = Math.max(...viewerCounts);
-            const avgV = Math.round(viewerCounts.reduce((a,b)=>a+b, 0) / viewerCounts.length);
-            document.getElementById('t-zuschauer').innerText = `${minV.toLocaleString()} / ${avgV.toLocaleString()} / ${maxV.toLocaleString()}`;
+        if (todayEntries.length > 0) {
+            const last = todayEntries[todayEntries.length - 1];
+            document.getElementById('modal-use-last-btn').textContent = `"${last.anlass_name}" (${last.anlass_kategorie}) übernehmen`;
+            suggBox.style.display = "block";
         } else {
-            document.getElementById('t-zuschauer').innerText = "0 / 0 / 0";
+            suggBox.style.display = "none";
         }
 
-        const topComp = Object.keys(comps).reduce((a, b) => comps[a] > comps[b] ? a : b, "-");
-        document.getElementById('t-top-comp').innerHTML = topComp !== "-" ? `<span class="wiki-link" onclick="openWikiEntity('wettbewerb', '${topComp}')">${topComp}</span> (${comps[topComp]}x)` : "-";
+        document.getElementById('quick-log-modal').classList.add('active');
+    }
+
+    function closeQuickLogModal() {
+        document.getElementById('quick-log-modal').classList.remove('active');
+        activeModalDrink = null;
+    }
+
+    function applyLastAnlassToModal() {
+        const todayEntries = globalHistory.filter(item => item.anlass_name && item.anlass_name.trim() !== "");
+        if(todayEntries.length > 0) {
+            const last = todayEntries[todayEntries.length - 1];
+            document.getElementById('modal-anlass-name').value = last.anlass_name;
+            if (globalAnlassKategorien.includes(last.anlass_kategorie)) {
+                document.getElementById('modal-anlass-kategorie').value = last.anlass_kategorie;
+                document.getElementById('modal-anlass-kategorie-neu').value = "";
+            } else {
+                document.getElementById('modal-anlass-kategorie').value = "";
+                document.getElementById('modal-anlass-kategorie-neu').value = last.anlass_kategorie;
+            }
+        }
+    }
+
+    function submitQuickLogFromModal() {
+        if (!activeModalDrink) return;
+
+        const name = activeModalDrink.name;
+        const kategorie = activeModalDrink.kategorie;
+        const groesse = activeModalDrink.groesse;
+        const regelmaessig = "ja";
+
+        const aName = document.getElementById('modal-anlass-name').value.trim();
+        const selKat = document.getElementById('modal-anlass-kategorie').value;
+        const neuKat = document.getElementById('modal-anlass-kategorie-neu').value.trim();
+        const aKat = neuKat !== "" ? neuKat : selKat;
+
+        logDrink(name, kategorie, groesse, regelmaessig, aName, aKat);
+        closeQuickLogModal();
+    }
+
+    function toggleFormAnlassWieZuvor() {
+        const check = document.getElementById('form-anlass-wie-zuvor').checked;
+        const fields = document.querySelectorAll('.form-anlass-input-group');
         
-        const topOpp = Object.keys(opponents).reduce((a, b) => opponents[a] > opponents[b] ? a : b, "-");
-        document.getElementById('t-top-opp').innerHTML = topOpp !== "-" ? `<span class="wiki-link" onclick="openTeamFromWiki('${topOpp}')">${topOpp}</span> (${opponents[topOpp]}x)` : "-";
-
-        const topGround = Object.keys(groundsFreq).reduce((a, b) => groundsFreq[a] > groundsFreq[b] ? a : b, "-");
-        document.getElementById('t-top-ground').innerHTML = topGround !== "-" ? `<span class="wiki-link" onclick="openWikiEntity('stadion', '${topGround}')">${topGround}</span> (${groundsFreq[topGround]}x)` : "-";
+        if (check) {
+            fields.forEach(f => f.style.display = "none");
+            const todayEntries = globalHistory.filter(item => item.anlass_name && item.anlass_name.trim() !== "");
+            if (todayEntries.length > 0) {
+                const last = todayEntries[todayEntries.length - 1];
+                document.getElementById('form-anlass-name').value = last.anlass_name;
+                document.getElementById('form-anlass-kategorie').value = last.anlass_kategorie;
+                document.getElementById('form-anlass-kategorie-neu').value = "";
+            }
+        } else {
+            fields.forEach(f => f.style.display = "flex");
+            document.getElementById('form-anlass-name').value = "";
+            document.getElementById('form-anlass-kategorie').value = "";
+            document.getElementById('form-anlass-kategorie-neu').value = "";
+        }
     }
 
-    function buildGlobalStatsViews() {
-        const groundsCount = {};
-        const seasons = {};
-        const surfaces = {};
-        const maxGames = rawData.length;
+    function handleManualSubmit(event) {
+        event.preventDefault();
+        
+        const name = document.getElementById('form-name-input').value.trim();
+        const kategorie = document.getElementById('form-kategorie').value;
+        const groesse = document.getElementById('form-groesse').value;
+        const regelmaessig = document.getElementById('form-regelmaessig').checked ? "ja" : "nein";
 
-        rawData.forEach(d => {
-            if(d.Stadion) groundsCount[String(d.Stadion).trim()] = (groundsCount[String(d.Stadion).trim()] || 0) + 1;
-            if(d.Saison) seasons[String(d.Saison).trim()] = (seasons[String(d.Saison).trim()] || 0) + 1;
-            if(d.Untergrund) surfaces[String(d.Untergrund).trim()] = (surfaces[String(d.Untergrund).trim()] || 0) + 1;
-        });
+        let aName = document.getElementById('form-anlass-name').value.trim();
+        const selKat = document.getElementById('form-anlass-kategorie').value;
+        const neuKat = document.getElementById('form-anlass-kategorie-neu').value.trim();
+        let aKat = neuKat !== "" ? neuKat : selKat;
 
-        // 1. Grounds Render
-        const sortedGrounds = Object.entries(groundsCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
-        const groundsContainer = document.getElementById('top-grounds-container');
-        groundsContainer.innerHTML = "";
-        sortedGrounds.forEach(g => {
-            const pct = Math.round((g[1] / maxGames) * 100);
-            groundsContainer.innerHTML += `
-                <div class="perf-item">
-                    <div class="perf-info"><span class="perf-name wiki-link" onclick="openWikiEntity('stadion', '${g[0]}')">${g[0]}</span></div>
-                    <div class="perf-bar-wrapper">
-                        <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
-                        <span class="perf-pct">${g[1]}</span>
-                    </div>
-                </div>`;
-        });
+        if (!name || !groesse) return;
 
-        // 2. Saisons Render
-        const sortedSeasons = Object.entries(seasons).sort((a,b) => b[0].localeCompare(a[0]));
-        const seasonsContainer = document.getElementById('seasons-container');
-        seasonsContainer.innerHTML = "";
-        let highestSeasonCount = Math.max(...Object.values(seasons), 1);
-        sortedSeasons.forEach(s => {
-            const pct = Math.round((s[1] / highestSeasonCount) * 100);
-            seasonsContainer.innerHTML += `
-                <div class="perf-item">
-                    <div class="perf-info"><span class="perf-name">${s[0]}</span></div>
-                    <div class="perf-bar-wrapper">
-                        <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
-                        <span class="perf-pct">${s[1]}</span>
-                    </div>
-                </div>`;
-        });
+        logDrink(name, kategorie, groesse, regelmaessig, aName, aKat);
+        
+        document.getElementById('manual-drink-form').reset();
+        document.getElementById('form-anlass-wie-zuvor').checked = false;
+        toggleFormAnlassWieZuvor();
+    }
 
-        // 3. Untergrund Render
-        const sortedSurfaces = Object.entries(surfaces).sort((a,b) => b[1] - a[1]);
-        const surfacesContainer = document.getElementById('surfaces-container');
-        surfacesContainer.innerHTML = "";
-        sortedSurfaces.forEach(surf => {
-            const pct = Math.round((surf[1] / maxGames) * 100);
-            surfacesContainer.innerHTML += `
-                <div class="perf-item">
-                    <div class="perf-info"><span class="perf-name">${surf[0]}</span></div>
-                    <div class="perf-bar-wrapper">
-                        <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
-                        <span class="perf-pct">${surf[1]}</span>
-                    </div>
-                </div>`;
+    function logDrink(name, kategorie, groesse, regelmaessig, anlassName, anlassKategorie) {
+        updateCloudStatus("Cloud lädt");
+        const formBody = new URLSearchParams();
+        formBody.append('name', name);
+        formBody.append('kategorie', kategorie);
+        formBody.append('groesse', groesse);
+        formBody.append('regelmaessig', regelmaessig);
+        formBody.append('anlass_name', anlassName || '');
+        formBody.append('anlass_kategorie', anlassKategorie || '');
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formBody.toString()
+        })
+        .then(() => {
+            document.getElementById('cloud-error-box').style.display = 'none';
+            updateCloudStatus("Cloud synced");
+            showSuccessToast();
+            setTimeout(fetchData, 600);
+        })
+        .catch(err => {
+            document.getElementById('cloud-error-box').style.display = 'block';
+            updateCloudStatus("Cloud Fehler");
+            console.error(err);
         });
     }
 
-    function renderRecentGames() {
-        const container = document.getElementById('recent-games-container');
-        container.innerHTML = "";
-        const recent = rawData.slice(-5).reverse();
-        recent.forEach(g => {
-            const teamsObj = parseTeams(g.Begegnung);
-            let encounterHtml = g.Begegnung || '-';
-            if(teamsObj) {
-                encounterHtml = `<span class="wiki-link" onclick="openTeamFromWiki('${teamsObj.home}')">${teamsObj.home}</span> : <span class="wiki-link" onclick="openTeamFromWiki('${teamsObj.away}')">${teamsObj.away}</span>`;
+    function repeatLastDrink() {
+        if (!globalHistory || globalHistory.length === 0) return;
+        const last = globalHistory[globalHistory.length - 1];
+        if (!last || !last.name) return;
+
+        logDrink(
+            last.name,
+            last.kategorie || '',
+            last.groesse || '0',
+            last.regelmaessig || 'nein',
+            last.anlass_name || '',
+            last.anlass_kategorie || ''
+        );
+    }
+
+    function deleteLastLogEntry() {
+        updateCloudStatus("Cloud lädt");
+        const formBody = new URLSearchParams();
+        formBody.append('delete_last', 'true');
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formBody.toString()
+        })
+        .then(() => {
+            document.getElementById('cloud-error-box').style.display = 'none';
+            updateCloudStatus("Cloud synced");
+            const toast = document.getElementById('toast-notice');
+            toast.textContent = "Eintrag erfolgreich gelöscht!";
+            toast.classList.add('show');
+            setTimeout(() => { 
+                toast.classList.remove('show'); 
+                toast.textContent = "Eintrag erfolgreich verbucht!";
+            }, 2000);
+            setTimeout(fetchData, 600);
+        })
+        .catch(err => {
+            document.getElementById('cloud-error-box').style.display = 'block';
+            updateCloudStatus("Cloud Fehler");
+            console.error(err);
+        });
+    }
+
+    function calculateStats() {
+        const todayStr = formatDateToString(new Date());
+        
+        let todayVolume = 0;
+        const todayLogsContainer = document.getElementById('today-logs-container');
+        todayLogsContainer.innerHTML = '';
+
+        let todayGroups = {};
+
+        globalHistory.forEach(item => {
+            if (item.datum && item.datum.includes(todayStr)) {
+                const numSize = Number(item.groesse);
+                if (!isNaN(numSize)) {
+                    todayVolume += numSize;
+                }
+                
+                const key = `${item.name}|${item.groesse}`;
+                if (!todayGroups[key]) {
+                    todayGroups[key] = {
+                        name: item.name,
+                        groesse: item.groesse,
+                        count: 0
+                    };
+                }
+                todayGroups[key].count++;
+            }
+        });
+        document.getElementById('kpi-today').textContent = `${todayVolume.toFixed(2).replace('.', ',')} L`;
+
+        const groupKeys = Object.keys(todayGroups);
+        if (groupKeys.length === 0) {
+            todayLogsContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:4px 0; text-align:center;">Heute noch keine Einträge protokolliert.</div>`;
+        } else {
+            groupKeys.forEach(key => {
+                const group = todayGroups[key];
+                const sizeVal = parseFloat(group.groesse);
+                const formattedSize = isNaN(sizeVal) ? group.groesse : sizeVal.toFixed(2);
+
+                todayLogsContainer.innerHTML += `
+                    <div class="today-log-item">
+                        <div>
+                            <span>${group.name} (${formattedSize} L)</span>
+                        </div>
+                        <div style="text-align: right;">
+                            <div>${group.count}x</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        let currentStreak = 0;
+        if (globalHistory.length > 0) {
+            let checkDate = new Date();
+            for (let i = 0; i < 365; i++) {
+                const checkDateStr = formatDateToString(checkDate);
+                const hasEntries = globalHistory.some(item => item.datum && item.datum.includes(checkDateStr));
+                if (!hasEntries) { currentStreak++; checkDate.setDate(checkDate.getDate() - 1); } 
+                else { break; }
+            }
+        }
+        document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
+
+        const counts = {};
+        const drinkCatCounts = {};
+        const eventCatCounts = {};
+        
+        let maxCount = 0; let maxDrinkCatCount = 0; let maxEventCatCount = 0;
+
+        globalHistory.forEach(item => {
+            if (!item.name || item.name.trim() === "") return;
+            
+            const numSize = Number(item.groesse);
+            if(isNaN(numSize)) return;
+            
+            const sizeFormatted = numSize.toFixed(2);
+            const key = `${item.name} (${sizeFormatted} L)|${item.kategorie || 'Bier'}`;
+            counts[key] = (counts[key] || 0) + 1;
+            if (counts[key] > maxCount) maxCount = counts[key];
+
+            if (item.kategorie) {
+                drinkCatCounts[item.kategorie] = (drinkCatCounts[item.kategorie] || 0) + 1;
+                if (drinkCatCounts[item.kategorie] > maxDrinkCatCount) maxDrinkCatCount = drinkCatCounts[item.kategorie];
             }
 
-            container.innerHTML += `
-                <div class="perf-item" style="height: auto; padding: 10px 0;">
-                    <div style="display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0;">
-                        <span style="font-size: 0.85rem; font-weight: 700;">${encounterHtml}</span>
-                        <span style="font-size: 0.72rem; color: var(--text-secondary);">
-                            <span class="wiki-link" onclick="openWikiEntity('stadion', '${g.Stadion}')">${g.Stadion || '-'}</span> | 
-                            <span class="wiki-link" onclick="openWikiEntity('wettbewerb', '${g.Wettbewerb}')">${g.Wettbewerb || '-'}</span>
-                        </span>
-                    </div>
-                    <span style="font-size: 0.85rem; font-weight: 800; color: var(--accent); margin-left: 12px; white-space: nowrap;">${g.Ergebnis || '-'}</span>
-                </div>`;
+            if (item.anlass_kategorie && item.anlass_kategorie.trim() !== "") {
+                eventCatCounts[item.anlass_kategorie] = (eventCatCounts[item.anlass_kategorie] || 0) + 1;
+                if (eventCatCounts[item.anlass_kategorie] > maxEventCatCount) maxEventCatCount = eventCatCounts[item.anlass_kategorie];
+            }
         });
+
+        const sortedRanking = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+        const perfContainer = document.getElementById('routine-performance-container');
+        perfContainer.innerHTML = '';
+
+        if (sortedRanking.length === 0) {
+            perfContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:8px 0;">Noch keine Daten vorhanden.</div>`;
+        } else {
+            sortedRanking.slice(0, 5).forEach(drinkKey => {
+                const count = counts[drinkKey];
+                const pct = maxCount > 0 ? Math.round((count / maxCount) * 100) : 0;
+                const parts = drinkKey.split('|');
+                const labelPart = parts[0];
+                const catPart = parts[1] || 'Bier';
+                
+                const cleanName = labelPart.split(' (')[0];
+                const cleanSize = labelPart.includes(' (') ? labelPart.split(' (')[1].replace(')', '') : '';
+                const icon = categoryIcons[catPart] || "🥤";
+                
+                perfContainer.innerHTML += `
+                    <div class="perf-item">
+                        <div class="perf-info">
+                            <span class="perf-icon">${icon}</span>
+                            <span class="perf-name">${cleanName} <small style="color:var(--text-secondary); font-weight:700;">${cleanSize}</small></span>
+                        </div>
+                        <div class="perf-bar-wrapper">
+                            <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
+                            <span class="perf-pct">${count}x</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        const sortedDrinkCats = Object.keys(drinkCatCounts).sort((a, b) => drinkCatCounts[b] - drinkCatCounts[a]);
+        const drinkCatContainer = document.getElementById('drink-category-performance-container');
+        drinkCatContainer.innerHTML = '';
+
+        if (sortedDrinkCats.length === 0) {
+            drinkCatContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:8px 0;">Noch keine Daten vorhanden.</div>`;
+        } else {
+            sortedDrinkCats.forEach(catKey => {
+                const count = drinkCatCounts[catKey];
+                const pct = maxDrinkCatCount > 0 ? Math.round((count / maxDrinkCatCount) * 100) : 0;
+                const icon = categoryIcons[catKey] || "🥤";
+
+                drinkCatContainer.innerHTML += `
+                    <div class="perf-item">
+                        <div class="perf-info"><span class="perf-icon">${icon}</span><span class="perf-name">${catKey}</span></div>
+                        <div class="perf-bar-wrapper">
+                            <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
+                            <span class="perf-pct">${count}x</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        const sortedEventCats = Object.keys(eventCatCounts).sort((a, b) => eventCatCounts[b] - eventCatCounts[a]);
+        const eventCatContainer = document.getElementById('event-category-performance-container');
+        eventCatContainer.innerHTML = '';
+
+        if (sortedEventCats.length === 0) {
+            eventCatContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:8px 0;">Noch keine Anlass-Daten vorhanden.</div>`;
+        } else {
+            sortedEventCats.forEach(catKey => {
+                const count = eventCatCounts[catKey];
+                const pct = maxEventCatCount > 0 ? Math.round((count / maxEventCatCount) * 100) : 0;
+                const icon = eventIcons[catKey] || "📍";
+
+                eventCatContainer.innerHTML += `
+                    <div class="perf-item">
+                        <div class="perf-info"><span class="perf-icon">${icon}</span><span class="perf-name">${catKey}</span></div>
+                        <div class="perf-bar-wrapper">
+                            <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
+                            <span class="perf-pct">${count}x</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
     }
+
+    window.onload = fetchData;
 </script>
 </body>
 </html>
