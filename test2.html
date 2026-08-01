@@ -5,517 +5,1237 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Startseite</title>
-    <script src="daten.js"></script>
+    <title>Alkohol</title>
     <style>
         :root {
-            --bg: linear-gradient(135deg, #e0e6ed 0%, #f4f6f9 100%);
-            --surface: rgba(255, 255, 255, 0.45);
-            --surface-modal: rgba(255, 255, 255, 0.85);
+            --accent: #e67e22;
+            --accent-soft: rgba(230, 126, 34, 0.1);
+            --success: #27ae60;
+            --success-soft: rgba(39, 174, 96, 0.1);
+            --danger: #e74c3c;
+            --danger-soft: rgba(231, 76, 60, 0.3);
+            --bg: #f0f2f5;
+            --surface: #ffffff;
             --text-primary: #1e293b;
             --text-secondary: #64748b;
-            --glass-border: rgba(255, 255, 255, 0.6);
-            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06);
-            --bubble-shadow-hover: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
-            --highlight: radial-gradient(circle, rgba(243, 156, 18, 0.25) 0%, rgba(243, 156, 18, 0) 70%);
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --apple-switch-bg: #e3e3e6;
+            --overlay-bg: rgba(15, 23, 42, 0.4);
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-                --surface: rgba(30, 41, 59, 0.45);
-                --surface-modal: rgba(30, 41, 59, 0.85);
+                --bg: #0f172a;
+                --surface: #1e293b;
                 --text-primary: #f1f5f9;
                 --text-secondary: #94a3b8;
-                --glass-border: rgba(255, 255, 255, 0.08);
-                --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-                --bubble-shadow-hover: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
-                --highlight: radial-gradient(circle, rgba(243, 156, 18, 0.3) 0%, rgba(243, 156, 18, 0) 70%);
+                --border: #2d3f55;
+                --border-light: #253347;
+                --apple-switch-bg: #1c1c1e;
+                --overlay-bg: rgba(0, 0, 0, 0.6);
             }
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
             background: var(--bg);
-            background-attachment: fixed;
-            margin: 0;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            -webkit-tap-highlight-color: transparent;
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 40px;
         }
 
         header {
-            padding: calc(env(safe-area-inset-top) + 24px) 20px 14px 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 500;
-        }
-
-        .header-title {
-            font-weight: 800;
-            font-size: 1.2rem;
-            letter-spacing: 0.06em;
-            color: var(--text-primary);
-        }
-
-        main {
-            flex: 1;
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #bubble-arena {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .bubble-wrapper {
-            position: absolute;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-
-        /* Hochwertiges Milchglas-Design ohne harten Rahmen */
-        .bubble {
-            background: var(--surface);
-            border: 1px solid var(--glass-border);
-            border-radius: 50%;
-            text-decoration: none;
+            position: sticky; top: 0; z-index: 100;
+            background: var(--bg);
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease, box-shadow 0.2s ease;
-            cursor: pointer;
-            text-align: center;
-            width: var(--bubble-size, 100px);
-            height: var(--bubble-size, 100px);
+            gap: 12px;
         }
 
-        /* Subtile, rahmenlose Aura für die Top-Favoriten */
-        .bubble-wrapper.top-favorit::before {
-            content: '';
-            position: absolute;
-            width: calc(var(--bubble-size, 100px) * 1.5);
-            height: calc(var(--bubble-size, 100px) * 1.5);
-            background: var(--highlight);
-            pointer-events: none;
-            z-index: -1;
-            border-radius: 50%;
-        }
-
-        .bubble:active { 
-            transform: scale(0.93) !important; 
-            background: rgba(255, 255, 255, 0.6);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            .bubble:active {
-                background: rgba(30, 41, 59, 0.6);
-            }
-        }
-
-        @media (hover: hover) {
-            .bubble-wrapper:hover .bubble {
-                background: rgba(255, 255, 255, 0.55);
-                box-shadow: var(--bubble-shadow-hover);
-                transform: translateY(-4px);
-            }
-            @media (prefers-color-scheme: dark) {
-                .bubble-wrapper:hover .bubble {
-                    background: rgba(30, 41, 59, 0.55);
-                }
-            }
-            .bubble-wrapper:hover {
-                z-index: 50;
-            }
-        }
-
-        .bubble-icon {
-            font-size: calc(var(--bubble-size, 100px) * 0.26);
-            line-height: 1;
-            margin-bottom: 4px;
-        }
-
-        .bubble-title {
-            font-weight: 700;
-            color: var(--text-primary);
-            font-size: calc(var(--bubble-size, 100px) * 0.12);
-            padding: 0 6px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            width: 100%;
-        }
-
-        /* Info Button & Modal */
-        .info-btn {
-            position: fixed;
-            bottom: calc(env(safe-area-inset-bottom) + 20px);
-            right: 20px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--surface);
-            border: 1px solid var(--glass-border);
-            color: var(--text-primary);
-            font-size: 1.1rem;
-            font-weight: bold;
+        .header-top { 
             display: flex;
             align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            box-shadow: var(--shadow);
-            z-index: 600;
-            transition: transform 0.2s ease, background 0.2s ease;
+            justify-content: flex-start;
+            width: 100%;
+            position: relative;
         }
 
-        .info-btn:active {
-            transform: scale(0.9);
-        }
-
-        .modal-overlay {
-            position: fixed;
-            top: 0;
+        .header-left { 
+            display: flex; 
+            align-items: center; 
+            position: absolute;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
+            z-index: 10;
+            gap: 8px;
+        }
+        
+        .back-container { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            text-decoration: none; 
+            color: var(--text-primary); 
+        }
+        
+        .back-container span { 
+            font-size: 0.95rem; 
+            font-weight: 700; 
+            line-height: 1;
+        }
+
+        .back-btn {
+            display: flex; 
+            align-items: center; 
             justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease;
-            padding: 20px;
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-content {
-            background: var(--surface-modal);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 24px;
-            width: 100%;
-            max-width: 400px;
-            max-height: 80vh;
-            display: flex;
-            flex-direction: column;
+            width: 32px; 
+            height: 32px; 
+            border-radius: 9px;
+            background: var(--surface); 
+            border: 1px solid var(--border);
+            color: var(--text-primary); 
             box-shadow: var(--shadow);
-            color: var(--text-primary);
+            flex-shrink: 0; 
+            font-size: 0.9rem;
+            line-height: 1;
         }
 
-        .modal-header {
+        .header-right {
+            display: flex; align-items: center; position: absolute; right: 0; z-index: 10;
+            font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+            color: var(--text-secondary); transition: color 0.2s ease;
+        }
+
+        .header-switch-container { margin: 0 auto; display: flex; justify-content: center; z-index: 5; }
+
+        .main-view-switch { display: flex; background: var(--apple-switch-bg); border-radius: 9px; padding: 2px; width: 160px; height: 32px; flex-shrink: 0; }
+        
+        .main-switch-btn {
+            flex: 1; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px;
+            font-size: 0.78rem; font-weight: 700; border-radius: 7px; border: none; background: transparent;
+            color: var(--text-secondary); cursor: pointer; transition: all 0.2s; height: 100%; line-height: 1;
+        }
+        
+        .main-switch-btn.active {
+            background: var(--surface); color: var(--text-primary);
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
+        }
+
+        .cloud-error-banner {
+            display: none; background: var(--danger-soft); border: 1px solid var(--danger);
+            color: var(--text-primary); padding: 8px 12px; border-radius: 10px; font-size: 0.75rem;
+            font-weight: 700; text-align: center; margin: 12px 16px 0;
+        }
+
+        .toast-notification {
+            position: fixed; top: calc(env(safe-area-inset-top) + 110px); left: 50%; transform: translateX(-50%) translateY(-20px);
+            background: var(--success); color: white; padding: 10px 20px; border-radius: 12px; font-size: 0.85rem;
+            font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; z-index: 1000;
+            transition: all 0.3s ease; pointer-events: none;
+        }
+        .toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+        .view-section { display: none; flex-direction: column; gap: 12px; width: 100%; }
+        .view-section.active { display: flex; }
+
+        .delete-last-container {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            margin-bottom: 12px;
+            gap: 12px;
+            margin: -4px auto 4px auto;
+            width: 100%;
         }
 
-        .modal-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .modal-close {
+        .delete-last-btn {
             background: none;
             border: none;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
             color: var(--text-secondary);
-            font-size: 1.5rem;
             cursor: pointer;
-            padding: 0;
-            line-height: 1;
+            transition: color 0.2s ease;
+            padding: 4px 8px;
+        }
+        .delete-last-btn:active {
+            color: var(--danger);
         }
 
-        .modal-desc {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin: 0 0 16px 0;
-            line-height: 1.4;
+        .category-group { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); position: relative; }
+        
+        .category-header { padding: 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; transition: background 0.2s; }
+        .category-header:active { background: var(--border-light); }
+
+        .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; flex: 1; }
+        .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        
+        .arrow { font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.3s ease; flex-shrink: 0; }
+        .category-group.open .arrow { transform: rotate(180deg); }
+
+        .category-content { display: none; padding: 0 16px 16px; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 16px; }
+        .category-group.open .category-content { display: flex; }
+
+        .drink-card {
+            background: var(--bg); border-radius: 12px; border: 1px solid var(--border);
+            padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 14px;
+            cursor: pointer; user-select: none; transition: all 0.2s ease;
+        }
+        .drink-card:active { transform: scale(0.99); }
+        
+        .drink-info { display: flex; flex-direction: column; gap: 2px; }
+        .drink-name { font-weight: 600; font-size: 0.95rem; }
+        .drink-size { font-size: 0.75rem; color: var(--text-secondary); font-weight: 700; }
+
+        .plus-btn {
+            width: 28px; height: 28px; border-radius: 8px; background: var(--accent-soft); color: var(--accent);
+            display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1rem;
         }
 
-        .modal-body {
-            overflow-y: auto;
-            flex: 1;
+        .form-block {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px;
+        }
+        .form-block h3 { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .form-group { display: flex; flex-direction: column; gap: 4px; }
+        .form-group.full { grid-column: span 2; }
+        
+        .form-group label { font-size: 0.7rem; height: 16px; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); label-spacing: 0.05em; }
+        .form-group input, .form-group select {
+            width: 100%; height: 38px; border-radius: 9px; border: 1px solid var(--border);
+            background: var(--bg); color: var(--text-primary); padding: 0 10px; font-size: 0.9rem; font-family: inherit;
+        }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); }
+        
+        .checkbox-group { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; margin-top: 4px; }
+        .checkbox-group input { width: 18px; height: 18px; accent-color: var(--accent); }
+        .checkbox-group label { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); cursor: pointer; }
+
+        .submit-btn {
+            width: 100%; height: 40px; border-radius: 10px; background: var(--accent); color: white;
+            border: none; font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;
+            cursor: pointer; transition: opacity 0.2s; margin-top: 4px;
+        }
+        .submit-btn:active { opacity: 0.9; }
+
+        .suggestion-btn {
+            background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent);
+            padding: 8px 12px; border-radius: 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+            text-align: left; width: 100%; transition: background 0.2s; margin-bottom: 4px;
+        }
+        .suggestion-btn:active { background: var(--border); }
+
+        /* Modal Design */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--overlay-bg); z-index: 1000; display: none;
+            align-items: center; justify-content: center; padding: 16px;
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-card {
+            background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 450px;
+            border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); padding: 20px;
+            display: flex; flex-direction: column; gap: 16px; animation: modalSlidUp 0.25s ease-out;
+            max-height: 85vh; overflow-y: auto;
+        }
+        @keyframes modalSlidUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-title { font-size: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+        .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+        .cancel-btn {
+            width: 100%; height: 40px; border-radius: 10px; background: transparent; color: var(--text-secondary);
+            border: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; cursor: pointer;
         }
 
-        .stat-item {
+        /* Stats Dashboard Layout */
+        .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .kpi-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; height: 95px;
+        }
+        .kpi-value { font-size: 1.35rem; font-weight: 800; color: var(--text-primary); }
+        .kpi-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+
+        .section-block { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px; }
+        .block-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+
+        .toggle-trigger {
+            font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+            padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; gap: 4px; user-select: none;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);
+            transition: background 0.2s;
+        }
+        .toggle-trigger:active { background: var(--border-light); }
+        
+        .event-item-block {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--glass-border);
+            flex-direction: column;
+            gap: 8px;
+        }
+        .event-item-block.expanded .toggle-hidden-wrapper { display: flex; }
+
+        .toggle-hidden-wrapper { display: none; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+        .today-log-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+            font-size: 0.82rem; font-weight: 600;
         }
 
-        .stat-item:last-child {
-            border-bottom: none;
+        .perf-item { 
+            display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; 
+            border-bottom: 1px solid var(--border-light); height: 38px; cursor: pointer; border-radius: 8px; transition: background 0.15s ease;
         }
+        .perf-item:hover, .perf-item:active { background: var(--border-light); }
+        .perf-item:last-child { border-bottom: none; }
+        .perf-info { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+        .perf-icon { font-size: 0.95rem; flex-shrink: 0; }
+        .perf-name { font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .perf-bar-wrapper { display: flex; align-items: center; gap: 8px; width: 204px; flex-shrink: 0; }
+        .perf-bar-bg { flex: 1; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
+        .perf-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; }
+        .perf-pct { font-size: 0.75rem; font-weight: 700; width: 32px; text-align: right; }
 
-        .stat-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        /* Wiki System Modal Elements */
+        .wiki-header { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .wiki-badge { width: 36px; height: 36px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+        .wiki-title-container { display: flex; flex-direction: column; }
+        .wiki-subtitle { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+        .wiki-stats-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+        .wiki-stat-row { display: flex; justify-content: space-between; align-items: center; background: var(--bg); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 0.82rem; }
+        .wiki-stat-label { font-weight: 600; color: var(--text-secondary); }
+        .wiki-stat-value { font-weight: 800; color: var(--text-primary); text-align: right; }
+
+        @media (max-width: 420px) {
+            .main-view-switch { width: 150px; }
+            .main-switch-btn { font-size: 0.72rem; }
         }
-
-        .stat-count {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-secondary);
+        @media (max-width: 395px) {
+            .perf-name { font-size: 0.78rem; }
+            .perf-bar-wrapper { width: 168px; gap: 4px; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-title">FABIANS APP</div>
-    </header>
+<div class="toast-notification" id="toast-notice">Eintrag erfolgreich verbucht!</div>
 
-    <main>
-        <div id="bubble-arena">
+<!-- Log Modal -->
+<div class="modal-overlay" id="quick-log-modal">
+    <div class="modal-card">
+        <div class="modal-title" id="modal-drink-title">Getränk bestätigen</div>
+        
+        <div id="modal-suggestion-box" style="display:none;">
+            <div style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 4px;">Letzter aktiver Anlass</div>
+            <button type="button" class="suggestion-btn" id="modal-use-last-btn" onclick="applyLastAnlassToModal()">Bisherigen Anlass übernehmen</button>
         </div>
-    </main>
 
-    <button class="info-btn" id="open-info" aria-label="Informationen">i</button>
+        <div class="form-grid">
+            <div class="form-group full">
+                <label for="modal-anlass-name">Anlass Name</label>
+                <input type="text" id="modal-anlass-name" placeholder="z.B. Bremen (A)">
+            </div>
+            <div class="form-group full">
+                <label for="modal-anlass-kategorie">Anlass Kategorie</label>
+                <select id="modal-anlass-kategorie"></select>
+            </div>
+            <div class="form-group full">
+                <label for="modal-anlass-kategorie-neu">Oder neue Anlass Kategorie</label>
+                <input type="text" id="modal-anlass-kategorie-neu" placeholder="z.B. Fußball">
+            </div>
+        </div>
 
-    <div class="modal-overlay" id="info-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Bubble-Größen</h3>
-                <button class="modal-close" id="close-info">&times;</button>
+        <div class="modal-actions">
+            <button class="cancel-btn" onclick="closeQuickLogModal()">Abbrechen</button>
+            <button class="submit-btn" onclick="submitQuickLogFromModal()">Loggen</button>
+        </div>
+    </div>
+</div>
+
+<!-- Wiki Details Modal -->
+<div class="modal-overlay" id="wiki-detail-modal">
+    <div class="modal-card">
+        <div class="wiki-header">
+            <div class="wiki-badge" id="wiki-modal-icon">📖</div>
+            <div class="wiki-title-container">
+                <span class="wiki-subtitle" id="wiki-modal-subtitle">Wiki Detail</span>
+                <span class="modal-title" id="wiki-modal-title">Eintrag</span>
             </div>
-            <p class="modal-desc">
-                Die Größe der Bubbles berechnet sich aus der Häufigkeit und Aktualität der Aufrufe. Die Daten werden ausschließlich lokal auf diesem Gerät gespeichert.
-            </p>
-            <div class="modal-body" id="stats-list">
+        </div>
+        
+        <div class="wiki-stats-list" id="wiki-modal-body">
+            <!-- Dynamischer Wiki-Inhalt -->
+        </div>
+
+        <div class="modal-actions" style="grid-template-columns: 1fr;">
+            <button class="cancel-btn" onclick="closeWikiModal()">Schließen</button>
+        </div>
+    </div>
+</div>
+
+<header>
+    <div class="header-top">
+        <div class="header-left">
+            <a href="index.html" class="back-container">
+                <div class="back-btn">&larr;</div>
+                <span>Alkohol</span>
+            </a>
+        </div>
+        <div class="header-switch-container">
+            <div class="main-view-switch">
+                <button class="main-switch-btn active" id="view-btn-tracker" onclick="toggleMainView('tracker')">🎯 Tracker</button>
+                <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')">📊 Stats</button>
             </div>
+        </div>
+        <div class="header-right" id="cloud-status-text">Cloud Live</div>
+    </div>
+</header>
+
+<div class="cloud-error-banner" id="cloud-error-box">Sync-Fehler: Verbindung zur Cloud fehlgeschlagen.</div>
+
+<main>
+    <div id="view-tracker" class="view-section active">
+        <div class="delete-last-container">
+            <button type="button" class="delete-last-btn" onclick="deleteLastLogEntry()">Letztes Getränk löschen</button>
+            <span style="color: var(--text-secondary); font-size: 0.7rem;">|</span>
+            <button type="button" class="delete-last-btn" onclick="repeatLastDrink()">Letztes Getränk erneut</button>
+        </div>
+
+        <div id="categories-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
+
+        <div class="form-block">
+            <h3>Neues Getränk erfassen</h3>
+            <form id="manual-drink-form" onsubmit="handleManualSubmit(event)">
+                <div class="form-grid">
+                    
+                    <div class="form-group full">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="form-regelmaessig">
+                            <label for="form-regelmaessig">Bei Regelmäßig speichern?</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group full">
+                        <label for="form-name-input">Name neues Getränk</label>
+                        <input type="text" id="form-name-input" placeholder="z.B. Reissdorf" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-kategorie">Kategorie</label>
+                        <select id="form-kategorie" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-groesse">Größe (in Liter)</label>
+                        <input type="number" id="form-groesse" step="0.01" min="0.01" placeholder="z.B. 0.33" required>
+                    </div>
+
+                    <div class="form-group full" style="margin-top: 6px; border-top: 1px solid var(--border-light); padding-top: 12px;">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="form-anlass-wie-zuvor" onchange="toggleFormAnlassWieZuvor()">
+                            <label for="form-anlass-wie-zuvor">Anlass wie zuvor übernehmen?</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group full form-anlass-input-group">
+                        <label for="form-anlass-name">Anlass Name</label>
+                        <input type="text" id="form-anlass-name" placeholder="z.B. Bremen (A)">
+                    </div>
+                    <div class="form-group form-anlass-input-group">
+                        <label for="form-anlass-kategorie">Anlass Kategorie</label>
+                        <select id="form-anlass-kategorie"></select>
+                    </div>
+                    <div class="form-group form-anlass-input-group">
+                        <label for="form-anlass-kategorie-neu">Neue Kategorie</label>
+                        <input type="text" id="form-anlass-kategorie-neu" placeholder="z.B. Fußball">
+                    </div>
+                </div>
+                
+                <button type="submit" class="submit-btn" style="margin-top: 12px;">Eintragen & Loggen</button>
+            </form>
         </div>
     </div>
 
-    <script>
-        const APPS = [
-            { id: "reisen", title: "Reisen", icon: "✈️", url: "reise_stats.html" },
-            { id: "habits", title: "Habits", icon: "📊", url: "habits.html" },
-            { id: "alkohol", title: "Alkohol", icon: "🍺", url: "alkohol.html" },
-            { id: "alltag", title: "Alltag", icon: "🏠", url: "alltag.html" },
-            { id: "gastspiel", title: "Gastspiel", icon: "⚽", url: "gastspiel2.html" },
-            { id: "kcrakete", title: "KC Rakete", icon: "🚀", url: "kcr_index.html" },
-            { id: "test", title: "Test", icon: "🧪", url: "test.html" },
-            { id: "test2", title: "Test 2", icon: "⚗️", url: "test2.html" },
-            { id: "finanzen", title: "Finanzen", icon: "💰", url: "finanzen.html" },
-            { id: "spiele", title: "Spiele", icon: "🎮", url: "spiele.html" },
-            { id: "familie", title: "Familie", icon: "🧑‍🧑‍🧒‍🧒", url: "familie.html" },
-            { id: "pomodoro", title: "Pomodoro", icon: "🎧", url: "pomo.html" },
-            { id: "hopping", title: "Hopping", icon: "⚽", url: "hopping.html" }
-        ];
+    <div id="view-stats" class="view-section">
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-value" id="kpi-today">0,00 L</div>
+                <div class="kpi-label">Heute Gesamt</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-value" id="kpi-streak">0 Tage</div>
+                <div class="kpi-label">Nüchtern-Konto</div>
+            </div>
+        </div>
 
-        function getStats() {
-            const defaults = {};
-            APPS.forEach(app => { defaults[app.id] = { count: 0, lastUsed: 0 }; });
-            const stored = localStorage.getItem("fabians_app_stats");
-            return stored ? JSON.parse(stored) : defaults;
+        <div class="section-block">
+            <div class="block-title">Letzte 5 Events</div>
+            <div id="last-events-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
+        </div>
+
+        <div class="section-block">
+            <div class="block-title">Getränke-Ranking (Frequenz)</div>
+            <div id="routine-performance-container" style="display: flex; flex-direction: column; gap: 2px;"></div>
+        </div>
+
+        <div class="section-block">
+            <div class="block-title">Getränke-Kategorien</div>
+            <div id="drink-category-performance-container" style="display: flex; flex-direction: column; gap: 2px;"></div>
+        </div>
+
+        <div class="section-block">
+            <div class="block-title">Anlass-Kategorien</div>
+            <div id="event-category-performance-container" style="display: flex; flex-direction: column; gap: 2px;"></div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyswriq1vR_F9f-2LQX0nnFB8jNcj2waVbQjw6TS_SU7cz1Ex6mrdxG5Tm9FheNy8OWfw/exec";
+
+    let globalFavorites = [];
+    let globalHistory = [];
+    let globalAnlassKategorien = [];
+    let cloudSyncTimeout = null;
+    let activeModalDrink = null;
+
+    const categoryIcons = { "Bier": "🍺", "Wein": "🍷", "Spirituose": "🥃", "Mixgetränk": "🍹" };
+    const eventIcons = { "Fußball": "⚽", "Kegeln": "🎳", "Restaurant": "🍽️", "Party": "🎉", "Feier": "🥳", "Konzert": "🎸", "Bar": "🍸" };
+
+    function updateCloudStatus(status) {
+        const indicator = document.getElementById('cloud-status-text');
+        if (!indicator) return;
+        if (cloudSyncTimeout && status !== "Cloud synced") { clearTimeout(cloudSyncTimeout); cloudSyncTimeout = null; }
+        indicator.textContent = status;
+        if (status === "Cloud Fehler") { indicator.style.color = "var(--danger)"; }
+        else if (status === "Cloud synced") {
+            indicator.style.color = "var(--success)";
+            cloudSyncTimeout = setTimeout(() => { indicator.textContent = "Cloud Live"; indicator.style.color = "var(--text-secondary)"; }, 3000);
+        } else if (status === "Cloud lädt") { indicator.style.color = "var(--accent)"; }
+        else { indicator.style.color = "var(--text-secondary)"; }
+    }
+
+    function toggleMainView(view) {
+        document.getElementById('view-btn-tracker').classList.toggle('active', view === 'tracker');
+        document.getElementById('view-btn-stats').classList.toggle('active', view === 'stats');
+        document.getElementById('view-tracker').classList.toggle('active', view === 'tracker');
+        document.getElementById('view-stats').classList.toggle('active', view === 'stats');
+        if (view === 'stats') calculateStats();
+    }
+
+    function toggleGroup(header) { header.parentElement.classList.toggle('open'); }
+    function showSuccessToast() { const toast = document.getElementById('toast-notice'); toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 2000); }
+    
+    function toggleEventBlock(triggerElement) {
+        const block = triggerElement.parentElement;
+        block.classList.toggle('expanded');
+        const arrow = triggerElement.querySelector('.arrow-icon');
+        if (block.classList.contains('expanded')) {
+            arrow.textContent = "▲";
+        } else {
+            arrow.textContent = "▼";
         }
+    }
 
-        function trackClick(id) {
-            const stats = getStats();
-            if (stats[id]) {
-                stats[id].count += 1;
-                stats[id].lastUsed = Date.now();
-                localStorage.setItem("fabians_app_stats", JSON.stringify(stats));
+    function formatDateToString(date) {
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        return `${dd}.${mm}.${date.getFullYear()}`;
+    }
+
+    function formatRawDate(datumVal) {
+        if (!datumVal) return "";
+        let str = String(datumVal).trim();
+        if (str.includes('T')) {
+            const parsed = new Date(str);
+            if (!isNaN(parsed.getTime())) {
+                const pd = String(parsed.getDate()).padStart(2, '0');
+                const pm = String(parsed.getMonth() + 1).padStart(2, '0');
+                const py = String(parsed.getFullYear());
+                return `${pd}.${pm}.${py}`;
+            }
+        }
+        const match = str.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})/);
+        if (match) {
+            const pd = String(match[1]).padStart(2, '0');
+            const pm = String(match[2]).padStart(2, '0');
+            let py = match[3];
+            if (py.length === 2) py = "20" + py;
+            return `${pd}.${pm}.${py}`;
+        }
+        return str;
+    }
+
+    function isTodayEntry(datumVal) {
+        if (!datumVal) return false;
+        const now = new Date();
+        const d = String(now.getDate()).padStart(2, '0');
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const y = String(now.getFullYear());
+
+        let str = String(datumVal).trim();
+        
+        if (str.includes('T')) {
+            const parsed = new Date(str);
+            if (!isNaN(parsed.getTime())) {
+                const pd = String(parsed.getDate()).padStart(2, '0');
+                const pm = String(parsed.getMonth() + 1).padStart(2, '0');
+                const py = String(parsed.getFullYear());
+                return pd === d && pm === m && py === y;
             }
         }
 
-        function renderStatsModal() {
-            const stats = getStats();
-            const statsList = document.getElementById("stats-list");
-            statsList.innerHTML = "";
-
-            const sortedApps = [...APPS].sort((a, b) => {
-                const countA = stats[a.id] ? stats[a.id].count : 0;
-                const countB = stats[b.id] ? stats[b.id].count : 0;
-                return countB - countA;
-            });
-
-            sortedApps.forEach(app => {
-                const count = stats[app.id] ? stats[app.id].count : 0;
-                const item = document.createElement("div");
-                item.className = "stat-item";
-                item.innerHTML = `
-                    <div class="stat-info">
-                        <span>${app.icon}</span>
-                        <span>${app.title}</span>
-                    </div>
-                    <div class="stat-count">${count} Aufrufe</div>
-                `;
-                statsList.appendChild(item);
-            });
+        const match = str.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})/);
+        if (match) {
+            const pd = String(match[1]).padStart(2, '0');
+            const pm = String(match[2]).padStart(2, '0');
+            let py = match[3];
+            if (py.length === 2) py = "20" + py;
+            return pd === d && pm === m && py === y;
         }
 
-        function renderMenu() {
-            const stats = getStats();
-            const now = Date.now();
-            const arena = document.getElementById("bubble-arena");
-            arena.innerHTML = "";
+        return str.includes(`${d}.${m}.${y}`);
+    }
 
-            const appsWithScores = APPS.map(app => {
-                const stat = stats[app.id] || { count: 0, lastUsed: 0 };
-                const recency = stat.lastUsed ? (1 / (now - stat.lastUsed + 1)) : 0;
-                const score = (stat.count * 0.7) + (recency * 1000000 * 0.3);
-                return { ...app, score };
-            });
-
-            const sortedApps = [...appsWithScores].sort((a, b) => b.score - a.score);
-            
-            const scores = sortedApps.map(a => a.score);
-            const maxScore = Math.max(...scores);
-            const minScore = Math.min(...scores);
-
-            const isMobile = window.innerWidth < 768;
-            const isPortrait = window.innerHeight > window.innerWidth;
-
-            const baseSize = isMobile ? 96 : 115;
-
-            const stretchX = isPortrait ? 0.75 : 1.35;
-            const stretchY = isPortrait ? 1.45 : 0.75;
-
-            const centerRadius = isMobile ? 65 : 95;
-            const outerRadius = isMobile ? 155 : 230;
-
-            let centerAngles = [45, 135, 225, 315].map(a => a + (Math.random() * 15 - 7.5));
-            let outerAngles = [0, 45, 90, 135, 180, 225, 270, 315].map(a => a + (Math.random() * 20 - 10));
-
-            centerAngles = centerAngles.sort(() => Math.random() - 0.5);
-            outerAngles = outerAngles.sort(() => Math.random() - 0.5);
-
-            const bubblesData = sortedApps.map((app, index) => {
-                const isTopFour = index < 4;
-
-                let factor = 1.0;
-                if (maxScore !== minScore) {
-                    factor = 0.85 + ((app.score - minScore) / (maxScore - minScore)) * 0.55;
-                } else if (maxScore > 0) {
-                    factor = 1.15;
-                }
-
-                const finalSize = Math.round(baseSize * factor);
-
-                let posX, posY;
-                if (isTopFour) {
-                    const angleRad = (centerAngles[index] * Math.PI) / 180;
-                    posX = Math.cos(angleRad) * centerRadius * stretchX;
-                    posY = Math.sin(angleRad) * centerRadius * stretchY;
+    function fetchData() {
+        updateCloudStatus("Cloud lädt");
+        fetch(GOOGLE_SCRIPT_URL)
+            .then(res => { if (!res.ok) throw new Error('Network error'); return res.json(); })
+            .then(data => {
+                document.getElementById('cloud-error-box').style.display = 'none';
+                if (data && !data.error) {
+                    globalFavorites = data.favorites || [];
+                    globalHistory = data.history || [];
+                    globalAnlassKategorien = data.anlassKategorien || [];
                 } else {
-                    const angleRad = (outerAngles[(index - 4) % outerAngles.length] * Math.PI) / 180;
-                    posX = Math.cos(angleRad) * outerRadius * stretchX;
-                    posY = Math.sin(angleRad) * outerRadius * stretchY;
+                    globalFavorites = []; globalHistory = []; globalAnlassKategorien = [];
                 }
-
-                return {
-                    app,
-                    isTopFour,
-                    size: finalSize,
-                    radius: finalSize / 2,
-                    x: posX,
-                    y: posY
-                };
+                renderTrackerUI();
+                populateDropdowns();
+                updateCloudStatus("Cloud Live");
+                calculateStats();
+            })
+            .catch(err => {
+                document.getElementById('cloud-error-box').style.display = 'block';
+                updateCloudStatus("Cloud Fehler");
+                console.error(err);
             });
+    }
 
-            for (let step = 0; step < 12; step++) {
-                for (let i = 0; i < bubblesData.length; i++) {
-                    for (let j = i + 1; j < bubblesData.length; j++) {
-                        const b1 = bubblesData[i];
-                        const b2 = bubblesData[j];
+    function populateDropdowns() {
+        const d1 = document.getElementById('modal-anlass-kategorie');
+        const d2 = document.getElementById('form-anlass-kategorie');
+        
+        let optionsHtml = `<option value="">-- Option wählen --</option>`;
+        globalAnlassKategorien.forEach(kat => {
+            if(kat.trim() !== "") optionsHtml += `<option value="${kat}">${kat}</option>`;
+        });
 
-                        const dx = b2.x - b1.x;
-                        const dy = b2.y - b1.y;
-                        const dist = Math.hypot(dx, dy);
-                        const minDist = b1.radius + b2.radius + 8;
+        d1.innerHTML = optionsHtml;
+        d2.innerHTML = optionsHtml;
 
-                        if (dist < minDist) {
-                            const overlap = minDist - dist;
-                            const forceX = (dx / (dist || 1)) * (overlap * 0.5);
-                            const forceY = (dy / (dist || 1)) * (overlap * 0.5);
+        const dKategorie = document.getElementById('form-kategorie');
+        let uniqueCategories = [];
+        
+        globalFavorites.forEach(item => {
+            if(item.kategorie && !uniqueCategories.includes(item.kategorie)) uniqueCategories.push(item.kategorie);
+        });
+        
+        if (uniqueCategories.length === 0) {
+            uniqueCategories = ["Bier", "Wein", "Spirituose", "Mixgetränk"];
+        }
+        uniqueCategories.sort();
 
-                            b1.x -= forceX;
-                            b1.y -= forceY;
-                            b2.x += forceX;
-                            b2.y += forceY;
-                        }
-                    }
+        let catOptionsHtml = ``;
+        uniqueCategories.forEach(cat => {
+            catOptionsHtml += `<option value="${cat}">${cat}</option>`;
+        });
+        dKategorie.innerHTML = catOptionsHtml;
+    }
+
+    function renderTrackerUI() {
+        const container = document.getElementById('categories-container');
+        container.innerHTML = '';
+        const categorized = {};
+
+        globalFavorites.forEach(item => {
+            if (item.regelmaessig === "ja") {
+                if (!categorized[item.kategorie]) categorized[item.kategorie] = [];
+                categorized[item.kategorie].push(item);
+            }
+        });
+
+        const keys = Object.keys(categorized);
+        if (keys.length === 0) {
+            container.innerHTML = `<div style="font-size:0.85rem; text-align:center; color:var(--text-secondary); padding:20px 0;">Keine regelmäßigen Getränke vorhanden. Nutze das Formular unten.</div>`;
+            return;
+        }
+
+        keys.forEach(cat => {
+            const icon = categoryIcons[cat] || "🥤";
+            let drinksHtml = categorized[cat].map(drink => {
+                return `
+                    <div class="drink-card" onclick="openQuickLogModal('${drink.name}', '${drink.kategorie}', '${drink.groesse}')">
+                        <div class="drink-info">
+                            <span class="drink-name">${drink.name}</span>
+                            <span class="drink-size">${parseFloat(drink.groesse).toFixed(2)} L</span>
+                        </div>
+                        <div class="plus-btn">+</div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML += `
+                <div class="category-group">
+                    <div class="category-header" onclick="toggleGroup(this)">
+                        <div class="category-title"><div class="category-icon">${icon}</div><span>${cat}</span></div>
+                        <div class="arrow">▼</div>
+                    </div>
+                    <div class="category-content">${drinksHtml}</div>
+                </div>
+            `;
+        });
+    }
+
+    function openQuickLogModal(name, kategorie, groesse) {
+        activeModalDrink = { name, kategorie, groesse };
+        document.getElementById('modal-drink-title').textContent = `${name} (${parseFloat(groesse).toFixed(2)} L)`;
+        
+        document.getElementById('modal-anlass-name').value = "";
+        document.getElementById('modal-anlass-kategorie').value = "";
+        document.getElementById('modal-anlass-kategorie-neu').value = "";
+
+        const todayEntries = globalHistory.filter(item => item.anlass_name && item.anlass_name.trim() !== "");
+        const suggBox = document.getElementById('modal-suggestion-box');
+        
+        if (todayEntries.length > 0) {
+            const last = todayEntries[todayEntries.length - 1];
+            document.getElementById('modal-use-last-btn').textContent = `"${last.anlass_name}" (${last.anlass_kategorie}) übernehmen`;
+            suggBox.style.display = "block";
+        } else {
+            suggBox.style.display = "none";
+        }
+
+        document.getElementById('quick-log-modal').classList.add('active');
+    }
+
+    function closeQuickLogModal() {
+        document.getElementById('quick-log-modal').classList.remove('active');
+        activeModalDrink = null;
+    }
+
+    function applyLastAnlassToModal() {
+        const todayEntries = globalHistory.filter(item => item.anlass_name && item.anlass_name.trim() !== "");
+        if(todayEntries.length > 0) {
+            const last = todayEntries[todayEntries.length - 1];
+            document.getElementById('modal-anlass-name').value = last.anlass_name;
+            if (globalAnlassKategorien.includes(last.anlass_kategorie)) {
+                document.getElementById('modal-anlass-kategorie').value = last.anlass_kategorie;
+                document.getElementById('modal-anlass-kategorie-neu').value = "";
+            } else {
+                document.getElementById('modal-anlass-kategorie').value = "";
+                document.getElementById('modal-anlass-kategorie-neu').value = last.anlass_kategorie;
+            }
+        }
+    }
+
+    function submitQuickLogFromModal() {
+        if (!activeModalDrink) return;
+
+        const name = activeModalDrink.name;
+        const kategorie = activeModalDrink.kategorie;
+        const groesse = activeModalDrink.groesse;
+        const regelmaessig = "ja";
+
+        const aName = document.getElementById('modal-anlass-name').value.trim();
+        const selKat = document.getElementById('modal-anlass-kategorie').value;
+        const neuKat = document.getElementById('modal-anlass-kategorie-neu').value.trim();
+        const aKat = neuKat !== "" ? neuKat : selKat;
+
+        logDrink(name, kategorie, groesse, regelmaessig, aName, aKat);
+        closeQuickLogModal();
+    }
+
+    function toggleFormAnlassWieZuvor() {
+        const check = document.getElementById('form-anlass-wie-zuvor').checked;
+        const fields = document.querySelectorAll('.form-anlass-input-group');
+        
+        if (check) {
+            fields.forEach(f => f.style.display = "none");
+            const todayEntries = globalHistory.filter(item => item.anlass_name && item.anlass_name.trim() !== "");
+            if (todayEntries.length > 0) {
+                const last = todayEntries[todayEntries.length - 1];
+                document.getElementById('form-anlass-name').value = last.anlass_name;
+                document.getElementById('form-anlass-kategorie').value = last.anlass_kategorie;
+                document.getElementById('form-anlass-kategorie-neu').value = "";
+            }
+        } else {
+            fields.forEach(f => f.style.display = "flex");
+            document.getElementById('form-anlass-name').value = "";
+            document.getElementById('form-anlass-kategorie').value = "";
+            document.getElementById('form-anlass-kategorie-neu').value = "";
+        }
+    }
+
+    function handleManualSubmit(event) {
+        event.preventDefault();
+        
+        const name = document.getElementById('form-name-input').value.trim();
+        const kategorie = document.getElementById('form-kategorie').value;
+        const groesse = document.getElementById('form-groesse').value;
+        const regelmaessig = document.getElementById('form-regelmaessig').checked ? "ja" : "nein";
+
+        let aName = document.getElementById('form-anlass-name').value.trim();
+        const selKat = document.getElementById('form-anlass-kategorie').value;
+        const neuKat = document.getElementById('form-anlass-kategorie-neu').value.trim();
+        let aKat = neuKat !== "" ? neuKat : selKat;
+
+        if (!name || !groesse) return;
+
+        logDrink(name, kategorie, groesse, regelmaessig, aName, aKat);
+        
+        document.getElementById('manual-drink-form').reset();
+        document.getElementById('form-anlass-wie-zuvor').checked = false;
+        toggleFormAnlassWieZuvor();
+    }
+
+    function logDrink(name, kategorie, groesse, regelmaessig, anlassName, anlassKategorie) {
+        updateCloudStatus("Cloud lädt");
+        const formBody = new URLSearchParams();
+        formBody.append('name', name);
+        formBody.append('kategorie', kategorie);
+        formBody.append('groesse', groesse);
+        formBody.append('regelmaessig', regelmaessig);
+        formBody.append('anlass_name', anlassName || '');
+        formBody.append('anlass_kategorie', anlassKategorie || '');
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formBody.toString()
+        })
+        .then(() => {
+            document.getElementById('cloud-error-box').style.display = 'none';
+            updateCloudStatus("Cloud synced");
+            showSuccessToast();
+            setTimeout(fetchData, 600);
+        })
+        .catch(err => {
+            document.getElementById('cloud-error-box').style.display = 'block';
+            updateCloudStatus("Cloud Fehler");
+            console.error(err);
+        });
+    }
+
+    function repeatLastDrink() {
+        if (!globalHistory || globalHistory.length === 0) return;
+        const last = globalHistory[globalHistory.length - 1];
+        if (!last || !last.name) return;
+
+        logDrink(
+            last.name,
+            last.kategorie || '',
+            last.groesse || '0',
+            last.regelmaessig || 'nein',
+            last.anlass_name || '',
+            last.anlass_kategorie || ''
+        );
+    }
+
+    function deleteLastLogEntry() {
+        updateCloudStatus("Cloud lädt");
+        const formBody = new URLSearchParams();
+        formBody.append('delete_last', 'true');
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formBody.toString()
+        })
+        .then(() => {
+            document.getElementById('cloud-error-box').style.display = 'none';
+            updateCloudStatus("Cloud synced");
+            const toast = document.getElementById('toast-notice');
+            toast.textContent = "Eintrag erfolgreich gelöscht!";
+            toast.classList.add('show');
+            setTimeout(() => { 
+                toast.classList.remove('show'); 
+                toast.textContent = "Eintrag erfolgreich verbucht!";
+            }, 2000);
+            setTimeout(fetchData, 600);
+        })
+        .catch(err => {
+            document.getElementById('cloud-error-box').style.display = 'block';
+            updateCloudStatus("Cloud Fehler");
+            console.error(err);
+        });
+    }
+
+    /* WIKI SYSTEM MODAL LOGIK */
+    function openWikiModal(title, subtitle, icon, statsArray) {
+        document.getElementById('wiki-modal-title').textContent = title;
+        document.getElementById('wiki-modal-subtitle').textContent = subtitle;
+        document.getElementById('wiki-modal-icon').textContent = icon;
+
+        const body = document.getElementById('wiki-modal-body');
+        body.innerHTML = '';
+
+        statsArray.forEach(stat => {
+            body.innerHTML += `
+                <div class="wiki-stat-row">
+                    <span class="wiki-stat-label">${stat.label}</span>
+                    <span class="wiki-stat-value">${stat.value}</span>
+                </div>
+            `;
+        });
+
+        document.getElementById('wiki-detail-modal').classList.add('active');
+    }
+
+    function closeWikiModal() {
+        document.getElementById('wiki-detail-modal').classList.remove('active');
+    }
+
+    /* Wiki Details bei Klick öffnen */
+    function showDrinkWiki(drinkName, drinkSize, drinkCat) {
+        let totalCount = 0;
+        let totalVolume = 0;
+        const anlaesseMap = {};
+        const anlassKatMap = {};
+
+        globalHistory.forEach(item => {
+            if (item.name === drinkName && parseFloat(item.groesse) === parseFloat(drinkSize)) {
+                totalCount++;
+                totalVolume += parseFloat(item.groesse) || 0;
+                
+                if (item.anlass_name && item.anlass_name.trim() !== "") {
+                    anlaesseMap[item.anlass_name] = (anlaesseMap[item.anlass_name] || 0) + 1;
+                }
+                if (item.anlass_kategorie && item.anlass_kategorie.trim() !== "") {
+                    anlassKatMap[item.anlass_kategorie] = (anlassKatMap[item.anlass_kategorie] || 0) + 1;
                 }
             }
+        });
 
-            bubblesData.forEach(b => {
-                const wrapper = document.createElement("div");
-                wrapper.className = "bubble-wrapper";
-                if (b.isTopFour) wrapper.classList.add("top-favorit");
-                wrapper.style.transform = `translate(${b.x}px, ${b.y}px)`;
+        const topAnlass = Object.keys(anlaesseMap).sort((a,b) => anlaesseMap[b] - anlaesseMap[a])[0] || "Keiner";
+        const topAnlassKat = Object.keys(anlassKatMap).sort((a,b) => anlassKatMap[b] - anlassKatMap[a])[0] || "Keine";
+        const icon = categoryIcons[drinkCat] || "🍺";
 
-                const bubble = document.createElement("a");
-                bubble.href = b.app.url;
-                bubble.className = "bubble";
-                bubble.style.setProperty("--bubble-size", `${b.size}px`);
+        openWikiModal(`${drinkName} (${parseFloat(drinkSize).toFixed(2)} L)`, "Getränk Wiki-Stats", icon, [
+            { label: "Anzahl konsumiert", value: `${totalCount}x` },
+            { label: "Gesamtvolumen", value: `${totalVolume.toFixed(2).replace('.', ',')} Liter` },
+            { label: "Kategorie", value: drinkCat },
+            { label: "Top-Anlass", value: topAnlass },
+            { label: "Top-Anlass-Kategorie", value: topAnlassKat }
+        ]);
+    }
 
-                bubble.addEventListener("click", () => trackClick(b.app.id));
+    function showDrinkCatWiki(catName) {
+        let totalCount = 0;
+        let totalVolume = 0;
+        const drinkCounts = {};
 
-                bubble.innerHTML = `
-                    <span class="bubble-icon">${b.app.icon}</span>
-                    <span class="bubble-title">${b.app.title}</span>
+        let globalTotalDrinks = 0;
+
+        globalHistory.forEach(item => {
+            if (item.name && item.name.trim() !== "") globalTotalDrinks++;
+            
+            if (item.kategorie === catName) {
+                totalCount++;
+                totalVolume += parseFloat(item.groesse) || 0;
+                drinkCounts[item.name] = (drinkCounts[item.name] || 0) + 1;
+            }
+        });
+
+        const topDrink = Object.keys(drinkCounts).sort((a,b) => drinkCounts[b] - drinkCounts[a])[0] || "Keines";
+        const share = globalTotalDrinks > 0 ? Math.round((totalCount / globalTotalDrinks) * 100) : 0;
+        const icon = categoryIcons[catName] || "🥤";
+
+        openWikiModal(`Kategorie: ${catName}`, "Getränke-Kategorie Wiki", icon, [
+            { label: "Anzahl Getränke", value: `${totalCount}x` },
+            { label: "Gesamtvolumen", value: `${totalVolume.toFixed(2).replace('.', ',')} Liter` },
+            { label: "Anteil an allen Drinks", value: `${share}%` },
+            { label: "Meistgetrunken", value: topDrink }
+        ]);
+    }
+
+    function showEventCatWiki(eventCatName) {
+        let totalDrinks = 0;
+        const eventsSeen = new Set();
+        const drinkCounts = {};
+
+        globalHistory.forEach(item => {
+            if (item.anlass_kategorie === eventCatName) {
+                totalDrinks++;
+                if (item.anlass_name) eventsSeen.add(item.anlass_name);
+                if (item.name) drinkCounts[item.name] = (drinkCounts[item.name] || 0) + 1;
+            }
+        });
+
+        const topDrink = Object.keys(drinkCounts).sort((a,b) => drinkCounts[b] - drinkCounts[a])[0] || "Keines";
+        const icon = eventIcons[eventCatName] || "📍";
+
+        openWikiModal(`Anlass: ${eventCatName}`, "Anlass-Kategorie Wiki", icon, [
+            { label: "Verknüpfte Events", value: `${eventsSeen.size} Events` },
+            { label: "Konsumierte Drinks", value: `${totalDrinks}x` },
+            { label: "Favorit bei Anlass", value: topDrink }
+        ]);
+    }
+
+    function showEventWiki(eventKey) {
+        const parts = eventKey.split('|');
+        const eventName = parts[0];
+        const eventDate = parts[1];
+
+        let totalVolume = 0;
+        let totalDrinks = 0;
+        const drinkMap = {};
+
+        globalHistory.forEach(item => {
+            const eName = item.anlass_name && item.anlass_name.trim() !== "" ? item.anlass_name.trim() : "Ohne Anlass";
+            const dStr = formatRawDate(item.datum);
+            
+            if (eName === eventName && dStr === eventDate) {
+                totalDrinks++;
+                totalVolume += parseFloat(item.groesse) || 0;
+                drinkMap[item.name] = (drinkMap[item.name] || 0) + 1;
+            }
+        });
+
+        const icon = eventIcons[eventName] || "🎉";
+
+        openWikiModal(`${eventName}`, `Event Wiki (${eventDate})`, icon, [
+            { label: "Datum", value: eventDate },
+            { label: "Gesamtgetränke", value: `${totalDrinks}x` },
+            { label: "Gesamtvolumen", value: `${totalVolume.toFixed(2).replace('.', ',')} Liter` },
+            { label: "Getränke-Vielfalt", value: `${Object.keys(drinkMap).length} Sorten` }
+        ]);
+    }
+
+    function calculateStats() {
+        let todayVolume = 0;
+        globalHistory.forEach(item => {
+            if (isTodayEntry(item.datum)) {
+                const numSize = Number(item.groesse);
+                if (!isNaN(numSize)) {
+                    todayVolume += numSize;
+                }
+            }
+        });
+        document.getElementById('kpi-today').textContent = `${todayVolume.toFixed(2).replace('.', ',')} L`;
+
+        /* Letzte 5 Events aufbauen */
+        const lastEventsContainer = document.getElementById('last-events-container');
+        lastEventsContainer.innerHTML = '';
+
+        const eventsMap = [];
+
+        for (let i = globalHistory.length - 1; i >= 0; i--) {
+            const item = globalHistory[i];
+            const eventName = item.anlass_name && item.anlass_name.trim() !== "" ? item.anlass_name.trim() : "Ohne Anlass";
+            const dateStr = formatRawDate(item.datum);
+            const eventKey = `${eventName}|${dateStr}`;
+
+            let eventObj = eventsMap.find(e => e.key === eventKey);
+            if (!eventObj) {
+                eventObj = {
+                    key: eventKey,
+                    name: eventName,
+                    datum: dateStr,
+                    rawDatum: item.datum,
+                    drinks: {}
+                };
+                eventsMap.push(eventObj);
+            }
+
+            const drinkKey = `${item.name}|${item.groesse}`;
+            if (!eventObj.drinks[drinkKey]) {
+                eventObj.drinks[drinkKey] = {
+                    name: item.name,
+                    groesse: item.groesse,
+                    count: 0
+                };
+            }
+            eventObj.drinks[drinkKey].count++;
+        }
+
+        const top5Events = eventsMap.slice(0, 5);
+
+        if (top5Events.length === 0) {
+            lastEventsContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:4px 0; text-align:center;">Noch keine Events protokolliert.</div>`;
+        } else {
+            top5Events.forEach(evt => {
+                let drinksHtml = '';
+                const drinkKeys = Object.keys(evt.drinks);
+                
+                drinkKeys.forEach(dk => {
+                    const d = evt.drinks[dk];
+                    const sizeVal = parseFloat(d.groesse);
+                    const formattedSize = isNaN(sizeVal) ? d.groesse : sizeVal.toFixed(2);
+                    drinksHtml += `
+                        <div class="today-log-item">
+                            <div>
+                                <span>${d.name} (${formattedSize} L)</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <div>${d.count}x</div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                lastEventsContainer.innerHTML += `
+                    <div class="event-item-block">
+                        <div class="toggle-trigger" onclick="showEventWiki('${evt.key}')">
+                            <span><strong>${evt.name}</strong> (${evt.datum})</span>
+                            <span class="arrow-icon" style="font-size:0.7rem; color:var(--accent);">ℹ️ Wiki</span>
+                        </div>
+                        <div class="toggle-hidden-wrapper" style="display:flex;">
+                            ${drinksHtml}
+                        </div>
+                    </div>
                 `;
-
-                wrapper.appendChild(bubble);
-                arena.appendChild(wrapper);
             });
         }
 
-        const modal = document.getElementById("info-modal");
-        const openBtn = document.getElementById("open-info");
-        const closeBtn = document.getElementById("close-info");
+        let currentStreak = 0;
+        if (globalHistory.length > 0) {
+            let checkDate = new Date();
+            for (let i = 0; i < 365; i++) {
+                const checkDateStr = formatDateToString(checkDate);
+                const hasEntries = globalHistory.some(item => isTodayEntry(item.datum));
+                if (!hasEntries) { currentStreak++; checkDate.setDate(checkDate.getDate() - 1); } 
+                else { break; }
+            }
+        }
+        document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
 
-        openBtn.addEventListener("click", () => {
-            renderStatsModal();
-            modal.classList.add("active");
-        });
+        const counts = {};
+        const drinkCatCounts = {};
+        const eventCatCounts = {};
+        
+        let maxCount = 0; let maxDrinkCatCount = 0; let maxEventCatCount = 0;
 
-        closeBtn.addEventListener("click", () => {
-            modal.classList.remove("active");
-        });
+        globalHistory.forEach(item => {
+            if (!item.name || item.name.trim() === "") return;
+            
+            const numSize = Number(item.groesse);
+            if(isNaN(numSize)) return;
+            
+            const sizeFormatted = numSize.toFixed(2);
+            const key = `${item.name} (${sizeFormatted} L)|${item.kategorie || 'Bier'}|${numSize}`;
+            counts[key] = (counts[key] || 0) + 1;
+            if (counts[key] > maxCount) maxCount = counts[key];
 
-        modal.addEventListener("click", (e) => {
-            if (e.target === modal) {
-                modal.classList.remove("active");
+            if (item.kategorie) {
+                drinkCatCounts[item.kategorie] = (drinkCatCounts[item.kategorie] || 0) + 1;
+                if (drinkCatCounts[item.kategorie] > maxDrinkCatCount) maxDrinkCatCount = drinkCatCounts[item.kategorie];
+            }
+
+            if (item.anlass_kategorie && item.anlass_kategorie.trim() !== "") {
+                eventCatCounts[item.anlass_kategorie] = (eventCatCounts[item.anlass_kategorie] || 0) + 1;
+                if (eventCatCounts[item.anlass_kategorie] > maxEventCatCount) maxEventCatCount = eventCatCounts[item.anlass_kategorie];
             }
         });
 
-        window.addEventListener("DOMContentLoaded", renderMenu);
-        window.addEventListener("resize", renderMenu);
-    </script>
+        const sortedRanking = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+        const perfContainer = document.getElementById('routine-performance-container');
+        perfContainer.innerHTML = '';
+
+        if (sortedRanking.length === 0) {
+            perfContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:8px 0;">Noch keine Daten vorhanden.</div>`;
+        } else {
+            sortedRanking.slice(0, 5).forEach(drinkKey => {
+                const count = counts[drinkKey];
+                const pct = maxCount > 0 ? Math.round((count / maxCount) * 100) : 0;
+                const parts = drinkKey.split('|');
+                const labelPart = parts[0];
+                const catPart = parts[1] || 'Bier';
+                const sizeVal = parts[2] || '0';
+                
+                const cleanName = labelPart.split(' (')[0];
+                const cleanSize = labelPart.includes(' (') ? labelPart.split(' (')[1].replace(')', '') : '';
+                const icon = categoryIcons[catPart] || "🥤";
+                
+                perfContainer.innerHTML += `
+                    <div class="perf-item" onclick="showDrinkWiki('${cleanName}', '${sizeVal}', '${catPart}')">
+                        <div class="perf-info">
+                            <span class="perf-icon">${icon}</span>
+                            <span class="perf-name">${cleanName} <small style="color:var(--text-secondary); font-weight:700;">${cleanSize}</small></span>
+                        </div>
+                        <div class="perf-bar-wrapper">
+                            <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
+                            <span class="perf-pct">${count}x</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        const sortedDrinkCats = Object.keys(drinkCatCounts).sort((a, b) => drinkCatCounts[b] - drinkCatCounts[a]);
+        const drinkCatContainer = document.getElementById('drink-category-performance-container');
+        drinkCatContainer.innerHTML = '';
+
+        if (sortedDrinkCats.length === 0) {
+            drinkCatContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:8px 0;">Noch keine Daten vorhanden.</div>`;
+        } else {
+            sortedDrinkCats.forEach(catKey => {
+                const count = drinkCatCounts[catKey];
+                const pct = maxDrinkCatCount > 0 ? Math.round((count / maxDrinkCatCount) * 100) : 0;
+                const icon = categoryIcons[catKey] || "🥤";
+
+                drinkCatContainer.innerHTML += `
+                    <div class="perf-item" onclick="showDrinkCatWiki('${catKey}')">
+                        <div class="perf-info"><span class="perf-icon">${icon}</span><span class="perf-name">${catKey}</span></div>
+                        <div class="perf-bar-wrapper">
+                            <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
+                            <span class="perf-pct">${count}x</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        const sortedEventCats = Object.keys(eventCatCounts).sort((a, b) => eventCatCounts[b] - eventCatCounts[a]);
+        const eventCatContainer = document.getElementById('event-category-performance-container');
+        eventCatContainer.innerHTML = '';
+
+        if (sortedEventCats.length === 0) {
+            eventCatContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:8px 0;">Noch keine Anlass-Daten vorhanden.</div>`;
+        } else {
+            sortedEventCats.forEach(catKey => {
+                const count = eventCatCounts[catKey];
+                const pct = maxEventCatCount > 0 ? Math.round((count / maxEventCatCount) * 100) : 0;
+                const icon = eventIcons[catKey] || "📍";
+
+                eventCatContainer.innerHTML += `
+                    <div class="perf-item" onclick="showEventCatWiki('${catKey}')">
+                        <div class="perf-info"><span class="perf-icon">${icon}</span><span class="perf-name">${catKey}</span></div>
+                        <div class="perf-bar-wrapper">
+                            <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
+                            <span class="perf-pct">${count}x</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    }
+
+    window.onload = fetchData;
+</script>
 </body>
 </html>
