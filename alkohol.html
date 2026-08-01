@@ -150,6 +150,8 @@
         .delete-last-container {
             display: flex;
             justify-content: center;
+            align-items: center;
+            gap: 12px;
             margin: -4px auto 4px auto;
             width: 100%;
         }
@@ -164,7 +166,7 @@
             color: var(--text-secondary);
             cursor: pointer;
             transition: color 0.2s ease;
-            padding: 4px 12px;
+            padding: 4px 8px;
         }
         .delete-last-btn:active {
             color: var(--danger);
@@ -364,6 +366,8 @@
     <div id="view-tracker" class="view-section active">
         <div class="delete-last-container">
             <button type="button" class="delete-last-btn" onclick="deleteLastLogEntry()">Letztes Getränk löschen</button>
+            <span style="color: var(--text-secondary); font-size: 0.7rem;">|</span>
+            <button type="button" class="delete-last-btn" onclick="repeatLastDrink()">Letztes Getränk erneut</button>
         </div>
 
         <div id="categories-container" style="display: flex; flex-direction: column; gap: 12px;"></div>
@@ -504,6 +508,37 @@
         const dd = String(date.getDate()).padStart(2, '0');
         const mm = String(date.getMonth() + 1).padStart(2, '0');
         return `${dd}.${mm}.${date.getFullYear()}`;
+    }
+
+    function isTodayEntry(datumVal) {
+        if (!datumVal) return false;
+        const now = new Date();
+        const d = String(now.getDate()).padStart(2, '0');
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const y = String(now.getFullYear());
+
+        let str = String(datumVal).trim();
+        
+        if (str.includes('T')) {
+            const parsed = new Date(str);
+            if (!isNaN(parsed.getTime())) {
+                const pd = String(parsed.getDate()).padStart(2, '0');
+                const pm = String(parsed.getMonth() + 1).padStart(2, '0');
+                const py = String(parsed.getFullYear());
+                return pd === d && pm === m && py === y;
+            }
+        }
+
+        const match = str.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})/);
+        if (match) {
+            const pd = String(match[1]).padStart(2, '0');
+            const pm = String(match[2]).padStart(2, '0');
+            let py = match[3];
+            if (py.length === 2) py = "20" + py;
+            return pd === d && pm === m && py === y;
+        }
+
+        return str.includes(`${d}.${m}.${y}`);
     }
 
     function fetchData() {
@@ -715,8 +750,8 @@
         formBody.append('kategorie', kategorie);
         formBody.append('groesse', groesse);
         formBody.append('regelmaessig', regelmaessig);
-        formBody.append('anlass_name', anlassName);
-        formBody.append('anlass_kategorie', anlassKategorie);
+        formBody.append('anlass_name', anlassName || '');
+        formBody.append('anlass_kategorie', anlassKategorie || '');
 
         fetch(GOOGLE_SCRIPT_URL, {
             method: "POST",
@@ -735,6 +770,21 @@
             updateCloudStatus("Cloud Fehler");
             console.error(err);
         });
+    }
+
+    function repeatLastDrink() {
+        if (!globalHistory || globalHistory.length === 0) return;
+        const last = globalHistory[globalHistory.length - 1];
+        if (!last || !last.name) return;
+
+        logDrink(
+            last.name,
+            last.kategorie || '',
+            last.groesse || '0',
+            last.regelmaessig || 'nein',
+            last.anlass_name || '',
+            last.anlass_kategorie || ''
+        );
     }
 
     function deleteLastLogEntry() {
@@ -768,45 +818,48 @@
     }
 
     function calculateStats() {
-        const todayStr = formatDateToString(new Date());
-        
         let todayVolume = 0;
         const todayLogsContainer = document.getElementById('today-logs-container');
         todayLogsContainer.innerHTML = '';
 
-        let drinkTodayCounts = {};
-        let catTodayCounts = {};
+        let todayGroups = {};
 
         globalHistory.forEach(item => {
-            if (item.datum && item.datum.includes(todayStr) && !isNaN(item.groesse)) {
-                todayVolume += Number(item.groesse);
-                drinkTodayCounts[item.name] = (drinkTodayCounts[item.name] || 0) + 1;
-                catTodayCounts[item.kategorie] = (catTodayCounts[item.kategorie] || 0) + 1;
+            if (isTodayEntry(item.datum)) {
+                const numSize = Number(item.groesse);
+                if (!isNaN(numSize)) {
+                    todayVolume += numSize;
+                }
+                
+                const key = `${item.name}|${item.groesse}`;
+                if (!todayGroups[key]) {
+                    todayGroups[key] = {
+                        name: item.name,
+                        groesse: item.groesse,
+                        count: 0
+                    };
+                }
+                todayGroups[key].count++;
             }
         });
         document.getElementById('kpi-today').textContent = `${todayVolume.toFixed(2).replace('.', ',')} L`;
 
-        let todayEntries = globalHistory.filter(item => item.datum && item.datum.includes(todayStr));
-        if (todayEntries.length === 0) {
+        const groupKeys = Object.keys(todayGroups);
+        if (groupKeys.length === 0) {
             todayLogsContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:4px 0; text-align:center;">Heute noch keine Einträge protokolliert.</div>`;
         } else {
-            todayEntries.forEach(item => {
-                let timePart = "00:00";
-                if (item.datum.includes(" ")) {
-                    timePart = item.datum.split(" ")[1].substring(0, 5);
-                }
-                const curDrinkCount = drinkTodayCounts[item.name] || 0;
-                const curCatCount = catTodayCounts[item.kategorie] || 0;
+            groupKeys.forEach(key => {
+                const group = todayGroups[key];
+                const sizeVal = parseFloat(group.groesse);
+                const formattedSize = isNaN(sizeVal) ? group.groesse : sizeVal.toFixed(2);
 
                 todayLogsContainer.innerHTML += `
                     <div class="today-log-item">
                         <div>
-                            <span>${item.name}</span>
-                            <span class="today-log-meta"> (${curDrinkCount}x heute)</span>
+                            <span>${group.name} (${formattedSize} L)</span>
                         </div>
                         <div style="text-align: right;">
-                            <div>${parseFloat(item.groesse).toFixed(2)} L</div>
-                            <div class="today-log-meta">${timePart} | ${item.kategorie} (${curCatCount}x)</div>
+                            <div>${group.count}x</div>
                         </div>
                     </div>
                 `;
@@ -818,7 +871,7 @@
             let checkDate = new Date();
             for (let i = 0; i < 365; i++) {
                 const checkDateStr = formatDateToString(checkDate);
-                const hasEntries = globalHistory.some(item => item.datum && item.datum.includes(checkDateStr));
+                const hasEntries = globalHistory.some(item => isTodayEntry(item.datum));
                 if (!hasEntries) { currentStreak++; checkDate.setDate(checkDate.getDate() - 1); } 
                 else { break; }
             }
