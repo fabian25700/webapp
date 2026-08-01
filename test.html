@@ -273,11 +273,20 @@
         .toggle-trigger {
             font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);
             text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
-            padding: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;
+            padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; gap: 4px; user-select: none;
             background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);
+            transition: background 0.2s;
         }
+        .toggle-trigger:active { background: var(--border-light); }
+        
+        .event-item-block {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .event-item-block.expanded .toggle-hidden-wrapper { display: flex; }
+
         .toggle-hidden-wrapper { display: none; flex-direction: column; gap: 8px; margin-top: 4px; }
-        .section-block.expanded .toggle-hidden-wrapper { display: flex; }
 
         .today-log-item {
             display: flex; justify-content: space-between; align-items: center;
@@ -435,9 +444,9 @@
             </div>
         </div>
 
-        <div class="section-block" id="today-logs-section-block">
-            <div class="toggle-trigger" onclick="toggleTodayLogsBlock()">Getränke von heute anzeigen ▼</div>
-            <div class="toggle-hidden-wrapper" id="today-logs-container"></div>
+        <div class="section-block">
+            <div class="block-title">Letzte 5 Events</div>
+            <div id="last-events-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
         </div>
 
         <div class="section-block">
@@ -493,14 +502,14 @@
     function toggleGroup(header) { header.parentElement.classList.toggle('open'); }
     function showSuccessToast() { const toast = document.getElementById('toast-notice'); toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 2000); }
     
-    function toggleTodayLogsBlock() {
-        const block = document.getElementById('today-logs-section-block');
+    function toggleEventBlock(triggerElement) {
+        const block = triggerElement.parentElement;
         block.classList.toggle('expanded');
-        const trigger = block.querySelector('.toggle-trigger');
+        const arrow = triggerElement.querySelector('.arrow-icon');
         if (block.classList.contains('expanded')) {
-            trigger.textContent = "Getränke von heute ausblenden ▲";
+            arrow.textContent = "▲";
         } else {
-            trigger.textContent = "Getränke von heute anzeigen ▼";
+            arrow.textContent = "▼";
         }
     }
 
@@ -508,6 +517,29 @@
         const dd = String(date.getDate()).padStart(2, '0');
         const mm = String(date.getMonth() + 1).padStart(2, '0');
         return `${dd}.${mm}.${date.getFullYear()}`;
+    }
+
+    function formatRawDate(datumVal) {
+        if (!datumVal) return "";
+        let str = String(datumVal).trim();
+        if (str.includes('T')) {
+            const parsed = new Date(str);
+            if (!isNaN(parsed.getTime())) {
+                const pd = String(parsed.getDate()).padStart(2, '0');
+                const pm = String(parsed.getMonth() + 1).padStart(2, '0');
+                const py = String(parsed.getFullYear());
+                return `${pd}.${pm}.${py}`;
+            }
+        }
+        const match = str.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})/);
+        if (match) {
+            const pd = String(match[1]).padStart(2, '0');
+            const pm = String(match[2]).padStart(2, '0');
+            let py = match[3];
+            if (py.length === 2) py = "20" + py;
+            return `${pd}.${pm}.${py}`;
+        }
+        return str;
     }
 
     function isTodayEntry(datumVal) {
@@ -819,47 +851,87 @@
 
     function calculateStats() {
         let todayVolume = 0;
-        const todayLogsContainer = document.getElementById('today-logs-container');
-        todayLogsContainer.innerHTML = '';
-
-        let todayGroups = {};
-
         globalHistory.forEach(item => {
             if (isTodayEntry(item.datum)) {
                 const numSize = Number(item.groesse);
                 if (!isNaN(numSize)) {
                     todayVolume += numSize;
                 }
-                
-                const key = `${item.name}|${item.groesse}`;
-                if (!todayGroups[key]) {
-                    todayGroups[key] = {
-                        name: item.name,
-                        groesse: item.groesse,
-                        count: 0
-                    };
-                }
-                todayGroups[key].count++;
             }
         });
         document.getElementById('kpi-today').textContent = `${todayVolume.toFixed(2).replace('.', ',')} L`;
 
-        const groupKeys = Object.keys(todayGroups);
-        if (groupKeys.length === 0) {
-            todayLogsContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:4px 0; text-align:center;">Heute noch keine Einträge protokolliert.</div>`;
-        } else {
-            groupKeys.forEach(key => {
-                const group = todayGroups[key];
-                const sizeVal = parseFloat(group.groesse);
-                const formattedSize = isNaN(sizeVal) ? group.groesse : sizeVal.toFixed(2);
+        /* Letzte 5 Events aufbauen */
+        const lastEventsContainer = document.getElementById('last-events-container');
+        lastEventsContainer.innerHTML = '';
 
-                todayLogsContainer.innerHTML += `
-                    <div class="today-log-item">
-                        <div>
-                            <span>${group.name} (${formattedSize} L)</span>
+        // Gruppierung nach Event (Name + Datum)
+        const eventsMap = [];
+        const eventKeysSeen = [];
+
+        // Rückwärts durch die History gehen, damit neueste Events oben sind
+        for (let i = globalHistory.length - 1; i >= 0; i--) {
+            const item = globalHistory[i];
+            const eventName = item.anlass_name && item.anlass_name.trim() !== "" ? item.anlass_name.trim() : "Ohne Anlass";
+            const dateStr = formatRawDate(item.datum);
+            const eventKey = `${eventName}|${dateStr}`;
+
+            let eventObj = eventsMap.find(e => e.key === eventKey);
+            if (!eventObj) {
+                eventObj = {
+                    key: eventKey,
+                    name: eventName,
+                    datum: dateStr,
+                    rawDatum: item.datum,
+                    drinks: {}
+                };
+                eventsMap.push(eventObj);
+            }
+
+            const drinkKey = `${item.name}|${item.groesse}`;
+            if (!eventObj.drinks[drinkKey]) {
+                eventObj.drinks[drinkKey] = {
+                    name: item.name,
+                    groesse: item.groesse,
+                    count: 0
+                };
+            }
+            eventObj.drinks[drinkKey].count++;
+        }
+
+        const top5Events = eventsMap.slice(0, 5);
+
+        if (top5Events.length === 0) {
+            lastEventsContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:4px 0; text-align:center;">Noch keine Events protokolliert.</div>`;
+        } else {
+            top5Events.forEach(evt => {
+                let drinksHtml = '';
+                const drinkKeys = Object.keys(evt.drinks);
+                
+                drinkKeys.forEach(dk => {
+                    const d = evt.drinks[dk];
+                    const sizeVal = parseFloat(d.groesse);
+                    const formattedSize = isNaN(sizeVal) ? d.groesse : sizeVal.toFixed(2);
+                    drinksHtml += `
+                        <div class="today-log-item">
+                            <div>
+                                <span>${d.name} (${formattedSize} L)</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <div>${d.count}x</div>
+                            </div>
                         </div>
-                        <div style="text-align: right;">
-                            <div>${group.count}x</div>
+                    `;
+                });
+
+                lastEventsContainer.innerHTML += `
+                    <div class="event-item-block">
+                        <div class="toggle-trigger" onclick="toggleEventBlock(this)">
+                            <span><strong>${evt.name}</strong> (${evt.datum})</span>
+                            <span class="arrow-icon">▼</span>
+                        </div>
+                        <div class="toggle-hidden-wrapper">
+                            ${drinksHtml}
                         </div>
                     </div>
                 `;
