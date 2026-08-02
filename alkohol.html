@@ -249,6 +249,7 @@
             background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 450px;
             border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); padding: 20px;
             display: flex; flex-direction: column; gap: 16px; animation: modalSlidUp 0.25s ease-out;
+            max-height: 85vh; overflow-y: auto;
         }
         @keyframes modalSlidUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         .modal-title { font-size: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
@@ -273,21 +274,33 @@
         .toggle-trigger {
             font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);
             text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
-            padding: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;
+            padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; gap: 4px; user-select: none;
             background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);
+            transition: background 0.2s;
         }
+        .toggle-trigger:active { background: var(--border-light); }
+        
+        .event-item-block {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .event-item-block.expanded .toggle-hidden-wrapper { display: flex; }
+
         .toggle-hidden-wrapper { display: none; flex-direction: column; gap: 8px; margin-top: 4px; }
-        .section-block.expanded .toggle-hidden-wrapper { display: flex; }
 
         .today-log-item {
             display: flex; justify-content: space-between; align-items: center;
             padding: 8px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
             font-size: 0.82rem; font-weight: 600;
         }
-        .today-log-meta { font-size: 0.72rem; color: var(--text-secondary); font-weight: 700; }
 
-        .perf-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-light); height: 32px; }
-        .perf-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .perf-item { 
+            display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; 
+            border-bottom: 1px solid var(--border-light); height: 38px; cursor: pointer; border-radius: 8px; transition: background 0.15s ease;
+        }
+        .perf-item:hover, .perf-item:active { background: var(--border-light); }
+        .perf-item:last-child { border-bottom: none; }
         .perf-info { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
         .perf-icon { font-size: 0.95rem; flex-shrink: 0; }
         .perf-name { font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -296,6 +309,16 @@
         .perf-bar-bg { flex: 1; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
         .perf-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; }
         .perf-pct { font-size: 0.75rem; font-weight: 700; width: 32px; text-align: right; }
+
+        /* Wiki System Modal Elements */
+        .wiki-header { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .wiki-badge { width: 36px; height: 36px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+        .wiki-title-container { display: flex; flex-direction: column; }
+        .wiki-subtitle { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+        .wiki-stats-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+        .wiki-stat-row { display: flex; justify-content: space-between; align-items: center; background: var(--bg); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 0.82rem; }
+        .wiki-stat-label { font-weight: 600; color: var(--text-secondary); }
+        .wiki-stat-value { font-weight: 800; color: var(--text-primary); text-align: right; }
 
         @media (max-width: 420px) {
             .main-view-switch { width: 150px; }
@@ -311,6 +334,7 @@
 
 <div class="toast-notification" id="toast-notice">Eintrag erfolgreich verbucht!</div>
 
+<!-- Log Modal -->
 <div class="modal-overlay" id="quick-log-modal">
     <div class="modal-card">
         <div class="modal-title" id="modal-drink-title">Getränk bestätigen</div>
@@ -338,6 +362,27 @@
         <div class="modal-actions">
             <button class="cancel-btn" onclick="closeQuickLogModal()">Abbrechen</button>
             <button class="submit-btn" onclick="submitQuickLogFromModal()">Loggen</button>
+        </div>
+    </div>
+</div>
+
+<!-- Wiki Details Modal -->
+<div class="modal-overlay" id="wiki-detail-modal">
+    <div class="modal-card">
+        <div class="wiki-header">
+            <div class="wiki-badge" id="wiki-modal-icon">📖</div>
+            <div class="wiki-title-container">
+                <span class="wiki-subtitle" id="wiki-modal-subtitle">Wiki Detail</span>
+                <span class="modal-title" id="wiki-modal-title">Eintrag</span>
+            </div>
+        </div>
+        
+        <div class="wiki-stats-list" id="wiki-modal-body">
+            <!-- Dynamischer Wiki-Inhalt -->
+        </div>
+
+        <div class="modal-actions" style="grid-template-columns: 1fr;">
+            <button class="cancel-btn" onclick="closeWikiModal()">Schließen</button>
         </div>
     </div>
 </div>
@@ -435,9 +480,9 @@
             </div>
         </div>
 
-        <div class="section-block" id="today-logs-section-block">
-            <div class="toggle-trigger" onclick="toggleTodayLogsBlock()">Getränke von heute anzeigen ▼</div>
-            <div class="toggle-hidden-wrapper" id="today-logs-container"></div>
+        <div class="section-block">
+            <div class="block-title">Letzte 5 Events</div>
+            <div id="last-events-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
         </div>
 
         <div class="section-block">
@@ -493,14 +538,14 @@
     function toggleGroup(header) { header.parentElement.classList.toggle('open'); }
     function showSuccessToast() { const toast = document.getElementById('toast-notice'); toast.classList.add('show'); setTimeout(() => { toast.classList.remove('show'); }, 2000); }
     
-    function toggleTodayLogsBlock() {
-        const block = document.getElementById('today-logs-section-block');
+    function toggleEventBlock(triggerElement) {
+        const block = triggerElement.parentElement;
         block.classList.toggle('expanded');
-        const trigger = block.querySelector('.toggle-trigger');
+        const arrow = triggerElement.querySelector('.arrow-icon');
         if (block.classList.contains('expanded')) {
-            trigger.textContent = "Getränke von heute ausblenden ▲";
+            arrow.textContent = "▲";
         } else {
-            trigger.textContent = "Getränke von heute anzeigen ▼";
+            arrow.textContent = "▼";
         }
     }
 
@@ -508,6 +553,29 @@
         const dd = String(date.getDate()).padStart(2, '0');
         const mm = String(date.getMonth() + 1).padStart(2, '0');
         return `${dd}.${mm}.${date.getFullYear()}`;
+    }
+
+    function formatRawDate(datumVal) {
+        if (!datumVal) return "";
+        let str = String(datumVal).trim();
+        if (str.includes('T')) {
+            const parsed = new Date(str);
+            if (!isNaN(parsed.getTime())) {
+                const pd = String(parsed.getDate()).padStart(2, '0');
+                const pm = String(parsed.getMonth() + 1).padStart(2, '0');
+                const py = String(parsed.getFullYear());
+                return `${pd}.${pm}.${py}`;
+            }
+        }
+        const match = str.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})/);
+        if (match) {
+            const pd = String(match[1]).padStart(2, '0');
+            const pm = String(match[2]).padStart(2, '0');
+            let py = match[3];
+            if (py.length === 2) py = "20" + py;
+            return `${pd}.${pm}.${py}`;
+        }
+        return str;
     }
 
     function isTodayEntry(datumVal) {
@@ -817,49 +885,227 @@
         });
     }
 
+    /* WIKI SYSTEM MODAL LOGIK */
+    function openWikiModal(title, subtitle, icon, statsArray) {
+        document.getElementById('wiki-modal-title').textContent = title;
+        document.getElementById('wiki-modal-subtitle').textContent = subtitle;
+        document.getElementById('wiki-modal-icon').textContent = icon;
+
+        const body = document.getElementById('wiki-modal-body');
+        body.innerHTML = '';
+
+        statsArray.forEach(stat => {
+            body.innerHTML += `
+                <div class="wiki-stat-row">
+                    <span class="wiki-stat-label">${stat.label}</span>
+                    <span class="wiki-stat-value">${stat.value}</span>
+                </div>
+            `;
+        });
+
+        document.getElementById('wiki-detail-modal').classList.add('active');
+    }
+
+    function closeWikiModal() {
+        document.getElementById('wiki-detail-modal').classList.remove('active');
+    }
+
+    /* Wiki Details bei Klick öffnen */
+    function showDrinkWiki(drinkName, drinkSize, drinkCat) {
+        let totalCount = 0;
+        let totalVolume = 0;
+        const anlaesseMap = {};
+        const anlassKatMap = {};
+
+        globalHistory.forEach(item => {
+            if (item.name === drinkName && parseFloat(item.groesse) === parseFloat(drinkSize)) {
+                totalCount++;
+                totalVolume += parseFloat(item.groesse) || 0;
+                
+                if (item.anlass_name && item.anlass_name.trim() !== "") {
+                    anlaesseMap[item.anlass_name] = (anlaesseMap[item.anlass_name] || 0) + 1;
+                }
+                if (item.anlass_kategorie && item.anlass_kategorie.trim() !== "") {
+                    anlassKatMap[item.anlass_kategorie] = (anlassKatMap[item.anlass_kategorie] || 0) + 1;
+                }
+            }
+        });
+
+        const topAnlass = Object.keys(anlaesseMap).sort((a,b) => anlaesseMap[b] - anlaesseMap[a])[0] || "Keiner";
+        const topAnlassKat = Object.keys(anlassKatMap).sort((a,b) => anlassKatMap[b] - anlassKatMap[a])[0] || "Keine";
+        const icon = categoryIcons[drinkCat] || "🍺";
+
+        openWikiModal(`${drinkName} (${parseFloat(drinkSize).toFixed(2)} L)`, "Getränk Wiki-Stats", icon, [
+            { label: "Anzahl konsumiert", value: `${totalCount}x` },
+            { label: "Gesamtvolumen", value: `${totalVolume.toFixed(2).replace('.', ',')} Liter` },
+            { label: "Kategorie", value: drinkCat },
+            { label: "Top-Anlass", value: topAnlass },
+            { label: "Top-Anlass-Kategorie", value: topAnlassKat }
+        ]);
+    }
+
+    function showDrinkCatWiki(catName) {
+        let totalCount = 0;
+        let totalVolume = 0;
+        const drinkCounts = {};
+
+        let globalTotalDrinks = 0;
+
+        globalHistory.forEach(item => {
+            if (item.name && item.name.trim() !== "") globalTotalDrinks++;
+            
+            if (item.kategorie === catName) {
+                totalCount++;
+                totalVolume += parseFloat(item.groesse) || 0;
+                drinkCounts[item.name] = (drinkCounts[item.name] || 0) + 1;
+            }
+        });
+
+        const topDrink = Object.keys(drinkCounts).sort((a,b) => drinkCounts[b] - drinkCounts[a])[0] || "Keines";
+        const share = globalTotalDrinks > 0 ? Math.round((totalCount / globalTotalDrinks) * 100) : 0;
+        const icon = categoryIcons[catName] || "🥤";
+
+        openWikiModal(`Kategorie: ${catName}`, "Getränke-Kategorie Wiki", icon, [
+            { label: "Anzahl Getränke", value: `${totalCount}x` },
+            { label: "Gesamtvolumen", value: `${totalVolume.toFixed(2).replace('.', ',')} Liter` },
+            { label: "Anteil an allen Drinks", value: `${share}%` },
+            { label: "Meistgetrunken", value: topDrink }
+        ]);
+    }
+
+    function showEventCatWiki(eventCatName) {
+        let totalDrinks = 0;
+        const eventsSeen = new Set();
+        const drinkCounts = {};
+
+        globalHistory.forEach(item => {
+            if (item.anlass_kategorie === eventCatName) {
+                totalDrinks++;
+                if (item.anlass_name) eventsSeen.add(item.anlass_name);
+                if (item.name) drinkCounts[item.name] = (drinkCounts[item.name] || 0) + 1;
+            }
+        });
+
+        const topDrink = Object.keys(drinkCounts).sort((a,b) => drinkCounts[b] - drinkCounts[a])[0] || "Keines";
+        const icon = eventIcons[eventCatName] || "📍";
+
+        openWikiModal(`Anlass: ${eventCatName}`, "Anlass-Kategorie Wiki", icon, [
+            { label: "Verknüpfte Events", value: `${eventsSeen.size} Events` },
+            { label: "Konsumierte Drinks", value: `${totalDrinks}x` },
+            { label: "Favorit bei Anlass", value: topDrink }
+        ]);
+    }
+
+    function showEventWiki(eventKey) {
+        const parts = eventKey.split('|');
+        const eventName = parts[0];
+        const eventDate = parts[1];
+
+        let totalVolume = 0;
+        let totalDrinks = 0;
+        const drinkMap = {};
+
+        globalHistory.forEach(item => {
+            const eName = item.anlass_name && item.anlass_name.trim() !== "" ? item.anlass_name.trim() : "Ohne Anlass";
+            const dStr = formatRawDate(item.datum);
+            
+            if (eName === eventName && dStr === eventDate) {
+                totalDrinks++;
+                totalVolume += parseFloat(item.groesse) || 0;
+                drinkMap[item.name] = (drinkMap[item.name] || 0) + 1;
+            }
+        });
+
+        const icon = eventIcons[eventName] || "🎉";
+
+        openWikiModal(`${eventName}`, `Event Wiki (${eventDate})`, icon, [
+            { label: "Datum", value: eventDate },
+            { label: "Gesamtgetränke", value: `${totalDrinks}x` },
+            { label: "Gesamtvolumen", value: `${totalVolume.toFixed(2).replace('.', ',')} Liter` },
+            { label: "Getränke-Vielfalt", value: `${Object.keys(drinkMap).length} Sorten` }
+        ]);
+    }
+
     function calculateStats() {
         let todayVolume = 0;
-        const todayLogsContainer = document.getElementById('today-logs-container');
-        todayLogsContainer.innerHTML = '';
-
-        let todayGroups = {};
-
         globalHistory.forEach(item => {
             if (isTodayEntry(item.datum)) {
                 const numSize = Number(item.groesse);
                 if (!isNaN(numSize)) {
                     todayVolume += numSize;
                 }
-                
-                const key = `${item.name}|${item.groesse}`;
-                if (!todayGroups[key]) {
-                    todayGroups[key] = {
-                        name: item.name,
-                        groesse: item.groesse,
-                        count: 0
-                    };
-                }
-                todayGroups[key].count++;
             }
         });
         document.getElementById('kpi-today').textContent = `${todayVolume.toFixed(2).replace('.', ',')} L`;
 
-        const groupKeys = Object.keys(todayGroups);
-        if (groupKeys.length === 0) {
-            todayLogsContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:4px 0; text-align:center;">Heute noch keine Einträge protokolliert.</div>`;
-        } else {
-            groupKeys.forEach(key => {
-                const group = todayGroups[key];
-                const sizeVal = parseFloat(group.groesse);
-                const formattedSize = isNaN(sizeVal) ? group.groesse : sizeVal.toFixed(2);
+        /* Letzte 5 Events aufbauen */
+        const lastEventsContainer = document.getElementById('last-events-container');
+        lastEventsContainer.innerHTML = '';
 
-                todayLogsContainer.innerHTML += `
-                    <div class="today-log-item">
-                        <div>
-                            <span>${group.name} (${formattedSize} L)</span>
+        const eventsMap = [];
+
+        for (let i = globalHistory.length - 1; i >= 0; i--) {
+            const item = globalHistory[i];
+            const eventName = item.anlass_name && item.anlass_name.trim() !== "" ? item.anlass_name.trim() : "Ohne Anlass";
+            const dateStr = formatRawDate(item.datum);
+            const eventKey = `${eventName}|${dateStr}`;
+
+            let eventObj = eventsMap.find(e => e.key === eventKey);
+            if (!eventObj) {
+                eventObj = {
+                    key: eventKey,
+                    name: eventName,
+                    datum: dateStr,
+                    rawDatum: item.datum,
+                    drinks: {}
+                };
+                eventsMap.push(eventObj);
+            }
+
+            const drinkKey = `${item.name}|${item.groesse}`;
+            if (!eventObj.drinks[drinkKey]) {
+                eventObj.drinks[drinkKey] = {
+                    name: item.name,
+                    groesse: item.groesse,
+                    count: 0
+                };
+            }
+            eventObj.drinks[drinkKey].count++;
+        }
+
+        const top5Events = eventsMap.slice(0, 5);
+
+        if (top5Events.length === 0) {
+            lastEventsContainer.innerHTML = `<div style="font-size:0.8rem; color:var(--text-secondary); padding:4px 0; text-align:center;">Noch keine Events protokolliert.</div>`;
+        } else {
+            top5Events.forEach(evt => {
+                let drinksHtml = '';
+                const drinkKeys = Object.keys(evt.drinks);
+                
+                drinkKeys.forEach(dk => {
+                    const d = evt.drinks[dk];
+                    const sizeVal = parseFloat(d.groesse);
+                    const formattedSize = isNaN(sizeVal) ? d.groesse : sizeVal.toFixed(2);
+                    drinksHtml += `
+                        <div class="today-log-item">
+                            <div>
+                                <span>${d.name} (${formattedSize} L)</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <div>${d.count}x</div>
+                            </div>
                         </div>
-                        <div style="text-align: right;">
-                            <div>${group.count}x</div>
+                    `;
+                });
+
+                lastEventsContainer.innerHTML += `
+                    <div class="event-item-block">
+                        <div class="toggle-trigger" onclick="showEventWiki('${evt.key}')">
+                            <span><strong>${evt.name}</strong> (${evt.datum})</span>
+                            <span class="arrow-icon" style="font-size:0.7rem; color:var(--accent);">ℹ️ Wiki</span>
+                        </div>
+                        <div class="toggle-hidden-wrapper" style="display:flex;">
+                            ${drinksHtml}
                         </div>
                     </div>
                 `;
@@ -891,7 +1137,7 @@
             if(isNaN(numSize)) return;
             
             const sizeFormatted = numSize.toFixed(2);
-            const key = `${item.name} (${sizeFormatted} L)|${item.kategorie || 'Bier'}`;
+            const key = `${item.name} (${sizeFormatted} L)|${item.kategorie || 'Bier'}|${numSize}`;
             counts[key] = (counts[key] || 0) + 1;
             if (counts[key] > maxCount) maxCount = counts[key];
 
@@ -919,13 +1165,14 @@
                 const parts = drinkKey.split('|');
                 const labelPart = parts[0];
                 const catPart = parts[1] || 'Bier';
+                const sizeVal = parts[2] || '0';
                 
                 const cleanName = labelPart.split(' (')[0];
                 const cleanSize = labelPart.includes(' (') ? labelPart.split(' (')[1].replace(')', '') : '';
                 const icon = categoryIcons[catPart] || "🥤";
                 
                 perfContainer.innerHTML += `
-                    <div class="perf-item">
+                    <div class="perf-item" onclick="showDrinkWiki('${cleanName}', '${sizeVal}', '${catPart}')">
                         <div class="perf-info">
                             <span class="perf-icon">${icon}</span>
                             <span class="perf-name">${cleanName} <small style="color:var(--text-secondary); font-weight:700;">${cleanSize}</small></span>
@@ -952,7 +1199,7 @@
                 const icon = categoryIcons[catKey] || "🥤";
 
                 drinkCatContainer.innerHTML += `
-                    <div class="perf-item">
+                    <div class="perf-item" onclick="showDrinkCatWiki('${catKey}')">
                         <div class="perf-info"><span class="perf-icon">${icon}</span><span class="perf-name">${catKey}</span></div>
                         <div class="perf-bar-wrapper">
                             <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
@@ -976,7 +1223,7 @@
                 const icon = eventIcons[catKey] || "📍";
 
                 eventCatContainer.innerHTML += `
-                    <div class="perf-item">
+                    <div class="perf-item" onclick="showEventCatWiki('${catKey}')">
                         <div class="perf-info"><span class="perf-icon">${icon}</span><span class="perf-name">${catKey}</span></div>
                         <div class="perf-bar-wrapper">
                             <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${pct}%"></div></div>
