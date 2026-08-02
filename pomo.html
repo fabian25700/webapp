@@ -250,18 +250,6 @@
             margin: 4px 0;
         }
 
-        .quote-box {
-            font-size: 0.95rem;
-            font-weight: 700;
-            line-height: 1.4;
-            color: var(--text-primary);
-            padding: 12px;
-            background: var(--bg);
-            border-radius: 12px;
-            border: 1px solid var(--border-light);
-            width: 100%;
-        }
-
         .todo-callout {
             font-size: 0.8rem;
             font-weight: 800;
@@ -312,7 +300,6 @@
     <div class="lock-container">
         <div class="badge-lock">🔒 Focus Mode Active</div>
         <div class="timer-display" id="timer">00:00</div>
-        <div class="quote-box" id="quote"></div>
         <div class="todo-callout">🚀 Jetzt ToDos rocken!</div>
     </div>
 </div>
@@ -322,23 +309,11 @@
         e.preventDefault();
     });
 
-    const quotes = [
-        "Kein Cashflow während du Trophys verlierst. Geh wieder an die Work!",
-        "Low Performer spielen 2v2. High Performer skalieren das Business.",
-        "Macho Mindset: Erst der Grind, dann der Win.",
-        "Der Markt wartet nicht auf deine Elixier-Aufladung. Hustle weiter!",
-        "Krone verloren? Egal. Hauptsache das Portfolio wächst.",
-        "Wenig Spiel, viel Revenue. Geh zurück an die ToDo-Liste!"
-    ];
-
     let timerInterval = null;
 
     function startLockout(minutes) {
         const endTime = Date.now() + minutes * 60 * 1000;
         localStorage.setItem('pomodoro_end_time', endTime);
-        
-        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-        localStorage.setItem('pomodoro_quote', randomQuote);
         
         runTimer();
     }
@@ -348,10 +323,7 @@
         if (!endTime) return;
 
         const lockScreen = document.getElementById('lock-screen');
-        const quoteBox = document.getElementById('quote');
         
-        const savedQuote = localStorage.getItem('pomodoro_quote') || quotes[0];
-        quoteBox.innerText = `"${savedQuote}"`;
         lockScreen.classList.add('active');
 
         if (timerInterval) clearInterval(timerInterval);
@@ -364,8 +336,8 @@
             if (remainingSeconds <= 0) {
                 clearInterval(timerInterval);
                 localStorage.removeItem('pomodoro_end_time');
-                localStorage.removeItem('pomodoro_quote');
                 lockScreen.classList.remove('active');
+                document.title = "Pomodoro";
             } else {
                 updateTimerDisplay(remainingSeconds);
             }
@@ -378,8 +350,9 @@
     function updateTimerDisplay(seconds) {
         const m = Math.floor(seconds / 60);
         const s = seconds % 60;
-        document.getElementById('timer').innerText = 
-            `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        const timeString = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        document.getElementById('timer').innerText = timeString;
+        document.title = `(${timeString}) Pomodoro`;
     }
 
     // Beim Laden der Seite prüfen, ob noch ein Timer läuft
