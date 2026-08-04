@@ -1,2296 +1,360 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Mein Budget</title>
-    <style>
-        :root {
-            --accent: #e67e22;
-            --accent-soft: rgba(230, 126, 34, 0.1);
-            --success: #27ae60;
-            --success-soft: rgba(39, 174, 96, 0.1);
-            --danger: #e74c3c;
-            --danger-soft: rgba(231, 76, 60, 0.1);
-            --bg: #f0f2f5;
-            --surface: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --border: #e2e8f0;
-            --border-light: #f1f5f9;
-            --shadow: 0 6px 16px rgba(0,0,0,0.06);
-            --apple-switch-bg: #e3e3e6;
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #0f172a;
-                --surface: #1e293b;
-                --text-primary: #f1f5f9;
-                --text-secondary: #94a3b8;
-                --border: #2d3f55;
-                --border-light: #253347;
-                --apple-switch-bg: #1c1c1e;
-            }
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            touch-action: manipulation;
-        }
-
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow-x: hidden;
-            touch-action: pan-y;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
-            background: var(--bg);
-            color: var(--text-primary);
-            min-height: 100vh;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-user-select: none;
-            user-select: none;
-        }
-
-        header {
-            position: sticky; top: 0; z-index: 100;
-            background: var(--surface);
-            padding: calc(env(safe-area-inset-top) + 16px) 20px 16px;
-            border-bottom: 1px solid var(--border-light);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .back-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4px;
-            text-decoration: none;
-        }
-
-        .back-btn svg {
-            width: 24px;
-            height: 24px;
-            fill: currentColor;
-        }
-
-        .header-title-left {
-            font-size: 1.25rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-        }
-
-        .header-right {
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
-        }
-
-        .container {
-            padding: 20px 16px;
-            max-width: 600px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        /* Schwebender Plus-Button (FAB) */
-        .fab {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 60px;
-            height: 60px;
-            background: var(--accent);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 16px rgba(230, 126, 34, 0.4);
-            cursor: pointer;
-            z-index: 90;
-            border: none;
-            color: white;
-            transition: transform 0.2s;
-            touch-action: none;
-        }
-
-        .fab:active {
-            transform: scale(0.92);
-        }
-
-        .fab svg {
-            width: 28px;
-            height: 28px;
-            fill: currentColor;
-        }
-
-        /* Modal Overlay */
-        .modal {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4);
-            z-index: 200;
-            display: none;
-            align-items: flex-end;
-            justify-content: center;
-            backdrop-filter: blur(4px);
-            touch-action: none;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: var(--bg);
-            width: 100%;
-            max-height: 88vh;
-            border-top-left-radius: 24px;
-            border-top-right-radius: 24px;
-            padding: 20px;
-            overflow-y: auto;
-            box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            touch-action: pan-y;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        /* Tracking Modal */
-        #tracking-modal .modal-content {
-            max-height: 96vh;
-            height: auto;
-            overflow: hidden !important;
-            padding: 12px 16px;
-            gap: 8px;
-            justify-content: space-between;
-        }
-
-        #tracking-modal .card {
-            padding: 10px 12px;
-            border-radius: 14px;
-        }
-
-        #tracking-modal .card-title {
-            margin-bottom: 6px;
-        }
-
-        #tracking-modal .input-group {
-            margin-bottom: 0;
-        }
-
-        @media (min-width: 601px) {
-            .modal {
-                align-items: center;
-            }
-            .modal-content {
-                width: 500px;
-                max-height: 85vh;
-                border-radius: 24px;
-            }
-            #tracking-modal .modal-content {
-                height: max-content;
-                max-height: 90vh;
-            }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .modal-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-        }
-
-        .close-modal {
-            background: var(--border);
-            border: none;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            color: var(--text-primary);
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Segmented Controls */
-        .segmented-control {
-            display: flex;
-            background: var(--apple-switch-bg);
-            padding: 2px;
-            border-radius: 9px;
-            width: 100%;
-        }
-
-        .segmented-btn {
-            flex: 1;
-            padding: 8px 0;
-            font-size: 0.85rem;
-            font-weight: 600;
-            border: none;
-            background: transparent;
-            color: var(--text-primary);
-            border-radius: 7px;
-            cursor: pointer;
-            touch-action: manipulation;
-        }
-
-        .segmented-btn.active {
-            background: var(--surface);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        /* Cards */
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card-title {
-            font-size: 0.85rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
-            margin-bottom: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
-
-        .card-title-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .card-icon {
-            width: 28px;
-            height: 28px;
-            background: var(--accent-soft);
-            color: var(--accent);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            flex-shrink: 0;
-        }
-
-        .modal-content.income .card-icon {
-            background: var(--success-soft);
-            color: var(--success);
-        }
-
-        .input-group {
-            margin-bottom: 14px;
-        }
-
-        .input-group:last-of-type {
-            margin-bottom: 0;
-        }
-
-        .input-group label {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .number-input {
-            width: 100%;
-            text-align: center;
-            background: transparent;
-            border: none;
-            color: var(--danger);
-            font-size: 2.2rem;
-            font-weight: 800;
-            outline: none;
-            padding: 8px 0;
-            -webkit-user-select: text;
-            user-select: text;
-        }
-
-        #tracking-modal .number-input {
-            font-size: 1.8rem;
-            padding: 2px 0;
-        }
-
-        .modal-content.income .number-input { color: var(--success); }
-
-        .text-input {
-            width: 100%;
-            padding: 14px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 16px;
-            font-weight: 600;
-            outline: none;
-            -webkit-user-select: text;
-            user-select: text;
-        }
-
-        #tracking-modal .text-input {
-            padding: 8px 12px;
-        }
-
-        .text-input:focus {
-            border-color: var(--accent);
-        }
-        
-        .modal-content.income .text-input:focus {
-            border-color: var(--success);
-        }
-
-        /* Category Grid */
-        .category-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        #tracking-modal .category-grid {
-            gap: 6px;
-        }
-
-        .category-btn {
-            background: var(--bg);
-            border: 1px solid transparent;
-            border-radius: 14px;
-            padding: 12px 6px;
-            color: var(--text-primary);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            font-size: 0.78rem;
-            font-weight: 600;
-            touch-action: manipulation;
-        }
-
-        #tracking-modal .category-btn {
-            padding: 6px 4px;
-            font-size: 0.72rem;
-            gap: 2px;
-            border-radius: 10px;
-        }
-
-        .category-btn span.icon-wrapper {
-            font-size: 1.2rem;
-            display: block;
-        }
-
-        #tracking-modal .category-btn span.icon-wrapper {
-            font-size: 1rem;
-        }
-
-        .modal-content.expense .category-btn.selected {
-            background: var(--danger-soft);
-            border-color: var(--danger);
-            color: var(--danger);
-        }
-
-        .modal-content.income .category-btn.selected {
-            background: var(--success-soft);
-            border-color: var(--success);
-            color: var(--success);
-        }
-
-        /* Switches */
-        .option-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .apple-switch {
-            position: relative;
-            display: inline-block;
-            width: 51px;
-            height: 31px;
-        }
-
-        .apple-switch input { opacity: 0; width: 0; height: 0; }
-
-        .slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: var(--apple-switch-bg);
-            transition: .3s; border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute; content: ""; height: 27px; width: 27px; left: 2px; bottom: 2px;
-            background-color: white; transition: .3s; border-radius: 50%;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
-        }
-
-        .modal-content.expense input:checked + .slider { background-color: var(--accent); }
-        .modal-content.income input:checked + .slider { background-color: var(--success); }
-        input:checked + .slider:before { transform: translateX(20px); }
-
-        /* Buttons */
-        .inline-action-btn {
-            background: var(--border-light);
-            border: 1px solid var(--border);
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            cursor: pointer;
-            color: var(--text-primary);
-            touch-action: manipulation;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            border: none;
-            color: white;
-            font-size: 0.9rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            touch-action: manipulation;
-        }
-
-        #tracking-modal .submit-btn {
-            padding: 12px;
-        }
-
-        .modal-content.expense .submit-btn { background: var(--accent); }
-        .modal-content.income .submit-btn { background: var(--success); }
-
-        .submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .delete-btn {
-            width: 100%;
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid var(--danger);
-            background: transparent;
-            color: var(--danger);
-            font-size: 0.9rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 8px;
-            touch-action: manipulation;
-        }
-
-        #tracking-modal .delete-btn {
-            padding: 10px;
-            margin-top: 0;
-        }
-
-        /* Spinner */
-        .spinner {
-            width: 20px; height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-            display: none;
-        }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* Vorlagen Drawer */
-        .templates-drawer {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--bg);
-            z-index: 210;
-            display: none;
-            flex-direction: column;
-            padding: 20px;
-            touch-action: pan-y;
-        }
-        @media (min-width: 601px) {
-            .templates-drawer {
-                width: 500px; max-height: 85vh; left: 50%; top: 50%;
-                transform: translate(-50%, -50%); border-radius: 24px;
-                box-shadow: 0 4px 24px rgba(0,0,0,0.2);
-            }
-            .templates-drawer.active { display: flex; }
-        }
-        .templates-drawer.active { display: flex; }
-
-        .templates-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            overflow-y: auto;
-            margin-top: 12px;
-            padding-bottom: 12px;
-        }
-
-        .template-item {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 10px 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: flex-start;
-            cursor: pointer;
-            box-shadow: var(--shadow);
-            gap: 4px;
-            touch-action: manipulation;
-        }
-
-        .template-info { display: flex; flex-direction: column; gap: 2px; width: 100%; }
-        .template-title { font-weight: 700; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
-        .template-meta { font-size: 0.65rem; color: var(--text-secondary); font-weight: 600; text-transform: uppercase; }
-        .template-amount { font-weight: 800; font-size: 0.9rem; margin-top: 2px; align-self: flex-end; }
-        .template-amount.expense { color: var(--danger); }
-        .template-amount.income { color: var(--success); }
-
-        /* Dashboard */
-        .dashboard-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 14px 0;
-            border-bottom: 1px solid var(--border-light);
-        }
-
-        .dashboard-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .dashboard-row span:first-child { font-size: 0.95rem; font-weight: 600; color: var(--text-secondary); }
-        .dashboard-row span:last-child { font-size: 1.05rem; font-weight: 700; }
-
-        /* Filter Controls */
-        .filter-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 16px 20px;
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .filter-row-inputs {
-            display: flex;
-            gap: 12px;
-            width: 100%;
-        }
-        .filter-select {
-            flex: 1;
-            padding: 10px;
-            border-radius: 10px;
-            border: 1px solid var(--border);
-            background: var(--bg);
-            color: var(--text-primary);
-            font-size: 16px;
-            font-weight: 600;
-            outline: none;
-            cursor: pointer;
-            touch-action: manipulation;
-        }
-
-        /* Sparquote Container */
-        .savings-rate-container {
-            margin-top: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .savings-rate-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-        }
-        .savings-track {
-            width: 100%;
-            height: 12px;
-            background: var(--border-light);
-            border-radius: 6px;
-            position: relative;
-            overflow: hidden;
-        }
-        .savings-center-line {
-            position: absolute;
-            left: 50%;
-            top: 0;
-            width: 2px;
-            height: 100%;
-            background: var(--text-secondary);
-            opacity: 0.4;
-            z-index: 2;
-        }
-        .savings-fill-bar {
-            position: absolute;
-            top: 0;
-            height: 100%;
-            width: 0%;
-            transition: all 0.5s cubic-bezier(0.1, 0.8, 0.3, 1);
-        }
-
-        .bar-visual-wrapper {
-            display: flex; flex-direction: column; gap: 4px; margin-top: 14px;
-        }
-        .bar-visual-row {
-            display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;
-        }
-        .bar-visual-track {
-            width: 100%; height: 22px; background: var(--border-light); border-radius: 6px; overflow: hidden; position: relative;
-        }
-        .bar-visual-fill {
-            height: 100%; width: 0%; background: var(--accent); transition: width 0.6s cubic-bezier(0.1, 0.8, 0.3, 1);
-        }
-        .bar-visual-fill.income-bar {
-            background: var(--success);
-        }
-        .bar-visual-text {
-            position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; font-weight: 800; color: var(--text-primary);
-        }
-
-        /* Distribution Lists */
-        .dist-item {
-            display: flex; align-items: center; justify-content: space-between; padding: 12px 0; font-size: 0.95rem; border-bottom: 1px solid var(--border-light);
-            cursor: pointer; text-decoration: none; transition: background 0.2s;
-            touch-action: manipulation;
-        }
-        .dist-item:hover {
-            background: var(--border-light);
-        }
-        .dist-item:last-child { border-bottom: none; }
-        .dist-label { display: flex; align-items: center; gap: 12px; font-weight: 600; color: var(--text-primary); }
-        .dist-value { font-weight: 700; }
-
-        .status-text-loader {
-            text-align: center; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; padding: 20px 0;
-        }
-
-        /* Toast */
-        .toast {
-            position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px);
-            background: var(--success); color: white; padding: 12px 24px; border-radius: 30px;
-            font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-            z-index: 300; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .toast.active { transform: translateX(-50%) translateY(0); }
-
-        /* Netto Trend Diagramm */
-        .net-trend-chart {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            height: 140px;
-            padding: 10px 0;
-            margin-top: 6px;
-            position: relative;
-            gap: 6px;
-        }
-        .net-zero-line {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 50%;
-            height: 1px;
-            border-top: 1px dashed var(--border);
-            z-index: 1;
-        }
-        .net-bar-wrapper {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100%;
-            position: relative;
-            z-index: 2;
-        }
-        .net-bar-wrapper:hover .timeline-tooltip {
-            display: block;
-        }
-        .net-bar-area {
-            flex: 1;
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-        .net-bar {
-            width: 60%;
-            max-width: 18px;
-            border-radius: 4px;
-            transition: height 0.3s ease;
-            position: absolute;
-            left: 20%;
-        }
-        .net-bar.pos {
-            bottom: 50%;
-            background: var(--success);
-            border-bottom-left-radius: 0;
-            border-bottom-right-radius: 0;
-        }
-        .net-bar.neg {
-            top: 50%;
-            background: var(--danger);
-            border-top-left-radius: 0;
-            border-top-right-radius: 0;
-        }
-        .net-label {
-            font-size: 0.65rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            margin-top: 4px;
-            text-align: center;
-            white-space: nowrap;
-        }
-        .timeline-tooltip {
-            position: absolute;
-            bottom: 105%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--text-primary);
-            color: var(--surface);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            white-space: nowrap;
-            z-index: 10;
-            display: none;
-            box-shadow: var(--shadow);
-        }
-
-        .timeline-chart {
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            height: 120px;
-            padding-top: 20px;
-            margin-top: 10px;
-            border-bottom: 2px solid var(--border);
-            gap: 4px;
-        }
-        .timeline-bar-wrapper {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100%;
-            justify-content: flex-end;
-            position: relative;
-        }
-        .timeline-bar-wrapper:hover .timeline-tooltip {
-            display: block;
-        }
-        .timeline-bar-multi {
-            width: 100%;
-            display: flex;
-            align-items: flex-end;
-            gap: 2px;
-            height: 100%;
-        }
-        .timeline-subbar {
-            flex: 1;
-            border-top-left-radius: 3px;
-            border-top-right-radius: 3px;
-            min-height: 2px;
-            transition: height 0.3s ease;
-        }
-        .timeline-subbar.inc { background: var(--success); }
-        .timeline-subbar.exp { background: var(--danger); }
-        .timeline-subbar.sal { background: var(--accent); }
-        .timeline-label {
-            font-size: 0.6rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            margin-top: 4px;
-            text-align: center;
-            white-space: nowrap;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#b31217">
+  <title>KC Rakete</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #a3a3a3;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      position: fixed;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 480px;
+      background-color: #4a4a4a;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      padding-bottom: 30px;
+      overflow: hidden;
+      transition: max-width 0.3s ease;
+    }
+
+    /* responsive Optimierung für Laptops / größere Bildschirme */
+    @media (min-width: 768px) {
+      .app-container {
+        max-width: 1024px;
+      }
+    }
+
+    /* Header mit rot-weißem Schachbrettmuster */
+    .header-banner {
+      width: 100%;
+      height: calc(160px + env(safe-area-inset-top));
+      padding-top: env(safe-area-inset-top);
+      background-color: #b31217;
+      background-image: 
+        linear-gradient(45deg, #a3a3a3 25%, transparent 25%), 
+        linear-gradient(-45deg, #a3a3a3 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #a3a3a3 75%), 
+        linear-gradient(-45deg, transparent 75%, #a3a3a3 75%);
+      background-size: 80px 80px;
+      background-position: 0 0, 0 40px, 40px -40px, -40px 0px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    /* Wölbung des Hauptinhalts */
+    .content-card {
+      width: 100%;
+      height: 100%;
+      background-color: #4a4a4a;
+      margin-top: -30px;
+      border-top-left-radius: 50% 20px;
+      border-top-right-radius: 50% 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 20px 20px 20px;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    /* Profil-Logo */
+    .avatar-container {
+      margin-top: -50px;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background-color: #000000;
+      border: 3px solid #333333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      flex-shrink: 0;
+    }
+
+    .avatar-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Titel & Untertitel */
+    .title {
+      font-size: 26px;
+      font-weight: bold;
+      margin-top: 15px;
+      text-align: center;
+      color: #ffffff;
+      flex-shrink: 0;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #dddddd;
+      margin-top: 5px;
+      margin-bottom: 20px;
+      text-align: center;
+      font-style: italic;
+      flex-shrink: 0;
+    }
+
+    /* Termine Box */
+    .events-box {
+      width: 100%;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      border-radius: 30px;
+      padding: 20px 15px;
+      text-align: center;
+      margin-bottom: 20px;
+      background-color: rgba(0, 0, 0, 0.05);
+      flex-shrink: 0;
+    }
+
+    .events-title {
+      font-size: 28px;
+      font-weight: normal;
+      margin-bottom: 15px;
+      color: #ffffff;
+    }
+
+    .events-list p {
+      font-size: 15px;
+      line-height: 1.5;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .events-list p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Buttons Grid (2-spaltig) */
+    .button-grid {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 25px;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: #ffffff;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      border-radius: 25px;
+      padding: 12px 8px;
+      font-size: 14px;
+      text-align: center;
+      background-color: transparent;
+      transition: background-color 0.2s, transform 0.1s;
+      min-height: 50px;
+      cursor: pointer;
+    }
+
+    .btn:active {
+      background-color: rgba(255, 255, 255, 0.2);
+      transform: scale(0.98);
+    }
+
+    /* Footer / Instagram */
+    .footer {
+      margin-top: auto;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding-top: 10px;
+      flex-shrink: 0;
+    }
+
+    .instagram-link {
+      display: inline-block;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .instagram-link:active {
+      opacity: 1;
+    }
+
+    .instagram-icon {
+      width: 20px;
+      height: 20px;
+      fill: #ffffff;
+    }
+
+    /* Modal / Dokumente-Maske */
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      touch-action: none;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      width: 90%;
+      max-width: 500px;
+      background-color: #4a4a4a;
+      border: 2px solid rgba(255, 255, 255, 0.8);
+      border-radius: 25px;
+      padding: 25px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      position: relative;
+      touch-action: none;
+    }
+
+    .modal-title {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      text-align: center;
+      color: #ffffff;
+    }
+
+    .modal-buttons {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .close-btn {
+      margin-top: 10px;
+      width: 100%;
+      max-width: 200px;
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+  </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-left">
-            <a href="index.html" class="back-btn" aria-label="Zurück">
-                <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-            </a>
-            <div class="header-title-left">Mein Budget</div>
+  <div class="app-container">
+    <div class="header-banner"></div>
+
+    <div class="content-card">
+      <div class="avatar-container">
+        <img src="rakete.png" alt="KC Rakete Logo">
+      </div>
+
+      <h1 class="title">KC Rakete</h1>
+      <p class="subtitle">Und niemals vergessen - KC Rakete!</p>
+
+      <div class="events-box">
+        <h2 class="events-title">Nächste Termine</h2>
+        <div class="events-list">
+          <p>Kegeln: jeden vierten Freitag, 18 Uhr, Zur Krone</p>
+          <p>Kegeltour: 26. Mai bis 30. Mai 2027</p>
+          <p>Kegelturnier: 2026 offen</p>
         </div>
-        <div class="header-right" id="cloud-status-text"></div>
-    </header>
+      </div>
 
-    <div class="container">
-        <!-- Filter Card -->
-        <div class="filter-card">
-            <div class="segmented-control" style="margin-bottom: 4px;">
-                <button id="view-mode-month" class="segmented-btn active" onclick="setViewMode('month')">Monatsübersicht</button>
-                <button id="view-mode-year" class="segmented-btn" onclick="setViewMode('year')">Jahresübersicht</button>
-            </div>
-            <div class="filter-row-inputs">
-                <select id="filter-year" class="filter-select" onchange="renderStats(globalRawData)">
-                </select>
-                <select id="filter-month" class="filter-select" onchange="renderStats(globalRawData)">
-                    <option value="all">Gesamtes Jahr</option>
-                    <option value="01">Januar</option>
-                    <option value="02">Februar</option>
-                    <option value="03">März</option>
-                    <option value="04">April</option>
-                    <option value="05">Mai</option>
-                    <option value="06">Juni</option>
-                    <option value="07">Juli</option>
-                    <option value="08">August</option>
-                    <option value="09">September</option>
-                    <option value="10">Oktober</option>
-                    <option value="11">November</option>
-                    <option value="12">Dezember</option>
-                </select>
-            </div>
-        </div>
+      <div class="button-grid">
+        <a href="kcr_teams.html" class="btn">Teams auslosen</a>
+        <a href="kcr_kallen.html" class="btn">Ewige Kallen Tabelle</a>
+        <a href="kcr_ao.html" class="btn">Kegelabgabenordnung</a>
+        <a href="kcr_chronik.html" class="btn">Chronik</a>
+        <a href="kcr_bot.html" class="btn">KC Bot</a>
+        <button id="docsBtn" class="btn" type="button">Dokumente</button>
+      </div>
 
-        <!-- Dashboard -->
-        <section id="sect-dashboard" class="app-section active">
-            <div class="card">
-                <div class="card-title">
-                    <div class="card-title-left">
-                        <div class="card-icon">📊</div>
-                        <span>Finanz-Übersicht</span>
-                    </div>
-                </div>
-                
-                <div class="dashboard-row">
-                    <span>Einnahmen</span>
-                    <span style="color: var(--success);" id="dash-income">0,00 €</span>
-                </div>
-                <div class="dashboard-row">
-                    <span>Ausgaben</span>
-                    <span style="color: var(--danger);" id="dash-expense">0,00 €</span>
-                </div>
-                <div class="dashboard-row" style="border-top: 1px dashed var(--border); padding-top: 16px; margin-top: 4px;">
-                    <span>Netto Saldo</span>
-                    <span id="dash-saldo">0,00 €</span>
-                </div>
-                <div class="dashboard-row">
-                    <span>Sparquote</span>
-                    <span id="stats-savings-rate">0%</span>
-                </div>
-                
-                <!-- Sparquoten Container -->
-                <div class="savings-rate-container">
-                    <div class="savings-rate-labels">
-                        <span id="savings-min-label">Max Sparen</span>
-                        <span>0%</span>
-                        <span id="savings-max-label">Max Verlust</span>
-                    </div>
-                    <div class="savings-track">
-                        <div class="savings-center-line"></div>
-                        <div id="savings-bar-fill" class="savings-fill-bar"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Netto-Saldo Trend Kachel -->
-            <div class="card">
-                <div class="card-title">
-                    <div class="card-title-left">
-                        <div class="card-icon">📈</div>
-                        <span>Netto-Saldo Trend</span>
-                    </div>
-                </div>
-                <div id="dashboard-timeline-chart" class="net-trend-chart">
-                </div>
-                <div style="display: flex; gap: 16px; justify-content: center; margin-top: 10px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">
-                    <div style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; background: var(--success); border-radius: 2px;"></div>Positiver Saldo</div>
-                    <div style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; background: var(--danger); border-radius: 2px;"></div>Negativer Saldo</div>
-                </div>
-            </div>
-
-            <!-- Kategorie Verteilungen -->
-            <div class="card">
-                <div class="card-title" style="margin-bottom: 8px;">
-                    <div class="card-title-left">
-                        <div class="card-icon">🍕</div>
-                        <span>Kategorie-Verteilungen</span>
-                    </div>
-                    <div class="segmented-control" style="width: auto; max-width: 100px; padding: 1px; border-radius: 6px;">
-                        <button id="chart-toggle-exp" class="segmented-btn active" style="padding: 4px 8px; font-size: 0.8rem; border-radius: 5px; font-weight: 800;" onclick="setChartDistributionType('expense')">─</button>
-                        <button id="chart-toggle-inc" class="segmented-btn" style="padding: 4px 8px; font-size: 0.8rem; border-radius: 5px; font-weight: 800;" onclick="setChartDistributionType('income')">┼</button>
-                    </div>
-                </div>
-                <div id="unified-chart-container" style="display: flex; flex-direction: column; gap: 4px;">
-                    <p class="status-text-loader">Lade Auswertungen...</p>
-                </div>
-            </div>
-
-            <!-- Kategorien Liste -->
-            <div class="card">
-                <div class="card-title">
-                    <div class="card-title-left">
-                        <div class="card-icon">📋</div>
-                        <span>Kategorien</span>
-                    </div>
-                </div>
-                <div id="stats-distribution" style="display: flex; flex-direction: column;">
-                    <p class="status-text-loader">Lade Daten...</p>
-                </div>
-            </div>
-
-            <!-- Letzte Buchungen Kachel -->
-            <div class="card">
-                <div class="card-title">
-                    <div class="card-title-left">
-                        <div class="card-icon">⏱️</div>
-                        <span>Letzte Buchungen</span>
-                    </div>
-                </div>
-                <div id="dashboard-recent-bookings" style="display: flex; flex-direction: column;">
-                    <p class="status-text-loader">Lade Buchungen...</p>
-                </div>
-                <button class="inline-action-btn" style="margin-top: 14px; width: 100%; padding: 12px; text-transform: uppercase; letter-spacing: 0.05em;" onclick="openHistoryModal()">Alle Buchungen</button>
-            </div>
-        </section>
+      <div class="footer">
+        <a href="https://www.instagram.com/kcrakete" target="_blank" class="instagram-link" aria-label="Instagram">
+          <svg class="instagram-icon" viewBox="0 0 24 24">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+          </svg>
+        </a>
+      </div>
     </div>
 
-    <!-- Floating Action Button -->
-    <button class="fab" onclick="openTrackingModal()" aria-label="Eintrag hinzufügen">
-        <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-    </button>
-
-    <!-- Tracking Modal -->
-    <div id="tracking-modal" class="modal" onclick="closeTrackingModalOnOutsideClick(event)">
-        <div class="modal-content expense" id="modal-content-container">
-            <div class="modal-header">
-                <span class="modal-title" id="tracking-modal-title">Eintrag tracken</span>
-                <button class="close-modal" onclick="closeTrackingModal()">×</button>
-            </div>
-
-            <div class="segmented-control" id="modal-type-switcher">
-                <button class="segmented-btn active expense-toggle" onclick="setEntryType('expense')">Ausgabe</button>
-                <button class="segmented-btn income-toggle" onclick="setEntryType('income')">Einnahme</button>
-            </div>
-
-            <div class="card">
-                <div class="input-group">
-                    <input type="number" step="0.01" class="number-input" id="amount" placeholder="-0,00 €" onfocus="clearPlaceholder(this)" onblur="restorePlaceholder(this)">
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-title">
-                    <div class="card-title-left">
-                        <div class="card-icon">📝</div>
-                        <span>Details</span>
-                    </div>
-                    <button class="inline-action-btn" id="modal-template-btn" onclick="openTemplatesDrawer()">Vorlagen</button>
-                </div>
-                <div class="input-group">
-                    <label for="title">Titel</label>
-                    <input type="text" class="text-input" id="title" placeholder="z.B. REWE, Miete, Strom">
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-title">
-                    <div class="card-title-left">
-                        <div class="card-icon">📁</div>
-                        <span>Kategorie wählen</span>
-                    </div>
-                </div>
-                
-                <div id="grid-expense" class="category-grid">
-                    <button class="category-btn" onclick="selectCategory(this, 'Kleidung')">
-                        <span class="icon-wrapper">👕</span>
-                        Kleidung
-                    </button>
-                    <button class="category-btn" onclick="selectCategory(this, 'Urlaub')">
-                        <span class="icon-wrapper">🧳</span>
-                        Urlaub
-                    </button>
-                    <button class="category-btn" onclick="selectCategory(this, 'Gesundheit')">
-                        <span class="icon-wrapper">🩺</span>
-                        Gesundheit
-                    </button>
-                    <button class="category-btn" onclick="selectCategory(this, 'Freizeit')">
-                        <span class="icon-wrapper">🎬</span>
-                        Freizeit
-                    </button>
-                    <button class="category-btn" onclick="selectCategory(this, 'Mobilität')">
-                        <span class="icon-wrapper">🚗</span>
-                        Mobilität
-                    </button>
-                    <button class="category-btn" onclick="selectCategory(this, 'Wohnen')">
-                        <span class="icon-wrapper">🏠</span>
-                        Wohnen
-                    </button>
-                    <button class="category-btn" onclick="selectCategory(this, 'Sonstiges')">
-                        <span class="icon-wrapper">📦</span>
-                        Sonstiges
-                    </button>
-                </div>
-
-                <div id="grid-income" class="category-grid" style="display: none;">
-                    <button class="category-btn" onclick="selectCategory(this, 'Lohn')">
-                        <span class="icon-wrapper">💼</span>
-                        Lohn
-                    </button>
-                    <button class="category-btn" onclick="selectCategory(this, 'Sonstige')">
-                        <span class="icon-wrapper">🪙</span>
-                        Sonstige
-                    </button>
-                    <button class="category-btn" onclick="selectCategory(this, 'MG')">
-                        <span class="icon-wrapper">🎖️</span>
-                        MG
-                    </button>
-                </div>
-            </div>
-
-            <div class="card" id="modal-template-toggle-card">
-                <div class="option-row">
-                    <span class="option-title" style="font-weight: 600; font-size: 0.95rem;">Als Vorlage speichern</span>
-                    <label class="apple-switch">
-                        <input type="checkbox" id="is_template">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-            </div>
-
-            <button class="submit-btn" id="btn-submit-data" onclick="submitData()">
-                <div class="spinner" id="submit-spinner"></div>
-                <span id="submit-btn-text">Speichern</span>
-            </button>
-            
-            <button class="delete-btn" id="btn-delete-data" style="display: none;" onclick="deleteData()">
-                <span>Löschen</span>
-            </button>
+    <!-- Dokumente Overlay/Maske -->
+    <div id="docsModal" class="modal-overlay">
+      <div class="modal-content">
+        <h2 class="modal-title">Dokumente</h2>
+        <div class="modal-buttons">
+          <button class="btn" type="button"></button>
+          <button class="btn" type="button"></button>
+          <button class="btn" type="button"></button>
         </div>
+        <button id="closeModalBtn" class="btn close-btn" type="button">Schließen</button>
+      </div>
     </div>
-
-    <!-- Kategorie Modal -->
-    <div id="category-modal" class="modal" onclick="closeCategoryModalOnOutsideClick(event)">
-        <div class="modal-content" style="background: var(--bg); max-height: 95vh;">
-            <div class="modal-header" style="background: var(--surface); padding: 12px 16px; margin: -20px -20px 12px -20px; border-bottom: 1px solid var(--border-light); border-top-left-radius: 24px; border-top-right-radius: 24px;">
-                <span class="modal-title" id="category-modal-title">Kategorie Details</span>
-                <button class="close-modal" onclick="closeCategoryModal()">×</button>
-            </div>
-            
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-                <div class="filter-card">
-                    <div class="filter-row-inputs">
-                        <select id="cat-filter-year" class="filter-select" style="width: 100%;" onchange="updateCategoryModalView()">
-                        </select>
-                    </div>
-                </div>
-
-                <div class="card" id="cat-overview-card">
-                    <div class="card-title">
-                        <div class="card-title-left">
-                            <div class="card-icon">📊</div>
-                            <span>Kategorie-Übersicht</span>
-                        </div>
-                    </div>
-                    <div class="dashboard-row" id="cat-row-income">
-                        <span>Einnahmen</span>
-                        <span style="color: var(--success);" id="cat-dash-income">0,00 €</span>
-                    </div>
-                    <div class="dashboard-row" id="cat-row-expense">
-                        <span>Ausgaben</span>
-                        <span style="color: var(--danger);" id="cat-dash-expense">0,00 €</span>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">
-                        <div class="card-title-left">
-                            <div class="card-icon">📈</div>
-                            <span>Jahresverlauf (Monate)</span>
-                        </div>
-                    </div>
-                    <div id="cat-timeline-chart" class="timeline-chart">
-                    </div>
-                    <div style="display: flex; gap: 12px; justify-content: center; margin-top: 10px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">
-                        <div id="cat-legend-inc" style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; background: var(--success); border-radius: 2px;"></div>Ein</div>
-                        <div id="cat-legend-exp" style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; background: var(--danger); border-radius: 2px;"></div>Aus</div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">
-                        <div class="card-title-left">
-                            <div class="card-icon">📜</div>
-                            <span>Buchungen dieser Kategorie</span>
-                        </div>
-                    </div>
-                    <div id="category-modal-body" style="display: flex; flex-direction: column;">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Historie Modal -->
-    <div id="history-modal" class="modal" onclick="closeHistoryModalOnOutsideClick(event)">
-        <div class="modal-content" style="background: var(--bg); max-height: 95vh;">
-            <div class="modal-header" style="background: var(--surface); padding: 12px 16px; margin: -20px -20px 12px -20px; border-bottom: 1px solid var(--border-light); border-top-left-radius: 24px; border-top-right-radius: 24px;">
-                <span class="modal-title">Alle historischen Buchungen</span>
-                <button class="close-modal" onclick="closeHistoryModal()">×</button>
-            </div>
-            <div class="card" style="margin-bottom: 12px; padding: 12px;">
-                <input type="text" class="text-input" id="history-search-input" placeholder="🔍 Buchung suchen..." oninput="filterHistoryBookings()">
-            </div>
-            <div class="card">
-                <div id="history-modal-body" style="display: flex; flex-direction: column;">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Vorlagen Drawer Panel -->
-    <div id="templates-drawer" class="templates-drawer">
-        <div class="modal-header">
-            <span class="modal-title">Vorlage wählen</span>
-            <button class="close-modal" onclick="closeTemplatesDrawer()">×</button>
-        </div>
-        <div id="templates-list" class="templates-grid">
-            <p class="status-text-loader" style="grid-column: span 2;">Lade Vorlagen...</p>
-        </div>
-    </div>
-
-    <!-- Toast Notification -->
-    <div id="app-toast" class="toast">Erfolgreich gespeichert!</div>
-
-    <iframe id="api-handler" src="geld_api.html" style="display:none;"></iframe>
-
-    <script>
-        document.addEventListener('gesturestart', function (e) {
-            e.preventDefault();
-        });
-
-        let currentType = 'expense';
-        let selectedCategoryValue = '';
-        let apiEndpoint = '';
-        let cloudSyncTimeout = null;
-        let globalRawData = [];
-        let viewMode = 'month';
-        let chartDistributionType = 'expense';
-        let editingRowIndex = null;
-        let activeCategoryName = '';
-
-        const initialDate = new Date();
-        const initialYearStr = initialDate.getFullYear().toString();
-        const initialMonthStr = (initialDate.getMonth() + 1).toString().padStart(2, '0');
-
-        const categoryEmojis = {
-            'Kleidung': '👕',
-            'Urlaub': '🧳',
-            'Gesundheit': '🩺',
-            'Freizeit': '🎬',
-            'Mobilität': '🚗',
-            'Wohnen': '🏠',
-            'Sonstiges': '📦',
-            'Lohn': '💼',
-            'Sonstige': '🪙',
-            'MG': '🎖️'
-        };
-
-        const incomeOnlyCategories = ['Lohn', 'Sonstige', 'MG'];
-
-        window.addEventListener('message', function(event) {
-            if (event.data && event.data.type === 'SET_API_URL') {
-                apiEndpoint = event.data.url;
-                updateCloudStatus("Cloud Live");
-                loadTemplatesAndStats();
-            }
-        });
-
-        function updateCloudStatus(status) {
-            const indicator = document.getElementById('cloud-status-text');
-            if (!indicator) return;
-            
-            if (cloudSyncTimeout && status !== "Cloud synced") {
-                clearTimeout(cloudSyncTimeout);
-                cloudSyncTimeout = null;
-            }
-
-            indicator.textContent = status;
-            if (status === "Cloud Fehler") {
-                indicator.style.color = "var(--danger)";
-            } else if (status === "Cloud synced") {
-                indicator.style.color = "var(--success)";
-                cloudSyncTimeout = setTimeout(() => {
-                    indicator.textContent = "Cloud Live";
-                    indicator.style.color = "var(--text-secondary)";
-                    cloudSyncTimeout = null;
-                }, 3000);
-            } else if (status === "Cloud lädt") {
-                indicator.style.color = "var(--accent)";
-            } else {
-                indicator.style.color = "var(--text-secondary)";
-            }
-        }
-
-        function setViewMode(mode) {
-            viewMode = mode;
-            document.getElementById('view-mode-month').classList.toggle('active', mode === 'month');
-            document.getElementById('view-mode-year').classList.toggle('active', mode === 'year');
-            
-            const monthSelect = document.getElementById('filter-month');
-            if (mode === 'year') {
-                monthSelect.value = 'all';
-                monthSelect.disabled = true;
-                monthSelect.style.opacity = '0.5';
-            } else {
-                monthSelect.value = initialMonthStr;
-                monthSelect.disabled = false;
-                monthSelect.style.opacity = '1';
-            }
-            renderStats(globalRawData);
-        }
-
-        function setChartDistributionType(type) {
-            chartDistributionType = type;
-            document.getElementById('chart-toggle-exp').classList.toggle('active', type === 'expense');
-            document.getElementById('chart-toggle-inc').classList.toggle('active', type === 'income');
-            renderChartDistribution(globalRawData);
-        }
-
-        function openTrackingModal() {
-            editingRowIndex = null;
-            document.getElementById('tracking-modal-title').innerText = "Eintrag tracken";
-            document.getElementById('modal-type-switcher').style.display = 'flex';
-            document.getElementById('modal-template-btn').style.display = 'block';
-            document.getElementById('modal-template-toggle-card').style.display = 'block';
-            document.getElementById('btn-delete-data').style.display = 'none';
-            
-            document.getElementById('amount').value = '';
-            document.getElementById('title').value = '';
-            document.getElementById('is_template').checked = false;
-            
-            document.getElementById('tracking-modal').classList.add('active');
-            setEntryType('expense');
-        }
-
-        function openEditModal(row) {
-            editingRowIndex = row.row_index;
-            document.getElementById('tracking-modal-title').innerText = "Eintrag bearbeiten";
-            document.getElementById('modal-type-switcher').style.display = 'none';
-            document.getElementById('modal-template-btn').style.display = 'none';
-            document.getElementById('modal-template-toggle-card').style.display = 'none';
-            document.getElementById('btn-delete-data').style.display = 'block';
-
-            let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
-            const val = parseFloat(cleanBetrag);
-            const isExpense = val < 0;
-
-            setEntryType(isExpense ? 'expense' : 'income');
-            document.getElementById('amount').value = Math.abs(val);
-            document.getElementById('title').value = row.titel || '';
-
-            const searchCat = (row.kategorie || '').trim().toLowerCase();
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                const btnText = btn.innerText.replace(/[\n\r]/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
-                if(btnText.includes(searchCat)) {
-                    selectCategory(btn, row.kategorie);
-                }
-            });
-
-            document.getElementById('tracking-modal').classList.add('active');
-        }
-
-        function closeTrackingModal() {
-            document.getElementById('tracking-modal').classList.remove('active');
-            editingRowIndex = null;
-        }
-
-        function closeTrackingModalOnOutsideClick(e) {
-            if (e.target.id === 'tracking-modal') {
-                closeTrackingModal();
-            }
-        }
-
-        function formatDate(dateInput) {
-            if (!dateInput) return '';
-            
-            if (dateInput instanceof Date) {
-                if (isNaN(dateInput.getTime())) return '';
-                const d = dateInput.getDate().toString().padStart(2, '0');
-                const m = (dateInput.getMonth() + 1).toString().padStart(2, '0');
-                const y = dateInput.getFullYear();
-                return `${d}.${m}.${y}`;
-            }
-
-            const cleanStr = dateInput.toString().replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
-            if (!cleanStr) return '';
-
-            const deRegex = /^(\d{1,2})\.(\d{1,2})\.(\d{2,4})$/;
-            const match = cleanStr.match(deRegex);
-            if (match) {
-                const d = match[1].padStart(2, '0');
-                const m = match[2].padStart(2, '0');
-                let y = match[3];
-                if (y.length === 2) y = "20" + y;
-                return `${d}.${m}.${y}`;
-            }
-
-            const parsedDate = new Date(cleanStr);
-            if (!isNaN(parsedDate.getTime())) {
-                const d = parsedDate.getDate().toString().padStart(2, '0');
-                const m = (parsedDate.getMonth() + 1).toString().padStart(2, '0');
-                const y = parsedDate.getFullYear();
-                return `${d}.${m}.${y}`;
-            }
-
-            return cleanStr;
-        }
-
-        function helperParseDate(dateStr) {
-            if (!dateStr) return new Date(0);
-            const cleanStr = dateStr.toString().replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
-            const parts = cleanStr.split('.');
-            if (parts.length === 3) {
-                let d = parseInt(parts[0], 10);
-                let m = parseInt(parts[1], 10) - 1;
-                let y = parseInt(parts[2], 10);
-                if (y < 100) y += 2000;
-                return new Date(y, m, d);
-            }
-            const d = new Date(cleanStr);
-            return isNaN(d.getTime()) ? new Date(0) : d;
-        }
-
-        function sortBookings(a, b) {
-            const timeA = helperParseDate(a.datum).getTime();
-            const timeB = helperParseDate(b.datum).getTime();
-            if (timeB !== timeA) {
-                return timeB - timeA;
-            }
-            return (b.row_index || 0) - (a.row_index || 0);
-        }
-
-        function openHistoryModal() {
-            document.getElementById('history-search-input').value = '';
-            renderHistoryBookingsList(globalRawData);
-            document.getElementById('history-modal').classList.add('active');
-        }
-
-        function filterHistoryBookings() {
-            const query = document.getElementById('history-search-input').value.toLowerCase().trim();
-            if (!query) {
-                renderHistoryBookingsList(globalRawData);
-                return;
-            }
-            const filtered = globalRawData.filter(r => {
-                const titleStr = (r.titel || '').toLowerCase();
-                const catStr = (r.kategorie || '').toLowerCase();
-                const dateStr = (formatDate(r.datum) || '').toLowerCase();
-                const amountStr = (r.betrag || '').toString().toLowerCase();
-                return titleStr.includes(query) || catStr.includes(query) || dateStr.includes(query) || amountStr.includes(query);
-            });
-            renderHistoryBookingsList(filtered);
-        }
-
-        function renderHistoryBookingsList(rows) {
-            const body = document.getElementById('history-modal-body');
-            body.innerHTML = '';
-            
-            const sorted = [...rows].sort(sortBookings);
-
-            if(sorted.length === 0) {
-                body.innerHTML = '<p class="status-text-loader">Keine Einträge vorhanden.</p>';
-            } else {
-                sorted.forEach(row => {
-                    let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
-                    const val = parseFloat(cleanBetrag);
-                    const isExpense = val < 0;
-                    const emo = categoryEmojis[row.kategorie] || '📦';
-
-                    const item = document.createElement('div');
-                    item.className = 'dist-item';
-                    item.style.padding = '12px 6px';
-                    item.onclick = () => {
-                        closeHistoryModal();
-                        openEditModal(row);
-                    };
-                    item.innerHTML = `
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <span style="font-size:1.2rem;">${emo}</span>
-                            <div style="display:flex; flex-direction:column;">
-                                <span style="font-weight:700; color:var(--text-primary); font-size:0.9rem;">${row.titel || 'Ohne Titel'}</span>
-                                <span style="font-size:0.7rem; color:var(--text-secondary); font-weight:600;">${formatDate(row.datum)} (${row.kategorie})</span>
-                            </div>
-                        </div>
-                        <span style="color: ${isExpense ? 'var(--danger)' : 'var(--success)'}; font-weight:800; font-size:0.95rem;">
-                            ${isExpense ? '-' : '+'}${formatCurrency(Math.abs(val))}
-                        </span>
-                    `;
-                    body.appendChild(item);
-                });
-            }
-        }
-
-        function closeHistoryModal() {
-            document.getElementById('history-modal').classList.remove('active');
-        }
-
-        function closeHistoryModalOnOutsideClick(e) {
-            if (e.target.id === 'history-modal') {
-                closeHistoryModal();
-            }
-        }
-
-        function openCategoryModal(categoryName, rows, allRows) {
-            activeCategoryName = categoryName;
-            document.getElementById('category-modal-title').innerText = `Kategorie: ${categoryName}`;
-            
-            const isIncomeOnly = incomeOnlyCategories.includes(activeCategoryName);
-            document.getElementById('cat-row-income').style.display = isIncomeOnly ? 'flex' : 'none';
-            document.getElementById('cat-legend-inc').style.display = isIncomeOnly ? 'flex' : 'none';
-            document.getElementById('cat-row-expense').style.display = isIncomeOnly ? 'none' : 'flex';
-            document.getElementById('cat-legend-exp').style.display = isIncomeOnly ? 'none' : 'flex';
-
-            const years = new Set();
-            globalRawData.forEach(row => {
-                const parsed = parseRowDate(row.datum);
-                if (parsed.year) years.add(parsed.year);
-            });
-            if (years.size === 0) years.add(initialYearStr);
-
-            const yearSelect = document.getElementById('cat-filter-year');
-            yearSelect.innerHTML = '';
-            Array.from(years).sort((a,b) => b - a).forEach(y => {
-                const opt = document.createElement('option');
-                opt.value = y;
-                opt.innerText = y;
-                yearSelect.appendChild(opt);
-            });
-
-            yearSelect.value = document.getElementById('filter-year').value || initialYearStr;
-
-            updateCategoryModalView();
-            document.getElementById('category-modal').classList.add('active');
-        }
-
-        function updateCategoryModalView() {
-            const selectedYear = document.getElementById('cat-filter-year').value;
-            const isIncomeOnly = incomeOnlyCategories.includes(activeCategoryName);
-            
-            const catRows = globalRawData.filter(row => {
-                if (row.kategorie !== activeCategoryName) return false;
-                const parsed = parseRowDate(row.datum);
-                return parsed.year === selectedYear;
-            });
-
-            let catIncome = 0;
-            let catExpense = 0;
-            
-            let monthlyTimeline = {};
-            for (let i = 1; i <= 12; i++) {
-                monthlyTimeline[i.toString().padStart(2, '0')] = { inc: 0, exp: 0 };
-            }
-
-            catRows.forEach(row => {
-                let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
-                const val = parseFloat(cleanBetrag);
-                if(!isNaN(val)) {
-                    if(val > 0) catIncome += val;
-                    else catExpense += Math.abs(val);
-
-                    const parsed = parseRowDate(row.datum);
-                    if(parsed.month && monthlyTimeline[parsed.month]) {
-                        if(val > 0) monthlyTimeline[parsed.month].inc += val;
-                        else monthlyTimeline[parsed.month].exp += Math.abs(val);
-                    }
-                }
-            });
-
-            document.getElementById('cat-dash-income').innerText = `+${formatCurrency(catIncome)}`;
-            document.getElementById('cat-dash-expense').innerText = `-${formatCurrency(catExpense)}`;
-
-            const timelineChart = document.getElementById('cat-timeline-chart');
-            timelineChart.innerHTML = '';
-
-            let maxVal = 0;
-            Object.values(monthlyTimeline).forEach(m => {
-                maxVal = Math.max(maxVal, m.inc, m.exp);
-            });
-
-            const monthLabelsShort = ['Jan', 'Feb', 'Mrz', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
-            
-            for (let i = 1; i <= 12; i++) {
-                const mStr = i.toString().padStart(2, '0');
-                const data = monthlyTimeline[mStr];
-                const label = monthLabelsShort[i - 1];
-                
-                const incH = maxVal > 0 ? (data.inc / maxVal) * 100 : 0;
-                const expH = maxVal > 0 ? (data.exp / maxVal) * 100 : 0;
-
-                const wrapper = document.createElement('div');
-                wrapper.className = 'timeline-bar-wrapper';
-                
-                if (isIncomeOnly) {
-                    wrapper.innerHTML = `
-                        <div class="timeline-tooltip">Ein: +${formatCurrency(data.inc)}</div>
-                        <div class="timeline-bar-multi">
-                            <div class="timeline-subbar inc" style="height: ${incH}%"></div>
-                        </div>
-                        <div class="timeline-label">${label}</div>
-                    `;
-                } else {
-                    wrapper.innerHTML = `
-                        <div class="timeline-tooltip">Aus: -${formatCurrency(data.exp)}</div>
-                        <div class="timeline-bar-multi">
-                            <div class="timeline-subbar exp" style="height: ${expH}%"></div>
-                        </div>
-                        <div class="timeline-label">${label}</div>
-                    `;
-                }
-                timelineChart.appendChild(wrapper);
-            }
-
-            const body = document.getElementById('category-modal-body');
-            body.innerHTML = '';
-
-            if (catRows.length === 0) {
-                body.innerHTML = '<p class="status-text-loader">Keine Einträge gefunden.</p>';
-            } else {
-                const sortedRows = [...catRows].sort(sortBookings);
-                const top5Rows = sortedRows.slice(0, 5);
-
-                top5Rows.forEach(row => {
-                    let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
-                    const val = parseFloat(cleanBetrag);
-                    const isExpense = val < 0;
-                    
-                    const item = document.createElement('div');
-                    item.className = 'dashboard-row';
-                    item.style.cursor = 'pointer';
-                    item.onclick = () => {
-                        closeCategoryModal();
-                        openEditModal(row);
-                    };
-                    item.innerHTML = `
-                        <div style="display:flex; flex-direction:column;">
-                            <span style="font-weight:700; color:var(--text-primary); font-size:0.95rem;">${row.titel || 'Ohne Titel'}</span>
-                            <span style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">${formatDate(row.datum)}</span>
-                        </div>
-                        <span style="color: ${isExpense ? 'var(--danger)' : 'var(--success)'}; font-weight:700;">
-                            ${isExpense ? '-' : '+'}${formatCurrency(Math.abs(val))}
-                        </span>
-                    `;
-                    body.appendChild(item);
-                });
-            }
-        }
-
-        function closeCategoryModal() {
-            document.getElementById('category-modal').classList.remove('active');
-        }
-
-        function closeCategoryModalOnOutsideClick(e) {
-            if (e.target.id === 'category-modal') {
-                closeCategoryModal();
-            }
-        }
-
-        function openTemplatesDrawer() {
-            document.getElementById('templates-drawer').classList.add('active');
-            renderTemplates(globalRawData);
-        }
-
-        function closeTemplatesDrawer() {
-            document.getElementById('templates-drawer').classList.remove('active');
-        }
-
-        function showToast() {
-            const toast = document.getElementById('app-toast');
-            toast.classList.add('active');
-            setTimeout(() => { toast.classList.remove('active'); }, 2500);
-        }
-
-        function setEntryType(type) {
-            currentType = type;
-            const container = document.getElementById('modal-content-container');
-            const expGrid = document.getElementById('grid-expense');
-            const incGrid = document.getElementById('grid-income');
-            const amountInput = document.getElementById('amount');
-            
-            document.querySelectorAll('#modal-type-switcher .segmented-btn').forEach(b => b.classList.remove('active'));
-            
-            if(type === 'expense') {
-                container.className = "modal-content expense";
-                expGrid.style.display = 'grid';
-                incGrid.style.display = 'none';
-                document.querySelector('.expense-toggle').classList.add('active');
-                amountInput.placeholder = "-0,00 €";
-            } else {
-                container.className = "modal-content income";
-                expGrid.style.display = 'none';
-                incGrid.style.display = 'grid';
-                document.querySelector('.income-toggle').classList.add('active');
-                amountInput.placeholder = "+0,00 €";
-            }
-            selectedCategoryValue = '';
-            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
-        }
-
-        function selectCategory(btn, cat) {
-            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            selectedCategoryValue = cat;
-        }
-
-        function clearPlaceholder(input) { input.placeholder = ''; }
-        function restorePlaceholder(input) { input.placeholder = currentType === 'expense' ? "-0,00 €" : "+0,00 €"; }
-
-        function formatCurrency(val) {
-            return val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
-        }
-
-        function parseRowDate(dateStr) {
-            if (!dateStr) return { year: "", month: "" };
-            const cleanStr = dateStr.toString().replace(/[\u200B-\u200D\uFEFF]/g, "").trim();
-            const parts = cleanStr.split('.');
-            if (parts.length >= 3) {
-                let yearPart = parts[2].trim();
-                let monthPart = parts[1].trim().padStart(2, '0');
-                if (yearPart.length === 2) yearPart = "20" + yearPart;
-                if (yearPart.length === 4 && !isNaN(yearPart) && !isNaN(monthPart)) {
-                    return { year: yearPart, month: monthPart };
-                }
-            }
-            const d = new Date(cleanStr);
-            if (!isNaN(d.getTime())) {
-                return {
-                    year: d.getFullYear().toString(),
-                    month: (d.getMonth() + 1).toString().padStart(2, '0')
-                };
-            }
-            return { year: "", month: "" };
-        }
-
-        async function submitData() {
-            const amountEl = document.getElementById('amount');
-            const titleEl = document.getElementById('title');
-            const isTemplateEl = document.getElementById('is_template');
-            const submitBtn = document.getElementById('btn-submit-data');
-            const spinner = document.getElementById('submit-spinner');
-            const btnText = document.getElementById('submit-btn-text');
-
-            const amount = amountEl.value;
-            const title = titleEl.value;
-            const isTemplate = isTemplateEl.checked ? 'ja' : 'nein';
-
-            if(!amount || !selectedCategoryValue || !title) {
-                alert('Bitte Betrag, Titel und Kategorie wählen.');
-                return;
-            }
-
-            submitBtn.disabled = true;
-            spinner.style.display = 'block';
-            btnText.textContent = "Übertrag läuft...";
-            updateCloudStatus("Cloud lädt");
-
-            const adjustedAmount = currentType === 'expense' ? -Math.abs(parseFloat(amount)) : Math.abs(parseFloat(amount));
-            const now = new Date();
-            const datum = formatDate(now);
-            const uhrzeit = now.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
-
-            const payload = {
-                datum: datum,
-                uhrzeit: uhrzeit,
-                kategorie: selectedCategoryValue,
-                titel: title,
-                betrag: adjustedAmount,
-                vorlage: isTemplate
-            };
-
-            if(editingRowIndex !== null) {
-                payload.row_index = editingRowIndex;
-            }
-
-            if(!apiEndpoint) {
-                alert('API URL fehlt.');
-                submitBtn.disabled = false;
-                spinner.style.display = 'none';
-                btnText.textContent = "Speichern";
-                updateCloudStatus("Cloud Fehler");
-                return;
-            }
-
-            try {
-                await fetch(apiEndpoint, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    redirect: 'follow',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                updateCloudStatus("Cloud synced");
-                showToast();
-
-                amountEl.value = '';
-                titleEl.value = '';
-                isTemplateEl.checked = false;
-                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
-                selectedCategoryValue = '';
-                
-                closeTrackingModal();
-                setTimeout(loadTemplatesAndStats, 500);
-
-            } catch(e) {
-                console.error(e);
-                updateCloudStatus("Cloud Fehler");
-                alert('Fehler beim Speichern.');
-            } finally {
-                submitBtn.disabled = false;
-                spinner.style.display = 'none';
-                btnText.textContent = "Speichern";
-            }
-        }
-
-        async function deleteData() {
-            if(editingRowIndex === null) return;
-            if(!confirm('Möchtest du diesen Eintrag wirklich löschen?')) return;
-
-            const submitBtn = document.getElementById('btn-submit-data');
-            submitBtn.disabled = true;
-            updateCloudStatus("Cloud lädt");
-
-            const payload = {
-                row_index: editingRowIndex,
-                delete: true
-            };
-
-            try {
-                await fetch(apiEndpoint, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    redirect: 'follow',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                updateCloudStatus("Cloud synced");
-                showToast();
-                closeTrackingModal();
-                setTimeout(loadTemplatesAndStats, 500);
-            } catch(e) {
-                console.error(e);
-                updateCloudStatus("Cloud Fehler");
-                alert('Fehler beim Löschen.');
-            } finally {
-                submitBtn.disabled = false;
-            }
-        }
-
-        // 1. LAZY LOADING & 2. STATUS-ENTKOPPLUNG UMGESETZT
-        async function loadTemplatesAndStats() {
-            if(!apiEndpoint) return;
-            try {
-                const res = await fetch(apiEndpoint, { 
-                    method: 'GET', 
-                    mode: 'cors',
-                    redirect: 'follow' 
-                });
-                const data = await res.json();
-                
-                globalRawData = Array.isArray(data) ? data : [];
-                
-                initFilterOptions(globalRawData);
-
-                // Asynchrones/Entkoppeltes Lazy Loading der Komponenten
-                requestAnimationFrame(() => {
-                    renderStats(globalRawData);
-                });
-
-                // Status-Entkopplung: Vorlagen isoliert verarbeiten damit Fehler die Stats nicht blockieren
-                setTimeout(() => {
-                    try {
-                        renderTemplates(globalRawData);
-                    } catch(err) {
-                        console.error("Entkoppelter Ladefehler Vorlagen:", err);
-                    }
-                }, 50);
-
-            } catch(e) {
-                console.error("Fehler beim Abruf:", e);
-                document.getElementById('stats-distribution').innerHTML = 
-                    '<p class="status-text-loader" style="color:var(--danger)">Verbindung fehlgeschlagen. Prüfe dein Google Script.</p>';
-            }
-        }
-
-        function initFilterOptions(rows) {
-            const yearSelect = document.getElementById('filter-year');
-            const monthSelect = document.getElementById('filter-month');
-            
-            const currentYearSelected = yearSelect.value;
-            const currentMonthSelected = monthSelect.value;
-            
-            const years = new Set();
-            if (rows && rows.length > 0) {
-                rows.forEach(row => {
-                    const parsed = parseRowDate(row.datum);
-                    if (parsed.year) years.add(parsed.year);
-                });
-            }
-            
-            if (years.size === 0) {
-                years.add(initialYearStr);
-            }
-            
-            yearSelect.innerHTML = '';
-            Array.from(years).sort((a,b) => b - a).forEach(y => {
-                const opt = document.createElement('option');
-                opt.value = y;
-                opt.innerText = y;
-                yearSelect.appendChild(opt);
-            });
-            
-            if (!currentYearSelected) {
-                yearSelect.value = years.has(initialYearStr) ? initialYearStr : yearSelect.options[0].value;
-                if(viewMode === 'month') monthSelect.value = initialMonthStr;
-            } else {
-                yearSelect.value = currentYearSelected;
-                monthSelect.value = currentMonthSelected;
-            }
-        }
-
-        // 3. VORLAGEN ROBUST GEMACHT GEGEN LADEFEHLER
-        function renderTemplates(rows) {
-            const container = document.getElementById('templates-list');
-            if(!container) return;
-            container.innerHTML = '';
-            
-            const cache = new Set();
-            let uniqueTemplates = [];
-
-            if (rows && Array.isArray(rows) && rows.length > 0) {
-                rows.forEach(row => {
-                    // Strikte Defensive Checks zur Behebung von Ladefehlern bei fehlerhaften Datensätzen
-                    if(!row || typeof row !== 'object') return;
-                    if(row.vorlage && String(row.vorlage).trim().toLowerCase() === 'ja') {
-                        let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
-                        const val = parseFloat(cleanBetrag);
-                        if(isNaN(val)) return;
-
-                        const isExpenseTemplate = val < 0;
-
-                        if(currentType === 'expense' && !isExpenseTemplate) return;
-                        if(currentType === 'income' && isExpenseTemplate) return;
-
-                        const safeTitel = row.titel || "Vorlage ohne Titel";
-                        const safeKat = row.kategorie || "Sonstiges";
-
-                        const identifier = `${safeTitel}_${row.betrag}_${safeKat}`;
-                        if(!cache.has(identifier)) {
-                            cache.add(identifier);
-                            uniqueTemplates.push({ ...row, titel: safeTitel, kategorie: safeKat });
-                        }
-                    }
-                });
-            }
-
-            if(uniqueTemplates.length === 0) {
-                container.innerHTML = '<p class="status-text-loader" style="grid-column: span 2;">Keine passenden Vorlagen vorhanden.</p>';
-                return;
-            }
-
-            uniqueTemplates.sort((a, b) => (a.titel || "").localeCompare(b.titel || ""));
-
-            uniqueTemplates.forEach(t => {
-                let cleanBetrag = (t.betrag || 0).toString().replace(',','.');
-                const val = parseFloat(cleanBetrag);
-                if (isNaN(val)) return;
-
-                const isExpense = val < 0;
-                const div = document.createElement('div');
-                div.className = 'template-item';
-                div.onclick = () => fillFromTemplate(t.titel, Math.abs(val), t.kategorie, isExpense ? 'expense' : 'income');
-                
-                div.innerHTML = `
-                    <div class="template-info">
-                        <span class="template-title">${t.titel}</span>
-                        <span class="template-meta">${t.kategorie}</span>
-                    </div>
-                    <span class="template-amount ${isExpense ? 'expense' : 'income'}">${formatCurrency(Math.abs(val))}</span>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function fillFromTemplate(titel, betrag, kategorie, type) {
-            closeTemplatesDrawer();
-            setEntryType(type);
-            document.getElementById('amount').value = betrag;
-            document.getElementById('title').value = titel;
-            
-            const searchCat = (kategorie || '').trim().toLowerCase();
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                const btnText = btn.innerText.replace(/[\n\r]/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
-                if(btnText.includes(searchCat)) {
-                    selectCategory(btn, kategorie);
-                }
-            });
-        }
-
-        function renderStats(rows) {
-            let income = 0;
-            let expense = 0;
-            let catDistribution = {};
-            let incomeCatDistribution = {};
-            let catItemsMap = {};
-            
-            let timelineData = {};
-            let historicalSavingsRates = [];
-
-            const selectedYear = document.getElementById('filter-year').value;
-            const selectedMonth = document.getElementById('filter-month').value;
-
-            if (rows && rows.length > 0) {
-                rows.forEach(row => {
-                    let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
-                    const val = parseFloat(cleanBetrag);
-                    if(isNaN(val)) return;
-
-                    const parsed = parseRowDate(row.datum);
-                    if(parsed.year && parsed.month) {
-                        const mKey = `${parsed.year}-${parsed.month}`;
-                        if(!timelineData[mKey]) timelineData[mKey] = { inc: 0, exp: 0 };
-                        if(val > 0) timelineData[mKey].inc += val;
-                        else timelineData[mKey].exp += Math.abs(val);
-                    }
-                });
-            }
-
-            Object.values(timelineData).forEach(m => {
-                if(m.inc > 0) {
-                    historicalSavingsRates.push(((m.inc - m.exp) / m.inc) * 100);
-                } else if(m.exp > 0) {
-                    historicalSavingsRates.push(-100);
-                }
-            });
-
-            let maxPositiveRate = Math.max(...historicalSavingsRates.filter(r => r >= 0), 0);
-            let maxNegativeRate = Math.min(...historicalSavingsRates.filter(r => r < 0), 0);
-            
-            if (maxPositiveRate === 0) maxPositiveRate = 100;
-            if (maxNegativeRate === 0) maxNegativeRate = -100;
-            if (maxNegativeRate < -100) maxNegativeRate = -100;
-
-            if (rows && rows.length > 0) {
-                rows.forEach(row => {
-                    let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
-                    const val = parseFloat(cleanBetrag);
-                    if(isNaN(val)) return;
-
-                    const parsed = parseRowDate(row.datum);
-                    if (parsed.year !== selectedYear) return;
-                    if (viewMode === 'month' && selectedMonth !== 'all' && parsed.month !== selectedMonth) return;
-
-                    const cat = row.kategorie || 'Sonstiges';
-                    if (!catItemsMap[cat]) catItemsMap[cat] = [];
-                    catItemsMap[cat].push(row);
-
-                    if(val > 0) {
-                        income += val;
-                        incomeCatDistribution[cat] = (incomeCatDistribution[cat] || 0) + val;
-                    } else {
-                        expense += Math.abs(val);
-                        catDistribution[cat] = (catDistribution[cat] || 0) + Math.abs(val);
-                    }
-                });
-            }
-
-            const saldo = income - expense;
-
-            document.getElementById('dash-income').innerText = `+${formatCurrency(income)}`;
-            document.getElementById('dash-expense').innerText = `-${formatCurrency(expense)}`;
-            
-            const saldoEl = document.getElementById('dash-saldo');
-            saldoEl.innerText = `${saldo >= 0 ? '+' : ''}${formatCurrency(saldo)}`;
-            saldoEl.style.color = saldo >= 0 ? 'var(--success)' : 'var(--danger)';
-
-            let savingsRate = income > 0 ? ((income - expense) / income) * 100 : (expense > 0 ? -100 : 0);
-            
-            const savingsRateEl = document.getElementById('stats-savings-rate');
-            savingsRateEl.innerText = `${savingsRate.toFixed(1)}%`;
-            savingsRateEl.style.color = savingsRate >= 0 ? 'var(--success)' : 'var(--danger)';
-
-            let displaySavingsRate = savingsRate;
-            if(displaySavingsRate < -100) displaySavingsRate = -100;
-
-            const barFill = document.getElementById('savings-bar-fill');
-            document.getElementById('savings-min-label').innerText = `${maxPositiveRate.toFixed(0)}% Sparen`;
-            document.getElementById('savings-max-label').innerText = `${Math.abs(maxNegativeRate).toFixed(0)}% Verlust`;
-
-            if (displaySavingsRate >= 0) {
-                const scaleFactor = maxPositiveRate > 0 ? (displaySavingsRate / maxPositiveRate) : 0;
-                const widthPercent = Math.min(scaleFactor * 50, 50);
-                barFill.style.left = (50 - widthPercent) + '%';
-                barFill.style.width = widthPercent + '%';
-                barFill.style.background = 'var(--success)';
-            } else {
-                const scaleFactor = maxNegativeRate < 0 ? (displaySavingsRate / maxNegativeRate) : 0;
-                const widthPercent = Math.min(scaleFactor * 50, 50);
-                barFill.style.left = '50%';
-                barFill.style.width = widthPercent + '%';
-                barFill.style.background = 'var(--danger)';
-            }
-
-            renderChartDistribution(null, catDistribution, incomeCatDistribution, expense, income);
-            renderTimelineChart(timelineData);
-            renderCategoriesTable(catDistribution, incomeCatDistribution, catItemsMap);
-            renderRecentBookings(rows);
-        }
-
-        // 4. NETTO-SALDO TREND AUSREISSER-FILTER UMGESETZT
-        function renderTimelineChart(timelineData) {
-            const chart = document.getElementById('dashboard-timeline-chart');
-            chart.innerHTML = '<div class="net-zero-line"></div>';
-            
-            const sortedMonths = Object.keys(timelineData).sort();
-            if(sortedMonths.length === 0) {
-                chart.innerHTML = '<p class="status-text-loader" style="width:100%">Keine Verlaufsdaten vorhanden.</p>';
-                return;
-            }
-
-            const visibleMonths = sortedMonths.slice(-6);
-            let saldos = visibleMonths.map(m => Math.abs(timelineData[m].inc - timelineData[m].exp));
-
-            // Robuster Skalierungsfaktor ohne Verzerrung durch Ausreißer
-            let maxSaldoAbs = 0;
-            if (saldos.length > 0) {
-                const sortedSaldos = [...saldos].sort((a, b) => a - b);
-                const q3Index = Math.floor(sortedSaldos.length * 0.75);
-                const upperLimit = sortedSaldos[q3Index] * 1.5;
-                
-                maxSaldoAbs = Math.max(...saldos);
-                if (upperLimit > 0 && maxSaldoAbs > upperLimit) {
-                    maxSaldoAbs = upperLimit; // Skaliert extrem hohe Peaks ab
-                }
-            }
-
-            visibleMonths.forEach(m => {
-                const data = timelineData[m];
-                const sal = data.inc - data.exp;
-                const label = m.split('-')[1] + '/' + m.split('-')[0].substring(2);
-
-                const percentHeight = maxSaldoAbs > 0 ? Math.min((Math.abs(sal) / maxSaldoAbs) * 100, 100) : 0;
-                const isPos = sal >= 0;
-
-                const wrapper = document.createElement('div');
-                wrapper.className = 'net-bar-wrapper';
-                wrapper.innerHTML = `
-                    <div class="timeline-tooltip">
-                        Saldo: ${sal >= 0 ? '+' : ''}${formatCurrency(sal)}<br>
-                        <span style="opacity:0.8; font-size:0.6rem;">Ein: +${formatCurrency(data.inc)} | Aus: -${formatCurrency(data.exp)}</span>
-                    </div>
-                    <div class="net-bar-area">
-                        <div class="net-bar ${isPos ? 'pos' : 'neg'}" style="height: ${percentHeight / 2}%;"></div>
-                    </div>
-                    <div class="net-label">${label}</div>
-                `;
-                chart.appendChild(wrapper);
-            });
-        }
-
-        function renderChartDistribution(rows, catDist, incCatDist, totalExp, totalInc) {
-            if(!catDist && globalRawData.length > 0) {
-                const selectedYear = document.getElementById('filter-year').value;
-                const selectedMonth = document.getElementById('filter-month').value;
-                catDist = {}; incCatDist = {}; totalExp = 0; totalInc = 0;
-                
-                globalRawData.forEach(row => {
-                    let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
-                    const val = parseFloat(cleanBetrag);
-                    if(isNaN(val)) return;
-
-                    const parsed = parseRowDate(row.datum);
-                    if (parsed.year !== selectedYear) return;
-                    if (viewMode === 'month' && selectedMonth !== 'all' && parsed.month !== selectedMonth) return;
-
-                    const cat = row.kategorie || 'Sonstiges';
-                    if(val > 0) {
-                        totalInc += val;
-                        incCatDist[cat] = (incCatDist[cat] || 0) + val;
-                    } else {
-                        totalExp += Math.abs(val);
-                        catDist[cat] = (catDist[cat] || 0) + Math.abs(val);
-                    }
-                });
-            }
-
-            const chartContainer = document.getElementById('unified-chart-container');
-            if(!chartContainer) return;
-            chartContainer.innerHTML = '';
-
-            const activeDist = chartDistributionType === 'expense' ? (catDist || {}) : (incCatDist || {});
-            const totalVal = chartDistributionType === 'expense' ? totalExp : totalInc;
-            const prefix = chartDistributionType === 'expense' ? '-' : '+';
-            const colorClass = chartDistributionType === 'expense' ? '' : 'income-bar';
-
-            const sorted = Object.entries(activeDist).sort((a,b) => b[1] - a[1]);
-
-            if(sorted.length === 0) {
-                chartContainer.innerHTML = `<p class="status-text-loader">Keine Daten im Zeitraum vorhanden.</p>`;
-                return;
-            }
-
-            const maxVal = Math.max(...sorted.map(([_, v]) => v));
-            sorted.forEach(([cat, val]) => {
-                const percentageOfMax = maxVal > 0 ? (val / maxVal) * 100 : 0;
-                const graphRow = document.createElement('div');
-                graphRow.className = 'bar-visual-wrapper';
-                graphRow.innerHTML = `
-                    <div class="bar-visual-row">
-                        <span>${categoryEmojis[cat] || '📦'} ${cat}</span>
-                        <span>${((val / (totalVal || 1)) * 100).toFixed(0)}%</span>
-                    </div>
-                    <div class="bar-visual-track">
-                        <div class="bar-visual-fill ${colorClass}" style="width: ${percentageOfMax}%; ${chartDistributionType === 'expense' ? 'background:var(--danger);' : ''}"></div>
-                        <div class="bar-visual-text">${prefix}${formatCurrency(val)}</div>
-                    </div>
-                `;
-                chartContainer.appendChild(graphRow);
-            });
-        }
-
-        function renderCategoriesTable(catDistribution, incomeCatDistribution, catItemsMap) {
-            const distContainer = document.getElementById('stats-distribution');
-            distContainer.innerHTML = '';
-
-            const allUniqueCats = new Set([...Object.keys(catDistribution), ...Object.keys(incomeCatDistribution)]);
-
-            if(allUniqueCats.size === 0) {
-                distContainer.innerHTML = '<p class="status-text-loader">Keine Posten verbucht.</p>';
-                return;
-            }
-
-            let computedItems = [];
-            Array.from(allUniqueCats).forEach(cat => {
-                const catExpense = catDistribution[cat] || 0;
-                const catIncome = incomeCatDistribution[cat] || 0;
-                const netCatValue = catIncome - catExpense;
-                computedItems.push({
-                    cat: cat,
-                    netVal: netCatValue,
-                    absVal: Math.abs(netCatValue)
-                });
-            });
-
-            computedItems.sort((a, b) => b.absVal - a.absVal);
-
-            computedItems.forEach(item => {
-                const emo = categoryEmojis[item.cat] || '📦';
-                const tableRow = document.createElement('div');
-                tableRow.className = 'dist-item';
-                tableRow.onclick = () => openCategoryModal(item.cat, catItemsMap[item.cat] || [], globalRawData);
-                
-                tableRow.innerHTML = `
-                    <div class="dist-label"><span>${emo}</span> <span>${item.cat}</span></div>
-                    <div class="dist-value" style="color: ${item.netVal >= 0 ? 'var(--success)' : 'var(--danger)'};">
-                        ${item.netVal >= 0 ? '+' : '-'}${formatCurrency(item.absVal)}
-                    </div>
-                `;
-                distContainer.appendChild(tableRow);
-            });
-        }
-
-        function renderRecentBookings(rows) {
-            const container = document.getElementById('dashboard-recent-bookings');
-            container.innerHTML = '';
-
-            const sorted = [...rows].sort(sortBookings);
-            const last5 = sorted.slice(0, 5);
-
-            if(last5.length === 0) {
-                container.innerHTML = '<p class="status-text-loader">Noch keine Buchungen vorhanden.</p>';
-                return;
-            }
-
-            last5.forEach(row => {
-                let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
-                const val = parseFloat(cleanBetrag);
-                const isExpense = val < 0;
-                const emo = categoryEmojis[row.kategorie] || '📦';
-
-                const div = document.createElement('div');
-                div.className = 'dist-item';
-                div.style.padding = '12px 0';
-                div.onclick = () => openEditModal(row);
-                div.innerHTML = `
-                    <div class="dist-label">
-                        <span style="font-size: 1.2rem;">${emo}</span>
-                        <div style="display:flex; flex-direction:column; align-items:flex-start;">
-                            <span style="font-weight:700; font-size:0.9rem;">${row.titel || 'Ohne Titel'}</span>
-                            <span style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">${formatDate(row.datum)}</span>
-                        </div>
-                    </div>
-                    <span style="font-weight:800; font-size:1rem; color: ${isExpense ? 'var(--danger)' : 'var(--success)'}">
-                        ${isExpense ? '-' : '+'}${formatCurrency(Math.abs(val))}
-                    </span>
-                `;
-                container.appendChild(div);
-            });
-        }
-    </script>
+  </div>
+
+  <script>
+    // Zoom/Pinch/Gesture und Scroll-Events via JS blockieren
+    document.addEventListener('gesturestart', function(e) {
+      e.preventDefault();
+    });
+    document.addEventListener('gesturechange', function(e) {
+      e.preventDefault();
+    });
+    document.addEventListener('gestureend', function(e) {
+      e.preventDefault();
+    });
+    document.addEventListener('touchmove', function(e) {
+      e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('wheel', function(e) {
+      e.preventDefault();
+    }, { passive: false });
+
+    // Modal Steuerungs-Logik
+    const docsBtn = document.getElementById('docsBtn');
+    const docsModal = document.getElementById('docsModal');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    docsBtn.addEventListener('click', () => {
+      docsModal.classList.add('active');
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+      docsModal.classList.remove('active');
+    });
+  </script>
 </body>
 </html>
