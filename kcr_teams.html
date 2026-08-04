@@ -50,6 +50,22 @@
             padding-top: env(safe-area-inset-top);
         }
 
+        .back-btn {
+            position: absolute;
+            top: calc(10px + env(safe-area-inset-top));
+            left: 15px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            z-index: 10;
+        }
+
         h1 { margin: 20px 0; font-weight: 800; color: var(--primary); font-size: 1.6rem; text-transform: uppercase; }
 
         .container {
@@ -150,6 +166,8 @@
     </style>
 </head>
 <body>
+
+    <a href="kcr_index.html" class="back-btn">&#8592;</a>
 
     <h1>Kegel-Teams</h1>
 
