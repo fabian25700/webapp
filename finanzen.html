@@ -1048,6 +1048,9 @@
                 <span class="modal-title">Alle historischen Buchungen</span>
                 <button class="close-modal" onclick="closeHistoryModal()">×</button>
             </div>
+            <div class="card" style="margin-bottom: 12px; padding: 12px;">
+                <input type="text" class="text-input" id="history-search-input" placeholder="🔍 Buchung suchen..." oninput="filterHistoryBookings()">
+            </div>
             <div class="card">
                 <div id="history-modal-body" style="display: flex; flex-direction: column;">
                     <!-- Alle Posten -->
@@ -1193,8 +1196,10 @@
             document.getElementById('amount').value = Math.abs(val);
             document.getElementById('title').value = row.titel || '';
 
+            const searchCat = (row.kategorie || '').trim().toLowerCase();
             document.querySelectorAll('.category-btn').forEach(btn => {
-                if(btn.innerText.trim() === row.kategorie) {
+                const btnText = btn.innerText.replace(/[\n\r]/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+                if(btnText.includes(searchCat)) {
                     selectCategory(btn, row.kategorie);
                 }
             });
@@ -1273,11 +1278,32 @@
         }
 
         function openHistoryModal() {
+            document.getElementById('history-search-input').value = '';
+            renderHistoryBookingsList(globalRawData);
+            document.getElementById('history-modal').classList.add('active');
+        }
+
+        function filterHistoryBookings() {
+            const query = document.getElementById('history-search-input').value.toLowerCase().trim();
+            if (!query) {
+                renderHistoryBookingsList(globalRawData);
+                return;
+            }
+            const filtered = globalRawData.filter(r => {
+                const titleStr = (r.titel || '').toLowerCase();
+                const catStr = (r.kategorie || '').toLowerCase();
+                const dateStr = (formatDate(r.datum) || '').toLowerCase();
+                const amountStr = (r.betrag || '').toString().toLowerCase();
+                return titleStr.includes(query) || catStr.includes(query) || dateStr.includes(query) || amountStr.includes(query);
+            });
+            renderHistoryBookingsList(filtered);
+        }
+
+        function renderHistoryBookingsList(rows) {
             const body = document.getElementById('history-modal-body');
             body.innerHTML = '';
             
-            const dynamicRows = globalRawData.filter(r => !(r.vorlage && r.vorlage.toLowerCase() === 'ja'));
-            const sorted = [...dynamicRows].sort(sortBookings);
+            const sorted = [...rows].sort(sortBookings);
 
             if(sorted.length === 0) {
                 body.innerHTML = '<p class="status-text-loader">Keine Einträge vorhanden.</p>';
@@ -1310,7 +1336,6 @@
                     body.appendChild(item);
                 });
             }
-            document.getElementById('history-modal').classList.add('active');
         }
 
         function closeHistoryModal() {
@@ -1335,7 +1360,6 @@
 
             const years = new Set();
             globalRawData.forEach(row => {
-                if (row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
                 const parsed = parseRowDate(row.datum);
                 if (parsed.year) years.add(parsed.year);
             });
@@ -1361,7 +1385,6 @@
             const isIncomeOnly = incomeOnlyCategories.includes(activeCategoryName);
             
             const catRows = globalRawData.filter(row => {
-                if (row.vorlage && row.vorlage.toLowerCase() === 'ja') return false;
                 if (row.kategorie !== activeCategoryName) return false;
                 const parsed = parseRowDate(row.datum);
                 return parsed.year === selectedYear;
@@ -1703,7 +1726,6 @@
             const years = new Set();
             if (rows && rows.length > 0) {
                 rows.forEach(row => {
-                    if (row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
                     const parsed = parseRowDate(row.datum);
                     if (parsed.year) years.add(parsed.year);
                 });
@@ -1791,8 +1813,10 @@
             document.getElementById('amount').value = betrag;
             document.getElementById('title').value = titel;
             
+            const searchCat = (kategorie || '').trim().toLowerCase();
             document.querySelectorAll('.category-btn').forEach(btn => {
-                if(btn.innerText.trim() === kategorie) {
+                const btnText = btn.innerText.replace(/[\n\r]/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+                if(btnText.includes(searchCat)) {
                     selectCategory(btn, kategorie);
                 }
             });
@@ -1813,7 +1837,6 @@
 
             if (rows && rows.length > 0) {
                 rows.forEach(row => {
-                    if(row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
                     let cleanBetrag = row.betrag.toString().replace(',','.');
                     const val = parseFloat(cleanBetrag);
                     if(isNaN(val)) return;
@@ -1845,7 +1868,6 @@
 
             if (rows && rows.length > 0) {
                 rows.forEach(row => {
-                    if(row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
                     let cleanBetrag = row.betrag.toString().replace(',','.');
                     const val = parseFloat(cleanBetrag);
                     if(isNaN(val)) return;
@@ -1961,7 +1983,6 @@
                 catDist = {}; incCatDist = {}; totalExp = 0; totalInc = 0;
                 
                 globalRawData.forEach(row => {
-                    if(row.vorlage && row.vorlage.toLowerCase() === 'ja') return;
                     let cleanBetrag = row.betrag.toString().replace(',','.');
                     const val = parseFloat(cleanBetrag);
                     if(isNaN(val)) return;
@@ -2061,8 +2082,7 @@
             const container = document.getElementById('dashboard-recent-bookings');
             container.innerHTML = '';
 
-            const dynamicRows = rows.filter(r => !(r.vorlage && r.vorlage.toLowerCase() === 'ja'));
-            const sorted = [...dynamicRows].sort(sortBookings);
+            const sorted = [...rows].sort(sortBookings);
             const last5 = sorted.slice(0, 5);
 
             if(last5.length === 0) {
