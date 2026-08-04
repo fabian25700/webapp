@@ -18,41 +18,45 @@
 
     html, body {
       width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: #a3a3a3;
+      min-height: 100vh;
+      background-color: #4a4a4a;
       color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       display: flex;
       justify-content: center;
+      align-items: flex-start;
+      overflow: hidden;
       position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
     }
 
     .app-container {
       width: 100%;
       max-width: 480px;
+      height: 100%;
       background-color: #4a4a4a;
-      height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       position: relative;
-      padding-bottom: 30px;
       overflow: hidden;
       transition: max-width 0.3s ease;
     }
 
-    /* responsive Optimierung für Laptops / größere Bildschirme */
+    /* Responsive Optimierung für Laptop / größere Bildschirme */
     @media (min-width: 768px) {
       .app-container {
-        max-width: 1024px;
+        max-width: 900px;
       }
     }
 
     /* Header mit rot-weißem Schachbrettmuster */
     .header-banner {
       width: 100%;
-      height: calc(160px + env(safe-area-inset-top));
+      height: clamp(120px, 20vh, 180px);
       padding-top: env(safe-area-inset-top);
       background-color: #b31217;
       background-image: 
@@ -69,25 +73,25 @@
     /* Wölbung des Hauptinhalts */
     .content-card {
       width: 100%;
-      height: 100%;
+      flex: 1;
       background-color: #4a4a4a;
       margin-top: -30px;
-      border-top-left-radius: 50% 20px;
-      border-top-right-radius: 50% 20px;
+      border-top-left-radius: 50% 25px;
+      border-top-right-radius: 50% 25px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 0 20px 20px 20px;
+      padding: 0 20px clamp(15px, 3vh, 30px) 20px;
       position: relative;
-      z-index: 1;
-      overflow: hidden;
+      z-index: 2;
+      justify-content: space-between;
     }
 
-    /* Profil-Logo */
+    /* Profil-Logo im Vordergrund */
     .avatar-container {
       margin-top: -50px;
-      width: 100px;
-      height: 100px;
+      width: clamp(80px, 15vh, 110px);
+      height: clamp(80px, 15vh, 110px);
       border-radius: 50%;
       background-color: #000000;
       border: 3px solid #333333;
@@ -95,31 +99,33 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
       flex-shrink: 0;
+      position: relative;
+      z-index: 3;
     }
 
     .avatar-container img {
-      width: 70%;
-      height: auto;
-      object-fit: contain;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     /* Titel & Untertitel */
     .title {
-      font-size: 26px;
+      font-size: clamp(22px, 3.5vh, 30px);
       font-weight: bold;
-      margin-top: 15px;
+      margin-top: clamp(8px, 1.5vh, 15px);
       text-align: center;
       color: #ffffff;
       flex-shrink: 0;
     }
 
     .subtitle {
-      font-size: 14px;
+      font-size: clamp(12px, 1.8vh, 15px);
       color: #dddddd;
-      margin-top: 5px;
-      margin-bottom: 20px;
+      margin-top: 4px;
+      margin-bottom: clamp(12px, 2vh, 20px);
       text-align: center;
       font-style: italic;
       flex-shrink: 0;
@@ -129,26 +135,29 @@
     .events-box {
       width: 100%;
       border: 2px solid rgba(255, 255, 255, 0.8);
-      border-radius: 30px;
-      padding: 20px 15px;
+      border-radius: 25px;
+      padding: clamp(12px, 2vh, 20px) 15px;
       text-align: center;
-      margin-bottom: 20px;
-      background-color: rgba(0, 0, 0, 0.05);
-      flex-shrink: 0;
+      margin-bottom: clamp(12px, 2vh, 20px);
+      background-color: rgba(0, 0, 0, 0.1);
+      flex-shrink: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
 
     .events-title {
-      font-size: 28px;
+      font-size: clamp(20px, 3vh, 26px);
       font-weight: normal;
-      margin-bottom: 15px;
+      margin-bottom: clamp(8px, 1.2vh, 12px);
       color: #ffffff;
     }
 
     .events-list p {
-      font-size: 15px;
-      line-height: 1.5;
+      font-size: clamp(13px, 1.8vh, 15px);
+      line-height: 1.4;
       color: #ffffff;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .events-list p:last-child {
@@ -160,8 +169,8 @@
       width: 100%;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-bottom: 25px;
+      gap: clamp(8px, 1.5vh, 12px);
+      margin-bottom: clamp(10px, 2vh, 20px);
       flex-shrink: 0;
     }
 
@@ -173,12 +182,12 @@
       color: #ffffff;
       border: 2px solid rgba(255, 255, 255, 0.8);
       border-radius: 25px;
-      padding: 12px 8px;
-      font-size: 14px;
+      padding: clamp(8px, 1.2vh, 12px) 8px;
+      font-size: clamp(12px, 1.8vh, 14px);
       text-align: center;
       background-color: transparent;
       transition: background-color 0.2s, transform 0.1s;
-      min-height: 50px;
+      min-height: clamp(42px, 6vh, 52px);
       cursor: pointer;
     }
 
@@ -189,11 +198,10 @@
 
     /* Footer / Instagram */
     .footer {
-      margin-top: auto;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding-top: 10px;
+      padding-top: 5px;
       flex-shrink: 0;
     }
 
@@ -208,8 +216,8 @@
     }
 
     .instagram-icon {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       fill: #ffffff;
     }
 
@@ -278,9 +286,7 @@
 
     <div class="content-card">
       <div class="avatar-container">
-        <svg viewBox="0 0 24 24" width="40" height="40" fill="#e63946">
-          <path d="M12 2.5s-2 1.5-2 4v2.5L8 12v9.5c0 .8.7 1.5 1.5 1.5h5c.8 0 1.5-.7 1.5-1.5V12l-2-3V6.5c0-2.5-2-4-2-4z"/>
-        </svg>
+        <img src="rakete.png" alt="KC Rakete Logo">
       </div>
 
       <h1 class="title">KC Rakete</h1>
