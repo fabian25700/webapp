@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Mein Budget</title>
@@ -40,6 +40,14 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            touch-action: manipulation;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
+            touch-action: pan-y;
         }
 
         body {
@@ -48,7 +56,8 @@
             color: var(--text-primary);
             min-height: 100vh;
             -webkit-tap-highlight-color: transparent;
-            overflow-x: hidden;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         header {
@@ -127,6 +136,7 @@
             border: none;
             color: white;
             transition: transform 0.2s;
+            touch-action: none;
         }
 
         .fab:active {
@@ -149,6 +159,7 @@
             align-items: flex-end;
             justify-content: center;
             backdrop-filter: blur(4px);
+            touch-action: none;
         }
 
         .modal.active {
@@ -158,7 +169,7 @@
         .modal-content {
             background: var(--bg);
             width: 100%;
-            max-height: 92vh;
+            max-height: 88vh;
             border-top-left-radius: 24px;
             border-top-right-radius: 24px;
             padding: 20px;
@@ -167,6 +178,31 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Tracking Modal */
+        #tracking-modal .modal-content {
+            max-height: 96vh;
+            height: auto;
+            overflow: hidden !important;
+            padding: 12px 16px;
+            gap: 8px;
+            justify-content: space-between;
+        }
+
+        #tracking-modal .card {
+            padding: 10px 12px;
+            border-radius: 14px;
+        }
+
+        #tracking-modal .card-title {
+            margin-bottom: 6px;
+        }
+
+        #tracking-modal .input-group {
+            margin-bottom: 0;
         }
 
         @media (min-width: 601px) {
@@ -177,6 +213,10 @@
                 width: 500px;
                 max-height: 85vh;
                 border-radius: 24px;
+            }
+            #tracking-modal .modal-content {
+                height: max-content;
+                max-height: 90vh;
             }
         }
 
@@ -225,6 +265,7 @@
             color: var(--text-primary);
             border-radius: 7px;
             cursor: pointer;
+            touch-action: manipulation;
         }
 
         .segmented-btn.active {
@@ -280,7 +321,6 @@
             color: var(--success);
         }
 
-        /* Inputs */
         .input-group {
             margin-bottom: 14px;
         }
@@ -305,10 +345,17 @@
             background: transparent;
             border: none;
             color: var(--danger);
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: 800;
             outline: none;
-            padding: 10px 0;
+            padding: 8px 0;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        #tracking-modal .number-input {
+            font-size: 1.8rem;
+            padding: 2px 0;
         }
 
         .modal-content.income .number-input { color: var(--success); }
@@ -321,9 +368,15 @@
             background: var(--bg);
             color: var(--text-primary);
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 16px;
             font-weight: 600;
             outline: none;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        #tracking-modal .text-input {
+            padding: 8px 12px;
         }
 
         .text-input:focus {
@@ -341,24 +394,40 @@
             gap: 10px;
         }
 
+        #tracking-modal .category-grid {
+            gap: 6px;
+        }
+
         .category-btn {
             background: var(--bg);
             border: 1px solid transparent;
             border-radius: 14px;
-            padding: 14px 8px;
+            padding: 12px 6px;
             color: var(--text-primary);
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: 600;
+            touch-action: manipulation;
+        }
+
+        #tracking-modal .category-btn {
+            padding: 6px 4px;
+            font-size: 0.72rem;
+            gap: 2px;
+            border-radius: 10px;
         }
 
         .category-btn span.icon-wrapper {
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             display: block;
+        }
+
+        #tracking-modal .category-btn span.icon-wrapper {
+            font-size: 1rem;
         }
 
         .modal-content.expense .category-btn.selected {
@@ -405,7 +474,7 @@
         .modal-content.income input:checked + .slider { background-color: var(--success); }
         input:checked + .slider:before { transform: translateX(20px); }
 
-        /* Action Buttons */
+        /* Buttons */
         .inline-action-btn {
             background: var(--border-light);
             border: 1px solid var(--border);
@@ -415,6 +484,7 @@
             font-weight: 700;
             cursor: pointer;
             color: var(--text-primary);
+            touch-action: manipulation;
         }
 
         .submit-btn {
@@ -432,6 +502,11 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            touch-action: manipulation;
+        }
+
+        #tracking-modal .submit-btn {
+            padding: 12px;
         }
 
         .modal-content.expense .submit-btn { background: var(--accent); }
@@ -459,6 +534,12 @@
             justify-content: center;
             gap: 10px;
             margin-top: 8px;
+            touch-action: manipulation;
+        }
+
+        #tracking-modal .delete-btn {
+            padding: 10px;
+            margin-top: 0;
         }
 
         /* Spinner */
@@ -481,6 +562,7 @@
             display: none;
             flex-direction: column;
             padding: 20px;
+            touch-action: pan-y;
         }
         @media (min-width: 601px) {
             .templates-drawer {
@@ -513,6 +595,7 @@
             cursor: pointer;
             box-shadow: var(--shadow);
             gap: 4px;
+            touch-action: manipulation;
         }
 
         .template-info { display: flex; flex-direction: column; gap: 2px; width: 100%; }
@@ -522,7 +605,7 @@
         .template-amount.expense { color: var(--danger); }
         .template-amount.income { color: var(--success); }
 
-        /* Dashboard & Stats Visuals */
+        /* Dashboard */
         .dashboard-row {
             display: flex;
             justify-content: space-between;
@@ -558,13 +641,14 @@
             border: 1px solid var(--border);
             background: var(--bg);
             color: var(--text-primary);
-            font-size: 0.9rem;
+            font-size: 16px;
             font-weight: 600;
             outline: none;
             cursor: pointer;
+            touch-action: manipulation;
         }
 
-        /* Bidirektionaler Sparquoten-Container */
+        /* Sparquote Container */
         .savings-rate-container {
             margin-top: 14px;
             display: flex;
@@ -628,6 +712,7 @@
         .dist-item {
             display: flex; align-items: center; justify-content: space-between; padding: 12px 0; font-size: 0.95rem; border-bottom: 1px solid var(--border-light);
             cursor: pointer; text-decoration: none; transition: background 0.2s;
+            touch-action: manipulation;
         }
         .dist-item:hover {
             background: var(--border-light);
@@ -640,7 +725,7 @@
             text-align: center; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; padding: 20px 0;
         }
 
-        /* Visual Toast Feedback */
+        /* Toast */
         .toast {
             position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px);
             background: var(--success); color: white; padding: 12px 24px; border-radius: 30px;
@@ -649,7 +734,89 @@
         }
         .toast.active { transform: translateX(-50%) translateY(0); }
 
-        /* Timeline Chart Styles */
+        /* Netto Trend Diagramm */
+        .net-trend-chart {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 140px;
+            padding: 10px 0;
+            margin-top: 6px;
+            position: relative;
+            gap: 6px;
+        }
+        .net-zero-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 50%;
+            height: 1px;
+            border-top: 1px dashed var(--border);
+            z-index: 1;
+        }
+        .net-bar-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            position: relative;
+            z-index: 2;
+        }
+        .net-bar-wrapper:hover .timeline-tooltip {
+            display: block;
+        }
+        .net-bar-area {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        .net-bar {
+            width: 60%;
+            max-width: 18px;
+            border-radius: 4px;
+            transition: height 0.3s ease;
+            position: absolute;
+            left: 20%;
+        }
+        .net-bar.pos {
+            bottom: 50%;
+            background: var(--success);
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .net-bar.neg {
+            top: 50%;
+            background: var(--danger);
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+        .net-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .timeline-tooltip {
+            position: absolute;
+            bottom: 105%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-primary);
+            color: var(--surface);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            white-space: nowrap;
+            z-index: 10;
+            display: none;
+            box-shadow: var(--shadow);
+        }
+
         .timeline-chart {
             display: flex;
             align-items: flex-end;
@@ -697,22 +864,6 @@
             text-align: center;
             white-space: nowrap;
         }
-        .timeline-tooltip {
-            position: absolute;
-            bottom: 105%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--text-primary);
-            color: var(--surface);
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            white-space: nowrap;
-            z-index: 10;
-            display: none;
-            box-shadow: var(--shadow);
-        }
     </style>
 </head>
 <body>
@@ -724,11 +875,11 @@
             </a>
             <div class="header-title-left">Mein Budget</div>
         </div>
-        <div class="header-right" id="cloud-status-text">Cloud Live</div>
+        <div class="header-right" id="cloud-status-text"></div>
     </header>
 
     <div class="container">
-        <!-- Zeit-Filter für historische Auswertungen & Reichweiten-Umschalter -->
+        <!-- Filter Card -->
         <div class="filter-card">
             <div class="segmented-control" style="margin-bottom: 4px;">
                 <button id="view-mode-month" class="segmented-btn active" onclick="setViewMode('month')">Monatsübersicht</button>
@@ -736,7 +887,6 @@
             </div>
             <div class="filter-row-inputs">
                 <select id="filter-year" class="filter-select" onchange="renderStats(globalRawData)">
-                    <!-- Dynamisch befüllt -->
                 </select>
                 <select id="filter-month" class="filter-select" onchange="renderStats(globalRawData)">
                     <option value="all">Gesamtes Jahr</option>
@@ -756,7 +906,7 @@
             </div>
         </div>
 
-        <!-- Hauptseite: Statistik & Grafisches Dashboard -->
+        <!-- Dashboard -->
         <section id="sect-dashboard" class="app-section active">
             <div class="card">
                 <div class="card-title">
@@ -783,7 +933,7 @@
                     <span id="stats-savings-rate">0%</span>
                 </div>
                 
-                <!-- Neue zentrierte bidirektionale Sparquoten-Anzeige -->
+                <!-- Sparquoten Container -->
                 <div class="savings-rate-container">
                     <div class="savings-rate-labels">
                         <span id="savings-min-label">Max Sparen</span>
@@ -797,25 +947,23 @@
                 </div>
             </div>
 
-            <!-- Monatliche Verläufe Diagramm-Kachel -->
+            <!-- Netto-Saldo Trend Kachel -->
             <div class="card">
                 <div class="card-title">
                     <div class="card-title-left">
                         <div class="card-icon">📈</div>
-                        <span>Historischer Monatsverlauf</span>
+                        <span>Netto-Saldo Trend</span>
                     </div>
                 </div>
-                <div id="dashboard-timeline-chart" class="timeline-chart">
-                    <!-- Dynamische Balken -->
+                <div id="dashboard-timeline-chart" class="net-trend-chart">
                 </div>
-                <div style="display: flex; gap: 12px; justify-content: center; margin-top: 10px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">
-                    <div style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; background: var(--success); border-radius: 2px;"></div>Ein</div>
-                    <div style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; background: var(--danger); border-radius: 2px;"></div>Aus</div>
-                    <div style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; background: var(--accent); border-radius: 2px;"></div>Sal</div>
+                <div style="display: flex; gap: 16px; justify-content: center; margin-top: 10px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">
+                    <div style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; background: var(--success); border-radius: 2px;"></div>Positiver Saldo</div>
+                    <div style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; background: var(--danger); border-radius: 2px;"></div>Negativer Saldo</div>
                 </div>
             </div>
 
-            <!-- Zusammengefasste Kategorie-Verteilungen mit umschaltbarer Fläche -->
+            <!-- Kategorie Verteilungen -->
             <div class="card">
                 <div class="card-title" style="margin-bottom: 8px;">
                     <div class="card-title-left">
@@ -866,7 +1014,7 @@
         <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
     </button>
 
-    <!-- Modal Maske: Tracken Einnahme / Ausgabe / Bearbeitung -->
+    <!-- Tracking Modal -->
     <div id="tracking-modal" class="modal" onclick="closeTrackingModalOnOutsideClick(event)">
         <div class="modal-content expense" id="modal-content-container">
             <div class="modal-header">
@@ -975,7 +1123,7 @@
         </div>
     </div>
 
-    <!-- Kategorie Detail Maske -->
+    <!-- Kategorie Modal -->
     <div id="category-modal" class="modal" onclick="closeCategoryModalOnOutsideClick(event)">
         <div class="modal-content" style="background: var(--bg); max-height: 95vh;">
             <div class="modal-header" style="background: var(--surface); padding: 12px 16px; margin: -20px -20px 12px -20px; border-bottom: 1px solid var(--border-light); border-top-left-radius: 24px; border-top-right-radius: 24px;">
@@ -984,11 +1132,9 @@
             </div>
             
             <div style="display: flex; flex-direction: column; gap: 16px;">
-                <!-- Filter oben in den Kategorie-Details -->
                 <div class="filter-card">
                     <div class="filter-row-inputs">
                         <select id="cat-filter-year" class="filter-select" style="width: 100%;" onchange="updateCategoryModalView()">
-                            <!-- Dynamisch befüllt -->
                         </select>
                     </div>
                 </div>
@@ -1018,7 +1164,6 @@
                         </div>
                     </div>
                     <div id="cat-timeline-chart" class="timeline-chart">
-                        <!-- Dynamische Kategorie Balken -->
                     </div>
                     <div style="display: flex; gap: 12px; justify-content: center; margin-top: 10px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;">
                         <div id="cat-legend-inc" style="display: flex; align-items: center; gap: 4px;"><div style="width: 8px; height: 8px; background: var(--success); border-radius: 2px;"></div>Ein</div>
@@ -1034,14 +1179,13 @@
                         </div>
                     </div>
                     <div id="category-modal-body" style="display: flex; flex-direction: column;">
-                        <!-- Dynamische Einzelposten-Auflistung -->
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Historie aller Buchungen Maske -->
+    <!-- Historie Modal -->
     <div id="history-modal" class="modal" onclick="closeHistoryModalOnOutsideClick(event)">
         <div class="modal-content" style="background: var(--bg); max-height: 95vh;">
             <div class="modal-header" style="background: var(--surface); padding: 12px 16px; margin: -20px -20px 12px -20px; border-bottom: 1px solid var(--border-light); border-top-left-radius: 24px; border-top-right-radius: 24px;">
@@ -1053,7 +1197,6 @@
             </div>
             <div class="card">
                 <div id="history-modal-body" style="display: flex; flex-direction: column;">
-                    <!-- Alle Posten -->
                 </div>
             </div>
         </div>
@@ -1076,6 +1219,10 @@
     <iframe id="api-handler" src="geld_api.html" style="display:none;"></iframe>
 
     <script>
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
+
         let currentType = 'expense';
         let selectedCategoryValue = '';
         let apiEndpoint = '';
@@ -1188,7 +1335,7 @@
             document.getElementById('modal-template-toggle-card').style.display = 'none';
             document.getElementById('btn-delete-data').style.display = 'block';
 
-            let cleanBetrag = row.betrag.toString().replace(',','.');
+            let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
             const val = parseFloat(cleanBetrag);
             const isExpense = val < 0;
 
@@ -1309,7 +1456,7 @@
                 body.innerHTML = '<p class="status-text-loader">Keine Einträge vorhanden.</p>';
             } else {
                 sorted.forEach(row => {
-                    let cleanBetrag = row.betrag.toString().replace(',','.');
+                    let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
                     const val = parseFloat(cleanBetrag);
                     const isExpense = val < 0;
                     const emo = categoryEmojis[row.kategorie] || '📦';
@@ -1399,7 +1546,7 @@
             }
 
             catRows.forEach(row => {
-                let cleanBetrag = row.betrag.toString().replace(',','.');
+                let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
                 const val = parseFloat(cleanBetrag);
                 if(!isNaN(val)) {
                     if(val > 0) catIncome += val;
@@ -1467,7 +1614,7 @@
                 const top5Rows = sortedRows.slice(0, 5);
 
                 top5Rows.forEach(row => {
-                    let cleanBetrag = row.betrag.toString().replace(',','.');
+                    let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
                     const val = parseFloat(cleanBetrag);
                     const isExpense = val < 0;
                     
@@ -1694,6 +1841,7 @@
             }
         }
 
+        // 1. LAZY LOADING & 2. STATUS-ENTKOPPLUNG UMGESETZT
         async function loadTemplatesAndStats() {
             if(!apiEndpoint) return;
             try {
@@ -1704,11 +1852,24 @@
                 });
                 const data = await res.json();
                 
-                globalRawData = data;
+                globalRawData = Array.isArray(data) ? data : [];
                 
-                initFilterOptions(data);
-                renderTemplates(data);
-                renderStats(data);
+                initFilterOptions(globalRawData);
+
+                // Asynchrones/Entkoppeltes Lazy Loading der Komponenten
+                requestAnimationFrame(() => {
+                    renderStats(globalRawData);
+                });
+
+                // Status-Entkopplung: Vorlagen isoliert verarbeiten damit Fehler die Stats nicht blockieren
+                setTimeout(() => {
+                    try {
+                        renderTemplates(globalRawData);
+                    } catch(err) {
+                        console.error("Entkoppelter Ladefehler Vorlagen:", err);
+                    }
+                }, 50);
+
             } catch(e) {
                 console.error("Fehler beim Abruf:", e);
                 document.getElementById('stats-distribution').innerHTML = 
@@ -1752,6 +1913,7 @@
             }
         }
 
+        // 3. VORLAGEN ROBUST GEMACHT GEGEN LADEFEHLER
         function renderTemplates(rows) {
             const container = document.getElementById('templates-list');
             if(!container) return;
@@ -1760,20 +1922,27 @@
             const cache = new Set();
             let uniqueTemplates = [];
 
-            if (rows && rows.length > 0) {
+            if (rows && Array.isArray(rows) && rows.length > 0) {
                 rows.forEach(row => {
-                    if(row.vorlage && row.vorlage.toLowerCase() === 'ja') {
-                        let cleanBetrag = row.betrag.toString().replace(',','.');
+                    // Strikte Defensive Checks zur Behebung von Ladefehlern bei fehlerhaften Datensätzen
+                    if(!row || typeof row !== 'object') return;
+                    if(row.vorlage && String(row.vorlage).trim().toLowerCase() === 'ja') {
+                        let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
                         const val = parseFloat(cleanBetrag);
+                        if(isNaN(val)) return;
+
                         const isExpenseTemplate = val < 0;
 
                         if(currentType === 'expense' && !isExpenseTemplate) return;
                         if(currentType === 'income' && isExpenseTemplate) return;
 
-                        const identifier = `${row.titel}_${row.betrag}_${row.kategorie}`;
+                        const safeTitel = row.titel || "Vorlage ohne Titel";
+                        const safeKat = row.kategorie || "Sonstiges";
+
+                        const identifier = `${safeTitel}_${row.betrag}_${safeKat}`;
                         if(!cache.has(identifier)) {
                             cache.add(identifier);
-                            uniqueTemplates.push(row);
+                            uniqueTemplates.push({ ...row, titel: safeTitel, kategorie: safeKat });
                         }
                     }
                 });
@@ -1787,7 +1956,7 @@
             uniqueTemplates.sort((a, b) => (a.titel || "").localeCompare(b.titel || ""));
 
             uniqueTemplates.forEach(t => {
-                let cleanBetrag = t.betrag.toString().replace(',','.');
+                let cleanBetrag = (t.betrag || 0).toString().replace(',','.');
                 const val = parseFloat(cleanBetrag);
                 if (isNaN(val)) return;
 
@@ -1837,7 +2006,7 @@
 
             if (rows && rows.length > 0) {
                 rows.forEach(row => {
-                    let cleanBetrag = row.betrag.toString().replace(',','.');
+                    let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
                     const val = parseFloat(cleanBetrag);
                     if(isNaN(val)) return;
 
@@ -1868,7 +2037,7 @@
 
             if (rows && rows.length > 0) {
                 rows.forEach(row => {
-                    let cleanBetrag = row.betrag.toString().replace(',','.');
+                    let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
                     const val = parseFloat(cleanBetrag);
                     if(isNaN(val)) return;
 
@@ -1932,9 +2101,10 @@
             renderRecentBookings(rows);
         }
 
+        // 4. NETTO-SALDO TREND AUSREISSER-FILTER UMGESETZT
         function renderTimelineChart(timelineData) {
             const chart = document.getElementById('dashboard-timeline-chart');
-            chart.innerHTML = '';
+            chart.innerHTML = '<div class="net-zero-line"></div>';
             
             const sortedMonths = Object.keys(timelineData).sort();
             if(sortedMonths.length === 0) {
@@ -1942,35 +2112,41 @@
                 return;
             }
 
-            let maxVal = 0;
-            sortedMonths.forEach(m => {
-                const s = timelineData[m].inc - timelineData[m].exp;
-                maxVal = Math.max(maxVal, timelineData[m].inc, timelineData[m].exp, Math.abs(s));
-            });
+            const visibleMonths = sortedMonths.slice(-6);
+            let saldos = visibleMonths.map(m => Math.abs(timelineData[m].inc - timelineData[m].exp));
 
-            sortedMonths.slice(-6).forEach(m => {
+            // Robuster Skalierungsfaktor ohne Verzerrung durch Ausreißer
+            let maxSaldoAbs = 0;
+            if (saldos.length > 0) {
+                const sortedSaldos = [...saldos].sort((a, b) => a - b);
+                const q3Index = Math.floor(sortedSaldos.length * 0.75);
+                const upperLimit = sortedSaldos[q3Index] * 1.5;
+                
+                maxSaldoAbs = Math.max(...saldos);
+                if (upperLimit > 0 && maxSaldoAbs > upperLimit) {
+                    maxSaldoAbs = upperLimit; // Skaliert extrem hohe Peaks ab
+                }
+            }
+
+            visibleMonths.forEach(m => {
                 const data = timelineData[m];
                 const sal = data.inc - data.exp;
                 const label = m.split('-')[1] + '/' + m.split('-')[0].substring(2);
 
-                const incH = maxVal > 0 ? (data.inc / maxVal) * 100 : 0;
-                const expH = maxVal > 0 ? (data.exp / maxVal) * 100 : 0;
-                const salH = maxVal > 0 ? (Math.abs(sal) / maxVal) * 100 : 0;
+                const percentHeight = maxSaldoAbs > 0 ? Math.min((Math.abs(sal) / maxSaldoAbs) * 100, 100) : 0;
+                const isPos = sal >= 0;
 
                 const wrapper = document.createElement('div');
-                wrapper.className = 'timeline-bar-wrapper';
+                wrapper.className = 'net-bar-wrapper';
                 wrapper.innerHTML = `
                     <div class="timeline-tooltip">
-                        Ein: +${formatCurrency(data.inc)}<br>
-                        Aus: -${formatCurrency(data.exp)}<br>
-                        Sal: ${sal >= 0 ? '+' : ''}${formatCurrency(sal)}
+                        Saldo: ${sal >= 0 ? '+' : ''}${formatCurrency(sal)}<br>
+                        <span style="opacity:0.8; font-size:0.6rem;">Ein: +${formatCurrency(data.inc)} | Aus: -${formatCurrency(data.exp)}</span>
                     </div>
-                    <div class="timeline-bar-multi">
-                        <div class="timeline-subbar inc" style="height: ${incH}%"></div>
-                        <div class="timeline-subbar exp" style="height: ${expH}%"></div>
-                        <div class="timeline-subbar sal" style="height: ${salH}%; background: ${sal >= 0 ? 'var(--success-soft)' : 'var(--danger-soft)'}; border: 1px solid var(--accent);"></div>
+                    <div class="net-bar-area">
+                        <div class="net-bar ${isPos ? 'pos' : 'neg'}" style="height: ${percentHeight / 2}%;"></div>
                     </div>
-                    <div class="timeline-label">${label}</div>
+                    <div class="net-label">${label}</div>
                 `;
                 chart.appendChild(wrapper);
             });
@@ -1983,7 +2159,7 @@
                 catDist = {}; incCatDist = {}; totalExp = 0; totalInc = 0;
                 
                 globalRawData.forEach(row => {
-                    let cleanBetrag = row.betrag.toString().replace(',','.');
+                    let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
                     const val = parseFloat(cleanBetrag);
                     if(isNaN(val)) return;
 
@@ -2091,7 +2267,7 @@
             }
 
             last5.forEach(row => {
-                let cleanBetrag = row.betrag.toString().replace(',','.');
+                let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
                 const val = parseFloat(cleanBetrag);
                 const isExpense = val < 0;
                 const emo = categoryEmojis[row.kategorie] || '📦';
