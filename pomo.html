@@ -134,6 +134,33 @@
             gap: 16px;
         }
 
+        /* Toggle Switch Styling */
+        .mode-toggle-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .toggle-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+        }
+
         .selection-card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -158,6 +185,10 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
+        }
+
+        .rank-grid.fm-grid {
+            grid-template-columns: repeat(2, 1fr);
         }
 
         .rank-btn {
@@ -197,6 +228,10 @@
         
         .rank-btn.p4 { border-color: rgba(231, 76, 60, 0.4); }
         .rank-btn.p4 .rank-num { color: var(--danger); }
+
+        .rank-btn.full-width {
+            grid-column: span 2;
+        }
 
         /* Lock Screen Overlay */
         #lock-screen {
@@ -257,6 +292,13 @@
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
+
+        .congrats-text {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
@@ -273,7 +315,13 @@
 </header>
 
 <main>
-    <div class="selection-card">
+    <div class="mode-toggle-container">
+        <button id="toggle-cr" class="toggle-btn active" onclick="switchMode('CR')">CR</button>
+        <button id="toggle-fm" class="toggle-btn" onclick="switchMode('FM')">FM</button>
+    </div>
+
+    <!-- Clash Royale Selection Card -->
+    <div id="card-cr" class="selection-card">
         <div class="card-title">Clash Royale Platzierung</div>
         <div class="rank-grid">
             <div class="rank-btn p1" onclick="startLockout(5)">
@@ -294,13 +342,40 @@
             </div>
         </div>
     </div>
+
+    <!-- FM Selection Card -->
+    <div id="card-fm" class="selection-card" style="display: none;">
+        <div class="card-title">FM Rating</div>
+        <div class="rank-grid fm-grid">
+            <div class="rank-btn p1 full-width" onclick="startCongrats(30)">
+                <span class="rank-num">Rating 95-99</span>
+                <span class="rank-penalty">Kein Timer</span>
+            </div>
+            <div class="rank-btn p1" onclick="startLockout(5)">
+                <span class="rank-num">Rating 85-94</span>
+                <span class="rank-penalty">5 Min Sperre</span>
+            </div>
+            <div class="rank-btn" onclick="startLockout(10)">
+                <span class="rank-num">Rating 75-84</span>
+                <span class="rank-penalty">10 Min Sperre</span>
+            </div>
+            <div class="rank-btn" onclick="startLockout(15)">
+                <span class="rank-num">Rating 65-74</span>
+                <span class="rank-penalty">15 Min Sperre</span>
+            </div>
+            <div class="rank-btn p4" onclick="startLockout(20)">
+                <span class="rank-num">Rating 50-64</span>
+                <span class="rank-penalty">20 Min Sperre</span>
+            </div>
+        </div>
+    </div>
 </main>
 
 <div id="lock-screen">
     <div class="lock-container">
-        <div class="badge-lock">🔒 Focus Mode Active</div>
+        <div class="badge-lock" id="lock-badge">🔒 Focus Mode Active</div>
         <div class="timer-display" id="timer">00:00</div>
-        <div class="todo-callout">🚀 Jetzt ToDos rocken!</div>
+        <div class="todo-callout" id="todo-text">🚀 Jetzt ToDos rocken!</div>
     </div>
 </div>
 
@@ -311,18 +386,64 @@
 
     let timerInterval = null;
 
+    function switchMode(mode) {
+        const crCard = document.getElementById('card-cr');
+        const fmCard = document.getElementById('card-fm');
+        const crBtn = document.getElementById('toggle-cr');
+        const fmBtn = document.getElementById('toggle-fm');
+
+        if (mode === 'CR') {
+            crCard.style.display = 'flex';
+            fmCard.style.display = 'none';
+            crBtn.classList.add('active');
+            fmBtn.classList.remove('active');
+        } else {
+            crCard.style.display = 'none';
+            fmCard.style.display = 'flex';
+            crBtn.classList.remove('active');
+            fmBtn.classList.add('active');
+        }
+    }
+
+    function getTaskText(minutes) {
+        if (minutes === 5) {
+            return "Habit / Aufgabe von dieser Woche";
+        } else if (minutes === 10) {
+            return "Habit / Aufgabe von heute oder morgen";
+        } else if (minutes === 15) {
+            return "Habit / Aufgabe von heute";
+        } else if (minutes === 20) {
+            return "Habit / wichtigste Aufgabe von heute";
+        }
+        return "🚀 Jetzt ToDos rocken!";
+    }
+
     function startLockout(minutes) {
         const endTime = Date.now() + minutes * 60 * 1000;
         localStorage.setItem('pomodoro_end_time', endTime);
+        localStorage.setItem('pomodoro_type', 'lockout');
+        localStorage.setItem('pomodoro_minutes', minutes);
+        
+        runTimer();
+    }
+
+    function startCongrats(seconds) {
+        const endTime = Date.now() + seconds * 1000;
+        localStorage.setItem('pomodoro_end_time', endTime);
+        localStorage.setItem('pomodoro_type', 'congrats');
         
         runTimer();
     }
 
     function runTimer() {
         const endTime = localStorage.getItem('pomodoro_end_time');
+        const type = localStorage.getItem('pomodoro_type');
         if (!endTime) return;
 
         const lockScreen = document.getElementById('lock-screen');
+        const timerDisplay = document.getElementById('timer');
+        const todoText = document.getElementById('todo-text');
+        const lockBadge = document.getElementById('lock-badge');
         
         lockScreen.classList.add('active');
 
@@ -336,10 +457,25 @@
             if (remainingSeconds <= 0) {
                 clearInterval(timerInterval);
                 localStorage.removeItem('pomodoro_end_time');
+                localStorage.removeItem('pomodoro_type');
+                localStorage.removeItem('pomodoro_minutes');
                 lockScreen.classList.remove('active');
                 document.title = "Pomodoro";
             } else {
-                updateTimerDisplay(remainingSeconds);
+                if (type === 'congrats') {
+                    lockBadge.innerText = "🎉 Glückwunsch!";
+                    timerDisplay.style.display = 'none';
+                    todoText.className = "congrats-text";
+                    todoText.innerText = "Glückwunsch und spiele erneut mit gleichem Land und tue etwas was dir Spaß macht.";
+                    document.title = "Glückwunsch!";
+                } else {
+                    const minutes = parseInt(localStorage.getItem('pomodoro_minutes'), 10);
+                    lockBadge.innerText = "🔒 Focus Mode Active";
+                    timerDisplay.style.display = 'block';
+                    todoText.className = "todo-callout";
+                    todoText.innerText = getTaskText(minutes);
+                    updateTimerDisplay(remainingSeconds);
+                }
             }
         };
 
