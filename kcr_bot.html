@@ -49,6 +49,29 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
+        /* ZURÜCK BUTTON */
+        .back-btn {
+            position: absolute;
+            left: 15px;
+            top: calc(15px + env(safe-area-inset-top));
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.05);
+            transition: background 0.2s;
+        }
+
+        .back-btn:active {
+            background: rgba(0, 0, 0, 0.15);
+        }
+
         .fixed-header h1 { 
             margin: 10px 0 5px 0; 
             font-size: 1.1rem; 
@@ -166,6 +189,7 @@
 <body>
 
     <div class="fixed-header">
+        <a href="kcr_index.html" class="back-btn" aria-label="Zurück">&#10094;</a>
         <h1>KC Rakete</h1>
         <div class="subtitle">Offizieller Regel-Bot (Mai 2026)</div>
     </div>
@@ -193,7 +217,7 @@
         { keywords: ["zu spät", "pünktlich", "whatsapp"], text: "Unentschuldigtes zu spät kommen kostet 10,00 € (jeder, der 5 Minuten nach Beginn nicht da ist). Bis zu 24 Stunden vorher in der WhatsApp-Gruppe ist es straffrei. Wer zu spät kommt, bekommt den aufgerundeten Mittelwert der Kallen und verlorenen Spiele." },
         { keywords: ["nicht erscheinen", "fehlen", "abwesend"], text: "Unentschuldigtes Nichtscheinen kostet den doppelten Durchschnitt aller Strafen. Absage bis zu 7 Tage vorher per WhatsApp ist straffrei. Entschuldigt nach der Frist kostet den einfachen Durchschnitt. Ausnahme: AU für den Tag." },
         { keywords: ["unsportlich", "reihenfolge", "glas", "umkippen", "tafel", "vorzeitig"], text: "Reihenfolge missachtet: 1,00 €.\nGlas umkippen: 1,00 € je Anwesenden.\nBahn nicht startbereit hinterlassen: 5,00 €.\nWurf nicht richtig angeschrieben: 1,00 €.\nVorzeitig gehen: 5,00 € (und man wird König, wenn man zu dem Zeitpunkt die meisten Kallen hat)." },
-        { keywords: ["könig", "kallen-könig", "krone", "god save the king"], text: "Der Kallen-König muss seine Krone mitbringen (fehlt sie: 5,00 €). Jedes Absetzen kostet 1,00 €. Fehlt er unentschuldigt: 5,00 € + doppelter Strafendurchschnitt. Neuer König wird, wer am Ende die meisten Kallen hat." },
+        { keywords: ["könig", "kallen-könig", "krone", "god save the king"], text: "Der Kallen-König muss seine Krone mitbringen (fehlt sie: 5,00 €). Jedes Absetzen kostet 1,00 €. Fehlt er unentschuldigt: 5,00 € + doppelter Strafendurchschnitt. Neuer König wird, wer am Ende die meiste Kallen hat." },
         { keywords: ["hausnummer", "große hausnummer", "kleine hausnummer"], text: "Große Hausnummer: 3 Würfe sortieren, höchste gewinnt (Kalle = 0). 999 ist Blitz-KO.\nKleine Hausnummer: 3 Würfe sortieren, kleinste gewinnt (Kalle = 9). 111 ist Blitz-KO." },
         { keywords: ["einsacken", "einpacken"], text: "Einsacken/Einpacken: Teams spielen auf exakt 51 Punkte. Bei Kalle oder Fehler verfallen alle Punkte der Runde und der Zug endet. Verliererteam bekommt ein verlorenes Spiel." },
         { keywords: ["gast", "gastkegler"], text: "Gastkegler dürfen auf Vorschlag mit 2/3 Mehrheit (oder ohne Widerspruch) teilnehmen. Sie müssen zu 100% an Spielen und Strafen teilnehmen. Werden sie Kallen-König, müssen sie nächstes Mal mit Krone erscheinen." }
