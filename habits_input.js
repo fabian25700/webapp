@@ -4,7 +4,6 @@ const ROUTINE_CONFIG = {
         zuhause: [
             "Wiegen",
             "alle Rollladen / Fenster",
-            "Tageslicht",
             "Schlafzimmer aufräumen",
             "Zungenscharber / Zahnseide / Mundspülung",
             "Zähne putzen",
@@ -42,12 +41,12 @@ const ROUTINE_CONFIG = {
     "Gesundheitsroutine": {
         icon: "🥗",
         zuhause: [
-            "10h+ gefastet über Nacht",
+            "nichts essen vor 8 Uhr",
             "Tabletten genommen",
             "Creatin genommen"
         ],
         unterwegs: [
-            "10h+ gefastet über Nacht",
+            "nichts essen vor 8 Uhr",
             "3 Liter Wasser getrunken"
         ]
     },
@@ -68,7 +67,7 @@ const ROUTINE_CONFIG = {
             "Küche aufräumen",
             "Wasser parat",
             "Wecker stellen",
-            "Schlafzimmer aufräumen",
+            "komplette Wohnung aufräumen",
             "Kleidung rauslegen",
             "alle Rollladen und Fenster",
             "Zungenscharber / Zahnseide / Mundspülung",
@@ -81,7 +80,7 @@ const ROUTINE_CONFIG = {
             "Finanzen und Habits anschauen",
             "Wasser parat",
             "Wecker stellen",
-            "Schlafzimmer aufräumen",
+            "Meine Sachen aufräumen",
             "Kleidung rauslegen",
             "Rollladen und Fenster",
             "Zähne putzen",
@@ -91,18 +90,19 @@ const ROUTINE_CONFIG = {
     "Schlafroutine": {
         icon: "🛌",
         zuhause: [
-            "21:45 Bildschirme aus (außer: Sally / Routinen)",
+            "nichts essen nach 20 Uhr",
             "Magnesium nehmen",
-            "22:15 im Bett",
+            "22 Uhr im Bett",
             "lesen vor schlafen",
-            "ohne Mac / Handy im Schlafzimmer",
-            "6:00 ohne Snooze aufstehen",
-            "6:05 Tageslicht"
+            "Handy Schlafmodus + anderer Raum",
+            "6 Uhr ohne Snooze aufstehen",
+            "5Min nach aufstehen Tageslicht"
         ],
         unterwegs: [
+            "nichts essen nach 20 Uhr",
             "Magnesium nehmen",
             "22:30 im Bett",
-            "ohne Mac / Handy im Bett",
+            "Handy Schlafmodus + zu Kleidung",
             "ohne Snooze aufstehen",
             "5Min nach aufstehen Tageslicht"
         ]
