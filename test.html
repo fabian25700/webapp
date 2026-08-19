@@ -1,368 +1,529 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#b31217">
-  <title>KC Rakete</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      touch-action: none;
-      -webkit-user-select: none;
-      user-select: none;
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="apple-touch-icon" href="logo.svg">
+<link rel="mask-icon" href="logo.svg" color="#1e293b">
+
+<title>Startseite</title>
+<script src="daten.js"></script>
+<style>
+    :root {
+        --bg: linear-gradient(135deg, #e0e6ed 0%, #f4f6f9 100%);
+        --surface: rgba(255, 255, 255, 0.45);
+        --surface-modal: rgba(255, 255, 255, 0.85);
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --glass-border: rgba(255, 255, 255, 0.6);
+        --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06);
+        --bubble-shadow-hover: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
+        --highlight: radial-gradient(circle, rgba(243, 156, 18, 0.25) 0%, rgba(243, 156, 18, 0) 70%);
     }
 
-    html, body {
-      width: 100%;
-      height: 100%;
-      background-color: #4a4a4a;
-      color: #ffffff;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow: hidden;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            --surface: rgba(30, 41, 59, 0.45);
+            --surface-modal: rgba(30, 41, 59, 0.85);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            --bubble-shadow-hover: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+            --highlight: radial-gradient(circle, rgba(243, 156, 18, 0.3) 0%, rgba(243, 156, 18, 0) 70%);
+        }
     }
 
-    /* Header mit rot-weißem Schachbrettmuster über die VOLLE Bildschirmbreite */
-    .header-banner {
-      width: 100vw;
-      height: clamp(120px, 20vh, 180px);
-      padding-top: env(safe-area-inset-top);
-      background-color: #b31217;
-      background-image: 
-        linear-gradient(45deg, #a3a3a3 25%, transparent 25%), 
-        linear-gradient(-45deg, #a3a3a3 25%, transparent 25%), 
-        linear-gradient(45deg, transparent 75%, #a3a3a3 75%), 
-        linear-gradient(-45deg, transparent 75%, #a3a3a3 75%);
-      background-size: 80px 80px;
-      background-position: 0 0, 0 40px, 40px -40px, -40px 0px;
-      position: relative;
-      flex-shrink: 0;
+    * { box-sizing: border-box; }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+        background: var(--bg);
+        background-attachment: fixed;
+        margin: 0;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        -webkit-tap-highlight-color: transparent;
     }
 
-    .app-container {
-      width: 100%;
-      max-width: 480px;
-      flex: 1;
-      background-color: #4a4a4a;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-      transition: max-width 0.3s ease;
+    header {
+        padding: calc(env(safe-area-inset-top) + 24px) 20px 14px 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 500;
     }
 
-    /* Responsive Optimierung für Laptop / größere Bildschirme */
-    @media (min-width: 768px) {
-      .app-container {
-        max-width: 900px;
-      }
+    .header-title {
+        font-weight: 800;
+        font-size: 1.2rem;
+        letter-spacing: 0.06em;
+        color: var(--text-primary);
     }
 
-    /* Wölbung des Hauptinhalts */
-    .content-card {
-      width: 100%;
-      height: 100%;
-      background-color: #4a4a4a;
-      margin-top: -30px;
-      border-top-left-radius: 50% 25px;
-      border-top-right-radius: 50% 25px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 0 20px clamp(15px, 3vh, 30px) 20px;
-      position: relative;
-      z-index: 2;
-      justify-content: space-between;
+    main {
+        flex: 1;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    /* Profil-Logo im Vordergrund */
-    .avatar-container {
-      margin-top: -50px;
-      width: clamp(80px, 15vh, 110px);
-      height: clamp(80px, 15vh, 110px);
-      border-radius: 50%;
-      background-color: #000000;
-      border: 3px solid #333333;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-      flex-shrink: 0;
-      position: relative;
-      z-index: 3;
+    #bubble-arena {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
-    .avatar-container img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .bubble-wrapper {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
     }
 
-    /* Titel & Untertitel */
-    .title {
-      font-size: clamp(22px, 3.5vh, 30px);
-      font-weight: bold;
-      margin-top: clamp(8px, 1.5vh, 15px);
-      text-align: center;
-      color: #ffffff;
-      flex-shrink: 0;
+    /* Hochwertiges Milchglas-Design ohne harten Rahmen */
+    .bubble {
+        background: var(--surface);
+        border: 1px solid var(--glass-border);
+        border-radius: 50%;
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease, box-shadow 0.2s ease;
+        cursor: pointer;
+        text-align: center;
+        width: var(--bubble-size, 100px);
+        height: var(--bubble-size, 100px);
     }
 
-    .subtitle {
-      font-size: clamp(12px, 1.8vh, 15px);
-      color: #dddddd;
-      margin-top: 4px;
-      margin-bottom: clamp(12px, 2vh, 20px);
-      text-align: center;
-      font-style: italic;
-      flex-shrink: 0;
+    /* Subtile, rahmenlose Aura für die Top-Favoriten */
+    .bubble-wrapper.top-favorit::before {
+        content: '';
+        position: absolute;
+        width: calc(var(--bubble-size, 100px) * 1.5);
+        height: calc(var(--bubble-size, 100px) * 1.5);
+        background: var(--highlight);
+        pointer-events: none;
+        z-index: -1;
+        border-radius: 50%;
     }
 
-    /* Termine Box */
-    .events-box {
-      width: 100%;
-      border: 2px solid rgba(255, 255, 255, 0.8);
-      border-radius: 25px;
-      padding: clamp(12px, 2vh, 20px) 15px;
-      text-align: center;
-      margin-bottom: clamp(12px, 2vh, 20px);
-      background-color: rgba(0, 0, 0, 0.1);
-      flex-shrink: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
+    .bubble:active { 
+        transform: scale(0.93) !important; 
+        background: rgba(255, 255, 255, 0.6);
     }
 
-    .events-title {
-      font-size: clamp(20px, 3vh, 26px);
-      font-weight: normal;
-      margin-bottom: clamp(8px, 1.2vh, 12px);
-      color: #ffffff;
+    @media (prefers-color-scheme: dark) {
+        .bubble:active {
+            background: rgba(30, 41, 59, 0.6);
+        }
     }
 
-    .events-list p {
-      font-size: clamp(13px, 1.8vh, 15px);
-      line-height: 1.4;
-      color: #ffffff;
-      margin-bottom: 6px;
+    @media (hover: hover) {
+        .bubble-wrapper:hover .bubble {
+            background: rgba(255, 255, 255, 0.55);
+            box-shadow: var(--bubble-shadow-hover);
+            transform: translateY(-4px);
+        }
+        @media (prefers-color-scheme: dark) {
+            .bubble-wrapper:hover .bubble {
+                background: rgba(30, 41, 59, 0.55);
+            }
+        }
+        .bubble-wrapper:hover {
+            z-index: 50;
+        }
     }
 
-    .events-list p:last-child {
-      margin-bottom: 0;
+    .bubble-icon {
+        font-size: calc(var(--bubble-size, 100px) * 0.26);
+        line-height: 1;
+        margin-bottom: 4px;
     }
 
-    /* Buttons Grid (2-spaltig) */
-    .button-grid {
-      width: 100%;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: clamp(8px, 1.5vh, 12px);
-      margin-bottom: clamp(10px, 2vh, 20px);
-      flex-shrink: 0;
+    .bubble-title {
+        font-weight: 700;
+        color: var(--text-primary);
+        font-size: calc(var(--bubble-size, 100px) * 0.12);
+        padding: 0 6px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 100%;
     }
 
-    .btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      color: #ffffff;
-      border: 2px solid rgba(255, 255, 255, 0.8);
-      border-radius: 25px;
-      padding: clamp(8px, 1.2vh, 12px) 8px;
-      font-size: clamp(12px, 1.8vh, 14px);
-      text-align: center;
-      background-color: transparent;
-      transition: background-color 0.2s, transform 0.1s;
-      min-height: clamp(42px, 6vh, 52px);
-      cursor: pointer;
+    /* Info Button & Modal */
+    .info-btn {
+        position: fixed;
+        bottom: calc(env(safe-area-inset-bottom) + 20px);
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: var(--surface);
+        border: 1px solid var(--glass-border);
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: var(--shadow);
+        z-index: 600;
+        transition: transform 0.2s ease, background 0.2s ease;
     }
 
-    .btn:active {
-      background-color: rgba(255, 255, 255, 0.2);
-      transform: scale(0.98);
+    .info-btn:active {
+        transform: scale(0.9);
     }
 
-    /* Footer / Instagram */
-    .footer {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding-top: 5px;
-      flex-shrink: 0;
-    }
-
-    .instagram-link {
-      display: inline-block;
-      opacity: 0.8;
-      transition: opacity 0.2s;
-    }
-
-    .instagram-link:active {
-      opacity: 1;
-    }
-
-    .instagram-icon {
-      width: 22px;
-      height: 22px;
-      fill: #ffffff;
-    }
-
-    /* Modal / Dokumente-Maske ohne Hintergrundabdunklung */
     .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background-color: transparent;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 10;
-      touch-action: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease;
+        padding: 20px;
     }
 
     .modal-overlay.active {
-      display: flex;
+        opacity: 1;
+        pointer-events: auto;
     }
 
     .modal-content {
-      width: 90%;
-      max-width: 500px;
-      background-color: #4a4a4a;
-      border: 2px solid rgba(255, 255, 255, 0.8);
-      border-radius: 25px;
-      padding: 25px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-      position: relative;
-      touch-action: none;
+        background: var(--surface-modal);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 24px;
+        width: 100%;
+        max-width: 400px;
+        max-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow);
+        color: var(--text-primary);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
     }
 
     .modal-title {
-      font-size: 22px;
-      font-weight: bold;
-      margin-bottom: 20px;
-      text-align: center;
-      color: #ffffff;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin: 0;
     }
 
-    .modal-buttons {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 20px;
+    .modal-close {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
     }
 
-    .close-btn {
-      margin-top: 10px;
-      width: 100%;
-      max-width: 200px;
-      border-color: rgba(255, 255, 255, 0.5);
+    .modal-desc {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin: 0 0 16px 0;
+        line-height: 1.4;
     }
-  </style>
-</head>
-<body>
 
-  <div class="header-banner"></div>
+    .modal-body {
+        overflow-y: auto;
+        flex: 1;
+    }
 
-  <div class="app-container">
-    <div class="content-card">
-      <div class="avatar-container">
-        <img src="rakete.png" alt="KC Rakete Logo">
-      </div>
+    .stat-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--glass-border);
+    }
 
-      <h1 class="title">KC Rakete</h1>
-      <p class="subtitle">Und niemals vergessen - KC Rakete!</p>
+    .stat-item:last-child {
+        border-bottom: none;
+    }
 
-      <div class="events-box">
-        <h2 class="events-title">Nächste Termine</h2>
-        <div class="events-list">
-          <p>Kegeln: jeden vierten Freitag, 18 Uhr, Zur Krone</p>
-          <p>Kegeltour: 26. Mai bis 30. Mai 2027</p>
-          <p>Kegelturnier: 2026 offen</p>
-        </div>
-      </div>
+    .stat-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-      <div class="button-grid">
-        <a href="kcr_teams.html" class="btn">Teams auslosen</a>
-        <a href="kcr_kallen.html" class="btn">Ewige Kallen Tabelle</a>
-        <a href="kcr_ao.html" class="btn">Kegelabgabenordnung</a>
-        <a href="kcr_chronik.html" class="btn">Chronik</a>
-        <a href="kcr_bot.html" class="btn">KC Bot</a>
-        <button id="docsBtn" class="btn" type="button">Dokumente</button>
-      </div>
+    .stat-count {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+</style>
 
-      <div class="footer">
-        <a href="https://www.instagram.com/kcrakete" target="_blank" class="instagram-link" aria-label="Instagram">
-          <svg class="instagram-icon" viewBox="0 0 24 24">
-            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-          </svg>
-        </a>
-      </div>
+```
+
+```
+<header>
+    <div class="header-title">FABIANS APP</div>
+</header>
+
+<main>
+    <div id="bubble-arena">
     </div>
-  </div>
+</main>
 
-  <!-- Dokumente Overlay/Maske -->
-  <div id="docsModal" class="modal-overlay">
+<button class="info-btn" id="open-info" aria-label="Informationen">i</button>
+
+<div class="modal-overlay" id="info-modal">
     <div class="modal-content">
-      <h2 class="modal-title">Dokumente</h2>
-      <div class="modal-buttons">
-        <button class="btn" type="button"></button>
-        <button class="btn" type="button"></button>
-        <button class="btn" type="button"></button>
-      </div>
-      <button id="closeModalBtn" class="btn close-btn" type="button">Schließen</button>
+        <div class="modal-header">
+            <h3 class="modal-title">Bubble-Größen</h3>
+            <button class="modal-close" id="close-info">&times;</button>
+        </div>
+        <p class="modal-desc">
+            Die Größe der Bubbles berechnet sich aus der Häufigkeit und Aktualität der Aufrufe. Die Daten werden ausschließlich lokal auf diesem Gerät gespeichert.
+        </p>
+        <div class="modal-body" id="stats-list">
+        </div>
     </div>
-  </div>
+</div>
 
-  <script>
-    // Zoom/Pinch/Gesture und Scroll-Events via JS blockieren
-    document.addEventListener('gesturestart', function(e) {
-      e.preventDefault();
-    });
-    document.addEventListener('gesturechange', function(e) {
-      e.preventDefault();
-    });
-    document.addEventListener('gestureend', function(e) {
-      e.preventDefault();
-    });
-    document.addEventListener('touchmove', function(e) {
-      e.preventDefault();
-    }, { passive: false });
-    document.addEventListener('wheel', function(e) {
-      e.preventDefault();
-    }, { passive: false });
+<script>
+    const APPS = [
+        { id: "reisen", title: "Reisen", icon: "✈️", url: "reise_stats.html" },
+        { id: "habits", title: "Habits", icon: "📊", url: "habits.html" },
+        { id: "alkohol", title: "Alkohol", icon: "🍺", url: "alkohol.html" },
+        { id: "alltag", title: "Alltag", icon: "🏠", url: "alltag.html" },
+        { id: "gastspiel", title: "Gastspiel", icon: "⚽", url: "gastspiel2.html" },
+        { id: "kcrakete", title: "KC Rakete", icon: "🚀", url: "[https://kcrakete.github.io/webapp/startseite/](https://kcrakete.github.io/webapp/startseite/)" },
+        { id: "test", title: "Test", icon: "🧪", url: "test.html" },
+        { id: "test2", title: "Test 2", icon: "⚗️", url: "test2.html" },
+        { id: "finanzen", title: "Finanzen", icon: "💰", url: "finanzen.html" },
+        { id: "spiele", title: "Spiele", icon: "🎮", url: "spiele.html" },
+        { id: "familie", title: "Familie", icon: "🧑‍🧑‍🧒‍🧒", url: "familie.html" },
+        { id: "pomodoro", title: "Pomodoro", icon: "🎧", url: "pomo.html" },
+        { id: "hopping", title: "Hopping", icon: "⚽", url: "hopping.html" }
+    ];
 
-    // Modal Steuerungs-Logik
-    const docsBtn = document.getElementById('docsBtn');
-    const docsModal = document.getElementById('docsModal');
-    const closeModalBtn = document.getElementById('closeModalBtn');
+    function getStats() {
+        let stats = {};
+        const stored = localStorage.getItem("fabians_app_stats");
+        if (stored) {
+            try {
+                stats = JSON.parse(stored);
+            } catch(e) {
+                stats = {};
+            }
+        }
+        APPS.forEach(app => {
+            if (!stats[app.id]) {
+                stats[app.id] = { count: 0, lastUsed: 0 };
+            }
+        });
+        return stats;
+    }
 
-    docsBtn.addEventListener('click', () => {
-      docsModal.classList.add('active');
+    function trackClick(id) {
+        const stats = getStats();
+        if (!stats[id]) {
+            stats[id] = { count: 0, lastUsed: 0 };
+        }
+        stats[id].count += 1;
+        stats[id].lastUsed = Date.now();
+        localStorage.setItem("fabians_app_stats", JSON.stringify(stats));
+    }
+
+    function renderStatsModal() {
+        const stats = getStats();
+        const statsList = document.getElementById("stats-list");
+        statsList.innerHTML = "";
+
+        const sortedApps = [...APPS].sort((a, b) => {
+            const countA = stats[a.id] ? stats[a.id].count : 0;
+            const countB = stats[b.id] ? stats[b.id].count : 0;
+            return countB - countA;
+        });
+
+        sortedApps.forEach(app => {
+            const count = stats[app.id] ? stats[app.id].count : 0;
+            const item = document.createElement("div");
+            item.className = "stat-item";
+            item.innerHTML = `
+                <div class="stat-info">
+                    <span>${app.icon}</span>
+                    <span>${app.title}</span>
+                </div>
+                <div class="stat-count">${count} Aufrufe</div>
+            `;
+            statsList.appendChild(item);
+        });
+    }
+
+    function renderMenu() {
+        const stats = getStats();
+        const now = Date.now();
+        const arena = document.getElementById("bubble-arena");
+        arena.innerHTML = "";
+
+        const appsWithScores = APPS.map(app => {
+            const stat = stats[app.id] || { count: 0, lastUsed: 0 };
+            const recency = stat.lastUsed ? (1 / (now - stat.lastUsed + 1)) : 0;
+            const score = (stat.count * 0.7) + (recency * 1000000 * 0.3);
+            return { ...app, score };
+        });
+
+        const sortedApps = [...appsWithScores].sort((a, b) => b.score - a.score);
+        
+        const scores = sortedApps.map(a => a.score);
+        const maxScore = Math.max(...scores);
+        const minScore = Math.min(...scores);
+
+        const isMobile = window.innerWidth < 768;
+        const isPortrait = window.innerHeight > window.innerWidth;
+
+        const baseSize = isMobile ? 96 : 115;
+
+        const stretchX = isPortrait ? 0.75 : 1.35;
+        const stretchY = isPortrait ? 1.45 : 0.75;
+
+        const centerRadius = isMobile ? 65 : 95;
+        const outerRadius = isMobile ? 155 : 230;
+
+        let centerAngles = [45, 135, 225, 315].map(a => a + (Math.random() * 15 - 7.5));
+        let outerAngles = [0, 45, 90, 135, 180, 225, 270, 315].map(a => a + (Math.random() * 20 - 10));
+
+        centerAngles = centerAngles.sort(() => Math.random() - 0.5);
+        outerAngles = outerAngles.sort(() => Math.random() - 0.5);
+
+        const bubblesData = sortedApps.map((app, index) => {
+            const isTopFour = index < 4;
+
+            let factor = 1.0;
+            if (maxScore !== minScore) {
+                factor = 0.85 + ((app.score - minScore) / (maxScore - minScore)) * 0.55;
+            } else if (maxScore > 0) {
+                factor = 1.15;
+            }
+
+            const finalSize = Math.round(baseSize * factor);
+
+            let posX, posY;
+            if (isTopFour) {
+                const angleRad = (centerAngles[index] * Math.PI) / 180;
+                posX = Math.cos(angleRad) * centerRadius * stretchX;
+                posY = Math.sin(angleRad) * centerRadius * stretchY;
+            } else {
+                const angleRad = (outerAngles[(index - 4) % outerAngles.length] * Math.PI) / 180;
+                posX = Math.cos(angleRad) * outerRadius * stretchX;
+                posY = Math.sin(angleRad) * outerRadius * stretchY;
+            }
+
+            return {
+                app,
+                isTopFour,
+                size: finalSize,
+                radius: finalSize / 2,
+                x: posX,
+                y: posY
+            };
+        });
+
+        for (let step = 0; step < 12; step++) {
+            for (let i = 0; i < bubblesData.length; i++) {
+                for (let j = i + 1; j < bubblesData.length; j++) {
+                    const b1 = bubblesData[i];
+                    const b2 = bubblesData[j];
+
+                    const dx = b2.x - b1.x;
+                    const dy = b2.y - b1.y;
+                    const dist = Math.hypot(dx, dy);
+                    const minDist = b1.radius + b2.radius + 8;
+
+                    if (dist < minDist) {
+                        const overlap = minDist - dist;
+                        const forceX = (dx / (dist || 1)) * (overlap * 0.5);
+                        const forceY = (dy / (dist || 1)) * (overlap * 0.5);
+
+                        b1.x -= forceX;
+                        b1.y -= forceY;
+                        b2.x += forceX;
+                        b2.y += forceY;
+                    }
+                }
+            }
+        }
+
+        bubblesData.forEach(b => {
+            const wrapper = document.createElement("div");
+            wrapper.className = "bubble-wrapper";
+            if (b.isTopFour) wrapper.classList.add("top-favorit");
+            wrapper.style.transform = `translate(${b.x}px, ${b.y}px)`;
+
+            const bubble = document.createElement("a");
+            bubble.href = b.app.url;
+            bubble.className = "bubble";
+            bubble.style.setProperty("--bubble-size", `${b.size}px`);
+
+            bubble.addEventListener("click", () => trackClick(b.app.id));
+
+            bubble.innerHTML = `
+                <span class="bubble-icon">${b.app.icon}</span>
+                <span class="bubble-title">${b.app.title}</span>
+            `;
+
+            wrapper.appendChild(bubble);
+            arena.appendChild(wrapper);
+        });
+    }
+
+    const modal = document.getElementById("info-modal");
+    const openBtn = document.getElementById("open-info");
+    const closeBtn = document.getElementById("close-info");
+
+    openBtn.addEventListener("click", () => {
+        renderStatsModal();
+        modal.classList.add("active");
     });
 
-    closeModalBtn.addEventListener('click', () => {
-      docsModal.classList.remove('active');
+    closeBtn.addEventListener("click", () => {
+        modal.classList.remove("active");
     });
-  </script>
-</body>
-</html>
+
+    modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+            modal.classList.remove("active");
+        }
+    });
+
+    window.addEventListener("DOMContentLoaded", renderMenu);
+    window.addEventListener("resize", renderMenu);
+</script>
