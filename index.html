@@ -2,15 +2,9 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Startseite">
-    
-    <link rel="icon" type="image/svg+xml" href="logo.svg">
-    <link rel="apple-touch-icon" href="logo.svg">
-    <link rel="mask-icon" href="logo.svg" color="#1e293b">
-    
     <title>Startseite</title>
     <script src="daten.js"></script>
     <style>
@@ -42,35 +36,24 @@
 
         * { box-sizing: border-box; }
 
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100vw;
-            height: 100vh;
-            height: 100dvh;
-            overflow: hidden;
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
             background: var(--bg);
             background-attachment: fixed;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             -webkit-tap-highlight-color: transparent;
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-            padding-left: env(safe-area-inset-left);
-            padding-right: env(safe-area-inset-right);
         }
 
         header {
-            padding: 16px 20px 8px 20px;
+            padding: calc(env(safe-area-inset-top) + 24px) 20px 14px 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 500;
-            flex-shrink: 0;
         }
 
         .header-title {
@@ -88,7 +71,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
         }
 
         #bubble-arena {
@@ -108,6 +90,7 @@
             z-index: 10;
         }
 
+        /* Hochwertiges Milchglas-Design ohne harten Rahmen */
         .bubble {
             background: var(--surface);
             border: 1px solid var(--glass-border);
@@ -127,6 +110,7 @@
             height: var(--bubble-size, 100px);
         }
 
+        /* Subtile, rahmenlose Aura für die Top-Favoriten */
         .bubble-wrapper.top-favorit::before {
             content: '';
             position: absolute;
@@ -182,10 +166,11 @@
             width: 100%;
         }
 
+        /* Info Button & Modal */
         .info-btn {
             position: fixed;
-            bottom: calc(env(safe-area-inset-bottom) + 16px);
-            right: calc(env(safe-area-inset-right) + 16px);
+            bottom: calc(env(safe-area-inset-bottom) + 20px);
+            right: 20px;
             width: 40px;
             height: 40px;
             border-radius: 50%;
@@ -327,7 +312,7 @@
                 <button class="modal-close" id="close-info">&times;</button>
             </div>
             <p class="modal-desc">
-                Die Größe der Bubbles berechnet sich aus den Aufrufen der letzten 14 Tage + (2 * Aufrufe letzte 7 Tage) + (4 * Aufrufe letzte 24 Std). Angezeigt werden die Aufrufe der letzten 30 Tage. Die Daten werden ausschließlich lokal auf diesem Gerät gespeichert.
+                Die Größe der Bubbles berechnet sich aus der Häufigkeit und Aktualität der Aufrufe. Die Daten werden ausschließlich lokal auf diesem Gerät gespeichert.
             </p>
             <div class="modal-body" id="stats-list">
             </div>
@@ -351,68 +336,35 @@
             { id: "hopping", title: "Hopping", icon: "⚽", url: "hopping.html" }
         ];
 
-        function getClicks() {
-            const stored = localStorage.getItem("fabians_app_clicks");
-            if (!stored) return [];
-            try {
-                return JSON.parse(stored);
-            } catch(e) {
-                return [];
-            }
+        function getStats() {
+            const defaults = {};
+            APPS.forEach(app => { defaults[app.id] = { count: 0, lastUsed: 0 }; });
+            const stored = localStorage.getItem("fabians_app_stats");
+            return stored ? JSON.parse(stored) : defaults;
         }
 
         function trackClick(id) {
-            const clicks = getClicks();
-            const now = Date.now();
-            const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000);
-            
-            clicks.push({ id: id, timestamp: now });
-            
-            const filteredClicks = clicks.filter(c => c.timestamp >= thirtyDaysAgo);
-            localStorage.setItem("fabians_app_clicks", JSON.stringify(filteredClicks));
-        }
-
-        function getAppMetrics(appId) {
-            const clicks = getClicks();
-            const now = Date.now();
-            
-            const ms24h = 24 * 60 * 60 * 1000;
-            const ms7d = 7 * ms24h;
-            const ms14d = 14 * ms24h;
-            const ms30d = 30 * ms24h;
-
-            let count24h = 0;
-            let count7d = 0;
-            let count14d = 0;
-            let count30d = 0;
-
-            clicks.forEach(c => {
-                if (c.id === appId) {
-                    const diff = now - c.timestamp;
-                    if (diff <= ms24h) count24h++;
-                    if (diff <= ms7d) count7d++;
-                    if (diff <= ms14d) count14d++;
-                    if (diff <= ms30d) count30d++;
-                }
-            });
-
-            const score = count14d + (2 * count7d) + (4 * count24h);
-
-            return { count30d, score };
+            const stats = getStats();
+            if (stats[id]) {
+                stats[id].count += 1;
+                stats[id].lastUsed = Date.now();
+                localStorage.setItem("fabians_app_stats", JSON.stringify(stats));
+            }
         }
 
         function renderStatsModal() {
+            const stats = getStats();
             const statsList = document.getElementById("stats-list");
             statsList.innerHTML = "";
 
-            const appsWithMetrics = APPS.map(app => {
-                const metrics = getAppMetrics(app.id);
-                return { ...app, count30d: metrics.count30d, score: metrics.score };
+            const sortedApps = [...APPS].sort((a, b) => {
+                const countA = stats[a.id] ? stats[a.id].count : 0;
+                const countB = stats[b.id] ? stats[b.id].count : 0;
+                return countB - countA;
             });
 
-            appsWithMetrics.sort((a, b) => b.count30d - a.count30d);
-
-            appsWithMetrics.forEach(app => {
+            sortedApps.forEach(app => {
+                const count = stats[app.id] ? stats[app.id].count : 0;
                 const item = document.createElement("div");
                 item.className = "stat-item";
                 item.innerHTML = `
@@ -420,23 +372,23 @@
                         <span>${app.icon}</span>
                         <span>${app.title}</span>
                     </div>
-                    <div class="stat-count">${app.count30d} Aufrufe (30 Tage)</div>
+                    <div class="stat-count">${count} Aufrufe</div>
                 `;
                 statsList.appendChild(item);
             });
         }
 
         function renderMenu() {
+            const stats = getStats();
+            const now = Date.now();
             const arena = document.getElementById("bubble-arena");
             arena.innerHTML = "";
 
-            const arenaRect = arena.getBoundingClientRect();
-            const availableWidth = arenaRect.width;
-            const availableHeight = arenaRect.height;
-
             const appsWithScores = APPS.map(app => {
-                const metrics = getAppMetrics(app.id);
-                return { ...app, score: metrics.score };
+                const stat = stats[app.id] || { count: 0, lastUsed: 0 };
+                const recency = stat.lastUsed ? (1 / (now - stat.lastUsed + 1)) : 0;
+                const score = (stat.count * 0.7) + (recency * 1000000 * 0.3);
+                return { ...app, score };
             });
 
             const sortedApps = [...appsWithScores].sort((a, b) => b.score - a.score);
@@ -446,49 +398,44 @@
             const minScore = Math.min(...scores);
 
             const isMobile = window.innerWidth < 768;
-            const isPortrait = availableHeight > availableWidth;
+            const isPortrait = window.innerHeight > window.innerWidth;
 
-            const baseSize = isMobile 
-                ? Math.min(availableWidth, availableHeight) * 0.18 
-                : 110;
+            const baseSize = isMobile ? 96 : 115;
 
-            const stretchX = isPortrait ? 0.70 : 1.30;
-            const stretchY = isPortrait ? 1.35 : 0.70;
+            const stretchX = isPortrait ? 0.75 : 1.35;
+            const stretchY = isPortrait ? 1.45 : 0.75;
 
-            const centerRadius = Math.min(availableWidth, availableHeight) * (isMobile ? 0.16 : 0.20);
-            const outerRadius = Math.min(availableWidth, availableHeight) * (isMobile ? 0.35 : 0.38);
+            const centerRadius = isMobile ? 65 : 95;
+            const outerRadius = isMobile ? 155 : 230;
 
-            const totalApps = sortedApps.length;
-            const innerCount = Math.min(4, totalApps);
-            const outerCount = totalApps - innerCount;
+            let centerAngles = [45, 135, 225, 315].map(a => a + (Math.random() * 15 - 7.5));
+            let outerAngles = [0, 45, 90, 135, 180, 225, 270, 315].map(a => a + (Math.random() * 20 - 10));
+
+            centerAngles = centerAngles.sort(() => Math.random() - 0.5);
+            outerAngles = outerAngles.sort(() => Math.random() - 0.5);
 
             const bubblesData = sortedApps.map((app, index) => {
                 const isTopFour = index < 4;
 
                 let factor = 1.0;
                 if (maxScore !== minScore) {
-                    factor = 0.85 + ((app.score - minScore) / (maxScore - minScore)) * 0.45;
+                    factor = 0.85 + ((app.score - minScore) / (maxScore - minScore)) * 0.55;
                 } else if (maxScore > 0) {
-                    factor = 1.10;
+                    factor = 1.15;
                 }
 
                 const finalSize = Math.round(baseSize * factor);
 
-                let angleDeg = 0;
-                let radius = 0;
-
+                let posX, posY;
                 if (isTopFour) {
-                    angleDeg = (index * (360 / innerCount)) + 45;
-                    radius = centerRadius;
+                    const angleRad = (centerAngles[index] * Math.PI) / 180;
+                    posX = Math.cos(angleRad) * centerRadius * stretchX;
+                    posY = Math.sin(angleRad) * centerRadius * stretchY;
                 } else {
-                    const outerIndex = index - 4;
-                    angleDeg = outerIndex * (360 / outerCount);
-                    radius = outerRadius;
+                    const angleRad = (outerAngles[(index - 4) % outerAngles.length] * Math.PI) / 180;
+                    posX = Math.cos(angleRad) * outerRadius * stretchX;
+                    posY = Math.sin(angleRad) * outerRadius * stretchY;
                 }
-
-                const angleRad = (angleDeg * Math.PI) / 180;
-                const posX = Math.cos(angleRad) * radius * stretchX;
-                const posY = Math.sin(angleRad) * radius * stretchY;
 
                 return {
                     app,
@@ -500,7 +447,7 @@
                 };
             });
 
-            for (let step = 0; step < 20; step++) {
+            for (let step = 0; step < 12; step++) {
                 for (let i = 0; i < bubblesData.length; i++) {
                     for (let j = i + 1; j < bubblesData.length; j++) {
                         const b1 = bubblesData[i];
@@ -513,28 +460,17 @@
 
                         if (dist < minDist) {
                             const overlap = minDist - dist;
-                            const nx = dist === 0 ? 1 : dx / dist;
-                            const ny = dist === 0 ? 0 : dy / dist;
+                            const forceX = (dx / (dist || 1)) * (overlap * 0.5);
+                            const forceY = (dy / (dist || 1)) * (overlap * 0.5);
 
-                            b1.x -= nx * (overlap * 0.5);
-                            b1.y -= ny * (overlap * 0.5);
-                            b2.x += nx * (overlap * 0.5);
-                            b2.y += ny * (overlap * 0.5);
+                            b1.x -= forceX;
+                            b1.y -= forceY;
+                            b2.x += forceX;
+                            b2.y += forceY;
                         }
                     }
                 }
             }
-
-            const maxX = (availableWidth / 2);
-            const maxY = (availableHeight / 2);
-            
-            bubblesData.forEach(b => {
-                const margin = b.radius + 10;
-                if (b.x + margin > maxX) b.x = maxX - margin;
-                if (b.x - margin < -maxX) b.x = -maxX + margin;
-                if (b.y + margin > maxY) b.y = maxY - margin;
-                if (b.y - margin < -maxY) b.y = -maxY + margin;
-            });
 
             bubblesData.forEach(b => {
                 const wrapper = document.createElement("div");
@@ -547,11 +483,7 @@
                 bubble.className = "bubble";
                 bubble.style.setProperty("--bubble-size", `${b.size}px`);
 
-                bubble.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    trackClick(b.app.id);
-                    window.location.href = b.app.url;
-                });
+                bubble.addEventListener("click", () => trackClick(b.app.id));
 
                 bubble.innerHTML = `
                     <span class="bubble-icon">${b.app.icon}</span>
