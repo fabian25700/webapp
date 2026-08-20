@@ -12,6 +12,9 @@
     <title>Startseite</title>
     <script src="daten.js"></script>
     <style>
+        /* ==========================================================
+           Farb- & Theme-Variablen (Light/Dark)
+           ========================================================== */
         :root {
             --bg-color-1: #e0e6ed;
             --bg-color-2: #f4f6f9;
@@ -42,50 +45,45 @@
             }
         }
 
+        /* ==========================================================
+           Basis-Reset & Grundlayout
+           ========================================================== */
         * { box-sizing: border-box; }
 
         html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
             height: 100%;
-            overflow: hidden;
-            background: var(--bg-color-1);
+            /* gleicher Verlauf wie body statt nur Volltonfarbe:
+               so ist es egal, wenn iOS Safari beim Ein-/Ausblenden der
+               Adressleiste kurzzeitig mehr html- als body-Fläche zeigt
+               (das war der dunkelgraue Streifen unten) */
+            background: var(--bg);
+            background-attachment: fixed;
+            overscroll-behavior: none;
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
             background: var(--bg);
             background-attachment: fixed;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
-
-        .app-container {
-            width: 100%;
-            height: 100%;
+            margin: 0;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            overscroll-behavior: none;
             display: flex;
             flex-direction: column;
-            position: relative;
+            -webkit-tap-highlight-color: transparent;
         }
 
+        /* ==========================================================
+           Header
+           ========================================================== */
         header {
-            padding-top: max(env(safe-area-inset-top), 16px);
-            padding-bottom: 10px;
+            padding: calc(env(safe-area-inset-top) + 12px) 20px 10px 20px;
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 500;
-            flex-shrink: 0;
         }
 
         .header-title {
@@ -95,15 +93,17 @@
             color: var(--text-primary);
         }
 
+        /* ==========================================================
+           Bubble-Arena (Hauptbereich mit App-Icons)
+           ========================================================== */
         main {
             flex: 1;
             position: relative;
             width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
-            padding-bottom: max(env(safe-area-inset-bottom), 10px);
         }
 
         #bubble-arena {
@@ -197,12 +197,20 @@
             width: 100%;
         }
 
+        /* ==========================================================
+           Info-Button (unten rechts)
+           ========================================================== */
         .info-btn {
-            position: absolute;
-            bottom: max(env(safe-area-inset-bottom), 16px);
+            position: fixed;
+            /* max() als Absicherung: iOS liefert env(safe-area-inset-bottom)
+               beim allerersten Rendern manchmal noch als 0 (bekannter
+               WebKit-Bug, da der Browser zunächst nur die Notch oben
+               berücksichtigt) - dadurch stand der Button zu hoch.
+               max() sorgt zusätzlich für ein Mindest-Abstand. */
+            bottom: max(calc(env(safe-area-inset-bottom) + 20px), 20px);
             right: 20px;
-            width: 42px;
-            height: 42px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: var(--surface);
             border: 1px solid var(--glass-border);
@@ -224,6 +232,9 @@
             transform: scale(0.9);
         }
 
+        /* ==========================================================
+           Info-Modal (Statistik-Übersicht)
+           ========================================================== */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -325,16 +336,16 @@
 </head>
 <body>
 
-    <div class="app-container">
-        <header>
-            <div class="header-title">FABIANS APP</div>
-        </header>
+    <header>
+        <div class="header-title">FABIANS APP</div>
+    </header>
 
-        <main>
-            <div id="bubble-arena"></div>
-            <button class="info-btn" id="open-info" aria-label="Informationen">i</button>
-        </main>
-    </div>
+    <main>
+        <div id="bubble-arena">
+        </div>
+    </main>
+
+    <button class="info-btn" id="open-info" aria-label="Informationen">i</button>
 
     <div class="modal-overlay" id="info-modal">
         <div class="modal-content">
@@ -351,6 +362,9 @@
     </div>
 
     <script>
+        /* ==========================================================
+           App-Daten
+           ========================================================== */
         const APPS = [
             { id: "reisen", title: "Reisen", icon: "✈️", url: "reise_stats.html" },
             { id: "habits", title: "Habits", icon: "📊", url: "habits.html" },
@@ -367,11 +381,9 @@
             { id: "hopping", title: "Hopping", icon: "⚽", url: "hopping.html" }
         ];
 
-        function setFixedAppHeight() {
-            const vh = window.innerHeight;
-            document.body.style.height = `${vh}px`;
-        }
-
+        /* ==========================================================
+           Nutzungsstatistik (localStorage)
+           ========================================================== */
         function getTimestamps() {
             const stored = localStorage.getItem("fabians_app_timestamps");
             if (!stored) {
@@ -435,6 +447,9 @@
             return { c24h, c7d, c14d, c30d };
         }
 
+        /* ==========================================================
+           Statistik-Modal (Anzeige der Aufrufzahlen)
+           ========================================================== */
         function renderStatsModal() {
             const timestamps = getTimestamps();
             const now = Date.now();
@@ -465,8 +480,11 @@
             });
         }
 
+        /* ==========================================================
+           Bubble-Layout (Sortierung, Größenberechnung, Kollisions-
+           auflösung / "Physik")
+           ========================================================== */
         function renderMenu() {
-            setFixedAppHeight();
             const timestamps = getTimestamps();
             const now = Date.now();
             const arena = document.getElementById("bubble-arena");
@@ -489,11 +507,17 @@
 
             const isMobile = containerWidth < 768;
 
-            let minSize = 80;
-            let maxSize = 120;
-            let gap = 12;
+            let minSize, maxSize, gap;
 
-            if (!isMobile) {
+            if (isMobile) {
+                const availableArea = containerWidth * containerHeight * 0.28;
+                const avgAreaPerBubble = availableArea / 13;
+                const baseDiameter = Math.sqrt(avgAreaPerBubble / Math.PI) * 2;
+                
+                minSize = Math.max(Math.round(baseDiameter * 0.8), 70);
+                maxSize = Math.min(Math.round(baseDiameter * 1.35), 115);
+                gap = 10;
+            } else {
                 minSize = 105;
                 maxSize = 150;
                 gap = 20;
@@ -506,19 +530,19 @@
             let slots;
             if (isMobile) {
                 slots = [
-                    { x:  0.00, y: -0.12 },
-                    { x: -0.22, y: -0.22 },
-                    { x:  0.22, y: -0.22 },
-                    { x: -0.23, y: -0.02 },
-                    { x:  0.23, y: -0.02 },
+                    { x:  0.00, y: -0.16 },
+                    { x: -0.22, y: -0.27 },
+                    { x:  0.22, y: -0.27 },
+                    { x: -0.23, y: -0.05 },
+                    { x:  0.23, y: -0.05 },
                     { x:  0.00, y:  0.06 },
-                    { x: -0.25, y:  0.14 },
-                    { x:  0.25, y:  0.14 },
-                    { x:  0.00, y: -0.30 },
-                    { x: -0.24, y:  0.25 },
-                    { x:  0.24, y:  0.25 },
-                    { x:  0.00, y:  0.22 },
-                    { x:  0.00, y:  0.31 }
+                    { x: -0.25, y:  0.16 },
+                    { x:  0.25, y:  0.16 },
+                    { x:  0.00, y: -0.37 },
+                    { x: -0.24, y:  0.32 },
+                    { x:  0.24, y:  0.32 },
+                    { x:  0.00, y:  0.27 },
+                    { x:  0.00, y:  0.39 }
                 ];
             } else {
                 slots = [
@@ -597,7 +621,7 @@
                 }
             }
 
-            const padding = 20;
+            const padding = 12;
             const minX = -containerWidth / 2 + padding;
             const maxX = containerWidth / 2 - padding;
             const minY = -containerHeight / 2 + padding;
@@ -633,6 +657,9 @@
             });
         }
 
+        /* ==========================================================
+           Event-Listener (Modal, Layout-Neuberechnung)
+           ========================================================== */
         const modal = document.getElementById("info-modal");
         const openBtn = document.getElementById("open-info");
         const closeBtn = document.getElementById("close-info");
@@ -654,7 +681,15 @@
 
         window.addEventListener("DOMContentLoaded", renderMenu);
         window.addEventListener("resize", renderMenu);
-        window.addEventListener("orientationchange", renderMenu);
+
+        // iOS liefert env(safe-area-inset-bottom) beim allerersten Malen
+        // manchmal noch als 0 (Fokus liegt zunächst nur auf der Notch
+        // oben) - ein erzwungener Reflow direkt nach dem Laden bringt
+        // Safari dazu, den unteren Sicherheitsbereich neu zu berechnen,
+        // damit der Info-Button korrekt tief genug sitzt.
+        window.addEventListener("load", () => {
+            void document.body.offsetHeight;
+        });
     </script>
 
     <script>
