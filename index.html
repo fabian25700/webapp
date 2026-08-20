@@ -520,5 +520,15 @@
         window.addEventListener("DOMContentLoaded", renderMenu);
         window.addEventListener("resize", renderMenu);
     </script>
+
+    <script>
+        document.addEventListener('click', function(e) {
+            var a = e.target.closest('a');
+            if (a && a.href) {
+                e.preventDefault();
+                window.location.href = a.href;
+            }
+        }, false);
+    </script>
 </body>
 </html>
