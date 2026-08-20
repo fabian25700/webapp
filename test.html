@@ -125,8 +125,8 @@
         .bubble-wrapper.top-favorit::before {
             content: '';
             position: absolute;
-            width: calc(var(--bubble-size, 100px) * 1.4);
-            height: calc(var(--bubble-size, 100px) * 1.4);
+            width: calc(var(--bubble-size, 100px) * 1.35);
+            height: calc(var(--bubble-size, 100px) * 1.35);
             background: var(--highlight);
             pointer-events: none;
             z-index: -1;
@@ -463,29 +463,60 @@
 
             const isMobile = containerWidth < 768;
 
-            const baseSize = isMobile ? 88 : 115;
-            const minSize = isMobile ? 68 : 85;
-            const maxSize = isMobile ? 112 : 145;
+            let minSize, maxSize, gap;
+
+            if (isMobile) {
+                const availableArea = containerWidth * containerHeight * 0.28;
+                const avgAreaPerBubble = availableArea / 13;
+                const baseDiameter = Math.sqrt(avgAreaPerBubble / Math.PI) * 2;
+                
+                minSize = Math.max(Math.round(baseDiameter * 0.8), 70);
+                maxSize = Math.min(Math.round(baseDiameter * 1.35), 115);
+                gap = 10;
+            } else {
+                minSize = 105;
+                maxSize = 150;
+                gap = 20;
+            }
 
             const scores = sortedApps.map(a => a.score);
             const maxScore = Math.max(...scores);
             const minScore = Math.min(...scores);
 
-            const slots = [
-                { x:  0.00, y: -0.05 },
-                { x: -0.15, y: -0.16 },
-                { x:  0.15, y: -0.16 },
-                { x: -0.16, y:  0.06 },
-                { x:  0.16, y:  0.06 },
-                { x:  0.00, y:  0.17 },
-                { x: -0.31, y: -0.06 },
-                { x:  0.31, y: -0.06 },
-                { x: -0.28, y: -0.25 },
-                { x:  0.28, y: -0.25 },
-                { x: -0.30, y:  0.16 },
-                { x:  0.30, y:  0.16 },
-                { x:  0.00, y: -0.29 }
-            ];
+            let slots;
+            if (isMobile) {
+                slots = [
+                    { x:  0.00, y: -0.16 },
+                    { x: -0.22, y: -0.27 },
+                    { x:  0.22, y: -0.27 },
+                    { x: -0.23, y: -0.05 },
+                    { x:  0.23, y: -0.05 },
+                    { x:  0.00, y:  0.06 },
+                    { x: -0.25, y:  0.16 },
+                    { x:  0.25, y:  0.16 },
+                    { x:  0.00, y: -0.37 },
+                    { x: -0.24, y:  0.32 },
+                    { x:  0.24, y:  0.32 },
+                    { x:  0.00, y:  0.27 },
+                    { x:  0.00, y:  0.39 }
+                ];
+            } else {
+                slots = [
+                    { x:  0.00, y: -0.02 },
+                    { x: -0.16, y: -0.16 },
+                    { x:  0.16, y: -0.16 },
+                    { x: -0.17, y:  0.12 },
+                    { x:  0.17, y:  0.12 },
+                    { x:  0.00, y:  0.20 },
+                    { x: -0.32, y: -0.02 },
+                    { x:  0.32, y: -0.02 },
+                    { x: -0.31, y: -0.22 },
+                    { x:  0.31, y: -0.22 },
+                    { x: -0.31, y:  0.20 },
+                    { x:  0.31, y:  0.20 },
+                    { x:  0.00, y: -0.30 }
+                ];
+            }
 
             const bubblesData = sortedApps.map((app, index) => {
                 const isTopFour = index < 4;
@@ -498,7 +529,6 @@
                 }
 
                 const finalSize = Math.round(minSize + factor * (maxSize - minSize));
-
                 const pos = slots[index] || { x: 0, y: 0 };
 
                 return {
@@ -512,12 +542,10 @@
                 };
             });
 
-            const gap = isMobile ? 4 : 8;
-
             for (let step = 0; step < 80; step++) {
                 for (let i = 0; i < bubblesData.length; i++) {
                     const b = bubblesData[i];
-                    const pullFactor = 0.05 + (13 - b.rank) * 0.005;
+                    const pullFactor = 0.03 + (13 - b.rank) * 0.003;
                     b.x -= b.x * pullFactor;
                     b.y -= b.y * pullFactor;
                 }
@@ -549,7 +577,7 @@
                 }
             }
 
-            const padding = 8;
+            const padding = 12;
             const minX = -containerWidth / 2 + padding;
             const maxX = containerWidth / 2 - padding;
             const minY = -containerHeight / 2 + padding;
