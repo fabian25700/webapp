@@ -2,9 +2,10 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#e0e6ed">
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     <link rel="apple-touch-icon" href="logo.png">
     <link rel="manifest" href="manifest.json">
@@ -12,7 +13,9 @@
     <script src="daten.js"></script>
     <style>
         :root {
-            --bg: linear-gradient(135deg, #e0e6ed 0%, #f4f6f9 100%);
+            --bg-color-1: #e0e6ed;
+            --bg-color-2: #f4f6f9;
+            --bg: linear-gradient(135deg, var(--bg-color-1) 0%, var(--bg-color-2) 100%);
             --surface: rgba(255, 255, 255, 0.45);
             --surface-modal: rgba(255, 255, 255, 0.85);
             --text-primary: #1e293b;
@@ -25,7 +28,9 @@
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                --bg-color-1: #0f172a;
+                --bg-color-2: #1e293b;
+                --bg: linear-gradient(135deg, var(--bg-color-1) 0%, var(--bg-color-2) 100%);
                 --surface: rgba(30, 41, 59, 0.45);
                 --surface-modal: rgba(30, 41, 59, 0.85);
                 --text-primary: #f1f5f9;
@@ -39,12 +44,17 @@
 
         * { box-sizing: border-box; }
 
+        html {
+            background-color: var(--bg-color-1);
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
             background: var(--bg);
             background-attachment: fixed;
             margin: 0;
             height: 100vh;
+            height: 100dvh;
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -52,7 +62,7 @@
         }
 
         header {
-            padding: calc(env(safe-area-inset-top) + 24px) 20px 14px 20px;
+            padding: calc(env(safe-area-inset-top) + 12px) 20px 10px 20px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -115,8 +125,8 @@
         .bubble-wrapper.top-favorit::before {
             content: '';
             position: absolute;
-            width: calc(var(--bubble-size, 100px) * 1.5);
-            height: calc(var(--bubble-size, 100px) * 1.5);
+            width: calc(var(--bubble-size, 100px) * 1.4);
+            height: calc(var(--bubble-size, 100px) * 1.4);
             background: var(--highlight);
             pointer-events: none;
             z-index: -1;
@@ -224,7 +234,7 @@
             border-radius: 20px;
             padding: 24px;
             width: 100%;
-            max-width: 400px;
+            max-width: 360px;
             max-height: 80vh;
             display: flex;
             flex-direction: column;
@@ -271,7 +281,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 0;
+            padding: 10px 0;
             border-bottom: 1px solid var(--glass-border);
         }
 
@@ -283,12 +293,13 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            font-weight: 600;
         }
 
         .stat-count {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-primary);
         }
     </style>
 </head>
@@ -308,11 +319,11 @@
     <div class="modal-overlay" id="info-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Bubble-Größen</h3>
+                <h3 class="modal-title">Aufrufe (7 Tage)</h3>
                 <button class="modal-close" id="close-info">&times;</button>
             </div>
             <p class="modal-desc">
-                Die Aufrufe der letzten 30 Tage pro App im Detail. Die Daten werden lokal auf diesem Gerät gespeichert.
+                Anzahl der Aufrufe pro App in den letzten 7 Tagen.
             </p>
             <div class="modal-body" id="stats-list">
             </div>
@@ -407,10 +418,13 @@
 
             const appData = APPS.map(app => {
                 const counts = getAppCounts(app.id, timestamps, now);
-                return { ...app, counts };
+                return { ...app, c7d: counts.c7d, c30d: counts.c30d };
             });
 
-            appData.sort((a, b) => b.counts.c30d - a.counts.c30d);
+            appData.sort((a, b) => {
+                if (b.c7d !== a.c7d) return b.c7d - a.c7d;
+                return b.c30d - a.c30d;
+            });
 
             appData.forEach(app => {
                 const item = document.createElement("div");
@@ -420,7 +434,7 @@
                         <span>${app.icon}</span>
                         <span>${app.title}</span>
                     </div>
-                    <div class="stat-count">24h: ${app.counts.c24h} | 7d: ${app.counts.c7d} | 14d: ${app.counts.c14d} | 30d: ${app.counts.c30d}</div>
+                    <div class="stat-count">${app.c7d} Aufruf${app.c7d === 1 ? '' : 'e'}</div>
                 `;
                 statsList.appendChild(item);
             });
@@ -448,33 +462,32 @@
             const containerHeight = arena.clientHeight || (window.innerHeight - 80);
 
             const isMobile = containerWidth < 768;
-            const isPortrait = containerHeight > containerWidth;
 
-            const baseSize = isMobile ? Math.min(containerWidth, containerHeight) * 0.18 : 115;
-            const minSize = Math.max(baseSize * 0.75, 55);
-            const maxSize = baseSize * 1.35;
+            const baseSize = isMobile ? Math.min(containerWidth, containerHeight) * 0.16 : 110;
+            const minSize = Math.max(baseSize * 0.75, 52);
+            const maxSize = baseSize * 1.3;
 
             const scores = sortedApps.map(a => a.score);
             const maxScore = Math.max(...scores);
             const minScore = Math.min(...scores);
 
             const centerLayout = [
-                { x: -0.20, y: -0.18 },
-                { x:  0.20, y: -0.18 },
-                { x: -0.20, y:  0.18 },
-                { x:  0.20, y:  0.18 }
+                { x: -0.11, y: -0.09 },
+                { x:  0.11, y: -0.09 },
+                { x: -0.11, y:  0.09 },
+                { x:  0.11, y:  0.09 }
             ];
 
             const outerLayout = [
-                { x:  0.00, y: -0.40 },
-                { x:  0.38, y: -0.36 },
-                { x:  0.42, y:  0.00 },
-                { x:  0.38, y:  0.36 },
-                { x:  0.00, y:  0.40 },
-                { x: -0.38, y:  0.36 },
-                { x: -0.42, y:  0.00 },
-                { x: -0.38, y: -0.36 },
-                { x:  0.00, y: -0.22 }
+                { x:  0.00, y: -0.22 },
+                { x:  0.22, y: -0.19 },
+                { x:  0.25, y:  0.00 },
+                { x:  0.22, y:  0.19 },
+                { x:  0.00, y:  0.22 },
+                { x: -0.22, y:  0.19 },
+                { x: -0.25, y:  0.00 },
+                { x: -0.22, y: -0.19 },
+                { x:  0.00, y: -0.11 }
             ];
 
             const bubblesData = sortedApps.map((app, index) => {
@@ -506,13 +519,16 @@
                 };
             });
 
-            const padding = 12;
-            const minX = -containerWidth / 2 + padding;
-            const maxX = containerWidth / 2 - padding;
-            const minY = -containerHeight / 2 + padding;
-            const maxY = containerHeight / 2 - padding;
+            const gap = isMobile ? 3 : 6;
+            const centerAttraction = 0.12;
 
-            for (let step = 0; step < 25; step++) {
+            for (let step = 0; step < 60; step++) {
+                for (let i = 0; i < bubblesData.length; i++) {
+                    const b = bubblesData[i];
+                    b.x -= b.x * centerAttraction;
+                    b.y -= b.y * centerAttraction;
+                }
+
                 for (let i = 0; i < bubblesData.length; i++) {
                     for (let j = i + 1; j < bubblesData.length; j++) {
                         const b1 = bubblesData[i];
@@ -521,7 +537,7 @@
                         const dx = b2.x - b1.x;
                         const dy = b2.y - b1.y;
                         const dist = Math.hypot(dx, dy) || 0.1;
-                        const minDist = b1.radius + b2.radius + (isMobile ? 6 : 12);
+                        const minDist = b1.radius + b2.radius + gap;
 
                         if (dist < minDist) {
                             const overlap = minDist - dist;
@@ -535,14 +551,20 @@
                         }
                     }
                 }
-
-                bubblesData.forEach(b => {
-                    if (b.x - b.radius < minX) b.x = minX + b.radius;
-                    if (b.x + b.radius > maxX) b.x = maxX - b.radius;
-                    if (b.y - b.radius < minY) b.y = minY + b.radius;
-                    if (b.y + b.radius > maxY) b.y = maxY - b.radius;
-                });
             }
+
+            const padding = 10;
+            const minX = -containerWidth / 2 + padding;
+            const maxX = containerWidth / 2 - padding;
+            const minY = -containerHeight / 2 + padding;
+            const maxY = containerHeight / 2 - padding;
+
+            bubblesData.forEach(b => {
+                if (b.x - b.radius < minX) b.x = minX + b.radius;
+                if (b.x + b.radius > maxX) b.x = maxX - b.radius;
+                if (b.y - b.radius < minY) b.y = minY + b.radius;
+                if (b.y + b.radius > maxY) b.y = maxY - b.radius;
+            });
 
             bubblesData.forEach(b => {
                 const wrapper = document.createElement("div");
