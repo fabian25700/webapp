@@ -5,12 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Startseite">
-    
     <link rel="icon" type="image/svg+xml" href="logo.svg">
-    <link rel="apple-touch-icon" href="logo.svg">
-    <link rel="mask-icon" href="logo.svg" color="#1e293b">
-    
+    <link rel="apple-touch-icon" href="logo.png">
     <title>Startseite</title>
     <script src="daten.js"></script>
     <style>
@@ -318,7 +314,7 @@
                 <button class="modal-close" id="close-info">&times;</button>
             </div>
             <p class="modal-desc">
-                Die Größe der Bubbles berechnet sich aus den Aufrufen der letzten 14 Tage + (2 * Aufrufe letzte 7 Tage) + (4 * Aufrufe letzte 24 Std). Angezeigt werden die Aufrufe der letzten 30 Tage. Die Daten werden ausschließlich lokal auf diesem Gerät gespeichert.
+                Die Größe der Bubbles berechnet sich aus der Häufigkeit und Aktualität der Aufrufe. Die Daten werden ausschließlich lokal auf diesem Gerät gespeichert.
             </p>
             <div class="modal-body" id="stats-list">
             </div>
@@ -342,68 +338,35 @@
             { id: "hopping", title: "Hopping", icon: "⚽", url: "hopping.html" }
         ];
 
-        function getClicks() {
-            const stored = localStorage.getItem("fabians_app_clicks");
-            if (!stored) return [];
-            try {
-                return JSON.parse(stored);
-            } catch(e) {
-                return [];
-            }
+        function getStats() {
+            const defaults = {};
+            APPS.forEach(app => { defaults[app.id] = { count: 0, lastUsed: 0 }; });
+            const stored = localStorage.getItem("fabians_app_stats");
+            return stored ? JSON.parse(stored) : defaults;
         }
 
         function trackClick(id) {
-            const clicks = getClicks();
-            const now = Date.now();
-            const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000);
-            
-            clicks.push({ id: id, timestamp: now });
-            
-            const filteredClicks = clicks.filter(c => c.timestamp >= thirtyDaysAgo);
-            localStorage.setItem("fabians_app_clicks", JSON.stringify(filteredClicks));
-        }
-
-        function getAppMetrics(appId) {
-            const clicks = getClicks();
-            const now = Date.now();
-            
-            const ms24h = 24 * 60 * 60 * 1000;
-            const ms7d = 7 * ms24h;
-            const ms14d = 14 * ms24h;
-            const ms30d = 30 * ms24h;
-
-            let count24h = 0;
-            let count7d = 0;
-            let count14d = 0;
-            let count30d = 0;
-
-            clicks.forEach(c => {
-                if (c.id === appId) {
-                    const diff = now - c.timestamp;
-                    if (diff <= ms24h) count24h++;
-                    if (diff <= ms7d) count7d++;
-                    if (diff <= ms14d) count14d++;
-                    if (diff <= ms30d) count30d++;
-                }
-            });
-
-            const score = count14d + (2 * count7d) + (4 * count24h);
-
-            return { count30d, score };
+            const stats = getStats();
+            if (stats[id]) {
+                stats[id].count += 1;
+                stats[id].lastUsed = Date.now();
+                localStorage.setItem("fabians_app_stats", JSON.stringify(stats));
+            }
         }
 
         function renderStatsModal() {
+            const stats = getStats();
             const statsList = document.getElementById("stats-list");
             statsList.innerHTML = "";
 
-            const appsWithMetrics = APPS.map(app => {
-                const metrics = getAppMetrics(app.id);
-                return { ...app, count30d: metrics.count30d, score: metrics.score };
+            const sortedApps = [...APPS].sort((a, b) => {
+                const countA = stats[a.id] ? stats[a.id].count : 0;
+                const countB = stats[b.id] ? stats[b.id].count : 0;
+                return countB - countA;
             });
 
-            appsWithMetrics.sort((a, b) => b.count30d - a.count30d);
-
-            appsWithMetrics.forEach(app => {
+            sortedApps.forEach(app => {
+                const count = stats[app.id] ? stats[app.id].count : 0;
                 const item = document.createElement("div");
                 item.className = "stat-item";
                 item.innerHTML = `
@@ -411,19 +374,23 @@
                         <span>${app.icon}</span>
                         <span>${app.title}</span>
                     </div>
-                    <div class="stat-count">${app.count30d} Aufrufe (30 Tage)</div>
+                    <div class="stat-count">${count} Aufrufe</div>
                 `;
                 statsList.appendChild(item);
             });
         }
 
         function renderMenu() {
+            const stats = getStats();
+            const now = Date.now();
             const arena = document.getElementById("bubble-arena");
             arena.innerHTML = "";
 
             const appsWithScores = APPS.map(app => {
-                const metrics = getAppMetrics(app.id);
-                return { ...app, score: metrics.score };
+                const stat = stats[app.id] || { count: 0, lastUsed: 0 };
+                const recency = stat.lastUsed ? (1 / (now - stat.lastUsed + 1)) : 0;
+                const score = (stat.count * 0.7) + (recency * 1000000 * 0.3);
+                return { ...app, score };
             });
 
             const sortedApps = [...appsWithScores].sort((a, b) => b.score - a.score);
@@ -518,11 +485,7 @@
                 bubble.className = "bubble";
                 bubble.style.setProperty("--bubble-size", `${b.size}px`);
 
-                bubble.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    trackClick(b.app.id);
-                    window.location.href = b.app.url;
-                });
+                bubble.addEventListener("click", () => trackClick(b.app.id));
 
                 bubble.innerHTML = `
                     <span class="bubble-icon">${b.app.icon}</span>
@@ -555,6 +518,17 @@
 
         window.addEventListener("DOMContentLoaded", renderMenu);
         window.addEventListener("resize", renderMenu);
+    </script>
+
+    <!-- PWA Fix: Verhindert das Öffnen der Safari-Bedienleisten bei Linkklicks -->
+    <script>
+        document.addEventListener('click', function(e) {
+            var a = e.target.closest('a');
+            if (a && a.href) {
+                e.preventDefault();
+                window.location.href = a.href;
+            }
+        }, false);
     </script>
 </body>
 </html>
