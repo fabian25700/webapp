@@ -1,542 +1,589 @@
-<link rel="icon" type="image/svg+xml" href="logo.svg">
-<link rel="apple-touch-icon" href="logo.svg">
-<link rel="mask-icon" href="logo.svg" color="currentColor">
-
-<title>Startseite</title>
-<script src="daten.js"></script>
-<style>
-    :root {
-        --bg: linear-gradient(135deg, #e0e6ed 0%, #f4f6f9 100%);
-        --surface: rgba(255, 255, 255, 0.45);
-        --surface-modal: rgba(255, 255, 255, 0.85);
-        --text-primary: #1e293b;
-        --text-secondary: #64748b;
-        --glass-border: rgba(255, 255, 255, 0.6);
-        --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06);
-        --bubble-shadow-hover: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
-        --highlight: radial-gradient(circle, rgba(243, 156, 18, 0.25) 0%, rgba(243, 156, 18, 0) 70%);
-    }
-
-    @media (prefers-color-scheme: dark) {
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Startseite">
+    
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="apple-touch-icon" href="logo.svg">
+    <link rel="mask-icon" href="logo.svg" color="#1e293b">
+    
+    <title>Startseite</title>
+    <script src="daten.js"></script>
+    <style>
         :root {
-            --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --surface: rgba(30, 41, 59, 0.45);
-            --surface-modal: rgba(30, 41, 59, 0.85);
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-            --bubble-shadow-hover: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
-            --highlight: radial-gradient(circle, rgba(243, 156, 18, 0.3) 0%, rgba(243, 156, 18, 0) 70%);
+            --bg: linear-gradient(135deg, #e0e6ed 0%, #f4f6f9 100%);
+            --surface: rgba(255, 255, 255, 0.45);
+            --surface-modal: rgba(255, 255, 255, 0.85);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.06);
+            --bubble-shadow-hover: 0 12px 40px 0 rgba(31, 38, 135, 0.12);
+            --highlight: radial-gradient(circle, rgba(243, 156, 18, 0.25) 0%, rgba(243, 156, 18, 0) 70%);
         }
-    }
 
-    * { box-sizing: border-box; }
-
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
-        background: var(--bg);
-        background-attachment: fixed;
-        margin: 0;
-        height: 100vh;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        -webkit-tap-highlight-color: transparent;
-    }
-
-    header {
-        padding: calc(env(safe-area-inset-top) + 24px) 20px 14px 20px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 500;
-    }
-
-    .header-title {
-        font-weight: 800;
-        font-size: 1.2rem;
-        letter-spacing: 0.06em;
-        color: var(--text-primary);
-    }
-
-    main {
-        flex: 1;
-        position: relative;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    #bubble-arena {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .bubble-wrapper {
-        position: absolute;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10;
-    }
-
-    /* Hochwertiges Milchglas-Design ohne harten Rahmen */
-    .bubble {
-        background: var(--surface);
-        border: 1px solid var(--glass-border);
-        border-radius: 50%;
-        text-decoration: none;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        box-shadow: var(--shadow);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease, box-shadow 0.2s ease;
-        cursor: pointer;
-        text-align: center;
-        width: var(--bubble-size, 100px);
-        height: var(--bubble-size, 100px);
-    }
-
-    /* Subtile, rahmenlose Aura für die Top-Favoriten */
-    .bubble-wrapper.top-favorit::before {
-        content: '';
-        position: absolute;
-        width: calc(var(--bubble-size, 100px) * 1.5);
-        height: calc(var(--bubble-size, 100px) * 1.5);
-        background: var(--highlight);
-        pointer-events: none;
-        z-index: -1;
-        border-radius: 50%;
-    }
-
-    .bubble:active { 
-        transform: scale(0.93) !important; 
-        background: rgba(255, 255, 255, 0.6);
-    }
-
-    @media (prefers-color-scheme: dark) {
-        .bubble:active {
-            background: rgba(30, 41, 59, 0.6);
-        }
-    }
-
-    @media (hover: hover) {
-        .bubble-wrapper:hover .bubble {
-            background: rgba(255, 255, 255, 0.55);
-            box-shadow: var(--bubble-shadow-hover);
-            transform: translateY(-4px);
-        }
         @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                --surface: rgba(30, 41, 59, 0.45);
+                --surface-modal: rgba(30, 41, 59, 0.85);
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --glass-border: rgba(255, 255, 255, 0.08);
+                --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+                --bubble-shadow-hover: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+                --highlight: radial-gradient(circle, rgba(243, 156, 18, 0.3) 0%, rgba(243, 156, 18, 0) 70%);
+            }
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            background-attachment: fixed;
+            display: flex;
+            flex-direction: column;
+            -webkit-tap-highlight-color: transparent;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+
+        header {
+            padding: 16px 20px 8px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 500;
+            flex-shrink: 0;
+        }
+
+        .header-title {
+            font-weight: 800;
+            font-size: 1.2rem;
+            letter-spacing: 0.06em;
+            color: var(--text-primary);
+        }
+
+        main {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        #bubble-arena {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bubble-wrapper {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .bubble {
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 50%;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+            text-align: center;
+            width: var(--bubble-size, 100px);
+            height: var(--bubble-size, 100px);
+        }
+
+        .bubble-wrapper.top-favorit::before {
+            content: '';
+            position: absolute;
+            width: calc(var(--bubble-size, 100px) * 1.5);
+            height: calc(var(--bubble-size, 100px) * 1.5);
+            background: var(--highlight);
+            pointer-events: none;
+            z-index: -1;
+            border-radius: 50%;
+        }
+
+        .bubble:active { 
+            transform: scale(0.93) !important; 
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .bubble:active {
+                background: rgba(30, 41, 59, 0.6);
+            }
+        }
+
+        @media (hover: hover) {
             .bubble-wrapper:hover .bubble {
-                background: rgba(30, 41, 59, 0.55);
+                background: rgba(255, 255, 255, 0.55);
+                box-shadow: var(--bubble-shadow-hover);
+                transform: translateY(-4px);
+            }
+            @media (prefers-color-scheme: dark) {
+                .bubble-wrapper:hover .bubble {
+                    background: rgba(30, 41, 59, 0.55);
+                }
+            }
+            .bubble-wrapper:hover {
+                z-index: 50;
             }
         }
-        .bubble-wrapper:hover {
-            z-index: 50;
+
+        .bubble-icon {
+            font-size: calc(var(--bubble-size, 100px) * 0.26);
+            line-height: 1;
+            margin-bottom: 4px;
         }
-    }
 
-    .bubble-icon {
-        font-size: calc(var(--bubble-size, 100px) * 0.26);
-        line-height: 1;
-        margin-bottom: 4px;
-    }
+        .bubble-title {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: calc(var(--bubble-size, 100px) * 0.12);
+            padding: 0 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
+        }
 
-    .bubble-title {
-        font-weight: 700;
-        color: var(--text-primary);
-        font-size: calc(var(--bubble-size, 100px) * 0.12);
-        padding: 0 6px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        width: 100%;
-    }
+        .info-btn {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom) + 16px);
+            right: calc(env(safe-area-inset-right) + 16px);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: var(--shadow);
+            z-index: 600;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
 
-    /* Info Button & Modal */
-    .info-btn {
-        position: fixed;
-        bottom: calc(env(safe-area-inset-bottom) + 20px);
-        right: 20px;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: var(--surface);
-        border: 1px solid var(--glass-border);
-        color: var(--text-primary);
-        font-size: 1.1rem;
-        font-weight: bold;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        box-shadow: var(--shadow);
-        z-index: 600;
-        transition: transform 0.2s ease, background 0.2s ease;
-    }
+        .info-btn:active {
+            transform: scale(0.9);
+        }
 
-    .info-btn:active {
-        transform: scale(0.9);
-    }
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            padding: 20px;
+        }
 
-    .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.4);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.2s ease;
-        padding: 20px;
-    }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
 
-    .modal-overlay.active {
-        opacity: 1;
-        pointer-events: auto;
-    }
+        .modal-content {
+            background: var(--surface-modal);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 24px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow);
+            color: var(--text-primary);
+        }
 
-    .modal-content {
-        background: var(--surface-modal);
-        border: 1px solid var(--glass-border);
-        border-radius: 20px;
-        padding: 24px;
-        width: 100%;
-        max-width: 400px;
-        max-height: 80vh;
-        display: flex;
-        flex-direction: column;
-        box-shadow: var(--shadow);
-        color: var(--text-primary);
-    }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
 
-    .modal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-    }
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0;
+        }
 
-    .modal-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        margin: 0;
-    }
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
 
-    .modal-close {
-        background: none;
-        border: none;
-        color: var(--text-secondary);
-        font-size: 1.5rem;
-        cursor: pointer;
-        padding: 0;
-        line-height: 1;
-    }
+        .modal-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin: 0 0 16px 0;
+            line-height: 1.4;
+        }
 
-    .modal-desc {
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        margin: 0 0 16px 0;
-        line-height: 1.4;
-    }
+        .modal-body {
+            overflow-y: auto;
+            flex: 1;
+        }
 
-    .modal-body {
-        overflow-y: auto;
-        flex: 1;
-    }
+        .stat-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
 
-    .stat-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 8px 0;
-        border-bottom: 1px solid var(--glass-border);
-    }
+        .stat-item:last-child {
+            border-bottom: none;
+        }
 
-    .stat-item:last-child {
-        border-bottom: none;
-    }
+        .stat-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    .stat-info {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
+        .stat-count {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
 
-    .stat-count {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: var(--text-secondary);
-    }
-</style>
-<header>
-    <div class="header-title">FABIANS APP</div>
-</header>
+    <header>
+        <div class="header-title">FABIANS APP</div>
+    </header>
 
-<main>
-    <div id="bubble-arena">
-    </div>
-</main>
-
-<button class="info-btn" id="open-info" aria-label="Informationen">i</button>
-
-<div class="modal-overlay" id="info-modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 class="modal-title">Bubble-Größen</h3>
-            <button class="modal-close" id="close-info">&times;</button>
+    <main>
+        <div id="bubble-arena">
         </div>
-        <p class="modal-desc">
-            Die Größe der Bubbles berechnet sich aus den Aufrufen der letzten 14 Tage + (2 * Aufrufe letzte 7 Tage) + (4 * Aufrufe letzte 24 Std). Angezeigt werden die Aufrufe der letzten 30 Tage. Die Daten werden ausschließlich lokal auf diesem Gerät gespeichert.
-        </p>
-        <div class="modal-body" id="stats-list">
+    </main>
+
+    <button class="info-btn" id="open-info" aria-label="Informationen">i</button>
+
+    <div class="modal-overlay" id="info-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Bubble-Größen</h3>
+                <button class="modal-close" id="close-info">&times;</button>
+            </div>
+            <p class="modal-desc">
+                Die Größe der Bubbles berechnet sich aus den Aufrufen der letzten 14 Tage + (2 * Aufrufe letzte 7 Tage) + (4 * Aufrufe letzte 24 Std). Angezeigt werden die Aufrufe der letzten 30 Tage. Die Daten werden ausschließlich lokal auf diesem Gerät gespeichert.
+            </p>
+            <div class="modal-body" id="stats-list">
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    const APPS = [
-        { id: "reisen", title: "Reisen", icon: "✈️", url: "reise_stats.html" },
-        { id: "habits", title: "Habits", icon: "📊", url: "habits.html" },
-        { id: "alkohol", title: "Alkohol", icon: "🍺", url: "alkohol.html" },
-        { id: "alltag", title: "Alltag", icon: "🏠", url: "alltag.html" },
-        { id: "gastspiel", title: "Gastspiel", icon: "⚽", url: "gastspiel2.html" },
-        { id: "kcrakete", title: "KC Rakete", icon: "🚀", url: "[https://kcrakete.github.io/webapp/startseite/](https://kcrakete.github.io/webapp/startseite/)" },
-        { id: "test", title: "Test", icon: "🧪", url: "test.html" },
-        { id: "test2", title: "Test 2", icon: "⚗️", url: "test2.html" },
-        { id: "finanzen", title: "Finanzen", icon: "💰", url: "finanzen.html" },
-        { id: "spiele", title: "Spiele", icon: "🎮", url: "spiele.html" },
-        { id: "familie", title: "Familie", icon: "🧑‍🧑‍🧒‍🧒", url: "familie.html" },
-        { id: "pomodoro", title: "Pomodoro", icon: "🎧", url: "pomo.html" },
-        { id: "hopping", title: "Hopping", icon: "⚽", url: "hopping.html" }
-    ];
+    <script>
+        const APPS = [
+            { id: "reisen", title: "Reisen", icon: "✈️", url: "reise_stats.html" },
+            { id: "habits", title: "Habits", icon: "📊", url: "habits.html" },
+            { id: "alkohol", title: "Alkohol", icon: "🍺", url: "alkohol.html" },
+            { id: "alltag", title: "Alltag", icon: "🏠", url: "alltag.html" },
+            { id: "gastspiel", title: "Gastspiel", icon: "⚽", url: "gastspiel2.html" },
+            { id: "kcrakete", title: "KC Rakete", icon: "🚀", url: "https://kcrakete.github.io/webapp/startseite/" },
+            { id: "test", title: "Test", icon: "🧪", url: "test.html" },
+            { id: "test2", title: "Test 2", icon: "⚗️", url: "test2.html" },
+            { id: "finanzen", title: "Finanzen", icon: "💰", url: "finanzen.html" },
+            { id: "spiele", title: "Spiele", icon: "🎮", url: "spiele.html" },
+            { id: "familie", title: "Familie", icon: "🧑‍🧑‍🧒‍🧒", url: "familie.html" },
+            { id: "pomodoro", title: "Pomodoro", icon: "🎧", url: "pomo.html" },
+            { id: "hopping", title: "Hopping", icon: "⚽", url: "hopping.html" }
+        ];
 
-    function getClicks() {
-        const stored = localStorage.getItem("fabians_app_clicks");
-        if (!stored) return [];
-        try {
-            return JSON.parse(stored);
-        } catch(e) {
-            return [];
+        function getClicks() {
+            const stored = localStorage.getItem("fabians_app_clicks");
+            if (!stored) return [];
+            try {
+                return JSON.parse(stored);
+            } catch(e) {
+                return [];
+            }
         }
-    }
 
-    function trackClick(id) {
-        const clicks = getClicks();
-        const now = Date.now();
-        const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000);
-        
-        clicks.push({ id: id, timestamp: now });
-        
-        const filteredClicks = clicks.filter(c => c.timestamp >= thirtyDaysAgo);
-        localStorage.setItem("fabians_app_clicks", JSON.stringify(filteredClicks));
-    }
+        function trackClick(id) {
+            const clicks = getClicks();
+            const now = Date.now();
+            const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000);
+            
+            clicks.push({ id: id, timestamp: now });
+            
+            const filteredClicks = clicks.filter(c => c.timestamp >= thirtyDaysAgo);
+            localStorage.setItem("fabians_app_clicks", JSON.stringify(filteredClicks));
+        }
 
-    function getAppMetrics(appId) {
-        const clicks = getClicks();
-        const now = Date.now();
-        
-        const ms24h = 24 * 60 * 60 * 1000;
-        const ms7d = 7 * ms24h;
-        const ms14d = 14 * ms24h;
-        const ms30d = 30 * ms24h;
+        function getAppMetrics(appId) {
+            const clicks = getClicks();
+            const now = Date.now();
+            
+            const ms24h = 24 * 60 * 60 * 1000;
+            const ms7d = 7 * ms24h;
+            const ms14d = 14 * ms24h;
+            const ms30d = 30 * ms24h;
 
-        let count24h = 0;
-        let count7d = 0;
-        let count14d = 0;
-        let count30d = 0;
+            let count24h = 0;
+            let count7d = 0;
+            let count14d = 0;
+            let count30d = 0;
 
-        clicks.forEach(c => {
-            if (c.id === appId) {
-                const diff = now - c.timestamp;
-                if (diff <= ms24h) count24h++;
-                if (diff <= ms7d) count7d++;
-                if (diff <= ms14d) count14d++;
-                if (diff <= ms30d) count30d++;
-            }
-        });
+            clicks.forEach(c => {
+                if (c.id === appId) {
+                    const diff = now - c.timestamp;
+                    if (diff <= ms24h) count24h++;
+                    if (diff <= ms7d) count7d++;
+                    if (diff <= ms14d) count14d++;
+                    if (diff <= ms30d) count30d++;
+                }
+            });
 
-        const score = count14d + (2 * count7d) + (4 * count24h);
+            const score = count14d + (2 * count7d) + (4 * count24h);
 
-        return { count30d, score };
-    }
+            return { count30d, score };
+        }
 
-    function renderStatsModal() {
-        const statsList = document.getElementById("stats-list");
-        statsList.innerHTML = "";
+        function renderStatsModal() {
+            const statsList = document.getElementById("stats-list");
+            statsList.innerHTML = "";
 
-        const appsWithMetrics = APPS.map(app => {
-            const metrics = getAppMetrics(app.id);
-            return { ...app, count30d: metrics.count30d, score: metrics.score };
-        });
+            const appsWithMetrics = APPS.map(app => {
+                const metrics = getAppMetrics(app.id);
+                return { ...app, count30d: metrics.count30d, score: metrics.score };
+            });
 
-        appsWithMetrics.sort((a, b) => b.count30d - a.count30d);
+            appsWithMetrics.sort((a, b) => b.count30d - a.count30d);
 
-        appsWithMetrics.forEach(app => {
-            const item = document.createElement("div");
-            item.className = "stat-item";
-            item.innerHTML = `
-                <div class="stat-info">
-                    <span>${app.icon}</span>
-                    <span>${app.title}</span>
-                </div>
-                <div class="stat-count">${app.count30d} Aufrufe (30 Tage)</div>
-            `;
-            statsList.appendChild(item);
-        });
-    }
+            appsWithMetrics.forEach(app => {
+                const item = document.createElement("div");
+                item.className = "stat-item";
+                item.innerHTML = `
+                    <div class="stat-info">
+                        <span>${app.icon}</span>
+                        <span>${app.title}</span>
+                    </div>
+                    <div class="stat-count">${app.count30d} Aufrufe (30 Tage)</div>
+                `;
+                statsList.appendChild(item);
+            });
+        }
 
-    function renderMenu() {
-        const arena = document.getElementById("bubble-arena");
-        arena.innerHTML = "";
+        function renderMenu() {
+            const arena = document.getElementById("bubble-arena");
+            arena.innerHTML = "";
 
-        const appsWithScores = APPS.map(app => {
-            const metrics = getAppMetrics(app.id);
-            return { ...app, score: metrics.score };
-        });
+            const arenaRect = arena.getBoundingClientRect();
+            const availableWidth = arenaRect.width;
+            const availableHeight = arenaRect.height;
 
-        const sortedApps = [...appsWithScores].sort((a, b) => b.score - a.score);
-        
-        const scores = sortedApps.map(a => a.score);
-        const maxScore = Math.max(...scores);
-        const minScore = Math.min(...scores);
+            const appsWithScores = APPS.map(app => {
+                const metrics = getAppMetrics(app.id);
+                return { ...app, score: metrics.score };
+            });
 
-        const isMobile = window.innerWidth < 768;
-        const isPortrait = window.innerHeight > window.innerWidth;
+            const sortedApps = [...appsWithScores].sort((a, b) => b.score - a.score);
+            
+            const scores = sortedApps.map(a => a.score);
+            const maxScore = Math.max(...scores);
+            const minScore = Math.min(...scores);
 
-        const baseSize = isMobile ? 96 : 115;
+            const isMobile = window.innerWidth < 768;
+            const isPortrait = availableHeight > availableWidth;
 
-        const stretchX = isPortrait ? 0.75 : 1.35;
-        const stretchY = isPortrait ? 1.45 : 0.75;
+            const baseSize = isMobile 
+                ? Math.min(availableWidth, availableHeight) * 0.18 
+                : 110;
 
-        const centerRadius = isMobile ? 65 : 95;
-        const outerRadius = isMobile ? 155 : 230;
+            const stretchX = isPortrait ? 0.70 : 1.30;
+            const stretchY = isPortrait ? 1.35 : 0.70;
 
-        let centerAngles = [45, 135, 225, 315].map(a => a + (Math.random() * 15 - 7.5));
-        let outerAngles = [0, 45, 90, 135, 180, 225, 270, 315].map(a => a + (Math.random() * 20 - 10));
+            const centerRadius = Math.min(availableWidth, availableHeight) * (isMobile ? 0.16 : 0.20);
+            const outerRadius = Math.min(availableWidth, availableHeight) * (isMobile ? 0.35 : 0.38);
 
-        centerAngles = centerAngles.sort(() => Math.random() - 0.5);
-        outerAngles = outerAngles.sort(() => Math.random() - 0.5);
+            const totalApps = sortedApps.length;
+            const innerCount = Math.min(4, totalApps);
+            const outerCount = totalApps - innerCount;
 
-        const bubblesData = sortedApps.map((app, index) => {
-            const isTopFour = index < 4;
+            const bubblesData = sortedApps.map((app, index) => {
+                const isTopFour = index < 4;
 
-            let factor = 1.0;
-            if (maxScore !== minScore) {
-                factor = 0.85 + ((app.score - minScore) / (maxScore - minScore)) * 0.55;
-            } else if (maxScore > 0) {
-                factor = 1.15;
-            }
+                let factor = 1.0;
+                if (maxScore !== minScore) {
+                    factor = 0.85 + ((app.score - minScore) / (maxScore - minScore)) * 0.45;
+                } else if (maxScore > 0) {
+                    factor = 1.10;
+                }
 
-            const finalSize = Math.round(baseSize * factor);
+                const finalSize = Math.round(baseSize * factor);
 
-            let posX, posY;
-            if (isTopFour) {
-                const angleRad = (centerAngles[index] * Math.PI) / 180;
-                posX = Math.cos(angleRad) * centerRadius * stretchX;
-                posY = Math.sin(angleRad) * centerRadius * stretchY;
-            } else {
-                const angleRad = (outerAngles[(index - 4) % outerAngles.length] * Math.PI) / 180;
-                posX = Math.cos(angleRad) * outerRadius * stretchX;
-                posY = Math.sin(angleRad) * outerRadius * stretchY;
-            }
+                let angleDeg = 0;
+                let radius = 0;
 
-            return {
-                app,
-                isTopFour,
-                size: finalSize,
-                radius: finalSize / 2,
-                x: posX,
-                y: posY
-            };
-        });
+                if (isTopFour) {
+                    angleDeg = (index * (360 / innerCount)) + 45;
+                    radius = centerRadius;
+                } else {
+                    const outerIndex = index - 4;
+                    angleDeg = outerIndex * (360 / outerCount);
+                    radius = outerRadius;
+                }
 
-        for (let step = 0; step < 12; step++) {
-            for (let i = 0; i < bubblesData.length; i++) {
-                for (let j = i + 1; j < bubblesData.length; j++) {
-                    const b1 = bubblesData[i];
-                    const b2 = bubblesData[j];
+                const angleRad = (angleDeg * Math.PI) / 180;
+                const posX = Math.cos(angleRad) * radius * stretchX;
+                const posY = Math.sin(angleRad) * radius * stretchY;
 
-                    const dx = b2.x - b1.x;
-                    const dy = b2.y - b1.y;
-                    const dist = Math.hypot(dx, dy);
-                    const minDist = b1.radius + b2.radius + 8;
+                return {
+                    app,
+                    isTopFour,
+                    size: finalSize,
+                    radius: finalSize / 2,
+                    x: posX,
+                    y: posY
+                };
+            });
 
-                    if (dist < minDist) {
-                        const overlap = minDist - dist;
-                        const forceX = (dx / (dist || 1)) * (overlap * 0.5);
-                        const forceY = (dy / (dist || 1)) * (overlap * 0.5);
+            for (let step = 0; step < 20; step++) {
+                for (let i = 0; i < bubblesData.length; i++) {
+                    for (let j = i + 1; j < bubblesData.length; j++) {
+                        const b1 = bubblesData[i];
+                        const b2 = bubblesData[j];
 
-                        b1.x -= forceX;
-                        b1.y -= forceY;
-                        b2.x += forceX;
-                        b2.y += forceY;
+                        const dx = b2.x - b1.x;
+                        const dy = b2.y - b1.y;
+                        const dist = Math.hypot(dx, dy);
+                        const minDist = b1.radius + b2.radius + 8;
+
+                        if (dist < minDist) {
+                            const overlap = minDist - dist;
+                            const nx = dist === 0 ? 1 : dx / dist;
+                            const ny = dist === 0 ? 0 : dy / dist;
+
+                            b1.x -= nx * (overlap * 0.5);
+                            b1.y -= ny * (overlap * 0.5);
+                            b2.x += nx * (overlap * 0.5);
+                            b2.y += ny * (overlap * 0.5);
+                        }
                     }
                 }
             }
+
+            const maxX = (availableWidth / 2);
+            const maxY = (availableHeight / 2);
+            
+            bubblesData.forEach(b => {
+                const margin = b.radius + 10;
+                if (b.x + margin > maxX) b.x = maxX - margin;
+                if (b.x - margin < -maxX) b.x = -maxX + margin;
+                if (b.y + margin > maxY) b.y = maxY - margin;
+                if (b.y - margin < -maxY) b.y = -maxY + margin;
+            });
+
+            bubblesData.forEach(b => {
+                const wrapper = document.createElement("div");
+                wrapper.className = "bubble-wrapper";
+                if (b.isTopFour) wrapper.classList.add("top-favorit");
+                wrapper.style.transform = `translate(${b.x}px, ${b.y}px)`;
+
+                const bubble = document.createElement("a");
+                bubble.href = b.app.url;
+                bubble.className = "bubble";
+                bubble.style.setProperty("--bubble-size", `${b.size}px`);
+
+                bubble.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    trackClick(b.app.id);
+                    window.location.href = b.app.url;
+                });
+
+                bubble.innerHTML = `
+                    <span class="bubble-icon">${b.app.icon}</span>
+                    <span class="bubble-title">${b.app.title}</span>
+                `;
+
+                wrapper.appendChild(bubble);
+                arena.appendChild(wrapper);
+            });
         }
 
-        bubblesData.forEach(b => {
-            const wrapper = document.createElement("div");
-            wrapper.className = "bubble-wrapper";
-            if (b.isTopFour) wrapper.classList.add("top-favorit");
-            wrapper.style.transform = `translate(${b.x}px, ${b.y}px)`;
+        const modal = document.getElementById("info-modal");
+        const openBtn = document.getElementById("open-info");
+        const closeBtn = document.getElementById("close-info");
 
-            const bubble = document.createElement("a");
-            bubble.href = b.app.url;
-            bubble.className = "bubble";
-            bubble.style.setProperty("--bubble-size", `${b.size}px`);
-
-            bubble.addEventListener("click", () => trackClick(b.app.id));
-
-            bubble.innerHTML = `
-                <span class="bubble-icon">${b.app.icon}</span>
-                <span class="bubble-title">${b.app.title}</span>
-            `;
-
-            wrapper.appendChild(bubble);
-            arena.appendChild(wrapper);
+        openBtn.addEventListener("click", () => {
+            renderStatsModal();
+            modal.classList.add("active");
         });
-    }
 
-    const modal = document.getElementById("info-modal");
-    const openBtn = document.getElementById("open-info");
-    const closeBtn = document.getElementById("close-info");
-
-    openBtn.addEventListener("click", () => {
-        renderStatsModal();
-        modal.classList.add("active");
-    });
-
-    closeBtn.addEventListener("click", () => {
-        modal.classList.remove("active");
-    });
-
-    modal.addEventListener("click", (e) => {
-        if (e.target === modal) {
+        closeBtn.addEventListener("click", () => {
             modal.classList.remove("active");
-        }
-    });
+        });
 
-    window.addEventListener("DOMContentLoaded", renderMenu);
-    window.addEventListener("resize", renderMenu);
-</script>
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) {
+                modal.classList.remove("active");
+            }
+        });
+
+        window.addEventListener("DOMContentLoaded", renderMenu);
+        window.addEventListener("resize", renderMenu);
+    </script>
+</body>
+</html>
