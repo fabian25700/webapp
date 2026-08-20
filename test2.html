@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#e0e6ed">
+    <meta name="theme-color" content="#f0f2f5">
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     <link rel="apple-touch-icon" href="logo.png">
     <link rel="manifest" href="manifest.json">
@@ -16,9 +16,7 @@
            Farb- & Theme-Variablen (Light/Dark)
            ========================================================== */
         :root {
-            --bg-color-1: #e0e6ed;
-            --bg-color-2: #f4f6f9;
-            --bg: linear-gradient(135deg, var(--bg-color-1) 0%, var(--bg-color-2) 100%);
+            --bg: #f0f2f5;
             --surface: rgba(255, 255, 255, 0.45);
             --surface-modal: rgba(255, 255, 255, 0.85);
             --text-primary: #1e293b;
@@ -31,9 +29,7 @@
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg-color-1: #0f172a;
-                --bg-color-2: #1e293b;
-                --bg: linear-gradient(135deg, var(--bg-color-1) 0%, var(--bg-color-2) 100%);
+                --bg: #0f172a;
                 --surface: rgba(30, 41, 59, 0.45);
                 --surface-modal: rgba(30, 41, 59, 0.85);
                 --text-primary: #f1f5f9;
@@ -52,7 +48,7 @@
 
         html {
             height: 100%;
-            background: var(--bg-color-1);
+            background: var(--bg);
             overscroll-behavior: none;
         }
 
@@ -67,16 +63,10 @@
             flex-direction: column;
             -webkit-tap-highlight-color: transparent;
             position: relative;
+            background: var(--bg);
+            transition: background 0.3s ease;
         }
 
-        /* Echte fixe Hintergrund-Ebene statt html/body-Hintergrund:
-           position:fixed + inset:0 deckt auf iOS zuverlässig den
-           GESAMTEN sichtbaren Bereich ab (genau wie .modal-overlay
-           das schon tut) - inklusive Notch oben und Home-Indicator
-           unten. Ein normaler html/body-Hintergrund folgt dagegen
-           der vh/dvh-Layoutgröße, die diese Sicherheitsbereiche auf
-           iOS nicht zuverlässig einschließt - das waren die weißen
-           Streifen oben/unten. */
         body::before {
             content: '';
             position: fixed;
@@ -216,11 +206,6 @@
            ========================================================== */
         .info-btn {
             position: fixed;
-            /* max() als Absicherung: iOS liefert env(safe-area-inset-bottom)
-               beim allerersten Rendern manchmal noch als 0 (bekannter
-               WebKit-Bug, da der Browser zunächst nur die Notch oben
-               berücksichtigt) - dadurch stand der Button zu hoch.
-               max() sorgt zusätzlich für ein Mindest-Abstand. */
             bottom: max(calc(env(safe-area-inset-bottom) + 20px), 20px);
             right: 20px;
             width: 40px;
@@ -696,11 +681,6 @@
         window.addEventListener("DOMContentLoaded", renderMenu);
         window.addEventListener("resize", renderMenu);
 
-        // iOS liefert env(safe-area-inset-bottom) beim allerersten Malen
-        // manchmal noch als 0 (Fokus liegt zunächst nur auf der Notch
-        // oben) - ein erzwungener Reflow direkt nach dem Laden bringt
-        // Safari dazu, den unteren Sicherheitsbereich neu zu berechnen,
-        // damit der Info-Button korrekt tief genug sitzt.
         window.addEventListener("load", () => {
             void document.body.offsetHeight;
         });
