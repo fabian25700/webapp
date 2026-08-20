@@ -1,6 +1,6 @@
 <link rel="icon" type="image/svg+xml" href="logo.svg">
 <link rel="apple-touch-icon" href="logo.svg">
-<link rel="mask-icon" href="logo.svg" color="#1e293b">
+<link rel="mask-icon" href="logo.svg" color="currentColor">
 
 <title>Startseite</title>
 <script src="daten.js"></script>
@@ -288,10 +288,6 @@
         color: var(--text-secondary);
     }
 </style>
-
-```
-
-```
 <header>
     <div class="header-title">FABIANS APP</div>
 </header>
@@ -310,7 +306,7 @@
             <button class="modal-close" id="close-info">&times;</button>
         </div>
         <p class="modal-desc">
-            Die Größe der Bubbles berechnet sich aus der Häufigkeit und Aktualität der Aufrufe. Die Daten werden ausschließlich lokal auf diesem Gerät gespeichert.
+            Die Größe der Bubbles berechnet sich aus den Aufrufen der letzten 14 Tage + (2 * Aufrufe letzte 7 Tage) + (4 * Aufrufe letzte 24 Std). Angezeigt werden die Aufrufe der letzten 30 Tage. Die Daten werden ausschließlich lokal auf diesem Gerät gespeichert.
         </p>
         <div class="modal-body" id="stats-list">
         </div>
@@ -334,47 +330,68 @@
         { id: "hopping", title: "Hopping", icon: "⚽", url: "hopping.html" }
     ];
 
-    function getStats() {
-        let stats = {};
-        const stored = localStorage.getItem("fabians_app_stats");
-        if (stored) {
-            try {
-                stats = JSON.parse(stored);
-            } catch(e) {
-                stats = {};
-            }
+    function getClicks() {
+        const stored = localStorage.getItem("fabians_app_clicks");
+        if (!stored) return [];
+        try {
+            return JSON.parse(stored);
+        } catch(e) {
+            return [];
         }
-        APPS.forEach(app => {
-            if (!stats[app.id]) {
-                stats[app.id] = { count: 0, lastUsed: 0 };
-            }
-        });
-        return stats;
     }
 
     function trackClick(id) {
-        const stats = getStats();
-        if (!stats[id]) {
-            stats[id] = { count: 0, lastUsed: 0 };
-        }
-        stats[id].count += 1;
-        stats[id].lastUsed = Date.now();
-        localStorage.setItem("fabians_app_stats", JSON.stringify(stats));
+        const clicks = getClicks();
+        const now = Date.now();
+        const thirtyDaysAgo = now - (30 * 24 * 60 * 60 * 1000);
+        
+        clicks.push({ id: id, timestamp: now });
+        
+        const filteredClicks = clicks.filter(c => c.timestamp >= thirtyDaysAgo);
+        localStorage.setItem("fabians_app_clicks", JSON.stringify(filteredClicks));
+    }
+
+    function getAppMetrics(appId) {
+        const clicks = getClicks();
+        const now = Date.now();
+        
+        const ms24h = 24 * 60 * 60 * 1000;
+        const ms7d = 7 * ms24h;
+        const ms14d = 14 * ms24h;
+        const ms30d = 30 * ms24h;
+
+        let count24h = 0;
+        let count7d = 0;
+        let count14d = 0;
+        let count30d = 0;
+
+        clicks.forEach(c => {
+            if (c.id === appId) {
+                const diff = now - c.timestamp;
+                if (diff <= ms24h) count24h++;
+                if (diff <= ms7d) count7d++;
+                if (diff <= ms14d) count14d++;
+                if (diff <= ms30d) count30d++;
+            }
+        });
+
+        const score = count14d + (2 * count7d) + (4 * count24h);
+
+        return { count30d, score };
     }
 
     function renderStatsModal() {
-        const stats = getStats();
         const statsList = document.getElementById("stats-list");
         statsList.innerHTML = "";
 
-        const sortedApps = [...APPS].sort((a, b) => {
-            const countA = stats[a.id] ? stats[a.id].count : 0;
-            const countB = stats[b.id] ? stats[b.id].count : 0;
-            return countB - countA;
+        const appsWithMetrics = APPS.map(app => {
+            const metrics = getAppMetrics(app.id);
+            return { ...app, count30d: metrics.count30d, score: metrics.score };
         });
 
-        sortedApps.forEach(app => {
-            const count = stats[app.id] ? stats[app.id].count : 0;
+        appsWithMetrics.sort((a, b) => b.count30d - a.count30d);
+
+        appsWithMetrics.forEach(app => {
             const item = document.createElement("div");
             item.className = "stat-item";
             item.innerHTML = `
@@ -382,23 +399,19 @@
                     <span>${app.icon}</span>
                     <span>${app.title}</span>
                 </div>
-                <div class="stat-count">${count} Aufrufe</div>
+                <div class="stat-count">${app.count30d} Aufrufe (30 Tage)</div>
             `;
             statsList.appendChild(item);
         });
     }
 
     function renderMenu() {
-        const stats = getStats();
-        const now = Date.now();
         const arena = document.getElementById("bubble-arena");
         arena.innerHTML = "";
 
         const appsWithScores = APPS.map(app => {
-            const stat = stats[app.id] || { count: 0, lastUsed: 0 };
-            const recency = stat.lastUsed ? (1 / (now - stat.lastUsed + 1)) : 0;
-            const score = (stat.count * 0.7) + (recency * 1000000 * 0.3);
-            return { ...app, score };
+            const metrics = getAppMetrics(app.id);
+            return { ...app, score: metrics.score };
         });
 
         const sortedApps = [...appsWithScores].sort((a, b) => b.score - a.score);
