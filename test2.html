@@ -50,21 +50,20 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
-            background: var(--bg-color-1);
+            background: var(--bg);
+            background-attachment: fixed;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
         .app-container {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
+            width: 100%;
+            height: 100dvh;
             display: flex;
             flex-direction: column;
-            background: var(--bg);
-            background-attachment: fixed;
         }
 
         header {
@@ -88,11 +87,11 @@
             flex: 1;
             position: relative;
             width: 100%;
-            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         #bubble-arena {
@@ -188,7 +187,7 @@
 
         .info-btn {
             position: absolute;
-            bottom: max(calc(env(safe-area-inset-bottom) + 16px), 20px);
+            bottom: 20px;
             right: 20px;
             width: 42px;
             height: 42px;
@@ -468,7 +467,7 @@
             });
 
             const containerWidth = arena.clientWidth || window.innerWidth;
-            const containerHeight = arena.clientHeight || (window.innerHeight - 80);
+            const containerHeight = arena.clientHeight || window.innerHeight;
 
             const isMobile = containerWidth < 768;
 
