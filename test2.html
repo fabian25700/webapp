@@ -2,16 +2,20 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#e0e6ed">
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     <link rel="apple-touch-icon" href="logo.png">
+    <link rel="manifest" href="manifest.json">
     <title>Startseite</title>
     <script src="daten.js"></script>
     <style>
         :root {
-            --bg: linear-gradient(135deg, #e0e6ed 0%, #f4f6f9 100%);
+            --bg-color-1: #e0e6ed;
+            --bg-color-2: #f4f6f9;
+            --bg: linear-gradient(135deg, var(--bg-color-1) 0%, var(--bg-color-2) 100%);
             --surface: rgba(255, 255, 255, 0.45);
             --surface-modal: rgba(255, 255, 255, 0.85);
             --text-primary: #1e293b;
@@ -24,7 +28,9 @@
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+                --bg-color-1: #0f172a;
+                --bg-color-2: #1e293b;
+                --bg: linear-gradient(135deg, var(--bg-color-1) 0%, var(--bg-color-2) 100%);
                 --surface: rgba(30, 41, 59, 0.45);
                 --surface-modal: rgba(30, 41, 59, 0.85);
                 --text-primary: #f1f5f9;
@@ -38,24 +44,37 @@
 
         * { box-sizing: border-box; }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
-            background: var(--bg);
-            background-attachment: fixed;
+        html, body {
             margin: 0;
-            height: 100vh;
+            padding: 0;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            background: var(--bg-color-1);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
 
+        .app-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            background-attachment: fixed;
+        }
+
         header {
-            padding: calc(env(safe-area-inset-top) + 24px) 20px 14px 20px;
+            padding-top: max(env(safe-area-inset-top), 16px);
+            padding-bottom: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 500;
+            flex-shrink: 0;
         }
 
         .header-title {
@@ -73,6 +92,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
         }
 
         #bubble-arena {
@@ -92,7 +112,6 @@
             z-index: 10;
         }
 
-        /* Hochwertiges Milchglas-Design ohne harten Rahmen */
         .bubble {
             background: var(--surface);
             border: 1px solid var(--glass-border);
@@ -112,12 +131,11 @@
             height: var(--bubble-size, 100px);
         }
 
-        /* Subtile, rahmenlose Aura für die Top-Favoriten */
         .bubble-wrapper.top-favorit::before {
             content: '';
             position: absolute;
-            width: calc(var(--bubble-size, 100px) * 1.5);
-            height: calc(var(--bubble-size, 100px) * 1.5);
+            width: calc(var(--bubble-size, 100px) * 1.35);
+            height: calc(var(--bubble-size, 100px) * 1.35);
             background: var(--highlight);
             pointer-events: none;
             z-index: -1;
@@ -168,13 +186,12 @@
             width: 100%;
         }
 
-        /* Info Button & Modal */
         .info-btn {
-            position: fixed;
-            bottom: calc(env(safe-area-inset-bottom) + 20px);
+            position: absolute;
+            bottom: max(calc(env(safe-area-inset-bottom) + 16px), 20px);
             right: 20px;
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             background: var(--surface);
             border: 1px solid var(--glass-border);
@@ -226,7 +243,7 @@
             border-radius: 20px;
             padding: 24px;
             width: 100%;
-            max-width: 400px;
+            max-width: 360px;
             max-height: 80vh;
             display: flex;
             flex-direction: column;
@@ -273,7 +290,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 8px 0;
+            padding: 10px 0;
             border-bottom: 1px solid var(--glass-border);
         }
 
@@ -285,36 +302,37 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            font-weight: 600;
         }
 
         .stat-count {
             font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-secondary);
+            font-weight: 700;
+            color: var(--text-primary);
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-title">FABIANS APP</div>
-    </header>
+    <div class="app-container">
+        <header>
+            <div class="header-title">FABIANS APP</div>
+        </header>
 
-    <main>
-        <div id="bubble-arena">
-        </div>
-    </main>
-
-    <button class="info-btn" id="open-info" aria-label="Informationen">i</button>
+        <main>
+            <div id="bubble-arena"></div>
+            <button class="info-btn" id="open-info" aria-label="Informationen">i</button>
+        </main>
+    </div>
 
     <div class="modal-overlay" id="info-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Bubble-Größen</h3>
+                <h3 class="modal-title">Aufrufe (7 Tage)</h3>
                 <button class="modal-close" id="close-info">&times;</button>
             </div>
             <p class="modal-desc">
-                Die Größe der Bubbles berechnet sich aus der Häufigkeit und Aktualität der Aufrufe. Die Daten werden ausschließlich lokal auf diesem Gerät gespeichert.
+                Anzahl der Aufrufe pro App in den letzten 7 Tagen.
             </p>
             <div class="modal-body" id="stats-list">
             </div>
@@ -338,35 +356,86 @@
             { id: "hopping", title: "Hopping", icon: "⚽", url: "hopping.html" }
         ];
 
-        function getStats() {
-            const defaults = {};
-            APPS.forEach(app => { defaults[app.id] = { count: 0, lastUsed: 0 }; });
-            const stored = localStorage.getItem("fabians_app_stats");
-            return stored ? JSON.parse(stored) : defaults;
-        }
-
-        function trackClick(id) {
-            const stats = getStats();
-            if (stats[id]) {
-                stats[id].count += 1;
-                stats[id].lastUsed = Date.now();
-                localStorage.setItem("fabians_app_stats", JSON.stringify(stats));
+        function getTimestamps() {
+            const stored = localStorage.getItem("fabians_app_timestamps");
+            if (!stored) {
+                const oldStored = localStorage.getItem("fabians_app_stats");
+                const defaults = {};
+                APPS.forEach(app => { defaults[app.id] = []; });
+                if (oldStored) {
+                    try {
+                        const oldStats = JSON.parse(oldStored);
+                        const now = Date.now();
+                        APPS.forEach(app => {
+                            if (oldStats[app.id] && oldStats[app.id].count > 0) {
+                                for (let i = 0; i < oldStats[app.id].count; i++) {
+                                    defaults[app.id].push(now - i * 1000);
+                                }
+                            }
+                        });
+                    } catch(e) {}
+                }
+                return defaults;
+            }
+            try {
+                return JSON.parse(stored);
+            } catch(e) {
+                const defaults = {};
+                APPS.forEach(app => { defaults[app.id] = []; });
+                return defaults;
             }
         }
 
+        function trackClick(id) {
+            const timestamps = getTimestamps();
+            if (!timestamps[id]) timestamps[id] = [];
+            timestamps[id].push(Date.now());
+            
+            const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+            APPS.forEach(app => {
+                if (timestamps[app.id]) {
+                    timestamps[app.id] = timestamps[app.id].filter(t => t >= thirtyDaysAgo);
+                }
+            });
+            
+            localStorage.setItem("fabians_app_timestamps", JSON.stringify(timestamps));
+        }
+
+        function getAppCounts(id, timestamps, now) {
+            const list = timestamps[id] || [];
+            const t24h = now - (24 * 60 * 60 * 1000);
+            const t7d = now - (7 * 24 * 60 * 60 * 1000);
+            const t14d = now - (14 * 24 * 60 * 60 * 1000);
+            const t30d = now - (30 * 24 * 60 * 60 * 1000);
+
+            let c24h = 0, c7d = 0, c14d = 0, c30d = 0;
+            list.forEach(t => {
+                if (t >= t24h) c24h++;
+                if (t >= t7d) c7d++;
+                if (t >= t14d) c14d++;
+                if (t >= t30d) c30d++;
+            });
+
+            return { c24h, c7d, c14d, c30d };
+        }
+
         function renderStatsModal() {
-            const stats = getStats();
+            const timestamps = getTimestamps();
+            const now = Date.now();
             const statsList = document.getElementById("stats-list");
             statsList.innerHTML = "";
 
-            const sortedApps = [...APPS].sort((a, b) => {
-                const countA = stats[a.id] ? stats[a.id].count : 0;
-                const countB = stats[b.id] ? stats[b.id].count : 0;
-                return countB - countA;
+            const appData = APPS.map(app => {
+                const counts = getAppCounts(app.id, timestamps, now);
+                return { ...app, c7d: counts.c7d, c30d: counts.c30d };
             });
 
-            sortedApps.forEach(app => {
-                const count = stats[app.id] ? stats[app.id].count : 0;
+            appData.sort((a, b) => {
+                if (b.c7d !== a.c7d) return b.c7d - a.c7d;
+                return b.c30d - a.c30d;
+            });
+
+            appData.forEach(app => {
                 const item = document.createElement("div");
                 item.className = "stat-item";
                 item.innerHTML = `
@@ -374,82 +443,122 @@
                         <span>${app.icon}</span>
                         <span>${app.title}</span>
                     </div>
-                    <div class="stat-count">${count} Aufrufe</div>
+                    <div class="stat-count">${app.c7d} Aufruf${app.c7d === 1 ? '' : 'e'}</div>
                 `;
                 statsList.appendChild(item);
             });
         }
 
         function renderMenu() {
-            const stats = getStats();
+            const timestamps = getTimestamps();
             const now = Date.now();
             const arena = document.getElementById("bubble-arena");
             arena.innerHTML = "";
 
             const appsWithScores = APPS.map(app => {
-                const stat = stats[app.id] || { count: 0, lastUsed: 0 };
-                const recency = stat.lastUsed ? (1 / (now - stat.lastUsed + 1)) : 0;
-                const score = (stat.count * 0.7) + (recency * 1000000 * 0.3);
-                return { ...app, score };
+                const c = getAppCounts(app.id, timestamps, now);
+                const score = c.c14d + (2 * c.c7d) + (4 * c.c24h);
+                return { ...app, score, counts: c };
             });
 
-            const sortedApps = [...appsWithScores].sort((a, b) => b.score - a.score);
-            
+            const sortedApps = [...appsWithScores].sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                if (b.counts.c30d !== a.counts.c30d) return b.counts.c30d - a.counts.c30d;
+                return a.title.localeCompare(b.title);
+            });
+
+            const containerWidth = arena.clientWidth || window.innerWidth;
+            const containerHeight = arena.clientHeight || (window.innerHeight - 80);
+
+            const isMobile = containerWidth < 768;
+
+            let minSize, maxSize, gap;
+
+            if (isMobile) {
+                const availableArea = containerWidth * containerHeight * 0.22;
+                const avgAreaPerBubble = availableArea / 13;
+                const baseDiameter = Math.sqrt(avgAreaPerBubble / Math.PI) * 2;
+                
+                minSize = Math.max(Math.round(baseDiameter * 0.75), 65);
+                maxSize = Math.min(Math.round(baseDiameter * 1.25), 100);
+                gap = 8;
+            } else {
+                minSize = 105;
+                maxSize = 150;
+                gap = 20;
+            }
+
             const scores = sortedApps.map(a => a.score);
             const maxScore = Math.max(...scores);
             const minScore = Math.min(...scores);
 
-            const isMobile = window.innerWidth < 768;
-            const isPortrait = window.innerHeight > window.innerWidth;
-
-            const baseSize = isMobile ? 96 : 115;
-
-            const stretchX = isPortrait ? 0.75 : 1.35;
-            const stretchY = isPortrait ? 1.45 : 0.75;
-
-            const centerRadius = isMobile ? 65 : 95;
-            const outerRadius = isMobile ? 155 : 230;
-
-            let centerAngles = [45, 135, 225, 315].map(a => a + (Math.random() * 15 - 7.5));
-            let outerAngles = [0, 45, 90, 135, 180, 225, 270, 315].map(a => a + (Math.random() * 20 - 10));
-
-            centerAngles = centerAngles.sort(() => Math.random() - 0.5);
-            outerAngles = outerAngles.sort(() => Math.random() - 0.5);
+            let slots;
+            if (isMobile) {
+                slots = [
+                    { x:  0.00, y: -0.12 },
+                    { x: -0.22, y: -0.22 },
+                    { x:  0.22, y: -0.22 },
+                    { x: -0.23, y: -0.02 },
+                    { x:  0.23, y: -0.02 },
+                    { x:  0.00, y:  0.06 },
+                    { x: -0.25, y:  0.14 },
+                    { x:  0.25, y:  0.14 },
+                    { x:  0.00, y: -0.30 },
+                    { x: -0.24, y:  0.25 },
+                    { x:  0.24, y:  0.25 },
+                    { x:  0.00, y:  0.22 },
+                    { x:  0.00, y:  0.31 }
+                ];
+            } else {
+                slots = [
+                    { x:  0.00, y: -0.02 },
+                    { x: -0.16, y: -0.16 },
+                    { x:  0.16, y: -0.16 },
+                    { x: -0.17, y:  0.12 },
+                    { x:  0.17, y:  0.12 },
+                    { x:  0.00, y:  0.20 },
+                    { x: -0.32, y: -0.02 },
+                    { x:  0.32, y: -0.02 },
+                    { x: -0.31, y: -0.22 },
+                    { x:  0.31, y: -0.22 },
+                    { x: -0.31, y:  0.20 },
+                    { x:  0.31, y:  0.20 },
+                    { x:  0.00, y: -0.30 }
+                ];
+            }
 
             const bubblesData = sortedApps.map((app, index) => {
                 const isTopFour = index < 4;
 
-                let factor = 1.0;
+                let factor = 0.5;
                 if (maxScore !== minScore) {
-                    factor = 0.85 + ((app.score - minScore) / (maxScore - minScore)) * 0.55;
+                    factor = (app.score - minScore) / (maxScore - minScore);
                 } else if (maxScore > 0) {
-                    factor = 1.15;
+                    factor = 1.0;
                 }
 
-                const finalSize = Math.round(baseSize * factor);
-
-                let posX, posY;
-                if (isTopFour) {
-                    const angleRad = (centerAngles[index] * Math.PI) / 180;
-                    posX = Math.cos(angleRad) * centerRadius * stretchX;
-                    posY = Math.sin(angleRad) * centerRadius * stretchY;
-                } else {
-                    const angleRad = (outerAngles[(index - 4) % outerAngles.length] * Math.PI) / 180;
-                    posX = Math.cos(angleRad) * outerRadius * stretchX;
-                    posY = Math.sin(angleRad) * outerRadius * stretchY;
-                }
+                const finalSize = Math.round(minSize + factor * (maxSize - minSize));
+                const pos = slots[index] || { x: 0, y: 0 };
 
                 return {
                     app,
                     isTopFour,
                     size: finalSize,
                     radius: finalSize / 2,
-                    x: posX,
-                    y: posY
+                    x: pos.x * containerWidth,
+                    y: pos.y * containerHeight,
+                    rank: index
                 };
             });
 
-            for (let step = 0; step < 12; step++) {
+            for (let step = 0; step < 80; step++) {
+                for (let i = 0; i < bubblesData.length; i++) {
+                    const b = bubblesData[i];
+                    const pullFactor = 0.03 + (13 - b.rank) * 0.003;
+                    b.x -= b.x * pullFactor;
+                    b.y -= b.y * pullFactor;
+                }
+
                 for (let i = 0; i < bubblesData.length; i++) {
                     for (let j = i + 1; j < bubblesData.length; j++) {
                         const b1 = bubblesData[i];
@@ -457,28 +566,44 @@
 
                         const dx = b2.x - b1.x;
                         const dy = b2.y - b1.y;
-                        const dist = Math.hypot(dx, dy);
-                        const minDist = b1.radius + b2.radius + 8;
+                        const dist = Math.hypot(dx, dy) || 0.1;
+                        const minDist = b1.radius + b2.radius + gap;
 
                         if (dist < minDist) {
                             const overlap = minDist - dist;
-                            const forceX = (dx / (dist || 1)) * (overlap * 0.5);
-                            const forceY = (dy / (dist || 1)) * (overlap * 0.5);
+                            const weight1 = b2.radius / (b1.radius + b2.radius);
+                            const weight2 = b1.radius / (b1.radius + b2.radius);
 
-                            b1.x -= forceX;
-                            b1.y -= forceY;
-                            b2.x += forceX;
-                            b2.y += forceY;
+                            const forceX = (dx / dist) * overlap;
+                            const forceY = (dy / dist) * overlap;
+
+                            b1.x -= forceX * weight1;
+                            b1.y -= forceY * weight1;
+                            b2.x += forceX * weight2;
+                            b2.y += forceY * weight2;
                         }
                     }
                 }
             }
 
+            const padding = 24;
+            const minX = -containerWidth / 2 + padding;
+            const maxX = containerWidth / 2 - padding;
+            const minY = -containerHeight / 2 + padding;
+            const maxY = containerHeight / 2 - padding;
+
+            bubblesData.forEach(b => {
+                if (b.x - b.radius < minX) b.x = minX + b.radius;
+                if (b.x + b.radius > maxX) b.x = maxX - b.radius;
+                if (b.y - b.radius < minY) b.y = minY + b.radius;
+                if (b.y + b.radius > maxY) b.y = maxY - b.radius;
+            });
+
             bubblesData.forEach(b => {
                 const wrapper = document.createElement("div");
                 wrapper.className = "bubble-wrapper";
                 if (b.isTopFour) wrapper.classList.add("top-favorit");
-                wrapper.style.transform = `translate(${b.x}px, ${b.y}px)`;
+                wrapper.style.transform = `translate(${Math.round(b.x)}px, ${Math.round(b.y)}px)`;
 
                 const bubble = document.createElement("a");
                 bubble.href = b.app.url;
@@ -520,7 +645,6 @@
         window.addEventListener("resize", renderMenu);
     </script>
 
-    <!-- PWA Fix: Verhindert das Öffnen der Safari-Bedienleisten bei Linkklicks -->
     <script>
         document.addEventListener('click', function(e) {
             var a = e.target.closest('a');
