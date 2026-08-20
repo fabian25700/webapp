@@ -44,7 +44,16 @@
 
         * { box-sizing: border-box; }
 
-        html, body {
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg-color-1);
+        }
+
+        body {
             margin: 0;
             padding: 0;
             width: 100%;
@@ -54,16 +63,19 @@
             background-attachment: fixed;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
             -webkit-tap-highlight-color: transparent;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
 
         .app-container {
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
-            height: 100dvh;
+            height: 100%;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         header {
@@ -91,7 +103,7 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
-            padding-bottom: env(safe-area-inset-bottom);
+            padding-bottom: max(env(safe-area-inset-bottom), 10px);
         }
 
         #bubble-arena {
@@ -187,7 +199,7 @@
 
         .info-btn {
             position: absolute;
-            bottom: 20px;
+            bottom: max(env(safe-area-inset-bottom), 16px);
             right: 20px;
             width: 42px;
             height: 42px;
@@ -355,6 +367,11 @@
             { id: "hopping", title: "Hopping", icon: "⚽", url: "hopping.html" }
         ];
 
+        function setFixedAppHeight() {
+            const vh = window.innerHeight;
+            document.body.style.height = `${vh}px`;
+        }
+
         function getTimestamps() {
             const stored = localStorage.getItem("fabians_app_timestamps");
             if (!stored) {
@@ -449,6 +466,7 @@
         }
 
         function renderMenu() {
+            setFixedAppHeight();
             const timestamps = getTimestamps();
             const now = Date.now();
             const arena = document.getElementById("bubble-arena");
@@ -467,21 +485,15 @@
             });
 
             const containerWidth = arena.clientWidth || window.innerWidth;
-            const containerHeight = arena.clientHeight || window.innerHeight;
+            const containerHeight = arena.clientHeight || (window.innerHeight - 80);
 
             const isMobile = containerWidth < 768;
 
-            let minSize, maxSize, gap;
+            let minSize = 80;
+            let maxSize = 120;
+            let gap = 12;
 
-            if (isMobile) {
-                const availableArea = containerWidth * containerHeight * 0.22;
-                const avgAreaPerBubble = availableArea / 13;
-                const baseDiameter = Math.sqrt(avgAreaPerBubble / Math.PI) * 2;
-                
-                minSize = Math.max(Math.round(baseDiameter * 0.75), 65);
-                maxSize = Math.min(Math.round(baseDiameter * 1.25), 100);
-                gap = 8;
-            } else {
+            if (!isMobile) {
                 minSize = 105;
                 maxSize = 150;
                 gap = 20;
@@ -585,7 +597,7 @@
                 }
             }
 
-            const padding = 24;
+            const padding = 20;
             const minX = -containerWidth / 2 + padding;
             const maxX = containerWidth / 2 - padding;
             const minY = -containerHeight / 2 + padding;
@@ -642,6 +654,7 @@
 
         window.addEventListener("DOMContentLoaded", renderMenu);
         window.addEventListener("resize", renderMenu);
+        window.addEventListener("orientationchange", renderMenu);
     </script>
 
     <script>
