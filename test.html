@@ -463,31 +463,28 @@
 
             const isMobile = containerWidth < 768;
 
-            const baseSize = isMobile ? Math.min(containerWidth, containerHeight) * 0.16 : 110;
-            const minSize = Math.max(baseSize * 0.75, 52);
-            const maxSize = baseSize * 1.3;
+            const baseSize = isMobile ? 88 : 115;
+            const minSize = isMobile ? 68 : 85;
+            const maxSize = isMobile ? 112 : 145;
 
             const scores = sortedApps.map(a => a.score);
             const maxScore = Math.max(...scores);
             const minScore = Math.min(...scores);
 
-            const centerLayout = [
-                { x: -0.11, y: -0.09 },
-                { x:  0.11, y: -0.09 },
-                { x: -0.11, y:  0.09 },
-                { x:  0.11, y:  0.09 }
-            ];
-
-            const outerLayout = [
-                { x:  0.00, y: -0.22 },
-                { x:  0.22, y: -0.19 },
-                { x:  0.25, y:  0.00 },
-                { x:  0.22, y:  0.19 },
-                { x:  0.00, y:  0.22 },
-                { x: -0.22, y:  0.19 },
-                { x: -0.25, y:  0.00 },
-                { x: -0.22, y: -0.19 },
-                { x:  0.00, y: -0.11 }
+            const slots = [
+                { x:  0.00, y: -0.05 },
+                { x: -0.15, y: -0.16 },
+                { x:  0.15, y: -0.16 },
+                { x: -0.16, y:  0.06 },
+                { x:  0.16, y:  0.06 },
+                { x:  0.00, y:  0.17 },
+                { x: -0.31, y: -0.06 },
+                { x:  0.31, y: -0.06 },
+                { x: -0.28, y: -0.25 },
+                { x:  0.28, y: -0.25 },
+                { x: -0.30, y:  0.16 },
+                { x:  0.30, y:  0.16 },
+                { x:  0.00, y: -0.29 }
             ];
 
             const bubblesData = sortedApps.map((app, index) => {
@@ -502,12 +499,7 @@
 
                 const finalSize = Math.round(minSize + factor * (maxSize - minSize));
 
-                let pos;
-                if (isTopFour) {
-                    pos = centerLayout[index];
-                } else {
-                    pos = outerLayout[(index - 4) % outerLayout.length];
-                }
+                const pos = slots[index] || { x: 0, y: 0 };
 
                 return {
                     app,
@@ -515,18 +507,19 @@
                     size: finalSize,
                     radius: finalSize / 2,
                     x: pos.x * containerWidth,
-                    y: pos.y * containerHeight
+                    y: pos.y * containerHeight,
+                    rank: index
                 };
             });
 
-            const gap = isMobile ? 3 : 6;
-            const centerAttraction = 0.12;
+            const gap = isMobile ? 4 : 8;
 
-            for (let step = 0; step < 60; step++) {
+            for (let step = 0; step < 80; step++) {
                 for (let i = 0; i < bubblesData.length; i++) {
                     const b = bubblesData[i];
-                    b.x -= b.x * centerAttraction;
-                    b.y -= b.y * centerAttraction;
+                    const pullFactor = 0.05 + (13 - b.rank) * 0.005;
+                    b.x -= b.x * pullFactor;
+                    b.y -= b.y * pullFactor;
                 }
 
                 for (let i = 0; i < bubblesData.length; i++) {
@@ -541,19 +534,22 @@
 
                         if (dist < minDist) {
                             const overlap = minDist - dist;
-                            const forceX = (dx / dist) * (overlap * 0.5);
-                            const forceY = (dy / dist) * (overlap * 0.5);
+                            const weight1 = b2.radius / (b1.radius + b2.radius);
+                            const weight2 = b1.radius / (b1.radius + b2.radius);
 
-                            b1.x -= forceX;
-                            b1.y -= forceY;
-                            b2.x += forceX;
-                            b2.y += forceY;
+                            const forceX = (dx / dist) * overlap;
+                            const forceY = (dy / dist) * overlap;
+
+                            b1.x -= forceX * weight1;
+                            b1.y -= forceY * weight1;
+                            b2.x += forceX * weight2;
+                            b2.y += forceY * weight2;
                         }
                     }
                 }
             }
 
-            const padding = 10;
+            const padding = 8;
             const minX = -containerWidth / 2 + padding;
             const maxX = containerWidth / 2 - padding;
             const minY = -containerHeight / 2 + padding;
