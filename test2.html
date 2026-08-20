@@ -52,19 +52,12 @@
 
         html {
             height: 100%;
-            /* gleicher Verlauf wie body statt nur Volltonfarbe:
-               so ist es egal, wenn iOS Safari beim Ein-/Ausblenden der
-               Adressleiste kurzzeitig mehr html- als body-Fläche zeigt
-               (das war der dunkelgraue Streifen unten) */
-            background: var(--bg);
-            background-attachment: fixed;
+            background: var(--bg-color-1);
             overscroll-behavior: none;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
-            background: var(--bg);
-            background-attachment: fixed;
             margin: 0;
             height: 100vh;
             height: 100dvh;
@@ -73,6 +66,27 @@
             display: flex;
             flex-direction: column;
             -webkit-tap-highlight-color: transparent;
+            position: relative;
+        }
+
+        /* Echte fixe Hintergrund-Ebene statt html/body-Hintergrund:
+           position:fixed + inset:0 deckt auf iOS zuverlässig den
+           GESAMTEN sichtbaren Bereich ab (genau wie .modal-overlay
+           das schon tut) - inklusive Notch oben und Home-Indicator
+           unten. Ein normaler html/body-Hintergrund folgt dagegen
+           der vh/dvh-Layoutgröße, die diese Sicherheitsbereiche auf
+           iOS nicht zuverlässig einschließt - das waren die weißen
+           Streifen oben/unten. */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg);
+            z-index: -1;
+            pointer-events: none;
         }
 
         /* ==========================================================
