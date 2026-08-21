@@ -1,7 +1,37 @@
 const ROUTINE_CONFIG = {
+    "Schlafroutine": {
+        icon: "🛌",
+        home: [
+            "nichts essen nach 20 Uhr",
+            "Magnesium nehmen",
+            "Handy Schlafmodus + anderer Raum",
+            "22 Uhr im Bett",
+            "lesen vor schlafen",
+            "6 Uhr ohne Snooze aufstehen",
+            "5Min nach aufstehen Tageslicht"
+        ],
+        sally: [
+            "nichts essen nach 20 Uhr",
+            "Magnesium nehmen",
+            "22:30 im Bett",
+            "Handy Schlafmodus + zu Kleidung",
+            "ohne Snooze aufstehen",
+            "5Min nach aufstehen Tageslicht"
+        ],
+        reise: [
+            "nichts essen nach 20 Uhr",
+            "Handy Schlafmodus + zu Kleidung",
+            "ohne Snooze aufstehen"
+        ],
+        cheater: {
+            home: "Krank",
+            sally: "Krank",
+            reise: "Krank"
+        }
+    },
     "Morgenroutine": {
         icon: "☀️",
-        zuhause: [
+        home: [
             "Wiegen",
             "alle Rollladen / Fenster",
             "Schlafzimmer aufräumen",
@@ -15,7 +45,17 @@ const ROUTINE_CONFIG = {
             "Mails checken",
             "bis 8:00 keine Geräte\n(außer Sally, To-Do’s, Routine)"
         ],
-        unterwegs: [
+        sally: [
+            "Wasser trinken",
+            "Zähne putzen",
+            "duschen / Gesicht waschen",
+            "Stoisches Kapitel",
+            "Whoop checken",
+            "Ziele + ToDo’s des Tages anschauen",
+            "Mails checken",
+            "bis 8:00 keine Geräte\n(außer To-Do’s, Routine)"
+        ],
+        reise: [
             "Schlafplatz machen",
             "alle Rollladen / Fenster",
             "Wasser trinken",
@@ -26,48 +66,84 @@ const ROUTINE_CONFIG = {
             "Ziele + ToDo’s des Tages anschauen",
             "Mails checken",
             "bis 8:00 keine Geräte\n(außer Sally, To-Do’s, Routine)"
-        ]
+        ],
+        cheater: {
+            home: "Krank",
+            sally: "Krank",
+            reise: "Krank"
+        }
     },
     "Sportroutine": {
         icon: "🏃‍♂️",
-        zuhause: [
+        home: [
             "Sporteinheit aus Notizen gemacht",
             "mind. 2x 12 Wadenheber an Treppe"
         ],
-        unterwegs: [
+        sally: [
             "8.000 Schritte gemacht"
-        ]
+        ],
+        reise: [
+            "8.000 Schritte gemacht"
+        ],
+        cheater: {
+            home: "Krank / Verletzt",
+            sally: "Krank / Verletzt",
+            reise: "Krank / Verletzt"
+        }
     },
     "Gesundheitsroutine": {
         icon: "🥗",
-        zuhause: [
+        home: [
             "nichts essen vor 8 Uhr",
             "Tabletten genommen",
-            "Creatin genommen"
+            "Creatin genommen",
+            "an Gesundheit arbeiten (Notion)"
         ],
-        unterwegs: [
+        sally: [
             "nichts essen vor 8 Uhr",
-            "3 Liter Wasser getrunken"
-        ]
+            "Tabletten genommen"
+        ],
+        reise: [
+            "nichts essen vor 8 Uhr",
+            "Wasser tracken"
+        ],
+        cheater: {
+            home: "16h außer Haus",
+            sally: "keinen!",
+            reise: "keinen!"
+        }
     },
     "Fokusroutine": {
         icon: "🧠",
-        zuhause: [
-            "To-Do’s heute leer"
+        home: [
+            "To-Do’s heute leer",
+            "bis 12:30 Uhr nicht stören an",
+            "an perfekter Wohnung arbeiten",
+            "Wohnung putzen",
+            "an To-Do’s ohne Deadline arbeiten"
         ],
-        unterwegs: [
-            "bis 12:30 Uhr nicht stören an"
-        ]
+        sally: [
+            "To-Do’s heute leer",
+            "bis 12:30 Uhr nicht stören an",
+            "an To-Do’s ohne Deadline arbeiten"
+        ],
+        reise: [
+            "bis 10:00 Uhr nicht stören an"
+        ],
+        cheater: {
+            home: "Krank",
+            sally: "Krank",
+            reise: "keinen!"
+        }
     },
     "Abendroutine": {
         icon: "🌙",
-        zuhause: [
+        home: [
             "morgigen Kalender und Aufgaben",
             "Finanzen und Habits anschauen",
-            "Küche aufräumen",
+            "Wohnung aufräumen",
             "Wasser parat",
             "Wecker stellen",
-            "komplette Wohnung aufräumen",
             "Kleidung rauslegen",
             "alle Rollladen und Fenster",
             "Zungenscharber / Zahnseide / Mundspülung",
@@ -75,7 +151,18 @@ const ROUTINE_CONFIG = {
             "Nasen dusche",
             "warm duschen / Gesicht waschen"
         ],
-        unterwegs: [
+        sally: [
+            "morgigen Kalender und Aufgaben",
+            "Finanzen und Habits anschauen",
+            "Wecker stellen",
+            "Meine Sachen aufräumen",
+            "Wasser parat",
+            "Kleidung rauslegen",
+            "Rollladen und Fenster",
+            "Zähne putzen",
+            "warm duschen / Gesicht waschen"
+        ],
+        reise: [
             "morgigen Kalender und Aufgaben",
             "Finanzen und Habits anschauen",
             "Wasser parat",
@@ -85,26 +172,11 @@ const ROUTINE_CONFIG = {
             "Rollladen und Fenster",
             "Zähne putzen",
             "warm duschen / Gesicht waschen"
-        ]
-    },
-    "Schlafroutine": {
-        icon: "🛌",
-        zuhause: [
-            "nichts essen nach 20 Uhr",
-            "Magnesium nehmen",
-            "22 Uhr im Bett",
-            "lesen vor schlafen",
-            "Handy Schlafmodus + anderer Raum",
-            "6 Uhr ohne Snooze aufstehen",
-            "5Min nach aufstehen Tageslicht"
         ],
-        unterwegs: [
-            "nichts essen nach 20 Uhr",
-            "Magnesium nehmen",
-            "22:30 im Bett",
-            "Handy Schlafmodus + zu Kleidung",
-            "ohne Snooze aufstehen",
-            "5Min nach aufstehen Tageslicht"
-        ]
+        cheater: {
+            home: "Krank",
+            sally: "Krank",
+            reise: "Krank"
+        }
     }
 };
