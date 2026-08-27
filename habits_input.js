@@ -80,7 +80,8 @@ const ROUTINE_CONFIG = {
             "mind. 2x 12 Wadenheber an Treppe"
         ],
         sally: [
-            "8.000 Schritte gemacht"
+            "Sporteinheit aus Notizen gemacht",
+            "mind. 2x 12 Wadenheber an Treppe"
         ],
         reise: [
             "8.000 Schritte gemacht"
