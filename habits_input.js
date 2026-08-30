@@ -8,7 +8,7 @@ const ROUTINE_CONFIG = {
             "22 Uhr im Bett",
             "lesen vor schlafen",
             "6 Uhr ohne Snooze aufstehen",
-            "5Min nach aufstehen Tageslicht"
+            "5 Min nach aufstehen Tageslicht / frische Luft"
         ],
         sally: [
             "nichts essen nach 20 Uhr",
@@ -16,7 +16,7 @@ const ROUTINE_CONFIG = {
             "22:30 im Bett",
             "Handy Schlafmodus + zu Kleidung",
             "ohne Snooze aufstehen",
-            "5Min nach aufstehen Tageslicht"
+            "5 Min nach aufstehen Tageslicht / frische Luft"
         ],
         reise: [
             "nichts essen nach 20 Uhr",
@@ -109,7 +109,7 @@ const ROUTINE_CONFIG = {
             "Wasser tracken"
         ],
         cheater: {
-            home: "16h außer Haus",
+            home: "14h außer Haus",
             sally: "keinen!",
             reise: "keinen!"
         }
@@ -126,6 +126,8 @@ const ROUTINE_CONFIG = {
         sally: [
             "To-Do’s heute leer",
             "bis 12:30 Uhr nicht stören an",
+            "an digitaler Ordnung arbeiten",
+            "10 Minuten lesen",
             "an To-Do’s ohne Deadline arbeiten"
         ],
         reise: [
