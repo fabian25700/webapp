@@ -74,7 +74,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 10px;
         }
 
         .header-top { 
@@ -125,16 +125,14 @@
             color: var(--text-primary);
         }
 
-        main {
-            width: 100%;
-            max-width: 420px;
+        /* Zweistufiger Toggle Switch */
+        .mode-toggle-group {
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            margin-top: 60px;
+            gap: 6px;
+            align-items: center;
         }
 
-        /* Toggle Switch Styling */
         .mode-toggle-container {
             display: flex;
             justify-content: center;
@@ -145,9 +143,9 @@
         .toggle-btn {
             background: var(--surface);
             border: 1px solid var(--border);
-            padding: 6px 16px;
+            padding: 5px 14px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: 800;
             color: var(--text-secondary);
             cursor: pointer;
@@ -158,6 +156,15 @@
             background: var(--accent);
             color: #ffffff;
             border-color: var(--accent);
+        }
+
+        main {
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 95px;
         }
 
         .selection-card {
@@ -223,6 +230,10 @@
         
         .rank-btn.p4 { border-color: rgba(231, 76, 60, 0.4); }
         .rank-btn.p4 .rank-num { color: var(--danger); }
+
+        .rank-btn.full-width {
+            grid-column: span 2;
+        }
 
         /* Lock Screen Overlay */
         #lock-screen {
@@ -303,54 +314,25 @@
         </div>
         <div class="header-title">Pomodoro</div>
     </div>
-    <div class="mode-toggle-container">
-        <button id="toggle-work" class="toggle-btn active" onclick="switchMode('WORK')">Arbeitszeit</button>
-        <button id="toggle-free" class="toggle-btn" onclick="switchMode('FREE')">Freizeit</button>
+    
+    <!-- Zweistufiger Schalter -->
+    <div class="mode-toggle-group">
+        <div class="mode-toggle-container">
+            <button id="toggle-cr" class="toggle-btn active" onclick="setSystem('CR')">CR</button>
+            <button id="toggle-fm" class="toggle-btn" onclick="setSystem('FM')">FM</button>
+        </div>
+        <div class="mode-toggle-container">
+            <button id="toggle-work" class="toggle-btn active" onclick="setCategory('WORK')">Arbeitszeit</button>
+            <button id="toggle-free" class="toggle-btn" onclick="setCategory('FREE')">Freizeit</button>
+        </div>
     </div>
 </header>
 
 <main>
-    <div id="card-work" class="selection-card">
-        <div class="card-title">Arbeitszeit Fokus</div>
-        <div class="rank-grid">
-            <div class="rank-btn p1" onclick="startLockoutByConfig('WORK', 0)">
-                <span class="rank-num" id="work-label-0">Option 1</span>
-                <span class="rank-penalty" id="work-sub-0">5 Min Sperre</span>
-            </div>
-            <div class="rank-btn" onclick="startLockoutByConfig('WORK', 1)">
-                <span class="rank-num" id="work-label-1">Option 2</span>
-                <span class="rank-penalty" id="work-sub-1">10 Min Sperre</span>
-            </div>
-            <div class="rank-btn" onclick="startLockoutByConfig('WORK', 2)">
-                <span class="rank-num" id="work-label-2">Option 3</span>
-                <span class="rank-penalty" id="work-sub-2">15 Min Sperre</span>
-            </div>
-            <div class="rank-btn p4" onclick="startLockoutByConfig('WORK', 3)">
-                <span class="rank-num" id="work-label-3">Option 4</span>
-                <span class="rank-penalty" id="work-sub-3">20 Min Sperre</span>
-            </div>
-        </div>
-    </div>
-
-    <div id="card-free" class="selection-card" style="display: none;">
-        <div class="card-title">Freizeit Fokus</div>
-        <div class="rank-grid">
-            <div class="rank-btn p1" onclick="startLockoutByConfig('FREE', 0)">
-                <span class="rank-num" id="free-label-0">Option 1</span>
-                <span class="rank-penalty" id="free-sub-0">5 Min Sperre</span>
-            </div>
-            <div class="rank-btn" onclick="startLockoutByConfig('FREE', 1)">
-                <span class="rank-num" id="free-label-1">Option 2</span>
-                <span class="rank-penalty" id="free-sub-1">10 Min Sperre</span>
-            </div>
-            <div class="rank-btn" onclick="startLockoutByConfig('FREE', 2)">
-                <span class="rank-num" id="free-label-2">Option 3</span>
-                <span class="rank-penalty" id="free-sub-2">15 Min Sperre</span>
-            </div>
-            <div class="rank-btn p4" onclick="startLockoutByConfig('FREE', 3)">
-                <span class="rank-num" id="free-label-3">Option 4</span>
-                <span class="rank-penalty" id="free-sub-3">20 Min Sperre</span>
-            </div>
+    <div id="selection-card" class="selection-card">
+        <div class="card-title" id="card-title-text">Clash Royale Platzierung</div>
+        <div class="rank-grid" id="grid-container">
+            <!-- Dynamisch generierte Buttons -->
         </div>
     </div>
 </main>
@@ -365,72 +347,122 @@
 
 <script>
     /* ==========================================================================
-       ZENTRALE KONFIGURATION: Hier können alle Zeiten & Tasks bearbeitet werden
+       ZENTRALE KONFIGURATION DER 4 MÖGLICHKEITEN
        ========================================================================== */
     const CONFIG = {
-        WORK: [
-            { label: "Kurzsprint", minutes: 15, task: "Habit / schnelle Aufgabe erledigen" },
-            { label: "Fokus-Block", minutes: 25, task: "Wichtige Aufgabe bearbeiten" },
-            { label: "Intensiv",    minutes: 45, task: "Deep Work Session durchziehen" },
-            { label: "Marathon",    minutes: 60, task: "Komplexes Projekt ohne Ablenkung" }
-        ],
-        FREE: [
-            { label: "Power Nap",   minutes: 10, task: "Kurz entspannen & Akku aufladen" },
-            { label: "Pause",       minutes: 15, task: "Kaffee / Tee trinken & durchatmen" },
-            { label: "Aktivpause",  minutes: 20, task: "Spaziergang oder leichtes Stretching" },
-            { label: "Feierabend",  minutes: 30, task: "Abschalten und Beine hochlegen" }
-        ]
+        CR: {
+            WORK: {
+                title: "Clash Royale — Arbeitszeit",
+                items: [
+                    { label: "Platz 1", minutes: 5,  task: "Habit / Aufgabe von dieser Woche", isP1: true },
+                    { label: "Platz 2", minutes: 10, task: "Habit / Aufgabe von heute oder morgen" },
+                    { label: "Platz 3", minutes: 15, task: "Habit / Aufgabe von heute" },
+                    { label: "Platz 4", minutes: 20, task: "Habit / wichtigste Aufgabe von heute", isP4: true }
+                ]
+            },
+            FREE: {
+                title: "Clash Royale — Freizeit",
+                items: [
+                    { label: "Platz 1", minutes: 5,  task: "Entspannen / 5 Min Pause", isP1: true },
+                    { label: "Platz 2", minutes: 10, task: "Kurzer Spaziergang / Dehnen" },
+                    { label: "Platz 3", minutes: 15, task: "Snack-Pause & Durchatmen" },
+                    { label: "Platz 4", minutes: 20, task: "Freie Zeit genießen", isP4: true }
+                ]
+            }
+        },
+        FM: {
+            WORK: {
+                title: "FM Rating — Arbeitszeit",
+                items: [
+                    { label: "Rating 95-99", seconds: 30, type: "congrats", sub: "Kein Timer", isP1: true, fullWidth: true },
+                    { label: "Rating 85-94", minutes: 5,  task: "Habit / Aufgabe von dieser Woche", isP1: true },
+                    { label: "Rating 75-84", minutes: 10, task: "Habit / Aufgabe von heute oder morgen" },
+                    { label: "Rating 65-74", minutes: 15, task: "Habit / Aufgabe von heute" },
+                    { label: "Rating 50-64", minutes: 20, task: "Habit / wichtigste Aufgabe von heute", isP4: true }
+                ]
+            },
+            FREE: {
+                title: "FM Rating — Freizeit",
+                items: [
+                    { label: "Rating 95-99", seconds: 30, type: "congrats", sub: "Kein Timer", isP1: true, fullWidth: true },
+                    { label: "Rating 85-94", minutes: 5,  task: "Entspannen / 5 Min Pause", isP1: true },
+                    { label: "Rating 75-84", minutes: 10, task: "Kurzer Spaziergang / Dehnen" },
+                    { label: "Rating 65-74", minutes: 15, task: "Snack-Pause & Durchatmen" },
+                    { label: "Rating 50-64", minutes: 20, task: "Freie Zeit genießen", isP4: true }
+                ]
+            }
+        }
     };
+
+    let currentSystem = 'CR';
+    let currentCategory = 'WORK';
+    let timerInterval = null;
 
     document.addEventListener('gesturestart', function (e) {
         e.preventDefault();
     });
 
-    let timerInterval = null;
+    function setSystem(sys) {
+        currentSystem = sys;
+        document.getElementById('toggle-cr').classList.toggle('active', sys === 'CR');
+        document.getElementById('toggle-fm').classList.toggle('active', sys === 'FM');
+        renderGrid();
+    }
 
-    function renderUI() {
-        CONFIG.WORK.forEach((item, index) => {
-            const labelEl = document.getElementById(`work-label-${index}`);
-            const subEl = document.getElementById(`work-sub-${index}`);
-            if (labelEl) labelEl.innerText = item.label;
-            if (subEl) subEl.innerText = `${item.minutes} Min Sperre`;
-        });
+    function setCategory(cat) {
+        currentCategory = cat;
+        document.getElementById('toggle-work').classList.toggle('active', cat === 'WORK');
+        document.getElementById('toggle-free').classList.toggle('active', cat === 'FREE');
+        renderGrid();
+    }
 
-        CONFIG.FREE.forEach((item, index) => {
-            const labelEl = document.getElementById(`free-label-${index}`);
-            const subEl = document.getElementById(`free-sub-${index}`);
-            if (labelEl) labelEl.innerText = item.label;
-            if (subEl) subEl.innerText = `${item.minutes} Min Sperre`;
+    function renderGrid() {
+        const data = CONFIG[currentSystem][currentCategory];
+        document.getElementById('card-title-text').innerText = data.title;
+
+        const grid = document.getElementById('grid-container');
+        grid.innerHTML = '';
+
+        data.items.forEach((item, idx) => {
+            const btn = document.createElement('div');
+            let classes = ['rank-btn'];
+            if (item.isP1) classes.push('p1');
+            if (item.isP4) classes.push('p4');
+            if (item.fullWidth) classes.push('full-width');
+            btn.className = classes.join(' ');
+
+            const subText = item.sub ? item.sub : `${item.minutes} Min Sperre`;
+
+            btn.innerHTML = `
+                <span class="rank-num">${item.label}</span>
+                <span class="rank-penalty">${subText}</span>
+            `;
+
+            btn.onclick = () => {
+                if (item.type === 'congrats') {
+                    startCongrats(item.seconds);
+                } else {
+                    startLockout(item.minutes, item.task);
+                }
+            };
+
+            grid.appendChild(btn);
         });
     }
 
-    function switchMode(mode) {
-        const workCard = document.getElementById('card-work');
-        const freeCard = document.getElementById('card-free');
-        const workBtn = document.getElementById('toggle-work');
-        const freeBtn = document.getElementById('toggle-free');
-
-        if (mode === 'WORK') {
-            workCard.style.display = 'flex';
-            freeCard.style.display = 'none';
-            workBtn.classList.add('active');
-            freeBtn.classList.remove('active');
-        } else {
-            workCard.style.display = 'none';
-            freeCard.style.display = 'flex';
-            workBtn.classList.remove('active');
-            freeBtn.classList.add('active');
-        }
-    }
-
-    function startLockoutByConfig(mode, index) {
-        const selected = CONFIG[mode][index];
-        if (!selected) return;
-
-        const endTime = Date.now() + selected.minutes * 60 * 1000;
+    function startLockout(minutes, task) {
+        const endTime = Date.now() + minutes * 60 * 1000;
         localStorage.setItem('pomodoro_end_time', endTime);
         localStorage.setItem('pomodoro_type', 'lockout');
-        localStorage.setItem('pomodoro_task', selected.task);
+        localStorage.setItem('pomodoro_task', task);
+        
+        runTimer();
+    }
+
+    function startCongrats(seconds) {
+        const endTime = Date.now() + seconds * 1000;
+        localStorage.setItem('pomodoro_end_time', endTime);
+        localStorage.setItem('pomodoro_type', 'congrats');
         
         runTimer();
     }
@@ -491,13 +523,11 @@
         document.title = `(${timeString}) Pomodoro`;
     }
 
-    // Beim Laden der Seite UI rendern und prüfen, ob noch ein Timer läuft
     window.addEventListener('load', () => {
-        renderUI();
+        renderGrid();
         runTimer();
     });
 
-    // Sobald der Tab wieder aktiv wird (z. B. nach Standby oder Tab-Wechsel) sofort aktualisieren
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
             runTimer();
