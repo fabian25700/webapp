@@ -70,12 +70,11 @@
             z-index: 100;
             background: var(--bg);
             padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
-            border-bottom: 1px solid var(--border-light);
-            backdrop-filter: blur(12px); 
-            -webkit-backdrop-filter: blur(12px);
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            gap: 10px;
         }
 
         .header-top { 
@@ -126,29 +125,27 @@
             color: var(--text-primary);
         }
 
-        main {
-            width: 100%;
-            max-width: 420px;
+        /* Zweistufiger Toggle Switch */
+        .mode-toggle-group {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 6px;
+            align-items: center;
         }
 
-        /* Toggle Switch Styling */
         .mode-toggle-container {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 8px;
-            margin-top: 10px;
         }
 
         .toggle-btn {
             background: var(--surface);
             border: 1px solid var(--border);
-            padding: 6px 16px;
+            padding: 5px 14px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.78rem;
             font-weight: 800;
             color: var(--text-secondary);
             cursor: pointer;
@@ -159,6 +156,15 @@
             background: var(--accent);
             color: #ffffff;
             border-color: var(--accent);
+        }
+
+        main {
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 95px;
         }
 
         .selection-card {
@@ -185,10 +191,6 @@
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
-        }
-
-        .rank-grid.fm-grid {
-            grid-template-columns: repeat(2, 1fr);
         }
 
         .rank-btn {
@@ -312,61 +314,25 @@
         </div>
         <div class="header-title">Pomodoro</div>
     </div>
+    
+    <!-- Zweistufiger Schalter -->
+    <div class="mode-toggle-group">
+        <div class="mode-toggle-container">
+            <button id="toggle-cr" class="toggle-btn active" onclick="setSystem('CR')">CR</button>
+            <button id="toggle-copero" class="toggle-btn" onclick="setSystem('Copero')">Copero</button>
+        </div>
+        <div class="mode-toggle-container">
+            <button id="toggle-work" class="toggle-btn active" onclick="setCategory('WORK')">Arbeitszeit</button>
+            <button id="toggle-free" class="toggle-btn" onclick="setCategory('FREE')">Freizeit</button>
+        </div>
+    </div>
 </header>
 
 <main>
-    <div class="mode-toggle-container">
-        <button id="toggle-cr" class="toggle-btn active" onclick="switchMode('CR')">CR</button>
-        <button id="toggle-fm" class="toggle-btn" onclick="switchMode('FM')">FM</button>
-    </div>
-
-    <!-- Clash Royale Selection Card -->
-    <div id="card-cr" class="selection-card">
-        <div class="card-title">Clash Royale Platzierung</div>
-        <div class="rank-grid">
-            <div class="rank-btn p1" onclick="startLockout(5)">
-                <span class="rank-num">Platz 1</span>
-                <span class="rank-penalty">5 Min Sperre</span>
-            </div>
-            <div class="rank-btn" onclick="startLockout(10)">
-                <span class="rank-num">Platz 2</span>
-                <span class="rank-penalty">10 Min Sperre</span>
-            </div>
-            <div class="rank-btn" onclick="startLockout(15)">
-                <span class="rank-num">Platz 3</span>
-                <span class="rank-penalty">15 Min Sperre</span>
-            </div>
-            <div class="rank-btn p4" onclick="startLockout(20)">
-                <span class="rank-num">Platz 4</span>
-                <span class="rank-penalty">20 Min Sperre</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- FM Selection Card -->
-    <div id="card-fm" class="selection-card" style="display: none;">
-        <div class="card-title">FM Rating</div>
-        <div class="rank-grid fm-grid">
-            <div class="rank-btn p1 full-width" onclick="startCongrats(30)">
-                <span class="rank-num">Rating 95-99</span>
-                <span class="rank-penalty">Kein Timer</span>
-            </div>
-            <div class="rank-btn p1" onclick="startLockout(5)">
-                <span class="rank-num">Rating 85-94</span>
-                <span class="rank-penalty">5 Min Sperre</span>
-            </div>
-            <div class="rank-btn" onclick="startLockout(10)">
-                <span class="rank-num">Rating 75-84</span>
-                <span class="rank-penalty">10 Min Sperre</span>
-            </div>
-            <div class="rank-btn" onclick="startLockout(15)">
-                <span class="rank-num">Rating 65-74</span>
-                <span class="rank-penalty">15 Min Sperre</span>
-            </div>
-            <div class="rank-btn p4" onclick="startLockout(20)">
-                <span class="rank-num">Rating 50-64</span>
-                <span class="rank-penalty">20 Min Sperre</span>
-            </div>
+    <div id="selection-card" class="selection-card">
+        <div class="card-title" id="card-title-text">Clash Royale Platzierung</div>
+        <div class="rank-grid" id="grid-container">
+            <!-- Dynamisch generierte Buttons -->
         </div>
     </div>
 </main>
@@ -380,49 +346,115 @@
 </div>
 
 <script>
+    /* ==========================================================================
+       ZENTRALE KONFIGURATION DER 4 MÖGLICHKEITEN
+       ========================================================================== */
+    const CONFIG = {
+        CR: {
+            WORK: {
+                title: "Clash Royale — Arbeitszeit",
+                items: [
+                    { label: "Platz 1", minutes: 5,  task: "Habit / Aufgabe von dieser Woche", isP1: true },
+                    { label: "Platz 2", minutes: 10, task: "Habit / Aufgabe von heute oder morgen" },
+                    { label: "Platz 3", minutes: 15, task: "Habit / Aufgabe von heute" },
+                    { label: "Platz 4", minutes: 20, task: "Habit / wichtigste Aufgabe von heute", isP4: true }
+                ]
+            },
+            FREE: {
+                title: "Clash Royale — Freizeit",
+                items: [
+                    { label: "Platz 1", minutes: 5,  task: "Freizeit Task", isP1: true },
+                    { label: "Platz 2", minutes: 5,  task: "Habit / Aufgabe von dieser Woche" },
+                    { label: "Platz 3", minutes: 10, task: "Habit / Aufgabe von heute oder morgen" },
+                    { label: "Platz 4", minutes: 15, task: "Habit / Aufgabe von heute", isP4: true }
+                ]
+            }
+        },
+        Copero: {
+            WORK: {
+                title: "Copero Rating — Arbeitszeit",
+                items: [
+                    { label: "Rating 95-99", seconds: 30, type: "congrats", sub: "Kein Timer", isP1: true, fullWidth: true },
+                    { label: "Rating 85-94", minutes: 5,  task: "Habit / Aufgabe von dieser Woche", isP1: true },
+                    { label: "Rating 75-84", minutes: 10, task: "Habit / Aufgabe von heute oder morgen" },
+                    { label: "Rating 65-74", minutes: 15, task: "Habit / Aufgabe von heute" },
+                    { label: "Rating 50-64", minutes: 20, task: "Habit / wichtigste Aufgabe von heute", isP4: true }
+                ]
+            },
+            FREE: {
+                title: "Copero Rating — Freizeit",
+                items: [
+                    { label: "Rating 95-99", seconds: 30, type: "congrats", sub: "Kein Timer", isP1: true, fullWidth: true },
+                    { label: "Rating 85-94", minutes: 5,  task: "Freizeit Task", isP1: true },
+                    { label: "Rating 75-84", minutes: 5,  task: "Habit / Aufgabe von dieser Woche" },
+                    { label: "Rating 65-74", minutes: 10, task: "Habit / Aufgabe von heute oder morgen" },
+                    { label: "Rating 50-64", minutes: 15, task: "Habit / Aufgabe von heute", isP4: true }
+                ]
+            }
+        }
+    };
+
+    let currentSystem = 'CR';
+    let currentCategory = 'WORK';
+    let timerInterval = null;
+
     document.addEventListener('gesturestart', function (e) {
         e.preventDefault();
     });
 
-    let timerInterval = null;
-
-    function switchMode(mode) {
-        const crCard = document.getElementById('card-cr');
-        const fmCard = document.getElementById('card-fm');
-        const crBtn = document.getElementById('toggle-cr');
-        const fmBtn = document.getElementById('toggle-fm');
-
-        if (mode === 'CR') {
-            crCard.style.display = 'flex';
-            fmCard.style.display = 'none';
-            crBtn.classList.add('active');
-            fmBtn.classList.remove('active');
-        } else {
-            crCard.style.display = 'none';
-            fmCard.style.display = 'flex';
-            crBtn.classList.remove('active');
-            fmBtn.classList.add('active');
-        }
+    function setSystem(sys) {
+        currentSystem = sys;
+        document.getElementById('toggle-cr').classList.toggle('active', sys === 'CR');
+        document.getElementById('toggle-copero').classList.toggle('active', sys === 'Copero');
+        renderGrid();
     }
 
-    function getTaskText(minutes) {
-        if (minutes === 5) {
-            return "Habit / Aufgabe von dieser Woche";
-        } else if (minutes === 10) {
-            return "Habit / Aufgabe von heute oder morgen";
-        } else if (minutes === 15) {
-            return "Habit / Aufgabe von heute";
-        } else if (minutes === 20) {
-            return "Habit / wichtigste Aufgabe von heute";
-        }
-        return "🚀 Jetzt ToDos rocken!";
+    function setCategory(cat) {
+        currentCategory = cat;
+        document.getElementById('toggle-work').classList.toggle('active', cat === 'WORK');
+        document.getElementById('toggle-free').classList.toggle('active', cat === 'FREE');
+        renderGrid();
     }
 
-    function startLockout(minutes) {
+    function renderGrid() {
+        const data = CONFIG[currentSystem][currentCategory];
+        document.getElementById('card-title-text').innerText = data.title;
+
+        const grid = document.getElementById('grid-container');
+        grid.innerHTML = '';
+
+        data.items.forEach((item, idx) => {
+            const btn = document.createElement('div');
+            let classes = ['rank-btn'];
+            if (item.isP1) classes.push('p1');
+            if (item.isP4) classes.push('p4');
+            if (item.fullWidth) classes.push('full-width');
+            btn.className = classes.join(' ');
+
+            const subText = item.sub ? item.sub : `${item.minutes} Min Sperre`;
+
+            btn.innerHTML = `
+                <span class="rank-num">${item.label}</span>
+                <span class="rank-penalty">${subText}</span>
+            `;
+
+            btn.onclick = () => {
+                if (item.type === 'congrats') {
+                    startCongrats(item.seconds);
+                } else {
+                    startLockout(item.minutes, item.task);
+                }
+            };
+
+            grid.appendChild(btn);
+        });
+    }
+
+    function startLockout(minutes, task) {
         const endTime = Date.now() + minutes * 60 * 1000;
         localStorage.setItem('pomodoro_end_time', endTime);
         localStorage.setItem('pomodoro_type', 'lockout');
-        localStorage.setItem('pomodoro_minutes', minutes);
+        localStorage.setItem('pomodoro_task', task);
         
         runTimer();
     }
@@ -458,7 +490,7 @@
                 clearInterval(timerInterval);
                 localStorage.removeItem('pomodoro_end_time');
                 localStorage.removeItem('pomodoro_type');
-                localStorage.removeItem('pomodoro_minutes');
+                localStorage.removeItem('pomodoro_task');
                 lockScreen.classList.remove('active');
                 document.title = "Pomodoro";
             } else {
@@ -469,11 +501,11 @@
                     todoText.innerText = "Glückwunsch und spiele erneut mit gleichem Land und tue etwas was dir Spaß macht.";
                     document.title = "Glückwunsch!";
                 } else {
-                    const minutes = parseInt(localStorage.getItem('pomodoro_minutes'), 10);
+                    const task = localStorage.getItem('pomodoro_task') || "🚀 Jetzt ToDos rocken!";
                     lockBadge.innerText = "🔒 Focus Mode Active";
                     timerDisplay.style.display = 'block';
                     todoText.className = "todo-callout";
-                    todoText.innerText = getTaskText(minutes);
+                    todoText.innerText = task;
                     updateTimerDisplay(remainingSeconds);
                 }
             }
@@ -491,10 +523,11 @@
         document.title = `(${timeString}) Pomodoro`;
     }
 
-    // Beim Laden der Seite prüfen, ob noch ein Timer läuft
-    window.addEventListener('load', runTimer);
+    window.addEventListener('load', () => {
+        renderGrid();
+        runTimer();
+    });
 
-    // Sobald der Tab wieder aktiv wird (z. B. nach Standby oder Tab-Wechsel) sofort aktualisieren
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) {
             runTimer();
