@@ -98,7 +98,8 @@ const ROUTINE_CONFIG = {
             "nichts essen vor 8 Uhr",
             "Tabletten genommen",
             "Creatin genommen",
-            "an Gesundheit arbeiten (Notion)"
+            "an Gesundheit arbeiten (Notion)",
+            "Nasen dusche"
         ],
         sally: [
             "nichts essen vor 8 Uhr",
@@ -134,7 +135,7 @@ const ROUTINE_CONFIG = {
             "bis 10:00 Uhr nicht stören an"
         ],
         cheater: {
-            home: "Krank",
+            home: "Krank / 14h außer Haus",
             sally: "Krank",
             reise: "keinen!"
         }
@@ -151,7 +152,6 @@ const ROUTINE_CONFIG = {
             "alle Rollladen und Fenster",
             "Zungenscharber / Zahnseide / Mundspülung",
             "Zähne putzen",
-            "Nasen dusche",
             "warm duschen / Gesicht waschen"
         ],
         sally: [
