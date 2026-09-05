@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Groundhopping Dashboard</title>
+    <style>
+        :root {
+            --bg: #f2f2f7;
+            --card-bg: #ffffff;
+            --text-main: #000000;
+            --text-sub: #8e8e93;
+            --accent: #007aff;
+            --accent-soft: rgba(0, 122, 255, 0.08);
+            --border: #e5e5ea;
+            --radius-large: 20px;
+            --radius-card: 16px;
+            --shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #000000;
+                --card-bg: #1c1c1e;
+                --text-main: #ffffff;
+                --text-sub: #8e8e93;
+                --accent: #0a84ff;
+                --accent-soft: rgba(10, 132, 255, 0.15);
+                --border: #2c2c2e;
+                --shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-top: calc(env(safe-area-inset-top) + 16px);
+            padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
+            padding-left: 16px;
+            padding-right: 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        header {
+            background: var(--card-bg);
+            border-radius: var(--radius-large);
+            padding: 16px 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+        }
+
+        .year-select-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .year-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-size: 1.5rem;
+            font-weight: 800;
+            padding: 6px 36px 6px 18px;
+            border-radius: 12px;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            text-align: center;
+            letter-spacing: -0.01em;
+            font-family: inherit;
+        }
+
+        .year-select-wrapper::after {
+            content: "";
+            position: absolute;
+            right: 14px;
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 6px solid var(--accent);
+            pointer-events: none;
+        }
+
+        .user-subtitle {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            letter-spacing: -0.01em;
+        }
+
+        .dashboard-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .row {
+            display: grid;
+            gap: 12px;
+        }
+
+        .row-3 { grid-template-columns: repeat(3, 1fr); }
+        .row-2 { grid-template-columns: repeat(2, 1fr); }
+        .row-1 { grid-template-columns: 1fr; }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius-card);
+            padding: 14px 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 4px;
+        }
+
+        .card-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+        }
+
+        .card-sublabel {
+            font-size: 0.62rem;
+            font-weight: 500;
+            color: var(--text-sub);
+            margin-top: -2px;
+            line-height: 1.1;
+        }
+
+        .card-value {
+            font-size: 1.45rem;
+            font-weight: 800;
+            color: var(--accent);
+            letter-spacing: -0.02em;
+            margin: 2px 0;
+        }
+
+        .card-value-small {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .card-footer {
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .loading-screen {
+            background: var(--card-bg);
+            border-radius: var(--radius-large);
+            padding: 30px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-sub);
+            border: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <header>
+        <div class="header-title">Groundhopping</div>
+        <div class="year-select-wrapper">
+            <select id="year-dropdown" class="year-select" onchange="renderDashboard()"></select>
+        </div>
+        <div class="user-subtitle">Fabian</div>
+    </header>
+
+    <div id="loading" class="loading-screen">Daten werden geladen...</div>
+
+    <main id="dashboard" class="dashboard-grid" style="display: none;">
+
+        <div class="row row-3">
+            <div class="card">
+                <div class="card-label">Tore</div>
+                <div class="card-value" id="val-tore">0</div>
+            </div>
+            <div class="card">
+                <div class="card-label">Spiele</div>
+                <div class="card-value" id="val-spiele">0</div>
+            </div>
+            <div class="card">
+                <div class="card-label">Länder</div>
+                <div class="card-sublabel">(Neu)</div>
+                <div class="card-value" id="val-laender">0 (0)</div>
+            </div>
+        </div>
+
+        <div class="row row-2">
+            <div class="card">
+                <div class="card-label">Teams</div>
+                <div class="card-sublabel">Anzahl (Neu) / Meistgesehen</div>
+                <div class="card-value" id="val-teams-count">0 (0)</div>
+                <div class="card-footer" id="val-teams-top">-</div>
+            </div>
+            <div class="card">
+                <div class="card-label">Grounds ++</div>
+                <div class="card-sublabel">Anzahl (Neu) / Meistgesehen</div>
+                <div class="card-value" id="val-grounds-count">0 (0)</div>
+                <div class="card-footer" id="val-grounds-top">-</div>
+            </div>
+        </div>
+
+        <div class="row row-2">
+            <div class="card">
+                <div class="card-label">Wettbewerbe</div>
+                <div class="card-sublabel">Anzahl / Meistgesehen</div>
+                <div class="card-value" id="val-wettbewerbe-count">0</div>
+                <div class="card-footer" id="val-wettbewerbe-top">-</div>
+            </div>
+            <div class="card">
+                <div class="card-label">Zuschauer</div>
+                <div class="card-sublabel">Minimum / Mittelwert / Maximum</div>
+                <div class="card-value-small" id="val-zuschauer" style="margin: 6px 0;">0 / 0 / 0</div>
+            </div>
+        </div>
+
+        <div class="row row-1">
+            <div class="card">
+                <div class="card-label">Visits (Länder)</div>
+                <div class="card-value" id="val-visits">0 (0)</div>
+            </div>
+        </div>
+
+        <div class="row row-1">
+            <div class="card">
+                <div class="card-label">Torreichstes Spiel</div>
+                <div class="card-footer" id="val-top-game" style="font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-top: 4px;">-</div>
+            </div>
+        </div>
+
+    </main>
+
+</div>
+
+<script src="hopping_api.js"></script>
+<script>
+    let allData = [];
+
+    function parseTeams(begegnungStr) {
+        if (!begegnungStr || !begegnungStr.includes(':')) return null;
+        const index = begegnungStr.indexOf(':');
+        return {
+            home: begegnungStr.substring(0, index).trim(),
+            away: begegnungStr.substring(index + 1).trim()
+        };
+    }
+
+    function extractYear(datumStr) {
+        if (!datumStr) return null;
+        const parts = String(datumStr).split('.');
+        if (parts.length >= 3) {
+            const y = parts[2].trim().substring(0, 4);
+            if (!isNaN(parseInt(y))) return y;
+        }
+        const match = String(datumStr).match(/\b(19|20)\d{2}\b/);
+        return match ? match[0] : null;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        if (typeof getHoppingData === 'function') {
+            getHoppingData()
+                .then(data => initApp(data))
+                .catch(err => {
+                    document.getElementById('loading').innerText = "Fehler beim Laden der Schnittstelle.";
+                    console.error(err);
+                });
+        } else {
+            document.getElementById('loading').innerText = "hopping_api.js wurde nicht gefunden.";
+        }
+    });
+
+    function initApp(data) {
+        allData = data || [];
+        if (allData.length === 0) {
+            document.getElementById('loading').innerText = "Keine Daten verfügbar.";
+            return;
+        }
+
+        const yearSet = new Set();
+        allData.forEach(item => {
+            const y = extractYear(item.Datum);
+            if (y) yearSet.add(y);
+        });
+
+        const years = Array.from(yearSet).sort((a, b) => b.localeCompare(a));
+        const select = document.getElementById('year-dropdown');
+        select.innerHTML = '';
+
+        years.forEach(y => {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = y;
+            select.appendChild(opt);
+        });
+
+        if (years.length > 0) {
+            select.value = years[0];
+        }
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'flex';
+
+        renderDashboard();
+    }
+
+    function renderDashboard() {
+        const selectedYear = document.getElementById('year-dropdown').value;
+
+        const currentMatches = allData.filter(d => extractYear(d.Datum) === selectedYear);
+        const priorMatches = allData.filter(d => {
+            const y = extractYear(d.Datum);
+            return y && y < selectedYear;
+        });
+
+        const priorCountries = new Set(priorMatches.map(m => m.Spielort).filter(Boolean));
+        const priorTeams = new Set();
+        priorMatches.forEach(m => {
+            const t = parseTeams(m.Begegnung);
+            if (t) {
+                if (t.home) priorTeams.add(t.home);
+                if (t.away) priorTeams.add(t.away);
+            }
+        });
+        const priorGrounds = new Set(priorMatches.map(m => m.Stadion).filter(Boolean));
+
+        let totalGoals = 0;
+        let maxGoalsInGame = -1;
+        let highestGoalMatchStr = "-";
+
+        const yearCountries = new Set();
+        let newCountriesCount = 0;
+
+        const yearTeams = new Set();
+        const yearTeamFreq = {};
+        let newTeamsCount = 0;
+
+        const yearGrounds = new Set();
+        const yearGroundFreq = {};
+        let newGroundsCount = 0;
+
+        const yearComps = new Set();
+        const yearCompFreq = {};
+
+        const viewerCounts = [];
+
+        currentMatches.forEach(m => {
+            let gameGoals = 0;
+            if (m.Ergebnis && String(m.Ergebnis).includes(':')) {
+                const parts = String(m.Ergebnis).split(':');
+                const g1 = parseInt(parts[0]) || 0;
+                const g2 = parseInt(parts[1]) || 0;
+                gameGoals = g1 + g2;
+                totalGoals += gameGoals;
+
+                if (gameGoals > maxGoalsInGame) {
+                    maxGoalsInGame = gameGoals;
+                    highestGoalMatchStr = `${m.Begegnung}, ${m.Ergebnis}`;
+                }
+            }
+
+            if (m.Spielort) {
+                const country = m.Spielort.trim();
+                if (!yearCountries.has(country)) {
+                    yearCountries.add(country);
+                    if (!priorCountries.has(country)) newCountriesCount++;
+                }
+            }
+
+            const teams = parseTeams(m.Begegnung);
+            if (teams) {
+                [teams.home, teams.away].forEach(tName => {
+                    if (tName) {
+                        yearTeamFreq[tName] = (yearTeamFreq[tName] || 0) + 1;
+                        if (!yearTeams.has(tName)) {
+                            yearTeams.add(tName);
+                            if (!priorTeams.has(tName)) newTeamsCount++;
+                        }
+                    }
+                });
+            }
+
+            if (m.Stadion) {
+                const gName = m.Stadion.trim();
+                yearGroundFreq[gName] = (yearGroundFreq[gName] || 0) + 1;
+                if (!yearGrounds.has(gName)) {
+                    yearGrounds.add(gName);
+                    if (!priorGrounds.has(gName)) newGroundsCount++;
+                }
+            }
+
+            if (m.Wettbewerb) {
+                const cName = m.Wettbewerb.trim();
+                yearComps.add(cName);
+                yearCompFreq[cName] = (yearCompFreq[cName] || 0) + 1;
+            }
+
+            if (m.Zuschauer) {
+                const cleanV = parseInt(String(m.Zuschauer).replace(/\D/g, ''));
+                if (!isNaN(cleanV)) viewerCounts.push(cleanV);
+            }
+        });
+
+        document.getElementById('val-tore').innerText = totalGoals;
+        document.getElementById('val-spiele').innerText = currentMatches.length;
+        document.getElementById('val-laender').innerText = `${yearCountries.size} (${newCountriesCount})`;
+
+        const topTeam = Object.keys(yearTeamFreq).reduce((a, b) => yearTeamFreq[a] > yearTeamFreq[b] ? a : b, null);
+        document.getElementById('val-teams-count').innerText = `${yearTeams.size} (${newTeamsCount})`;
+        document.getElementById('val-teams-top').innerText = topTeam ? `${yearTeamFreq[topTeam]}x ${topTeam}` : "-";
+
+        const topGround = Object.keys(yearGroundFreq).reduce((a, b) => yearGroundFreq[a] > yearGroundFreq[b] ? a : b, null);
+        document.getElementById('val-grounds-count').innerText = `${yearGrounds.size} (${newGroundsCount})`;
+        document.getElementById('val-grounds-top').innerText = topGround ? `${yearGroundFreq[topGround]}x ${topGround}` : "-";
+
+        const topComp = Object.keys(yearCompFreq).reduce((a, b) => yearCompFreq[a] > yearCompFreq[b] ? a : b, null);
+        document.getElementById('val-wettbewerbe-count').innerText = yearComps.size;
+        document.getElementById('val-wettbewerbe-top').innerText = topComp ? `${yearCompFreq[topComp]}x ${topComp}` : "-";
+
+        if (viewerCounts.length > 0) {
+            const minV = Math.min(...viewerCounts).toLocaleString('de-DE');
+            const maxV = Math.max(...viewerCounts).toLocaleString('de-DE');
+            const avgV = Math.round(viewerCounts.reduce((a, b) => a + b, 0) / viewerCounts.length).toLocaleString('de-DE');
+            document.getElementById('val-zuschauer').innerText = `${minV} / ${avgV} / ${maxV}`;
+        } else {
+            document.getElementById('val-zuschauer').innerText = "0 / 0 / 0";
+        }
+
+        document.getElementById('val-visits').innerText = `${currentMatches.length} (${yearCountries.size})`;
+        document.getElementById('val-top-game').innerText = highestGoalMatchStr;
+    }
+</script>
+</body>
+</html>
