@@ -76,12 +76,10 @@ const ROUTINE_CONFIG = {
     "Sportroutine": {
         icon: "🏃‍♂️",
         home: [
-            "Sporteinheit aus Notizen gemacht",
-            "mind. 2x 12 Wadenheber an Treppe"
+            "Sporteinheit (wie in Notizen)",
         ],
         sally: [
-            "Sporteinheit aus Notizen gemacht",
-            "mind. 2x 12 Wadenheber an Treppe"
+            "Sporteinheit (wie in Notizen)",
         ],
         reise: [
             "8.000 Schritte gemacht"
