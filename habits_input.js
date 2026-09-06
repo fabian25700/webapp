@@ -122,14 +122,14 @@ const ROUTINE_CONFIG = {
             "bis 12:30 Uhr nicht stören an",
             "an perfekter Wohnung arbeiten",
             "Wohnung putzen",
-            "an To-Do’s ohne Deadline arbeiten"
+            "an Zielen arbeiten"
         ],
         sally: [
             "To-Do’s heute leer",
             "bis 12:30 Uhr nicht stören an",
             "an digitaler Ordnung arbeiten",
             "10 Minuten lesen",
-            "an To-Do’s ohne Deadline arbeiten"
+            "an Zielen arbeiten"
         ],
         reise: [
             "bis 10:00 Uhr nicht stören an"
