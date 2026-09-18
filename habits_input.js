@@ -132,8 +132,8 @@ const ROUTINE_CONFIG = {
             "bis 10:00 Uhr nicht stören an"
         ],
         cheater: {
-            home: "Krank / 14h außer Haus",
-            sally: "Krank",
+            home: "Krank / 12h außer Haus",
+            sally: "Krank / 12h außer Haus",
             reise: "keinen!"
         }
     },
