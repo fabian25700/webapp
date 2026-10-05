@@ -648,7 +648,16 @@
             const sallyHabits = config.sally || [];
             const reiseHabits = config.reise || [];
             const krankHabits = config.krank || [];
-            const allHabitsCombined = Array.from(new Set([...homeHabits, ...sallyHabits, ...reiseHabits, ...krankHabits]));
+
+            // Reihenfolge 1:1 strikt wie in habits_input.js zusammenführen
+            const allHabitsCombined = [];
+            [homeHabits, sallyHabits, reiseHabits, krankHabits].forEach(list => {
+                list.forEach(habit => {
+                    if (!allHabitsCombined.includes(habit)) {
+                        allHabitsCombined.push(habit);
+                    }
+                });
+            });
             
             let habitsHtml = allHabitsCombined.map((habit, habitIdx) => {
                 const habitId = `${groupIdx}-${habitIdx}`;
@@ -703,6 +712,14 @@
         
         groups.forEach((group) => {
             const routineName = group.getAttribute('data-routine');
+            const config = ROUTINE_CONFIG[routineName];
+            if (!config) return;
+
+            // Die maßgebliche Reihenfolge für den aktuell aktiven Modus
+            const activeList = config[currentGlobalMode] || [];
+            const categoryContent = group.querySelector('.category-content');
+            const closeBtn = categoryContent.querySelector('.close-routine-trigger');
+
             const cards = group.querySelectorAll('.bucket-card');
             
             let totalForActiveMode = 0;
@@ -735,6 +752,15 @@
                 } else {
                     card.classList.add('hidden-by-mode');
                 }
+            });
+
+            // Re-Sortierung der DOM-Elemente basierend exakt auf activeList
+            activeList.forEach(habitText => {
+                cards.forEach(card => {
+                    if (card.getAttribute('data-habit-text') === habitText) {
+                        categoryContent.insertBefore(card, closeBtn);
+                    }
+                });
             });
 
             habitState[routineName] = { 
