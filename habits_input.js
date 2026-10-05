@@ -11,22 +11,23 @@ const ROUTINE_CONFIG = {
             "15 Minuten Tageslichtlampe"
         ],
         sally: [
-            "nichts essen nach 20 Uhr",
+            "nichts essen nach 20:30",
             "Magnesium nehmen",
             "22:30 im Bett",
             "Handy Schlafmodus + zu Kleidung",
-            "ohne Snooze aufstehen",
+            "ohne Snooze aufstehen"
         ],
         reise: [
             "nichts essen nach 20 Uhr",
             "Handy Schlafmodus + zu Kleidung",
             "ohne Snooze aufstehen"
         ],
-        cheater: {
-            home: "Krank",
-            sally: "Krank",
-            reise: "Krank"
-        }
+        krank: [
+            "21 Uhr im Bett",
+            "Magnesium nehmen",
+            "Handy Schlafmodus + anderer Raum",
+            "Ohne Snooze aufstehen"
+        ]
     },
     "Morgenroutine": {
         icon: "☀️",
@@ -41,18 +42,15 @@ const ROUTINE_CONFIG = {
             "Stoisches Kapitel",
             "Whoop checken",
             "Ziele + ToDo’s des Tages anschauen",
-            "Mails checken",
-            "bis 8:00 keine Geräte\n(außer Sally, To-Do’s, Routine)"
+            "Mails checken"
         ],
         sally: [
-            "Wasser trinken",
             "Zähne putzen",
             "duschen / Gesicht waschen",
             "Stoisches Kapitel",
             "Whoop checken",
             "Ziele + ToDo’s des Tages anschauen",
-            "Mails checken",
-            "bis 8:00 keine Geräte\n(außer To-Do’s, Routine)"
+            "Mails checken"
         ],
         reise: [
             "Schlafplatz machen",
@@ -63,31 +61,32 @@ const ROUTINE_CONFIG = {
             "Stoisches Kapitel",
             "Whoop checken",
             "Ziele + ToDo’s des Tages anschauen",
-            "Mails checken",
-            "bis 8:00 keine Geräte\n(außer Sally, To-Do’s, Routine)"
+            "Mails checken"
         ],
-        cheater: {
-            home: "Krank",
-            sally: "Krank",
-            reise: "Krank"
-        }
+        krank: [
+            "Wasser trinken",
+            "Medizin nehmen",
+            "Zähne putzen",
+            "duschen / Gesicht waschen",
+            "Stoisches Kapitel",
+            "Whoop checken",
+            "Mails checken"
+        ]
     },
     "Sportroutine": {
         icon: "🏃‍♂️",
         home: [
-            "Sporteinheit (wie in Notizen)",
+            "Sporteinheit (wie in Notizen)"
         ],
         sally: [
-            "Sporteinheit (wie in Notizen)",
+            "Sporteinheit (wie in Notizen)"
         ],
         reise: [
             "8.000 Schritte gemacht"
         ],
-        cheater: {
-            home: "Krank / Verletzt",
-            sally: "Krank / Verletzt",
-            reise: "Krank / Verletzt"
-        }
+        krank: [
+            "Nap / 8h+ Schlaf"
+        ]
     },
     "Gesundheitsroutine": {
         icon: "🥗",
@@ -106,36 +105,34 @@ const ROUTINE_CONFIG = {
             "nichts essen vor 8 Uhr",
             "Wasser tracken"
         ],
-        cheater: {
-            home: "14h außer Haus",
-            sally: "keinen!",
-            reise: "keinen!"
-        }
+        krank: [
+            "nichts essen vor 8 Uhr",
+            "Medizin nehmen"
+        ]
     },
     "Fokusroutine": {
         icon: "🧠",
         home: [
             "To-Do’s heute leer",
-            "bis 12:30 Uhr nicht stören an",
-            "an perfekter Wohnung arbeiten",
-            "Wohnung putzen",
+            "bis 13:30 Uhr nicht stören an",
+            "an Wohnung arbeiten (aufräumen, putzen, einrichten)",
+            "an Freizeit To-Do’s arbeiten",
             "an Zielen arbeiten"
         ],
         sally: [
             "To-Do’s heute leer",
             "bis 12:30 Uhr nicht stören an",
+            "an Zielen arbeiten",
             "an digitaler Ordnung arbeiten",
-            "10 Minuten lesen",
-            "an Zielen arbeiten"
+            "10 Minuten lesen"
         ],
         reise: [
-            "bis 10:00 Uhr nicht stören an"
+            "bis 11:00 Uhr nicht stören an"
         ],
-        cheater: {
-            home: "Krank / 12h außer Haus",
-            sally: "Krank / 12h außer Haus",
-            reise: "keinen!"
-        }
+        krank: [
+            "bis 12:30 Uhr nicht stören an",
+            "10 Minuten lesen"
+        ]
     },
     "Abendroutine": {
         icon: "🌙",
@@ -173,10 +170,14 @@ const ROUTINE_CONFIG = {
             "Zähne putzen",
             "warm duschen / Gesicht waschen"
         ],
-        cheater: {
-            home: "Krank",
-            sally: "Krank",
-            reise: "Krank"
-        }
+        krank: [
+            "Finanzen und Habits anschauen",
+            "Wecker stellen",
+            "Wasser parat",
+            "Medizin nehmen",
+            "Rollladen und Fenster",
+            "Zähne putzen",
+            "warm duschen / Gesicht waschen"
+        ]
     }
 };
