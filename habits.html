@@ -174,7 +174,7 @@
             background: var(--apple-switch-bg); 
             border-radius: 9px;
             padding: 2px; 
-            width: 120px; 
+            width: 160px; 
             height: 32px; 
             flex-shrink: 0;
         }
@@ -309,20 +309,6 @@
         }
         .close-routine-trigger:active { background: var(--border); }
 
-        .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .kpi-card {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-            padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; height: 95px;
-        }
-        .kpi-value { font-size: 1.35rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; justify-content: center; gap: 6px; }
-        .kpi-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
-        
-        .gauge-container { position: relative; width: 85px; height: 42px; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
-        .gauge-arc { width: 76px; height: 76px; border-radius: 50%; border: 4px solid var(--border-light); border-bottom-color: transparent; border-left-color: transparent; transform: rotate(-45deg); position: absolute; bottom: -38px; }
-        .gauge-needle { width: 2px; height: 35px; background: var(--text-primary); position: absolute; bottom: 0; transform-origin: bottom center; transform: rotate(0deg); transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-        .gauge-center { width: 6px; height: 6px; background: var(--text-primary); border-radius: 50%; position: absolute; bottom: -3px; }
-        .gauge-labels { display: flex; justify-content: space-between; width: 100%; padding: 0 2px; font-size: 0.55rem; font-weight: 700; color: var(--text-secondary); margin-top: -2px; }
-
         .section-block {
             background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
             padding: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px;
@@ -421,6 +407,7 @@
         <button class="apple-switch-btn active" id="mode-home" onclick="setGlobalMode('home')" title="Home">H</button>
         <button class="apple-switch-btn" id="mode-sally" onclick="setGlobalMode('sally')" title="Sally">S</button>
         <button class="apple-switch-btn" id="mode-reise" onclick="setGlobalMode('reise')" title="Reise">R</button>
+        <button class="apple-switch-btn" id="mode-krank" onclick="setGlobalMode('krank')" title="Krank">K</button>
     </div>
 </div>
 
@@ -448,26 +435,6 @@
     </div>
 
     <div id="view-stats" class="view-section">
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-value" id="kpi-streak">-</div>
-                <div class="kpi-label">TwoDayRule Streak</div>
-            </div>
-            <div class="kpi-card" style="justify-content: flex-start; padding-top: 10px; gap: 2px;">
-                <div class="gauge-container">
-                    <div class="gauge-arc"></div>
-                    <div class="gauge-needle" id="gauge-needle"></div>
-                    <div class="gauge-center"></div>
-                </div>
-                <div class="gauge-labels">
-                    <span id="gauge-lbl-max">Max</span>
-                    <span id="gauge-lbl-avg">Ø</span>
-                    <span>0.0 T</span>
-                </div>
-                <div class="kpi-label" style="margin-top: 4px;">Erholungs-Zeit</div>
-            </div>
-        </div>
-
         <div class="section-block">
             <div class="switch-header">
                 <div class="switch-tab active" onclick="switchBlock('mid', 'domino')">Kausalitäten</div>
@@ -647,6 +614,7 @@
         document.getElementById('mode-home').classList.toggle('active', mode === 'home');
         document.getElementById('mode-sally').classList.toggle('active', mode === 'sally');
         document.getElementById('mode-reise').classList.toggle('active', mode === 'reise');
+        document.getElementById('mode-krank').classList.toggle('active', mode === 'krank');
         localStorage.setItem('routine_global_mode', mode);
         
         applyGlobalModeToDOM();
@@ -679,7 +647,17 @@
             const homeHabits = config.home || [];
             const sallyHabits = config.sally || [];
             const reiseHabits = config.reise || [];
-            const allHabitsCombined = Array.from(new Set([...homeHabits, ...sallyHabits, ...reiseHabits]));
+            const krankHabits = config.krank || [];
+
+            // Reihenfolge 1:1 strikt wie in habits_input.js zusammenführen
+            const allHabitsCombined = [];
+            [homeHabits, sallyHabits, reiseHabits, krankHabits].forEach(list => {
+                list.forEach(habit => {
+                    if (!allHabitsCombined.includes(habit)) {
+                        allHabitsCombined.push(habit);
+                    }
+                });
+            });
             
             let habitsHtml = allHabitsCombined.map((habit, habitIdx) => {
                 const habitId = `${groupIdx}-${habitIdx}`;
@@ -688,6 +666,7 @@
                 const belongsToHome = homeHabits.includes(habit);
                 const belongsToSally = sallyHabits.includes(habit);
                 const belongsToReise = reiseHabits.includes(habit);
+                const belongsToKrank = krankHabits.includes(habit);
 
                 return `
                     <div class="bucket-card ${isChecked ? 'done' : ''}" 
@@ -696,22 +675,13 @@
                          data-home="${belongsToHome}" 
                          data-sally="${belongsToSally}" 
                          data-reise="${belongsToReise}" 
+                         data-krank="${belongsToKrank}" 
                          onclick="toggleHabit('${routineName}', '${habitId}', this)">
                         <div class="status-circle"></div>
                         <div class="location-name">${habit}</div>
                     </div>
                 `;
             }).join('');
-
-            const jokerId = `${groupIdx}-joker`;
-            const isJokerChecked = savedStates[jokerId] || false;
-
-            habitsHtml += `
-                <div class="bucket-card ${isJokerChecked ? 'done' : ''}" id="card-${jokerId}" onclick="toggleJoker('${routineName}', '${jokerId}', this)" data-joker="true">
-                    <div class="status-circle"></div>
-                    <div class="location-name" id="joker-text-${routineName}" style="color: var(--danger); font-style: italic;">Cheater 🏳️</div>
-                </div>
-            `;
 
             habitsHtml += `
                 <div class="close-routine-trigger" onclick="event.stopPropagation(); closeCurrentGroup('${routineName}')">
@@ -740,11 +710,17 @@
         const savedStates = getSavedStates();
         const groups = document.querySelectorAll('#active-routines-container .category-group');
         
-        groups.forEach((group, groupIdx) => {
+        groups.forEach((group) => {
             const routineName = group.getAttribute('data-routine');
             const config = ROUTINE_CONFIG[routineName];
-            const cards = group.querySelectorAll('.bucket-card:not([data-joker])');
-            const jokerCard = group.querySelector('.bucket-card[data-joker]');
+            if (!config) return;
+
+            // Die maßgebliche Reihenfolge für den aktuell aktiven Modus
+            const activeList = config[currentGlobalMode] || [];
+            const categoryContent = group.querySelector('.category-content');
+            const closeBtn = categoryContent.querySelector('.close-routine-trigger');
+
+            const cards = group.querySelectorAll('.bucket-card');
             
             let totalForActiveMode = 0;
             let doneForActiveMode = 0;
@@ -753,6 +729,7 @@
                 const isHome = card.getAttribute('data-home') === 'true';
                 const isSally = card.getAttribute('data-sally') === 'true';
                 const isReise = card.getAttribute('data-reise') === 'true';
+                const isKrank = card.getAttribute('data-krank') === 'true';
                 const habitId = card.id.replace('card-', '');
                 const isChecked = savedStates[habitId] || false;
 
@@ -766,6 +743,7 @@
                 if (currentGlobalMode === 'home' && isHome) shouldShow = true;
                 if (currentGlobalMode === 'sally' && isSally) shouldShow = true;
                 if (currentGlobalMode === 'reise' && isReise) shouldShow = true;
+                if (currentGlobalMode === 'krank' && isKrank) shouldShow = true;
 
                 if (shouldShow) {
                     card.classList.remove('hidden-by-mode');
@@ -776,26 +754,18 @@
                 }
             });
 
-            const jokerId = jokerCard.id.replace('card-', '');
-            const isJokerChecked = savedStates[jokerId] || false;
-            
-            if (isJokerChecked) {
-                jokerCard.classList.add('done');
-            } else {
-                jokerCard.classList.remove('done');
-            }
-
-            if (config && config.cheater && config.cheater[currentGlobalMode]) {
-                const jokerText = jokerCard.querySelector('.location-name');
-                if (jokerText) {
-                    jokerText.textContent = `Cheater: ${config.cheater[currentGlobalMode]} 🏳️`;
-                }
-            }
+            // Re-Sortierung der DOM-Elemente basierend exakt auf activeList
+            activeList.forEach(habitText => {
+                cards.forEach(card => {
+                    if (card.getAttribute('data-habit-text') === habitText) {
+                        categoryContent.insertBefore(card, closeBtn);
+                    }
+                });
+            });
 
             habitState[routineName] = { 
                 total: totalForActiveMode, 
-                done: doneForActiveMode, 
-                joker: isJokerChecked 
+                done: doneForActiveMode
             };
         });
 
@@ -856,21 +826,6 @@
         if (oldRoutineState !== newRoutineState) syncModuleToCloud(routineName, newRoutineState);
     }
 
-    function toggleJoker(routineName, jokerId, card) {
-        const isDone = card.classList.toggle('done');
-        const currentData = getSavedStates();
-        currentData[jokerId] = isDone;
-        localStorage.setItem('routine_storage', JSON.stringify(currentData));
-        
-        const oldRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
-        habitState[routineName].joker = isDone;
-        const newRoutineState = isRoutineApproved(routineName) ? "ja" : "nein";
-
-        updateGlobalProgress();
-        if (oldRoutineState === "nein" && newRoutineState === "ja") showSuccessToast();
-        if (oldRoutineState !== newRoutineState) syncModuleToCloud(routineName, newRoutineState);
-    }
-
     document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible") {
             checkMidnightReset();
@@ -882,7 +837,6 @@
     function isRoutineApproved(routineName) {
         const state = habitState[routineName];
         if (!state) return false;
-        if (state.joker) return true;
         if (state.total === 0) return false;
         return (state.done / state.total) >= TARGET_RATIO;
     }
@@ -1119,7 +1073,6 @@
 
         const monthlyData = {};
         const weeklyData = {};
-        const chronologicalHistory = [...historyArray].reverse();
 
         historyArray.forEach(row => {
             if (!row.datum) return;
@@ -1318,42 +1271,6 @@
                 clusterContainer.innerHTML += `<div class="insight-card"><div class="insight-title">${icon1} ${c.routine1} + ${icon2} ${c.routine2}</div><div class="insight-desc">Dieses Routine-Paket tritt in <strong>${c.strength}%</strong> aller aufgezeichneten Tage als geschlossene Einheit auf.</div></div>`;
             });
         }
-
-        let currentStreak = 0; let checkDate = new Date(); checkDate.setDate(checkDate.getDate() - 1); 
-        while (true) {
-            const checkDateStr = formatDateToString(checkDate);
-            const foundDay = historyArray.find(item => item.datum === checkDateStr);
-            if (foundDay && foundDay.routinen && foundDay.routinen["TwoDayRule"] && foundDay.routinen["TwoDayRule"].toLowerCase() === 'ja') {
-                currentStreak++; checkDate.setDate(checkDate.getDate() - 1);
-            } else { break; }
-        }
-        document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
-
-        let totalRecoveryDays = 0; let recoveryTracksCount = 0; let maxRecoveryDays = 0; let currentGap = 0; let trackingGap = false;
-        chronologicalHistory.forEach(row => {
-            if (row.routinen && row.routinen["TwoDayRule"]) {
-                const status = row.routinen["TwoDayRule"].toLowerCase();
-                if (status === 'nein') {
-                    if (!trackingGap) { trackingGap = true; currentGap = 1; } else { currentGap++; }
-                } else if (status === 'ja' && trackingGap) {
-                    totalRecoveryDays += currentGap;
-                    if (currentGap > maxRecoveryDays) maxRecoveryDays = currentGap;
-                    recoveryTracksCount++; trackingGap = false; currentGap = 0;
-                }
-            }
-        });
-
-        const avgRecovery = recoveryTracksCount > 0 ? parseFloat((totalRecoveryDays / recoveryTracksCount).toFixed(1)) : 0.0;
-        const finalMax = maxRecoveryDays > 0 ? maxRecoveryDays : 3.0;
-        document.getElementById('gauge-lbl-max').textContent = `${finalMax.toFixed(1)} T`;
-        document.getElementById('gauge-lbl-avg').textContent = `Ø ${avgRecovery.toFixed(1)}`;
-
-        let degrees = 75; 
-        if (recoveryTracksCount > 0 && finalMax > 0) {
-            degrees = 75 - ((avgRecovery / finalMax) * 150);
-            if (degrees < -75) degrees = -75; if (degrees > 75) degrees = 75;
-        }
-        document.getElementById('gauge-needle').style.transform = `rotate(${degrees}deg)`;
 
         const rowsContainer = document.getElementById('matrix-rows-container');
         rowsContainer.innerHTML = '';
