@@ -115,7 +115,7 @@ const ROUTINE_CONFIG = {
         home: [
             "To-Do’s heute leer",
             "bis 13:30 Uhr nicht stören an",
-            "an Wohnung arbeiten (aufräumen, putzen, einrichten)",
+            "an Wohnung arbeiten (putzen / einrichten)",
             "an Freizeit To-Do’s arbeiten",
             "an Zielen arbeiten"
         ],
