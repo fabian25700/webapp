@@ -119,20 +119,6 @@
         .info-label { font-size: 0.9rem; color: var(--text-secondary); }
         .info-value { font-size: 0.9rem; font-weight: 700; text-align: right; }
 
-        /* Toggles & Accordions */
-        .toggle-container { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; margin-bottom: 12px; border: 1px solid var(--border); gap: 4px; }
-        .toggle-switch { flex: 1; padding: 10px; text-align: center; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; cursor: pointer; border-radius: 9px; color: var(--text-secondary); transition: 0.2s; }
-        .toggle-switch.active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow); }
-
-        .accordion-btn { width: 100%; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; text-align: left; font-size: 0.8rem; font-weight: 800; color: var(--text-primary); cursor: pointer; margin-bottom: 8px; display: flex; justify-content: space-between; }
-        .accordion-content { display: none; padding: 4px 12px 12px; }
-
-        .todo-item { display: flex; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
-        .todo-item:last-child { border-bottom: none; }
-        .todo-checkbox { width: 18px; height: 18px; border: 2px solid var(--accent); border-radius: 5px; margin-right: 12px; flex-shrink: 0; }
-        .idea-bullet { color: var(--accent); margin-right: 12px; font-weight: 900; font-size: 1.1rem; width: 25px; text-align: center; }
-        .todo-text { font-size: 0.9rem; font-weight: 600; }
-
         /* Timeline */
         .timeline-item { position: relative; padding-left: 30px; margin-bottom: 24px; border-left: 2px solid var(--border); }
         .timeline-item::before { content: ''; position: absolute; left: -7px; top: 0; width: 12px; height: 12px; background: var(--accent); border-radius: 50%; }
@@ -140,7 +126,6 @@
         .timeline-date { font-weight: 800; font-size: 1rem; display: block; margin-bottom: 4px; }
         .timeline-desc { font-size: 0.85rem; color: var(--text-secondary); display: block; }
         .timeline-event { color: var(--accent); font-weight: 700; font-size: 0.85rem; margin-top: 2px; display: block; }
-        .map-container { width: 100%; height: 450px; border-radius: 15px; overflow: hidden; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
@@ -156,8 +141,6 @@
         <button class="nav-btn" onclick="showTab('hotels')">Hotels</button>
         <button class="nav-btn" onclick="showTab('activities')">Aktivitäten</button>
         <button class="nav-btn" onclick="showTab('plan')">Kalender</button>
-        <button class="nav-btn" onclick="showTab('todos')">Todos/Ideen</button>
-        <button class="nav-btn" onclick="showTab('map')">Karte</button>
     </div>
 
     <main id="flights" class="content-section active">
@@ -217,6 +200,12 @@
             <div class="info-row"><span class="info-label">Spiel</span><span class="info-value">Atlético Ottawa vs. Cavalry FC</span></div>
             <div class="info-row"><span class="info-label">Stadion</span><span class="info-value">TD Place Stadium</span></div>
         </div>
+        <div class="card">
+            <span class="card-title">Match 3: CHL (Eishockey)</span>
+            <div class="info-row"><span class="info-label">Datum</span><span class="info-value">Do, 01.10. | 19:30</span></div>
+            <div class="info-row"><span class="info-label">Spiel</span><span class="info-value">Shawinigan vs. Gatineau</span></div>
+            <div class="info-row"><span class="info-label">Stadion</span><span class="info-value">Centre Slush Puppie</span></div>
+        </div>
     </main>
 
     <main id="plan" class="content-section">
@@ -227,78 +216,8 @@
         <div class="timeline-item"><span class="timeline-date">Mo, 28. Sept. | Roadtrip Start</span><span class="time-badge">14:00 Mietwagen</span><span class="time-badge">~ 2h 45m Fahrt (260km)</span><span class="timeline-desc">Fahrt nach Québec City. Check-in C3 Hotel.</span></div>
         <div class="timeline-item"><span class="timeline-date">Di, 29. Sept. | Québec City</span><span class="timeline-desc">Altstadt (Vieux-Québec) & Montmorency-Falls.</span></div>
         <div class="timeline-item"><span class="timeline-date">Mi, 30. Sept. | Ottawa Matchday</span><span class="time-badge">09:00 Abfahrt</span><span class="time-badge">~ 4h 30m Fahrt (440km)</span><span class="time-badge">19:00 Match</span><span class="timeline-event">⚽️ Atlético Ottawa vs. Cavalry FC</span></div>
-        <div class="timeline-item"><span class="timeline-date">Do, 01. Okt. | Ottawa</span><span class="timeline-desc">Parlamentshügel & ByWard Market.</span></div>
+        <div class="timeline-item"><span class="timeline-date">Do, 01. Okt. | Ottawa / Matchday</span><span class="time-badge">19:30 Match</span><span class="timeline-event">🏒 Gatineau vs. Shawinigan (CHL)</span><span class="timeline-desc">Centre Slush Puppie.</span></div>
         <div class="timeline-item"><span class="timeline-date">Fr, 02. Okt. | Rückreise</span><span class="time-badge">11:00 Abfahrt Ottawa</span><span class="time-badge">~ 2h Fahrt (190km)</span><span class="time-badge">16:35 Abflug</span><span class="timeline-desc">Mietwagen-Return bis 13 Uhr & Rückflug FRA.</span></div>
-    </main>
-
-    <main id="todos" class="content-section">
-        <div class="toggle-container">
-            <div id="main-t" class="toggle-switch active" onclick="mainListSwitch('t')">Todos</div>
-            <div id="main-i" class="toggle-switch" onclick="mainListSwitch('i')">Ideen</div>
-        </div>
-
-        <div id="content-todos" class="card">
-            <span class="card-title">Offene Erledigungen</span>
-            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Recherche Mietwagen (Details)</span></div>
-            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">eTA Visum beantragen</span></div>
-            <div class="todo-item"><div class="todo-checkbox"></div><span class="todo-text">Flug-Benefits (Lounge/Upgrade) prüfen</span></div>
-        </div>
-
-        <div id="content-ideen" style="display:none;">
-            <div class="toggle-container">
-                <div id="city-m" class="toggle-switch active" onclick="citySwitch('m')">Montreal</div>
-                <div id="city-q" class="toggle-switch" onclick="citySwitch('q')">Québec</div>
-                <div id="city-o" class="toggle-switch" onclick="citySwitch('o')">Ottawa</div>
-            </div>
-            
-            <div id="ideen-m" class="city-content">
-                <div class="card">
-                    <span class="card-title">Montreal Entdeckungen</span>
-                    <button class="accordion-btn" onclick="toggleAcc('m-s')">Sehenswürdigkeit <span>▼</span></button>
-                    <div id="acc-m-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Mont-Royal Hike (Aussichtspunkt)</span></div></div>
-                    <button class="accordion-btn" onclick="toggleAcc('m-r')">Restaurant <span>▼</span></button>
-                    <div id="acc-m-r" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">🥯</span><span class="todo-text">St-Viateur Bagel</span></div>
-                        <div class="todo-item"><span class="idea-bullet">🥩</span><span class="todo-text">Schwartz's Smoked Meat</span></div>
-                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">La Banquise (Poutine)</span></div>
-                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">L'Avenue (Brunch)</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="ideen-q" class="city-content" style="display:none;">
-                <div class="card">
-                    <span class="card-title">Québec City Entdeckungen</span>
-                    <button class="accordion-btn" onclick="toggleAcc('q-s')">Sehenswürdigkeit <span>▼</span></button>
-                    <div id="acc-q-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">Château Frontenac Besichtigung</span></div></div>
-                    <button class="accordion-btn" onclick="toggleAcc('q-r')">Restaurant <span>▼</span></button>
-                    <div id="acc-q-r" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">☕</span><span class="todo-text">Tim Hortons (Quick-Stop)</span></div>
-                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">Bello Ristorante (Pasta)</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="ideen-o" class="city-content" style="display:none;">
-                <div class="card">
-                    <span class="card-title">Ottawa Entdeckungen</span>
-                    <button class="accordion-btn" onclick="toggleAcc('o-s')">Sehenswürdigkeit <span>▼</span></button>
-                    <div id="acc-o-s" class="accordion-content"><div class="todo-item"><span class="idea-bullet">🏛️</span><span class="todo-text">National Gallery of Canada</span></div></div>
-                    <button class="accordion-btn" onclick="toggleAcc('o-r')">Restaurant <span>▼</span></button>
-                    <div id="acc-o-r" class="accordion-content">
-                        <div class="todo-item"><span class="idea-bullet">🍩</span><span class="todo-text">BeaverTails (ByWard Market)</span></div>
-                        <div class="todo-item"><span class="idea-bullet">🍴</span><span class="todo-text">The Shore Club (Steak/Fisch)</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <main id="map" class="content-section">
-        <div class="card">
-            <span class="card-title">Unterkünfte</span>
-            <div class="map-container"><iframe width="100%" height="100%" frameborder="0" src="https://www.google.com/maps?q=Tru+By+Hilton+Montreal+Centre-Ville&output=embed"></iframe></div>
-        </div>
     </main>
 
     <script>
@@ -313,24 +232,6 @@
             });
             document.getElementById('main-nav').classList.remove('open');
             window.scrollTo(0,0);
-        }
-
-        function mainListSwitch(x) {
-            document.getElementById('content-todos').style.display = (x === 't') ? 'block' : 'none';
-            document.getElementById('content-ideen').style.display = (x === 'i') ? 'block' : 'none';
-            document.getElementById('main-t').classList.toggle('active', x === 't');
-            document.getElementById('main-i').classList.toggle('active', x === 'i');
-        }
-
-        function citySwitch(c) {
-            document.querySelectorAll('.city-content').forEach(div => div.style.display = 'none');
-            document.getElementById('ideen-' + c).style.display = 'block';
-            ['m', 'q', 'o'].forEach(city => document.getElementById('city-' + city).classList.toggle('active', city === c));
-        }
-
-        function toggleAcc(id) {
-            const content = document.getElementById('acc-' + id);
-            content.style.display = (content.style.display === 'block') ? 'none' : 'block';
         }
     </script>
 </body>
