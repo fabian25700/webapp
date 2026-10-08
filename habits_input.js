@@ -7,7 +7,7 @@ const ROUTINE_CONFIG = {
             "Handy Schlafmodus + anderer Raum",
             "22 Uhr im Bett",
             "lesen vor schlafen",
-            "6 Uhr ohne Snooze aufstehen",
+            "6:30 ohne Snooze aufstehen",
             "15 Minuten Tageslichtlampe"
         ],
         sally: [
@@ -94,7 +94,7 @@ const ROUTINE_CONFIG = {
             "nichts essen vor 8 Uhr",
             "Tabletten genommen",
             "Creatin genommen",
-            "an Gesundheit arbeiten (Notion)",
+            "an Gesundheit arbeiten (Notizen/Notion)",
             "Nasen dusche"
         ],
         sally: [
