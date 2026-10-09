@@ -186,10 +186,10 @@
     <script>
         var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         
-        // Fastly CDN Endpunkte ohne API-Key Limitierungen
+        // Vollkommen freie Tile-Server ohne API-Key Limitierungen
         var tileUrl = isDark
-            ? 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_nolabels/{z}/{x}/{y}.png'
-            : 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png';
+            ? 'https://a.basemaps.cartocdn.com/rastertiles/dark_nolabels/{z}/{x}/{y}.png'
+            : 'https://a.basemaps.cartocdn.com/rastertiles/light_nolabels/{z}/{x}/{y}.png';
 
         var map = L.map('map', {
             center: [25, 10],
