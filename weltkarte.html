@@ -17,6 +17,7 @@
             --border: #e2e8f0;
             --border-light: #f1f5f9;
             --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --map-bg: #cbd5e1;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -28,6 +29,7 @@
                 --border: #2d3f55;
                 --border-light: #253347;
                 --shadow: 0 2px 8px rgba(0,0,0,0.4);
+                --map-bg: #111827;
             }
         }
 
@@ -114,6 +116,38 @@
         #map {
             flex: 1;
             width: 100%;
+            background-color: var(--map-bg) !important;
+        }
+
+        .leaflet-container {
+            background-color: var(--map-bg) !important;
+        }
+
+        /* Popup Styles */
+        .popup-content {
+            font-size: 0.95rem;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .popup-title {
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-size: 1.05rem;
+        }
+
+        .popup-icons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.25rem;
+            margin-top: 4px;
+        }
+
+        .icon-disabled {
+            opacity: 0.25;
+            filter: grayscale(100%);
         }
 
         /* Leaflet Popup Dark Mode */
@@ -125,9 +159,6 @@
             }
             .leaflet-popup-tip {
                 background: #1e293b;
-            }
-            .leaflet-popup-content b {
-                color: #f1f5f9;
             }
         }
     </style>
@@ -153,28 +184,34 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Tile-URL je nach Dark/Light Mode
         var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         var tileUrl = isDark
-            ? 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png'
-            : 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
+            ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+            : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
         var map = L.map('map', {
             center: [25, 10],
             zoom: 2,
+            minZoom: 2,
+            maxZoom: 10,
             zoomControl: true,
-            attributionControl: false
+            attributionControl: false,
+            maxBounds: [[-85, -180], [85, 180]],
+            maxBoundsViscosity: 1.0
         });
 
         L.tileLayer(tileUrl, {
-            maxZoom: 10
+            maxZoom: 10,
+            noWrap: true
         }).addTo(map);
 
         // Lookup-Map für schnellen Zugriff (ISO-Code → Reisedaten)
         var reiseMap = {};
-        MEINE_REISEN.forEach(function(r) {
-            reiseMap[r.id.toUpperCase()] = r;
-        });
+        if (typeof MEINE_REISEN !== 'undefined') {
+            MEINE_REISEN.forEach(function(r) {
+                reiseMap[r.id.toUpperCase()] = r;
+            });
+        }
 
         function findeLand(feature) {
             var p = feature.properties;
@@ -185,9 +222,12 @@
 
             // Fallback: Name-Vergleich
             var geoName = (p.name || p.ADMIN || p.NAME || '').toString().toLowerCase().trim();
-            return MEINE_REISEN.find(function(r) {
-                return r.name_en.toLowerCase().trim() === geoName;
-            }) || null;
+            if (typeof MEINE_REISEN !== 'undefined') {
+                return MEINE_REISEN.find(function(r) {
+                    return r.name_en.toLowerCase().trim() === geoName;
+                }) || null;
+            }
+            return null;
         }
 
         function getStyle(feature) {
@@ -210,15 +250,25 @@
                         var info = findeLand(feature);
                         if (info) {
                             var flagge = info.flagge || info.id;
-                            var avgKm = info.Joggen > 0
-                                ? (info.km_gejoggt / info.Joggen).toFixed(1) + ' km/Lauf'
-                                : '–';
-                            layer.bindPopup(
-                                '<b>' + flagge + ' ' + info.Land + '</b><br>' +
-                                '🏨 ' + info.Übernachtungen + ' Nächte · ' + info.Unterkünfte + ' Unterkünfte<br>' +
-                                (info.FluegeAnkunft > 0 ? '✈️ ' + info.FluegeAnkunft + ' Flüge<br>' : '') +
-                                (info.Joggen > 0 ? '🏃 ' + info.km_gejoggt + ' km (' + avgKm + ')' : '')
-                            );
+                            
+                            var hatFlug = info.FluegeAnkunft > 0;
+                            var hatJoggen = (info.km_gejoggt > 0) || (info.Joggen > 0);
+                            var hatFussball = (info.Fussball === "ja" || info.Fussball === "Ja" || info.Fussball === true);
+
+                            var flugClass = hatFlug ? '' : 'icon-disabled';
+                            var joggenClass = hatJoggen ? '' : 'icon-disabled';
+                            var fussballClass = hatFussball ? '' : 'icon-disabled';
+
+                            var html = '<div class="popup-content">' +
+                                '<div class="popup-title">' + flagge + ' ' + info.Land + '</div>' +
+                                '<div class="popup-icons">' +
+                                    '<span class="' + flugClass + '">✈️</span>' +
+                                    '<span class="' + joggenClass + '">🏃</span>' +
+                                    '<span class="' + fussballClass + '">⚽️</span>' +
+                                '</div>' +
+                            '</div>';
+
+                            layer.bindPopup(html);
                         } else {
                             var name = feature.properties.name
                                     || feature.properties.ADMIN
