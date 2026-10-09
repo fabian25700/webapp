@@ -116,19 +116,31 @@
             width: 100%;
         }
 
-        /* Feature Emojis im Popup */
+        /* Popup Styles */
+        .popup-content {
+            font-size: 0.95rem;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        .popup-title {
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-size: 1.05rem;
+        }
+
         .popup-icons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
             font-size: 1.25rem;
             margin-top: 4px;
-            display: flex;
-            gap: 8px;
-            align-items: center;
         }
 
         .icon-disabled {
             opacity: 0.25;
             filter: grayscale(100%);
-            display: inline-block;
         }
 
         /* Leaflet Popup Dark Mode */
@@ -140,9 +152,6 @@
             }
             .leaflet-popup-tip {
                 background: #1e293b;
-            }
-            .leaflet-popup-content b {
-                color: #f1f5f9;
             }
         }
     </style>
@@ -168,7 +177,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Freie Tile-Server, die absolut keinen API Key benoetigen
+        // Freier Tile-Server ohne API Key (OSM / Esri)
         var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         var tileUrl = isDark
             ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
@@ -182,15 +191,14 @@
         });
 
         L.tileLayer(tileUrl, {
-            maxZoom: 18,
-            subdomains: 'abc'
+            maxZoom: 10
         }).addTo(map);
 
         // Lookup-Map für schnellen Zugriff (ISO-Code → Reisedaten)
         var reiseMap = {};
         if (typeof MEINE_REISEN !== 'undefined') {
             MEINE_REISEN.forEach(function(r) {
-                if (r.id) reiseMap[r.id.toUpperCase()] = r;
+                reiseMap[r.id.toUpperCase()] = r;
             });
         }
 
@@ -205,8 +213,7 @@
             var geoName = (p.name || p.ADMIN || p.NAME || '').toString().toLowerCase().trim();
             if (typeof MEINE_REISEN !== 'undefined') {
                 return MEINE_REISEN.find(function(r) {
-                    return (r.name_en && r.name_en.toLowerCase().trim() === geoName) ||
-                           (r.Land && r.Land.toLowerCase().trim() === geoName);
+                    return r.name_en.toLowerCase().trim() === geoName;
                 }) || null;
             }
             return null;
@@ -231,24 +238,27 @@
                     onEachFeature: function(feature, layer) {
                         var info = findeLand(feature);
                         if (info) {
-                            var flagge = info.flagge || info.id || '';
+                            var flagge = info.flagge || info.id;
+                            
+                            // Logik basierend auf daten.js
+                            var hatFlug = info.FluegeAnkunft > 0;
+                            var hatJoggen = (info.km_gejoggt > 0) || (info.Joggen > 0);
+                            var hatFussball = (info.Fussball === "ja" || info.Fussball === "Ja" || info.Fussball === true);
 
-                            var hasFluege = (info.FluegeAnkunft > 0) || (info.Fluege > 0) || (info.Flüge > 0);
-                            var hasJoggen = (info.km_gejoggt > 0) || (info.Joggen > 0);
-                            var hasFussball = (info.Fussball === 'Ja' || info.Fussball === true || info.Fußball === 'Ja' || info.Fußball === true || info.fussball > 0);
+                            var flugClass = hatFlug ? '' : 'icon-disabled';
+                            var joggenClass = hatJoggen ? '' : 'icon-disabled';
+                            var fussballClass = hatFussball ? '' : 'icon-disabled';
 
-                            var flyClass = hasFluege ? '' : 'icon-disabled';
-                            var runClass = hasJoggen ? '' : 'icon-disabled';
-                            var ballClass = hasFussball ? '' : 'icon-disabled';
-
-                            var popupContent = '<b>' + flagge + ' ' + info.Land + '</b><br>' +
+                            var html = '<div class="popup-content">' +
+                                '<div class="popup-title">' + flagge + ' ' + info.Land + '</div>' +
                                 '<div class="popup-icons">' +
-                                '<span class="' + flyClass + '">✈️</span>' +
-                                '<span class="' + runClass + '">🏃</span>' +
-                                '<span class="' + ballClass + '">⚽️</span>' +
-                                '</div>';
+                                    '<span class="' + flugClass + '">✈️</span>' +
+                                    '<span class="' + joggenClass + '">🏃</span>' +
+                                    '<span class="' + fussballClass + '">⚽️</span>' +
+                                '</div>' +
+                            '</div>';
 
-                            layer.bindPopup(popupContent);
+                            layer.bindPopup(html);
                         } else {
                             var name = feature.properties.name
                                     || feature.properties.ADMIN
