@@ -17,7 +17,7 @@
             --border: #e2e8f0;
             --border-light: #f1f5f9;
             --shadow: 0 2px 8px rgba(0,0,0,0.06);
-            --map-bg: #cbd5e1;
+            --map-bg: #e2e8f0;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -29,7 +29,7 @@
                 --border: #2d3f55;
                 --border-light: #253347;
                 --shadow: 0 2px 8px rgba(0,0,0,0.4);
-                --map-bg: #111827;
+                --map-bg: #0f172a;
             }
         }
 
@@ -185,9 +185,11 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        // Fastly CDN Endpunkte ohne API-Key Limitierungen
         var tileUrl = isDark
-            ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
-            : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+            ? 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_nolabels/{z}/{x}/{y}.png'
+            : 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_nolabels/{z}/{x}/{y}.png';
 
         var map = L.map('map', {
             center: [25, 10],
@@ -196,13 +198,12 @@
             maxZoom: 10,
             zoomControl: true,
             attributionControl: false,
-            maxBounds: [[-85, -180], [85, 180]],
-            maxBoundsViscosity: 1.0
+            worldCopyJump: true
         });
 
         L.tileLayer(tileUrl, {
             maxZoom: 10,
-            noWrap: true
+            subdomains: 'abcd'
         }).addTo(map);
 
         // Lookup-Map für schnellen Zugriff (ISO-Code → Reisedaten)
