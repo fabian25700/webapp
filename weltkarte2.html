@@ -3,153 +3,264 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Expansion Map | Analytics</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Weltkarte</title>
     <script src="daten.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
-            --apple-blue: #0071e3;
-            --bg: #f5f5f7;
-            --text: #1d1d1f;
-            --glass: rgba(255, 255, 255, 0.85);
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
-        @media (prefers-color-scheme: dark) {
-            :root { --bg: #000000; --text: #f5f5f7; --glass: rgba(28, 28, 30, 0.9); }
-        }
-        body, html { margin: 0; padding: 0; height: 100vh; font-family: -apple-system, sans-serif; background: var(--bg); overflow: hidden; }
-        #map { width: 100%; height: 100%; z-index: 1; background: var(--bg); }
 
-        .ui-element {
-            position: fixed; z-index: 1000;
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            background: var(--glass); border-radius: 18px; padding: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.15); color: var(--text);
-            border: 1px solid rgba(255,255,255,0.1);
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: #2d3f55;
+                --border-light: #253347;
+                --shadow: 0 2px 8px rgba(0,0,0,0.4);
+            }
         }
-        .stats-card { bottom: 110px; left: 20px; min-width: 140px; }
-        .slider-card { bottom: 30px; left: 20px; right: 20px; display: flex; align-items: center; gap: 15px; }
-        
-        header { position: fixed; top: 0; width: 100%; padding: 15px; z-index: 1000; display: flex; align-items: center; pointer-events: none; }
-        .back-btn { background: var(--glass); padding: 8px 15px; border-radius: 12px; text-decoration: none; color: var(--text); font-weight: 600; pointer-events: auto; }
-        
-        input[type=range] { flex: 1; -webkit-appearance: none; background: rgba(120,120,120,0.3); height: 4px; border-radius: 2px; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: var(--apple-blue); border: 3px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            height: -webkit-fill-available;
+            overflow: hidden;
+        }
+
+        /* ── Header ── */
+        header {
+            background: var(--surface);
+            padding: calc(env(safe-area-inset-top) + 14px) 16px 12px;
+            border-bottom: 1px solid var(--border-light);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+            box-shadow: var(--shadow);
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            text-decoration: none;
+            font-size: 1rem;
+            color: var(--text-primary);
+            box-shadow: var(--shadow);
+            flex-shrink: 0;
+            transition: all 0.15s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .back-btn:active { transform: scale(0.92); opacity: 0.7; }
+
+        .header-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        /* ── Legende ── */
+        .legend {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .legend-dot.visited  { background: #2ecc71; }
+        .legend-dot.not-visited { background: #e74c3c; opacity: 0.5; }
+
+        /* ── Karte ── */
+        #map {
+            flex: 1;
+            width: 100%;
+        }
+
+        /* Feature Emojis im Popup */
+        .popup-icons {
+            font-size: 1.25rem;
+            margin-top: 4px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .icon-disabled {
+            opacity: 0.25;
+            filter: grayscale(100%);
+            display: inline-block;
+        }
+
+        /* Leaflet Popup Dark Mode */
+        @media (prefers-color-scheme: dark) {
+            .leaflet-popup-content-wrapper {
+                background: #1e293b;
+                color: #f1f5f9;
+                border: 1px solid #2d3f55;
+            }
+            .leaflet-popup-tip {
+                background: #1e293b;
+            }
+            .leaflet-popup-content b {
+                color: #f1f5f9;
+            }
+        }
     </style>
 </head>
 <body>
 
     <header>
         <a href="reise_stats.html" class="back-btn">←</a>
-        <div id="year-label" style="margin-left: auto; font-weight: 800; color: var(--apple-blue); background: var(--glass); padding: 8px 20px; border-radius: 12px; pointer-events: auto;">2026</div>
+        <div class="header-title">Meine Weltkarte</div>
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-dot visited"></div>
+                <span>Besucht</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-dot not-visited"></div>
+                <span>Nicht besucht</span>
+            </div>
+        </div>
     </header>
 
     <div id="map"></div>
 
-    <div class="stats-card ui-element">
-        <div style="font-size: 10px; text-transform: uppercase; opacity: 0.6; letter-spacing: 1px;">Erschließungsgrad</div>
-        <div id="global-percent" style="font-size: 26px; font-weight: 800; color: var(--apple-blue);">0.0%</div>
-    </div>
-
-    <div class="slider-card ui-element">
-        <span style="font-size: 12px; font-weight: 700;">2000</span>
-        <input type="range" id="year-slider" min="2000" max="2026" value="2026" step="1">
-        <span style="font-size: 12px; font-weight: 700;">HEUTE</span>
-    </div>
-
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        // Apple Maps Style (Grau/Blau/Weiß)
-        const tileUrl = isDark 
-            ? 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png' 
-            : 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png';
+        // Freie Tile-Server, die absolut keinen API Key benoetigen
+        var isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        var tileUrl = isDark
+            ? 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}'
+            : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
-        const map = L.map('map', { 
-            center: [25, 10], 
-            zoom: 2.5, 
-            zoomControl: false, 
-            attributionControl: false,
-            maxBounds: [[-90, -180], [90, 180]]
+        var map = L.map('map', {
+            center: [25, 10],
+            zoom: 2,
+            zoomControl: true,
+            attributionControl: false
         });
-        
-        L.tileLayer(tileUrl).addTo(map);
 
-        let geoLayer;
-        let currentYear = 2026;
+        L.tileLayer(tileUrl, {
+            maxZoom: 18,
+            subdomains: 'abc'
+        }).addTo(map);
 
-        // --- Logik für "Saftiges Grün" (Top 20%) ---
-        function getFarbe(n) {
-            const nights = MEINE_REISEN.map(r => r.Übernachtungen);
-            const maxN = Math.max(...nights);
-            const minN = Math.min(...nights);
-            const range = maxN - minN;
-            
-            if (n >= minN + range * 0.8) return '#1a7a3a'; // Top-Tier (z.B. Deutschland)
-            if (n >= minN + range * 0.6) return '#2ecc71';
-            if (n >= minN + range * 0.4) return '#58d68d';
-            if (n >= minN + range * 0.2) return '#82e0aa';
-            return '#abebc6'; // Single Nights
+        // Lookup-Map für schnellen Zugriff (ISO-Code → Reisedaten)
+        var reiseMap = {};
+        if (typeof MEINE_REISEN !== 'undefined') {
+            MEINE_REISEN.forEach(function(r) {
+                if (r.id) reiseMap[r.id.toUpperCase()] = r;
+            });
         }
 
-        function style(feature) {
-            const iso = (feature.properties.ISO_A2 || feature.properties.iso_a2 || "").toUpperCase();
-            const data = MEINE_REISEN.find(r => r.id.toUpperCase() === iso);
-            
-            // Nur anzeigen, wenn Einreisejahr <= gewähltes Slider-Jahr
-            const isVisible = data && data["erste Einreise"] <= currentYear;
-            
+        function findeLand(feature) {
+            var p = feature.properties;
+            var geoID = (p.ISO_A2 || p.iso_a2 || p.ISO_A2_EH || feature.id || '')
+                .toString().toUpperCase().trim();
+
+            if (reiseMap[geoID]) return reiseMap[geoID];
+
+            // Fallback: Name-Vergleich
+            var geoName = (p.name || p.ADMIN || p.NAME || '').toString().toLowerCase().trim();
+            if (typeof MEINE_REISEN !== 'undefined') {
+                return MEINE_REISEN.find(function(r) {
+                    return (r.name_en && r.name_en.toLowerCase().trim() === geoName) ||
+                           (r.Land && r.Land.toLowerCase().trim() === geoName);
+                }) || null;
+            }
+            return null;
+        }
+
+        function getStyle(feature) {
+            var gefunden = findeLand(feature);
             return {
-                fillColor: isVisible ? getFarbe(data.Übernachtungen) : (isDark ? '#1a1a1e' : '#e0e0e2'),
-                fillOpacity: isVisible ? 0.9 : 0.4,
-                weight: 0.8,
-                color: isDark ? '#000' : '#fff'
+                fillColor:   gefunden ? '#2ecc71' : '#e74c3c',
+                fillOpacity: gefunden ? 0.75 : 0.22,
+                weight:      0.8,
+                color:       isDark ? '#1e293b' : '#ffffff',
+                opacity:     1
             };
         }
 
-        function updateUI() {
-            if (geoLayer) geoLayer.setStyle(style);
-            
-            const visibleCount = MEINE_REISEN.filter(r => r["erste Einreise"] <= currentYear).length;
-            const percent = ((visibleCount / 195) * 100).toFixed(1);
-            
-            document.getElementById('global-percent').innerText = `${percent}%`;
-            document.getElementById('year-label').innerText = currentYear;
-        }
-
-        // --- GeoData laden ---
         fetch('https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
-            .then(res => res.json())
-            .then(data => {
-                geoLayer = L.geoJSON(data, {
-                    style: style,
-                    onEachFeature: (f, l) => {
-                        l.on('click', (e) => {
-                            const iso = (f.properties.ISO_A2 || f.properties.iso_a2 || "").toUpperCase();
-                            const d = MEINE_REISEN.find(r => r.id.toUpperCase() === iso);
-                            
-                            if (d && d["erste Einreise"] <= currentYear) {
-                                L.popup()
-                                    .setLatLng(e.latlng)
-                                    .setContent(`
-                                        <div style="font-family:-apple-system; padding:5px;">
-                                            <span style="font-size:18px;">${d.flagge}</span> <b>${d.Land}</b><br>
-                                            <small style="color:#666;">Seit ${d["erste Einreise"]}</small><br>
-                                            <b>${d.Übernachtungen}</b> Nächte
-                                        </div>
-                                    `)
-                                    .openOn(map);
-                            }
-                        });
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                L.geoJSON(data, {
+                    style: getStyle,
+                    onEachFeature: function(feature, layer) {
+                        var info = findeLand(feature);
+                        if (info) {
+                            var flagge = info.flagge || info.id || '';
+
+                            var hasFluege = (info.FluegeAnkunft > 0) || (info.Fluege > 0) || (info.Flüge > 0);
+                            var hasJoggen = (info.km_gejoggt > 0) || (info.Joggen > 0);
+                            var hasFussball = (info.Fussball === 'Ja' || info.Fussball === true || info.Fußball === 'Ja' || info.Fußball === true || info.fussball > 0);
+
+                            var flyClass = hasFluege ? '' : 'icon-disabled';
+                            var runClass = hasJoggen ? '' : 'icon-disabled';
+                            var ballClass = hasFussball ? '' : 'icon-disabled';
+
+                            var popupContent = '<b>' + flagge + ' ' + info.Land + '</b><br>' +
+                                '<div class="popup-icons">' +
+                                '<span class="' + flyClass + '">✈️</span>' +
+                                '<span class="' + runClass + '">🏃</span>' +
+                                '<span class="' + ballClass + '">⚽️</span>' +
+                                '</div>';
+
+                            layer.bindPopup(popupContent);
+                        } else {
+                            var name = feature.properties.name
+                                    || feature.properties.ADMIN
+                                    || 'Unbekannt';
+                            layer.bindPopup('<b>' + name + '</b><br><span style="color:#94a3b8;">Noch nicht besucht</span>');
+                        }
                     }
                 }).addTo(map);
-                updateUI();
+            })
+            .catch(function(err) {
+                console.error('GeoJSON Ladefehler:', err);
             });
-
-        // Slider Event
-        document.getElementById('year-slider').addEventListener('input', (e) => {
-            currentYear = parseInt(e.target.value);
-            updateUI();
-        });
     </script>
 </body>
 </html>
