@@ -260,14 +260,6 @@
         }
 
         /* Stats Dashboard Layout */
-        .kpi-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        .kpi-card {
-            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
-            padding: 12px; box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; height: 95px;
-        }
-        .kpi-value { font-size: 1.35rem; font-weight: 800; color: var(--text-primary); }
-        .kpi-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
-
         .section-block { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px; }
         .block-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
 
@@ -345,6 +337,10 @@
         </div>
 
         <div class="form-grid">
+            <div class="form-group full" id="modal-size-select-container" style="display:none;">
+                <label for="modal-drink-size-select">Größe wählen</label>
+                <select id="modal-drink-size-select"></select>
+            </div>
             <div class="form-group full">
                 <label for="modal-anlass-name">Anlass Name</label>
                 <input type="text" id="modal-anlass-name" placeholder="z.B. Bremen (A)">
@@ -469,17 +465,6 @@
     </div>
 
     <div id="view-stats" class="view-section">
-        <div class="kpi-grid">
-            <div class="kpi-card">
-                <div class="kpi-value" id="kpi-today">0,00 L</div>
-                <div class="kpi-label">Heute Gesamt</div>
-            </div>
-            <div class="kpi-card">
-                <div class="kpi-value" id="kpi-streak">0 Tage</div>
-                <div class="kpi-label">Nüchtern-Konto</div>
-            </div>
-        </div>
-
         <div class="section-block">
             <div class="block-title">Letzte 5 Events</div>
             <div id="last-events-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
@@ -685,17 +670,45 @@
 
         keys.forEach(cat => {
             const icon = categoryIcons[cat] || "🥤";
-            let drinksHtml = categorized[cat].map(drink => {
-                return `
-                    <div class="drink-card" onclick="openQuickLogModal('${drink.name}', '${drink.kategorie}', '${drink.groesse}')">
-                        <div class="drink-info">
-                            <span class="drink-name">${drink.name}</span>
-                            <span class="drink-size">${parseFloat(drink.groesse).toFixed(2)} L</span>
+            
+            // Gruppiere nach Namen innerhalb der Kategorie, um identische Namen zusammenzufassen
+            const nameGroups = {};
+            categorized[cat].forEach(drink => {
+                if (!nameGroups[drink.name]) {
+                    nameGroups[drink.name] = [];
+                }
+                nameGroups[drink.name].push(drink.groesse);
+            });
+
+            let drinksHtml = '';
+            Object.keys(nameGroups).forEach(drinkName => {
+                const sizes = nameGroups[drinkName];
+                const sizesJson = JSON.stringify(sizes).replace(/"/g, '&quot;');
+                
+                if (sizes.length === 1) {
+                    const singleSize = sizes[0];
+                    drinksHtml += `
+                        <div class="drink-card" onclick="openQuickLogModal('${drinkName}', '${cat}', '${singleSize}')">
+                            <div class="drink-info">
+                                <span class="drink-name">${drinkName}</span>
+                                <span class="drink-size">${parseFloat(singleSize).toFixed(2)} L</span>
+                            </div>
+                            <div class="plus-btn">+</div>
                         </div>
-                        <div class="plus-btn">+</div>
-                    </div>
-                `;
-            }).join('');
+                    `;
+                } else {
+                    const sizeLabels = sizes.map(s => `${parseFloat(s).toFixed(2)} L`).join(', ');
+                    drinksHtml += `
+                        <div class="drink-card" onclick="openMultiSizeModal('${drinkName}', '${cat}', ${sizesJson})">
+                            <div class="drink-info">
+                                <span class="drink-name">${drinkName}</span>
+                                <span class="drink-size">${sizeLabels}</span>
+                            </div>
+                            <div class="plus-btn">+</div>
+                        </div>
+                    `;
+                }
+            });
 
             container.innerHTML += `
                 <div class="category-group">
@@ -709,10 +722,41 @@
         });
     }
 
+    function openMultiSizeModal(name, kategorie, sizes) {
+        activeModalDrink = { name, kategorie, sizes };
+        document.getElementById('modal-drink-title').textContent = `${name} auswählen`;
+        
+        const sizeContainer = document.getElementById('modal-size-select-container');
+        const sizeSelect = document.getElementById('modal-drink-size-select');
+        sizeSelect.innerHTML = '';
+        sizes.forEach(s => {
+            sizeSelect.innerHTML += `<option value="${s}">${parseFloat(s).toFixed(2)} Liter</option>`;
+        });
+        sizeContainer.style.display = "flex";
+
+        document.getElementById('modal-anlass-name').value = "";
+        document.getElementById('modal-anlass-kategorie').value = "";
+        document.getElementById('modal-anlass-kategorie-neu').value = "";
+
+        const todayEntries = globalHistory.filter(item => item.anlass_name && item.anlass_name.trim() !== "");
+        const suggBox = document.getElementById('modal-suggestion-box');
+        
+        if (todayEntries.length > 0) {
+            const last = todayEntries[todayEntries.length - 1];
+            document.getElementById('modal-use-last-btn').textContent = `"${last.anlass_name}" (${last.anlass_kategorie}) übernehmen`;
+            suggBox.style.display = "block";
+        } else {
+            suggBox.style.display = "none";
+        }
+
+        document.getElementById('quick-log-modal').classList.add('active');
+    }
+
     function openQuickLogModal(name, kategorie, groesse) {
-        activeModalDrink = { name, kategorie, groesse };
+        activeModalDrink = { name, kategorie, groesse: [groesse] };
         document.getElementById('modal-drink-title').textContent = `${name} (${parseFloat(groesse).toFixed(2)} L)`;
         
+        document.getElementById('modal-size-select-container').style.display = "none";
         document.getElementById('modal-anlass-name').value = "";
         document.getElementById('modal-anlass-kategorie').value = "";
         document.getElementById('modal-anlass-kategorie-neu').value = "";
@@ -756,7 +800,15 @@
 
         const name = activeModalDrink.name;
         const kategorie = activeModalDrink.kategorie;
-        const groesse = activeModalDrink.groesse;
+        
+        let groesse = "";
+        const sizeContainer = document.getElementById('modal-size-select-container');
+        if (sizeContainer.style.display !== "none") {
+            groesse = document.getElementById('modal-drink-size-select').value;
+        } else {
+            groesse = activeModalDrink.groesse[0];
+        }
+
         const regelmaessig = "ja";
 
         const aName = document.getElementById('modal-anlass-name').value.trim();
@@ -1027,17 +1079,6 @@
     }
 
     function calculateStats() {
-        let todayVolume = 0;
-        globalHistory.forEach(item => {
-            if (isTodayEntry(item.datum)) {
-                const numSize = Number(item.groesse);
-                if (!isNaN(numSize)) {
-                    todayVolume += numSize;
-                }
-            }
-        });
-        document.getElementById('kpi-today').textContent = `${todayVolume.toFixed(2).replace('.', ',')} L`;
-
         /* Letzte 5 Events aufbauen */
         const lastEventsContainer = document.getElementById('last-events-container');
         lastEventsContainer.innerHTML = '';
@@ -1111,18 +1152,6 @@
                 `;
             });
         }
-
-        let currentStreak = 0;
-        if (globalHistory.length > 0) {
-            let checkDate = new Date();
-            for (let i = 0; i < 365; i++) {
-                const checkDateStr = formatDateToString(checkDate);
-                const hasEntries = globalHistory.some(item => isTodayEntry(item.datum));
-                if (!hasEntries) { currentStreak++; checkDate.setDate(checkDate.getDate() - 1); } 
-                else { break; }
-            }
-        }
-        document.getElementById('kpi-streak').textContent = `${currentStreak} Tage`;
 
         const counts = {};
         const drinkCatCounts = {};
