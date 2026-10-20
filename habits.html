@@ -318,6 +318,33 @@
         .switch-tab { flex: 1; text-align: center; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); padding: 7px 4px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
         .switch-tab.active { background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow); }
 
+        .whoop-card {
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .whoop-metrics-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+        }
+        .whoop-metric-box {
+            background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+            padding: 10px 12px; display: flex; flex-direction: column; gap: 4px;
+        }
+        .whoop-metric-label {
+            font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary);
+        }
+        .whoop-metric-value {
+            font-size: 1.25rem; font-weight: 800; line-height: 1;
+        }
+        .whoop-metric-sub {
+            font-size: 0.7rem; font-weight: 600; color: var(--text-secondary);
+        }
+        .whoop-delta-badge {
+            display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 8px;
+            font-size: 0.72rem; font-weight: 800; width: fit-content;
+        }
+        .whoop-delta-badge.up { background: var(--success-soft); color: var(--success); }
+        .whoop-delta-badge.down { background: var(--danger-soft); color: var(--danger); }
+        .whoop-delta-badge.neutral { background: var(--border-light); color: var(--text-secondary); }
+
         .matrix-grid { display: flex; flex-direction: column; gap: 8px; width: 100%; }
         .matrix-row { display: flex; align-items: center; width: 100%; height: 28px; }
         
@@ -435,6 +462,20 @@
     </div>
 
     <div id="view-stats" class="view-section">
+        <!-- WHOOP-STYLE BENCHMARK CARD GANZ OBEN -->
+        <div class="section-block">
+            <div class="switch-header">
+                <div class="switch-tab active" onclick="switchBlock('whoop', 'all')">Gesamt Momentum</div>
+                <div class="switch-tab" onclick="switchBlock('whoop', 'tdr')">2-Day Rule Focus</div>
+            </div>
+            <div id="content-whoop-all" class="switch-content active">
+                <div class="whoop-card" id="whoop-container-all"></div>
+            </div>
+            <div id="content-whoop-tdr" class="switch-content">
+                <div class="whoop-card" id="whoop-container-tdr"></div>
+            </div>
+        </div>
+
         <div class="section-block">
             <div class="switch-header">
                 <div class="switch-tab active" onclick="switchBlock('mid', 'domino')">Kausalitäten</div>
@@ -552,7 +593,11 @@
         tabs.forEach(tab => tab.classList.remove('active'));
         event.target.classList.add('active');
 
-        if (position === 'top') {
+        if (position === 'whoop') {
+            document.getElementById('content-whoop-all').classList.remove('active');
+            document.getElementById('content-whoop-tdr').classList.remove('active');
+            document.getElementById('content-whoop-' + type).classList.add('active');
+        } else if (position === 'top') {
             document.getElementById('content-matrix').classList.remove('active');
             document.getElementById('content-perf').classList.remove('active');
             document.getElementById('content-' + type).classList.add('active');
@@ -1050,7 +1095,127 @@
         });
     }
 
+    // BERECHNUNG DES WHOOP-STYLE PERFORMANCE CODES (14-TAGE VS. 90-TAGE BASELINE MIT RELATIVER KETTEN-GEWICHTUNG)
+    function computeWhoopBenchmark(historyArray, targetRoutines) {
+        const today = new Date();
+        const dateMap = {};
+
+        historyArray.forEach(row => {
+            if (row.datum) {
+                dateMap[row.datum] = row;
+            }
+        });
+
+        function getSliceData(daysCount) {
+            let totalPossibleChecks = 0;
+            let rawSuccessfulChecks = 0;
+            
+            // Zur relativen Ketten-Gewichtung: Wir tracken ununterbrochene Erfolgsketten pro Routine
+            let totalWeightedScore = 0;
+
+            targetRoutines.forEach(routine => {
+                let currentChain = 0;
+                let routineTotal = 0;
+                let routineSuccess = 0;
+
+                // Wir iterieren chronologisch von vor X Tagen bis heute
+                for (let i = daysCount - 1; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(today.getDate() - i);
+                    const dStr = formatDateToString(d);
+                    const dayData = dateMap[dStr];
+
+                    totalPossibleChecks++;
+                    routineTotal++;
+
+                    let isJa = false;
+                    if (dayData && dayData.routinen && dayData.routinen[routine]) {
+                        if (dayData.routinen[routine].toLowerCase() === "ja") {
+                            isJa = true;
+                        }
+                    }
+
+                    if (isJa) {
+                        rawSuccessfulChecks++;
+                        routineSuccess++;
+                        currentChain++;
+                        
+                        // KETTEN-GEWICHTUNG (RELATIV ZUR FENSTERLÄNGE):
+                        // Je länger die ununterbrochene Kette im Verhältnis zur gesamten Fensterlänge (daysCount) ist, 
+                        // desto höher der Multiplikator (Bonus bis zu +25% für perfekte Kontinuität)
+                        const relativeChainRatio = Math.min(1.0, currentChain / daysCount);
+                        const chainBonusMultiplier = 1.0 + (0.25 * relativeChainRatio);
+                        totalWeightedScore += chainBonusMultiplier;
+                    } else {
+                        currentChain = 0; // Kettenbruch
+                    }
+                }
+            });
+
+            const rawPct = totalPossibleChecks > 0 ? (rawSuccessfulChecks / totalPossibleChecks) * 100 : 0;
+            const weightedPct = totalPossibleChecks > 0 ? Math.min(100, (totalWeightedScore / totalPossibleChecks) * 100) : 0;
+
+            return {
+                rawPct: Math.round(rawPct),
+                weightedPct: Math.round(weightedPct * 10) / 10,
+                daysCount: daysCount
+            };
+        }
+
+        const stats14 = getSliceData(14);
+        const stats90 = getSliceData(90);
+
+        const delta = Math.round((stats14.weightedPct - stats90.weightedPct) * 10) / 10;
+
+        return {
+            stats14,
+            stats90,
+            delta
+        };
+    }
+
+    function renderWhoopSection(historyArray) {
+        const whoopAll = computeWhoopBenchmark(historyArray, routineNamesOrdered);
+        const whoopTdr = computeWhoopBenchmark(historyArray, ["TwoDayRule"]);
+
+        function buildWhoopHtml(data, titleLabel) {
+            let badgeClass = "neutral";
+            let deltaSymbol = "►";
+            if (data.delta > 0) { badgeClass = "up"; deltaSymbol = "▲ +"; }
+            else if (data.delta < 0) { badgeClass = "down"; deltaSymbol = "▼ "; }
+
+            let statusText = "Stabil auf Baseline-Niveau";
+            if (data.delta >= 3.0) statusText = "Hohes Momentum — Ketten-Stabilität stark";
+            else if (data.delta <= -3.0) statusText = "Achtung — Ketten-Integrität schwindet";
+
+            return `
+                <div class="whoop-metrics-grid">
+                    <div class="whoop-metric-box">
+                        <span class="whoop-metric-label">14-Tage Momentum</span>
+                        <span class="whoop-metric-value" style="color: var(--accent);">${data.stats14.weightedPct}%</span>
+                        <span class="whoop-metric-sub">Raw: ${data.stats14.rawPct}% Erfüllung</span>
+                    </div>
+                    <div class="whoop-metric-box">
+                        <span class="whoop-metric-label">90-Tage Baseline</span>
+                        <span class="whoop-metric-value">${data.stats90.weightedPct}%</span>
+                        <span class="whoop-metric-sub">Raw: ${data.stats90.rawPct}% Erfüllung</span>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
+                    <span class="whoop-delta-badge ${badgeClass}">${deltaSymbol}${data.delta}% vs. 3M Baseline</span>
+                    <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-align: right;">${statusText}</span>
+                </div>
+            `;
+        }
+
+        document.getElementById('whoop-container-all').innerHTML = buildWhoopHtml(whoopAll, "Alle Routinen");
+        document.getElementById('whoop-container-tdr').innerHTML = buildWhoopHtml(whoopTdr, "2-Day Rule Focus");
+    }
+
     function renderDashboard(historyArray) {
+        // 1. Whoop-Sectionrendern (ganz oben im Stats-Tab)
+        renderWhoopSection(historyArray);
+
         const allKeysWithTdr = ["Schlafroutine", "Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "TwoDayRule"];
         
         const totalMatrixDays = 7;
