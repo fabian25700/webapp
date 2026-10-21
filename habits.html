@@ -2,9 +2,13 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#f0f2f5">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="manifest" href="manifest.json">
     <title>Routinen</title>
     <style>
         :root {
@@ -296,7 +300,7 @@
         }
         .category-header:active { background: var(--border-light); }
 
-        .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; flex: 1; }
+        .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
         .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
         
         .category-meta { display: flex; align-items: center; gap: 6px; margin-left: auto; margin-right: 12px; flex-shrink: 0; }
@@ -478,10 +482,15 @@
         <div class="category-group" data-routine="TwoDayRule" id="routine-block-TwoDayRule">
             <div class="category-header" style="cursor: default;">
                 <div class="category-title"><div class="category-icon">⚡</div><span>2-Day Rule</span></div>
-                <div class="category-meta">
-                    <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-heute"></span></div>
-                    <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-gestern"></span></div>
-                    <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-vorgestern"></span></div>
+                <div class="category-meta" style="gap: 16px; align-items: center;">
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+                        <span style="font-size: 0.65rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;" id="tdr-status-label">Current</span>
+                        <span style="font-size: 0.9rem; font-weight: 800;" id="tdr-text-value">0 Tage</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;" id="tdr-right-block">
+                        <span style="font-size: 0.65rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Best</span>
+                        <span style="font-size: 0.9rem; font-weight: 800; color: var(--text-secondary);" id="tdr-best-value">0</span>
+                    </div>
                 </div>
                 <div class="arrow" style="visibility: hidden;">▼</div>
             </div>
@@ -726,6 +735,7 @@
         activeContainer.innerHTML = '';
         
         const savedStates = getSavedStates();
+        const isMobile = window.innerWidth <= 768;
         
         routineNamesOrdered.forEach((routineName, groupIdx) => {
             const config = ROUTINE_CONFIG[routineName];
@@ -736,7 +746,6 @@
             const reiseHabits = config.reise || [];
             const krankHabits = config.krank || [];
 
-            // Reihenfolge 1:1 strikt wie in habits_input.js zusammenführen
             const allHabitsCombined = [];
             [homeHabits, sallyHabits, reiseHabits, krankHabits].forEach(list => {
                 list.forEach(habit => {
@@ -776,10 +785,16 @@
                 </div>
             `;
 
+            const displayName = (routineName === "Gesundheitsroutine" && isMobile) ? "Gesundheitsr." : routineName;
+
             activeContainer.innerHTML += `
                 <div class="category-group" data-routine="${routineName}" id="routine-block-${routineName}">
                     <div class="category-header" onclick="toggleGroup(this)">
-                        <div class="category-title"><div class="category-icon">${config.icon}</div><span>${routineName}</span><span id="progress-info-${routineName}" style="font-size: 0.72rem; font-weight: 500; color: var(--text-secondary); margin-left: 6px; text-transform: none; letter-spacing: normal;"></span></div>
+                        <div class="category-title">
+                            <div class="category-icon">${config.icon}</div>
+                            <span>${displayName}</span>
+                            <span id="progress-info-${routineName}" style="font-size: 0.72rem; font-weight: 500; color: var(--text-secondary); margin-left: auto; margin-right: 12px; text-transform: none; letter-spacing: normal; text-align: right; flex-shrink: 0;"></span>
+                        </div>
                         <div class="category-meta">
                             <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-heute"></span></div>
                             <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-gestern"></span></div>
@@ -802,7 +817,6 @@
             const config = ROUTINE_CONFIG[routineName];
             if (!config) return;
 
-            // Die maßgebliche Reihenfolge für den aktuell aktiven Modus
             const activeList = config[currentGlobalMode] || [];
             const categoryContent = group.querySelector('.category-content');
             const closeBtn = categoryContent.querySelector('.close-routine-trigger');
@@ -841,7 +855,6 @@
                 }
             });
 
-            // Re-Sortierung der DOM-Elemente basierend exakt auf activeList
             activeList.forEach(habitText => {
                 cards.forEach(card => {
                     if (card.getAttribute('data-habit-text') === habitText) {
@@ -1028,21 +1041,89 @@
             syncModuleToCloud("TwoDayRule", shouldTdrBeJa ? "ja" : "nein");
         }
 
-        let tdrGesternJa = false;
-        if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen["TwoDayRule"]) {
-            if (yesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrGesternJa = true;
-        }
-        let tdrVorgesternJa = false;
-        if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen["TwoDayRule"]) {
-            if (ereyesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrVorgesternJa = true;
-        }
-
-        if (document.getElementById("dot-TwoDayRule-heute")) document.getElementById("dot-TwoDayRule-heute").className = "yesterday-dot " + (todayData && todayData.routinen && todayData.routinen["TwoDayRule"] && todayData.routinen["TwoDayRule"].toLowerCase() === "ja" ? "ja" : "nein");
-        if (document.getElementById("dot-TwoDayRule-gestern")) document.getElementById("dot-TwoDayRule-gestern").className = "yesterday-dot " + (tdrGesternJa ? "ja" : "nein");
-        if (document.getElementById("dot-TwoDayRule-vorgestern")) document.getElementById("dot-TwoDayRule-vorgestern").className = "yesterday-dot " + (tdrVorgesternJa ? "ja" : "nein");
+        renderTwoDayRuleStreaks(globalHistoryArray);
 
         if (document.getElementById('view-stats').classList.contains('active')) {
             renderDashboard(globalHistoryArray);
+        }
+    }
+
+    function renderTwoDayRuleStreaks(historyArray) {
+        if (!Array.isArray(historyArray) || historyArray.length === 0) return;
+
+        const sortedHistory = [...historyArray].sort((a, b) => {
+            const [da, ma, ya] = a.datum.split('.').map(Number);
+            const [db, mb, yb] = b.datum.split('.').map(Number);
+            return new Date(ya, ma - 1, da) - new Date(yb, mb - 1, db);
+        });
+
+        let currentStreak = 0;
+        let bestStreak = 0;
+        let tempStreak = 0;
+
+        sortedHistory.forEach(item => {
+            const isTdrJa = item.routinen && item.routinen["TwoDayRule"] && item.routinen["TwoDayRule"].toLowerCase() === "ja";
+            if (isTdrJa) {
+                tempStreak++;
+                if (tempStreak > bestStreak) {
+                    bestStreak = tempStreak;
+                }
+            } else {
+                tempStreak = 0;
+            }
+        });
+
+        const today = new Date();
+        let checkDate = new Date(today);
+        let activeStreakCount = 0;
+        
+        while (true) {
+            const dStr = formatDateToString(checkDate);
+            const found = sortedHistory.find(item => item.datum === dStr);
+            const isJa = found && found.routinen && found.routinen["TwoDayRule"] && found.routinen["TwoDayRule"].toLowerCase() === "ja";
+            
+            if (isJa) {
+                activeStreakCount++;
+                checkDate.setDate(checkDate.getDate() - 1);
+            } else {
+                if (activeStreakCount === 0 && checkDate.toDateString() === today.toDateString()) {
+                    checkDate.setDate(checkDate.getDate() - 1);
+                    const yStr = formatDateToString(checkDate);
+                    const yFound = sortedHistory.find(item => item.datum === yStr);
+                    const yIsJa = yFound && yFound.routinen && yFound.routinen["TwoDayRule"] && yFound.routinen["TwoDayRule"].toLowerCase() === "ja";
+                    if (yIsJa) {
+                        activeStreakCount = 1;
+                        checkDate.setDate(checkDate.getDate() - 1);
+                        continue;
+                    }
+                }
+                break;
+            }
+        }
+        currentStreak = Math.max(activeStreakCount, tempStreak);
+        if (bestStreak < currentStreak) bestStreak = currentStreak;
+
+        const textValueEl = document.getElementById('tdr-text-value');
+        const bestValueEl = document.getElementById('tdr-best-value');
+        const rightBlockEl = document.getElementById('tdr-right-block');
+        const statusLabelEl = document.getElementById('tdr-status-label');
+
+        if (textValueEl && bestValueEl && rightBlockEl) {
+            bestValueEl.textContent = `${bestStreak} Tage`;
+
+            if (currentStreak >= bestStreak && bestStreak > 0) {
+                statusLabelEl.textContent = "Peak";
+                statusLabelEl.style.color = "#f1c40f";
+                textValueEl.innerHTML = `${currentStreak} Tage <span style="font-size: 0.65rem; color: #f1c40f; font-weight: 700; margin-left: 2px;">★ ATH</span>`;
+                textValueEl.style.color = "#f1c40f";
+                rightBlockEl.style.display = 'none';
+            } else {
+                statusLabelEl.textContent = "Current";
+                statusLabelEl.style.color = "var(--text-secondary)";
+                textValueEl.style.color = "var(--text-primary)";
+                rightBlockEl.style.display = 'flex';
+                textValueEl.textContent = `${currentStreak} Tage`;
+            }
         }
     }
 
@@ -1054,47 +1135,6 @@
                 document.getElementById('cloud-error-box').style.display = 'none';
                 if (!Array.isArray(historyArray)) return;
                 globalHistoryArray = historyArray;
-
-                const today = new Date();
-                const yesterday = new Date(); yesterday.setDate(today.getDate() - 1);
-                const ereyesterday = new Date(); ereyesterday.setDate(today.getDate() - 2);
-
-                const todayStr = formatDateToString(today);
-                const yesterdayStr = formatDateToString(yesterday);
-                const ereyesterdayStr = formatDateToString(ereyesterday);
-
-                const todayData = historyArray.find(item => item.datum === todayStr);
-                const yesterdayData = historyArray.find(item => item.datum === yesterdayStr);
-                const ereyesterdayData = historyArray.find(item => item.datum === ereyesterdayStr);
-
-                routineNamesOrdered.forEach(routineName => {
-                    const heuteDot = document.getElementById(`dot-${routineName}-heute`);
-                    if (heuteDot) {
-                        let statusHeute = "nein";
-                        if (todayData && todayData.routinen && todayData.routinen[routineName]) {
-                            statusHeute = todayData.routinen[routineName].toLowerCase();
-                        }
-                        heuteDot.className = "yesterday-dot " + statusHeute;
-                    }
-
-                    const gesternDot = document.getElementById(`dot-${routineName}-gestern`);
-                    if (gesternDot) {
-                        let statusGestern = "nein";
-                        if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen[routineName]) {
-                            statusGestern = yesterdayData.routinen[routineName].toLowerCase();
-                        }
-                        gesternDot.className = "yesterday-dot " + statusGestern;
-                    }
-
-                    const vorgesternDot = document.getElementById(`dot-${routineName}-vorgestern`);
-                    if (vorgesternDot) {
-                        let statusVorgestern = "nein";
-                        if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen[routineName]) {
-                            statusVorgestern = ereyesterdayData.routinen[routineName].toLowerCase();
-                        }
-                        vorgesternDot.className = "yesterday-dot " + statusVorgestern;
-                    }
-                });
 
                 updateTwoDayRuleStatus();
                 updateCloudStatus("Cloud synced");
@@ -1135,7 +1175,6 @@
         });
     }
 
-    // BERECHNUNG DES WHOOP-STYLE PERFORMANCE CODES (14-TAGE VS. 90-TAGE BASELINE MIT RELATIVER KETTEN-GEWICHTUNG)
     function computeWhoopBenchmark(historyArray, targetRoutines) {
         const today = new Date();
         const dateMap = {};
@@ -1149,16 +1188,11 @@
         function getSliceData(daysCount) {
             let totalPossibleChecks = 0;
             let rawSuccessfulChecks = 0;
-            
-            // Zur relativen Ketten-Gewichtung: Wir tracken ununterbrochene Erfolgsketten pro Routine
             let totalWeightedScore = 0;
 
             targetRoutines.forEach(routine => {
                 let currentChain = 0;
-                let routineTotal = 0;
-                let routineSuccess = 0;
 
-                // Wir iterieren chronologisch von vor X Tagen bis heute
                 for (let i = daysCount - 1; i >= 0; i--) {
                     const d = new Date();
                     d.setDate(today.getDate() - i);
@@ -1166,7 +1200,6 @@
                     const dayData = dateMap[dStr];
 
                     totalPossibleChecks++;
-                    routineTotal++;
 
                     let isJa = false;
                     if (dayData && dayData.routinen && dayData.routinen[routine]) {
@@ -1177,17 +1210,13 @@
 
                     if (isJa) {
                         rawSuccessfulChecks++;
-                        routineSuccess++;
                         currentChain++;
                         
-                        // KETTEN-GEWICHTUNG (RELATIV ZUR FENSTERLÄNGE):
-                        // Je länger die ununterbrochene Kette im Verhältnis zur gesamten Fensterlänge (daysCount) ist, 
-                        // desto höher der Multiplikator (Bonus bis zu +25% für perfekte Kontinuität)
                         const relativeChainRatio = Math.min(1.0, currentChain / daysCount);
                         const chainBonusMultiplier = 1.0 + (0.25 * relativeChainRatio);
                         totalWeightedScore += chainBonusMultiplier;
                     } else {
-                        currentChain = 0; // Kettenbruch
+                        currentChain = 0;
                     }
                 }
             });
@@ -1253,7 +1282,6 @@
     }
 
     function renderDashboard(historyArray) {
-        // 1. Whoop-Sectionrendern (ganz oben im Stats-Tab)
         renderWhoopSection(historyArray);
 
         const allKeysWithTdr = ["Schlafroutine", "Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "TwoDayRule"];
@@ -1373,7 +1401,7 @@
                     isTimeShifted = false;
                 }
                 
-                if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(triggerRoutine) && targetRoutine !== "Morgenroutine" && triggerRoutine !== "Schlafroutine") {
+                if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(triggerRoutine) && targetRoutine !== "Morgenroutine" && targetRoutine !== "Schlafroutine") {
                     if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(targetRoutine)) {
                         isAllowedPath = true;
                         isTimeShifted = true;
