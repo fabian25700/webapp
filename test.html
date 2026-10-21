@@ -45,7 +45,7 @@
             min-height: 100vh;
             padding-bottom: 40px;
             opacity: 0;
-            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         body.loaded {
@@ -297,25 +297,9 @@
         .category-header:active { background: var(--border-light); }
 
         .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
-        .category-name-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
         
-        /* Feste Breite und rechte Ausrichtung, damit die 3 Klammer-Zahlen perfekt untereinander stehen */
-        .category-progress-info {
-            font-size: 0.72rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            margin-left: auto;
-            margin-right: 8px;
-            text-transform: none;
-            letter-spacing: normal;
-            min-width: 58px;
-            text-align: right;
-            flex-shrink: 0;
-            display: inline-block;
-        }
-
-        .category-meta { display: flex; align-items: center; gap: 6px; margin-right: 12px; flex-shrink: 0; }
+        .category-meta { display: flex; align-items: center; gap: 6px; margin-left: auto; margin-right: 12px; flex-shrink: 0; }
         .status-dot-wrapper { display: flex; flex-direction: column; align-items: center; }
 
         .arrow { font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); flex-shrink: 0; }
@@ -440,41 +424,6 @@
         .switch-content { display: none; }
         .switch-content.active { display: flex; flex-direction: column; }
 
-        /* Styles für die grafischen Streaks bei der Two-Day Rule */
-        .tdr-streaks-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-left: auto;
-            margin-right: 12px;
-            flex-shrink: 0;
-        }
-        .tdr-streak-badge {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 3px 8px;
-            min-width: 42px;
-        }
-        .tdr-streak-label {
-            font-size: 0.55rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-            letter-spacing: 0.03em;
-            line-height: 1;
-        }
-        .tdr-streak-val {
-            font-size: 0.85rem;
-            font-weight: 800;
-            color: var(--accent);
-            line-height: 1.2;
-            margin-top: 2px;
-        }
-
         @media (max-width: 420px) {
             .main-view-switch { width: 150px; }
             .main-switch-btn { font-size: 0.72rem; }
@@ -487,10 +436,6 @@
             .day-label { height: 20px; line-height: 20px; }
         }
     </style>
-    <!-- Fallback-Sicherung falls habits_input.js fehlt oder blockiert -->
-    <script>
-        window.ROUTINE_CONFIG = window.ROUTINE_CONFIG || {};
-    </script>
     <script src="habits_input.js"></script>
 </head>
 <body>
@@ -532,15 +477,21 @@
     <div id="view-tracker" class="view-section active">
         <div class="category-group" data-routine="TwoDayRule" id="routine-block-TwoDayRule">
             <div class="category-header" style="cursor: default;">
-                <div class="category-title"><div class="category-icon">⚡</div><span class="category-name-text">2-Day Rule</span></div>
-                <div class="tdr-streaks-container">
-                    <div class="tdr-streak-badge" title="Current Streak">
-                        <span class="tdr-streak-label">Aktuell</span>
-                        <span class="tdr-streak-val" id="tdr-current-streak">0d</span>
+                <div class="category-title"><div class="category-icon">⚡</div><span>2-Day Rule</span></div>
+                <div class="category-meta" style="gap: 12px;">
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                        <span style="font-size: 0.55rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Current</span>
+                        <div style="display: flex; align-items: center; gap: 3px;">
+                            <span class="yesterday-dot" id="dot-TwoDayRule-heute"></span>
+                            <span class="yesterday-dot" id="dot-TwoDayRule-gestern"></span>
+                            <span class="yesterday-dot" id="dot-TwoDayRule-vorgestern"></span>
+                        </div>
                     </div>
-                    <div class="tdr-streak-badge" title="Best Streak">
-                        <span class="tdr-streak-label">Rekord</span>
-                        <span class="tdr-streak-val" id="tdr-best-streak">0d</span>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                        <span style="font-size: 0.55rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Best</span>
+                        <div style="display: flex; align-items: center; gap: 3px;" id="best-streak-dots-container">
+                            <!-- Wird dynamisch befüllt -->
+                        </div>
                     </div>
                 </div>
                 <div class="arrow" style="visibility: hidden;">▼</div>
@@ -640,13 +591,6 @@
         "Abendroutine": "🌙",
         "TwoDayRule": "⚡"
     };
-
-    function getDisplayRoutineName(routineName) {
-        if (routineName === "Gesundheitsroutine") {
-            return window.innerWidth <= 768 ? "Gesundheitsr." : "Gesundheitsroutine";
-        }
-        return routineName;
-    }
 
     function updateCloudStatus(status) {
         const dot = document.getElementById('cloud-status-dot');
@@ -786,15 +730,6 @@
         });
 
         fetchHistoryStatus();
-        
-        window.addEventListener('resize', () => {
-            routineNamesOrdered.forEach(routineName => {
-                const nameSpan = document.getElementById(`name-text-${routineName}`);
-                if (nameSpan) {
-                    nameSpan.textContent = getDisplayRoutineName(routineName);
-                }
-            });
-        });
     }
 
     function buildDOMFromTemplates() {
@@ -802,9 +737,11 @@
         activeContainer.innerHTML = '';
         
         const savedStates = getSavedStates();
+        const isMobile = window.innerWidth <= 768;
         
         routineNamesOrdered.forEach((routineName, groupIdx) => {
-            const config = (window.ROUTINE_CONFIG && window.ROUTINE_CONFIG[routineName]) || { icon: "🎯", home: [], sally: [], reise: [], krank: [] };
+            const config = ROUTINE_CONFIG[routineName];
+            if (!config) return;
             
             const homeHabits = config.home || [];
             const sallyHabits = config.sally || [];
@@ -850,15 +787,15 @@
                 </div>
             `;
 
-            const displayName = getDisplayRoutineName(routineName);
+            const displayName = (routineName === "Gesundheitsroutine" && isMobile) ? "Gesundheitsr." : routineName;
 
             activeContainer.innerHTML += `
                 <div class="category-group" data-routine="${routineName}" id="routine-block-${routineName}">
                     <div class="category-header" onclick="toggleGroup(this)">
                         <div class="category-title">
                             <div class="category-icon">${config.icon}</div>
-                            <span class="category-name-text" id="name-text-${routineName}">${displayName}</span>
-                            <span class="category-progress-info" id="progress-info-${routineName}"></span>
+                            <span>${displayName}</span>
+                            <span id="progress-info-${routineName}" style="font-size: 0.72rem; font-weight: 500; color: var(--text-secondary); margin-left: auto; margin-right: 12px; text-transform: none; letter-spacing: normal; text-align: right; flex-shrink: 0;"></span>
                         </div>
                         <div class="category-meta">
                             <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-heute"></span></div>
@@ -879,7 +816,7 @@
         
         groups.forEach((group) => {
             const routineName = group.getAttribute('data-routine');
-            const config = window.ROUTINE_CONFIG && window.ROUTINE_CONFIG[routineName];
+            const config = ROUTINE_CONFIG[routineName];
             if (!config) return;
 
             const activeList = config[currentGlobalMode] || [];
@@ -1035,7 +972,7 @@
                     const state = habitState[routineName];
                     if (state) {
                         const needed = Math.ceil(state.total * TARGET_RATIO);
-                        infoSpan.textContent = `(${state.done}/${needed}/${state.total})`;
+                        infoSpan.textContent = `(${state.done} / ${needed} / ${state.total})`;
                     }
                 }
             }
@@ -1119,22 +1056,20 @@
         if (document.getElementById("dot-TwoDayRule-gestern")) document.getElementById("dot-TwoDayRule-gestern").className = "yesterday-dot " + (tdrGesternJa ? "ja" : "nein");
         if (document.getElementById("dot-TwoDayRule-vorgestern")) document.getElementById("dot-TwoDayRule-vorgestern").className = "yesterday-dot " + (tdrVorgesternJa ? "ja" : "nein");
 
-        calculateAndRenderTdrStreaks(historyArray);
+        renderTwoDayRuleStreaks(historyArray);
 
         if (document.getElementById('view-stats').classList.contains('active')) {
             renderDashboard(globalHistoryArray);
         }
     }
 
-    function calculateAndRenderTdrStreaks(historyArray) {
+    function renderTwoDayRuleStreaks(historyArray) {
         if (!Array.isArray(historyArray) || historyArray.length === 0) return;
 
         const sortedHistory = [...historyArray].sort((a, b) => {
-            const partsA = a.datum.split('.');
-            const partsB = b.datum.split('.');
-            const dateA = new Date(partsA[2], partsA[1] - 1, partsA[0]);
-            const dateB = new Date(partsB[2], partsB[1] - 1, partsB[0]);
-            return dateA - dateB;
+            const [da, ma, ya] = a.datum.split('.').map(Number);
+            const [db, mb, yb] = b.datum.split('.').map(Number);
+            return new Date(ya, ma - 1, da) - new Date(yb, mb - 1, db);
         });
 
         let currentStreak = 0;
@@ -1142,8 +1077,8 @@
         let tempStreak = 0;
 
         sortedHistory.forEach(item => {
-            const tdrState = item.routinen && item.routinen["TwoDayRule"] ? item.routinen["TwoDayRule"].toLowerCase() : "nein";
-            if (tdrState === "ja") {
+            const isTdrJa = item.routinen && item.routinen["TwoDayRule"] && item.routinen["TwoDayRule"].toLowerCase() === "ja";
+            if (isTdrJa) {
                 tempStreak++;
                 if (tempStreak > bestStreak) {
                     bestStreak = tempStreak;
@@ -1155,28 +1090,24 @@
 
         const today = new Date();
         let checkDate = new Date(today);
-        let activeStreak = 0;
-
-        const dateMap = {};
-        sortedHistory.forEach(item => {
-            dateMap[item.datum] = item;
-        });
-
-        for (let i = 0; i < 365; i++) {
+        let activeStreakCount = 0;
+        
+        while (true) {
             const dStr = formatDateToString(checkDate);
-            const dayData = dateMap[dStr];
-            const tdrState = dayData && dayData.routinen && dayData.routinen["TwoDayRule"] ? dayData.routinen["TwoDayRule"].toLowerCase() : "nein";
+            const found = sortedHistory.find(item => item.datum === dStr);
+            const isJa = found && found.routinen && found.routinen["TwoDayRule"] && found.routinen["TwoDayRule"].toLowerCase() === "ja";
             
-            if (tdrState === "ja") {
-                activeStreak++;
+            if (isJa) {
+                activeStreakCount++;
                 checkDate.setDate(checkDate.getDate() - 1);
             } else {
-                if (i === 0) {
+                if (activeStreakCount === 0 && checkDate.toDateString() === today.toDateString()) {
                     checkDate.setDate(checkDate.getDate() - 1);
-                    const yesterdayStr = formatDateToString(checkDate);
-                    const yDayData = dateMap[yesterdayStr];
-                    const yTdrState = yDayData && yDayData.routinen && yDayData.routinen["TwoDayRule"] ? yDayData.routinen["TwoDayRule"].toLowerCase() : "nein";
-                    if (yTdrState === "ja") {
+                    const yStr = formatDateToString(checkDate);
+                    const yFound = sortedHistory.find(item => item.datum === yStr);
+                    const yIsJa = yFound && yFound.routinen && yFound.routinen["TwoDayRule"] && yFound.routinen["TwoDayRule"].toLowerCase() === "ja";
+                    if (yIsJa) {
+                        activeStreakCount = 1;
                         checkDate.setDate(checkDate.getDate() - 1);
                         continue;
                     }
@@ -1184,14 +1115,24 @@
                 break;
             }
         }
+        currentStreak = Math.max(activeStreakCount, tempStreak);
 
-        currentStreak = Math.max(activeStreak, tempStreak > 0 && activeStreak === 0 ? 0 : activeStreak);
-        if (bestStreak < currentStreak) bestStreak = currentStreak;
-
-        const currEl = document.getElementById('tdr-current-streak');
-        const bestEl = document.getElementById('tdr-best-streak');
-        if (currEl) currEl.textContent = `${currentStreak}d`;
-        if (bestEl) bestEl.textContent = `${bestStreak}d`;
+        const bestContainer = document.getElementById('best-streak-dots-container');
+        if (bestContainer) {
+            let dotsHtml = '';
+            const maxDotsToDisplay = Math.min(bestStreak, 7);
+            if (maxDotsToDisplay === 0) {
+                dotsHtml = `<span style="font-size: 0.75rem; font-weight: 800; color: var(--text-secondary);">0</span>`;
+            } else {
+                for (let i = 0; i < maxDotsToDisplay; i++) {
+                    dotsHtml += `<span class="yesterday-dot ja" style="width: 6px; height: 6px;"></span>`;
+                }
+                if (bestStreak > 7) {
+                    dotsHtml += `<span style="font-size: 0.6rem; font-weight: 800; color: var(--text-secondary);">+${bestStreak-7}</span>`;
+                }
+            }
+            bestContainer.innerHTML = dotsHtml;
+        }
     }
 
     function fetchHistoryStatus() {
@@ -1300,8 +1241,6 @@
 
             targetRoutines.forEach(routine => {
                 let currentChain = 0;
-                let routineTotal = 0;
-                let routineSuccess = 0;
 
                 for (let i = daysCount - 1; i >= 0; i--) {
                     const d = new Date();
@@ -1310,7 +1249,6 @@
                     const dayData = dateMap[dStr];
 
                     totalPossibleChecks++;
-                    routineTotal++;
 
                     let isJa = false;
                     if (dayData && dayData.routinen && dayData.routinen[routine]) {
@@ -1321,7 +1259,6 @@
 
                     if (isJa) {
                         rawSuccessfulChecks++;
-                        routineSuccess++;
                         currentChain++;
                         
                         const relativeChainRatio = Math.min(1.0, currentChain / daysCount);
@@ -1513,7 +1450,7 @@
                     isTimeShifted = false;
                 }
                 
-                if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(triggerRoutine) && targetRoutine !== "Morgenroutine" && triggerRoutine !== "Schlafroutine") {
+                if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(triggerRoutine) && targetRoutine !== "Morgenroutine" && targetRoutine !== "Schlafroutine") {
                     if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(targetRoutine)) {
                         isAllowedPath = true;
                         isTimeShifted = true;
@@ -1641,13 +1578,7 @@
         });
     }
 
-    window.onload = function() {
-        initApp();
-        // Fallback: Sollte das Skript durch eine fehlende externe Datei hängen, wird nach 600ms trotzdem eingeblendet
-        setTimeout(() => {
-            document.body.classList.add('loaded');
-        }, 600);
-    };
+    window.onload = initApp;
 </script>
 </body>
 </html>
