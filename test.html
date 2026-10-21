@@ -304,7 +304,8 @@
             font-size: 0.72rem;
             font-weight: 500;
             color: var(--text-secondary);
-            margin-left: 6px;
+            margin-left: auto;
+            margin-right: 8px;
             text-transform: none;
             letter-spacing: normal;
             min-width: 55px;
@@ -313,7 +314,7 @@
             display: inline-block;
         }
 
-        .category-meta { display: flex; align-items: center; gap: 6px; margin-left: auto; margin-right: 12px; flex-shrink: 0; }
+        .category-meta { display: flex; align-items: center; gap: 6px; margin-right: 12px; flex-shrink: 0; }
         .status-dot-wrapper { display: flex; flex-direction: column; align-items: center; }
 
         .arrow { font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); flex-shrink: 0; }
@@ -806,7 +807,6 @@
             const reiseHabits = config.reise || [];
             const krankHabits = config.krank || [];
 
-            // Reihenfolge 1:1 strikt wie in habits_input.js zusammenführen
             const allHabitsCombined = [];
             [homeHabits, sallyHabits, reiseHabits, krankHabits].forEach(list => {
                 list.forEach(habit => {
@@ -878,7 +878,6 @@
             const config = ROUTINE_CONFIG[routineName];
             if (!config) return;
 
-            // Die maßgebliche Reihenfolge für den aktuell aktiven Modus
             const activeList = config[currentGlobalMode] || [];
             const categoryContent = group.querySelector('.category-content');
             const closeBtn = categoryContent.querySelector('.close-routine-trigger');
@@ -917,7 +916,6 @@
                 }
             });
 
-            // Re-Sortierung der DOM-Elemente basierend exakt auf activeList
             activeList.forEach(habitText => {
                 cards.forEach(card => {
                     if (card.getAttribute('data-habit-text') === habitText) {
@@ -1117,7 +1115,6 @@
         if (document.getElementById("dot-TwoDayRule-gestern")) document.getElementById("dot-TwoDayRule-gestern").className = "yesterday-dot " + (tdrGesternJa ? "ja" : "nein");
         if (document.getElementById("dot-TwoDayRule-vorgestern")) document.getElementById("dot-TwoDayRule-vorgestern").className = "yesterday-dot " + (tdrVorgesternJa ? "ja" : "nein");
 
-        // Berechnung und Darstellung von Current Streak und Best Streak für Two-Day Rule
         calculateAndRenderTdrStreaks(historyArray);
 
         if (document.getElementById('view-stats').classList.contains('active')) {
@@ -1128,7 +1125,6 @@
     function calculateAndRenderTdrStreaks(historyArray) {
         if (!Array.isArray(historyArray) || historyArray.length === 0) return;
 
-        // Sortiere Historie chronologisch aufsteigend nach Datum
         const sortedHistory = [...historyArray].sort((a, b) => {
             const partsA = a.datum.split('.');
             const partsB = b.datum.split('.');
@@ -1153,18 +1149,15 @@
             }
         });
 
-        // Für den aktuellen Streak prüfen wir von heute aus rückwärts
         const today = new Date();
         let checkDate = new Date(today);
         let activeStreak = 0;
 
-        // Erstelle eine Map für schnellen Zugriff auf Tage
         const dateMap = {};
         sortedHistory.forEach(item => {
             dateMap[item.datum] = item;
         });
 
-        // Wir zählen rückwärts, solange TDR auf "ja" steht (erlaubt auch den heutigen Tag)
         for (let i = 0; i < 365; i++) {
             const dStr = formatDateToString(checkDate);
             const dayData = dateMap[dStr];
@@ -1174,14 +1167,12 @@
                 activeStreak++;
                 checkDate.setDate(checkDate.getDate() - 1);
             } else {
-                // Wenn heute noch nicht erledigt ist, prüfen wir ob vielleicht gestern der Streak noch aktiv war, damit er nicht sofort auf 0springt
                 if (i === 0) {
                     checkDate.setDate(checkDate.getDate() - 1);
                     const yesterdayStr = formatDateToString(checkDate);
                     const yDayData = dateMap[yesterdayStr];
                     const yTdrState = yDayData && yDayData.routinen && yDayData.routinen["TwoDayRule"] ? yDayData.routinen["TwoDayRule"].toLowerCase() : "nein";
                     if (yTdrState === "ja") {
-                        // Gestern war an, heute noch nicht -> zähle ab gestern weiter
                         checkDate.setDate(checkDate.getDate() - 1);
                         continue;
                     }
@@ -1288,7 +1279,6 @@
         });
     }
 
-    // BERECHNUNG DES WHOOP-STYLE PERFORMANCE CODES (14-TAGE VS. 90-TAGE BASELINE MIT RELATIVER KETTEN-GEWICHTUNG)
     function computeWhoopBenchmark(historyArray, targetRoutines) {
         const today = new Date();
         const dateMap = {};
@@ -1302,8 +1292,6 @@
         function getSliceData(daysCount) {
             let totalPossibleChecks = 0;
             let rawSuccessfulChecks = 0;
-            
-            // Zur relativen Ketten-Gewichtung: Wir tracken ununterbrochene Erfolgsketten pro Routine
             let totalWeightedScore = 0;
 
             targetRoutines.forEach(routine => {
@@ -1311,7 +1299,6 @@
                 let routineTotal = 0;
                 let routineSuccess = 0;
 
-                // Wir iterieren chronologisch von vor X Tagen bis heute
                 for (let i = daysCount - 1; i >= 0; i--) {
                     const d = new Date();
                     d.setDate(today.getDate() - i);
@@ -1333,14 +1320,11 @@
                         routineSuccess++;
                         currentChain++;
                         
-                        // KETTEN-GEWICHTUNG (RELATIV ZUR FENSTERLÄNGE):
-                        // Je länger die ununterbrochene Kette im Verhältnis zur gesamten Fensterlänge (daysCount) ist, 
-                        // desto höher der Multiplikator (Bonus bis zu +25% für perfekte Kontinuität)
                         const relativeChainRatio = Math.min(1.0, currentChain / daysCount);
                         const chainBonusMultiplier = 1.0 + (0.25 * relativeChainRatio);
                         totalWeightedScore += chainBonusMultiplier;
                     } else {
-                        currentChain = 0; // Kettenbruch
+                        currentChain = 0;
                     }
                 }
             });
@@ -1406,7 +1390,6 @@
     }
 
     function renderDashboard(historyArray) {
-        // 1. Whoop-Sectionrendern (ganz oben im Stats-Tab)
         renderWhoopSection(historyArray);
 
         const allKeysWithTdr = ["Schlafroutine", "Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "TwoDayRule"];
