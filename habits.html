@@ -44,6 +44,12 @@
             color: var(--text-primary);
             min-height: 100vh;
             padding-bottom: 40px;
+            opacity: 0;
+            transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body.loaded {
+            opacity: 1;
         }
 
         header {
@@ -107,15 +113,42 @@
         .header-right {
             display: flex;
             align-items: center;
+            justify-content: center;
             position: absolute;
             right: 0;
             z-index: 10;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
-            transition: color 0.2s ease;
+            width: 32px;
+            height: 32px;
+        }
+
+        .cloud-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--text-secondary);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .cloud-status-dot.synced {
+            background-color: var(--success);
+            box-shadow: 0 0 6px var(--success);
+        }
+
+        .cloud-status-dot.loading {
+            background-color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .cloud-status-dot.error {
+            background-color: var(--danger);
+            box-shadow: 0 0 8px var(--danger);
+            animation: pulse-danger 1.5s infinite;
+        }
+
+        @keyframes pulse-danger {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.25); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
         .header-switch-container {
@@ -158,7 +191,7 @@
             background: transparent;
             color: var(--text-secondary); 
             cursor: pointer; 
-            transition: all 0.2s; 
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); 
             height: 100%;
             line-height: 1;
         }
@@ -192,7 +225,7 @@
             background: transparent;
             color: var(--text-secondary);
             cursor: pointer; 
-            transition: all 0.2s; 
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); 
             position: relative; 
             z-index: 2; 
             height: 100%;
@@ -232,7 +265,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             opacity: 0;
             z-index: 1000;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             pointer-events: none;
         }
         .toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -259,7 +292,7 @@
 
         .category-header {
             padding: 16px; display: flex; align-items: center; justify-content: space-between;
-            cursor: pointer; user-select: none; transition: background 0.2s;
+            cursor: pointer; user-select: none; transition: background 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .category-header:active { background: var(--border-light); }
 
@@ -269,7 +302,7 @@
         .category-meta { display: flex; align-items: center; gap: 6px; margin-left: auto; margin-right: 12px; flex-shrink: 0; }
         .status-dot-wrapper { display: flex; flex-direction: column; align-items: center; }
 
-        .arrow { font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.3s ease; flex-shrink: 0; }
+        .arrow { font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); flex-shrink: 0; }
         .category-group.open .arrow { transform: rotate(180deg); }
 
         .category-content { display: none; padding: 0 16px 16px; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 16px; }
@@ -278,7 +311,7 @@
         .bucket-card {
             background: var(--bg); border-radius: 12px; border: 1px solid var(--border);
             padding: 14px 16px; display: flex; align-items: center; gap: 14px;
-            cursor: pointer; user-select: none; transition: all 0.2s ease;
+            cursor: pointer; user-select: none; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .bucket-card:active { transform: scale(0.99); }
         .bucket-card.done { opacity: 0.5; border-style: dashed; background: var(--border-light); }
@@ -287,7 +320,7 @@
         .status-circle {
             width: 22px; height: 22px; border-radius: 6px;
             border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-            transition: all 0.2s ease; order: -1;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); order: -1;
         }
         .done .status-circle { background: var(--success); border-color: var(--success); }
         .status-circle::after { content: '✓'; color: white; font-size: 13px; font-weight: bold; display: none; }
@@ -305,7 +338,7 @@
             background: var(--border-light); border: 1px dashed var(--border);
             color: var(--text-secondary); font-size: 0.8rem; font-weight: 700;
             text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
-            user-select: none; transition: background 0.2s;
+            user-select: none; transition: background 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .close-routine-trigger:active { background: var(--border); }
 
@@ -315,7 +348,7 @@
         }
         
         .switch-header { display: flex; background: var(--bg); border-radius: 10px; padding: 2px; border: 1px solid var(--border); width: 100%; }
-        .switch-tab { flex: 1; text-align: center; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); padding: 7px 4px; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+        .switch-tab { flex: 1; text-align: center; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); padding: 7px 4px; border-radius: 8px; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
         .switch-tab.active { background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow); }
 
         .whoop-card {
@@ -357,7 +390,7 @@
             display: flex; gap: 6px; flex-shrink: 0; align-items: center; justify-content: flex-end; width: 204px; 
         }
         
-        .matrix-cell { width: 24px; height: 24px; border-radius: 6px; background: var(--border-light); border: 1px solid var(--border); transition: all 0.2s; flex-shrink: 0; }
+        .matrix-cell { width: 24px; height: 24px; border-radius: 6px; background: var(--border-light); border: 1px solid var(--border); transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); flex-shrink: 0; }
         .matrix-cell.ja { background: var(--success); border-color: var(--success); }
         .matrix-cell.nein { background: var(--danger-soft); border-color: var(--danger); opacity: 0.3; }
         
@@ -423,11 +456,13 @@
                 <button class="main-switch-btn" id="view-btn-stats" onclick="toggleMainView('stats')"><span>📊</span> <span>Stats</span></button>
             </div>
         </div>
-        <div class="header-right" id="cloud-status-text">Cloud Live</div>
+        <div class="header-right">
+            <div class="cloud-status-dot" id="cloud-status-dot" title="Cloud-Status"></div>
+        </div>
     </div>
 </header>
 
-<div class="cloud-error-banner" id="cloud-error-box">Sync-Fehler: Keine Verbindung zur Cloud möglich.</div>
+<div class="cloud-error-banner" id="cloud-error-box">Sync-Fehler: Keine Verbindung zur Cloud möglich. Redirekt...</div>
 
 <div class="outside-switch-area">
     <div class="apple-switch-container" id="mode-switch-wrapper">
@@ -547,28 +582,30 @@
     };
 
     function updateCloudStatus(status) {
-        const indicator = document.getElementById('cloud-status-text');
-        if (!indicator) return;
+        const dot = document.getElementById('cloud-status-dot');
+        if (!dot) return;
         
         if (cloudSyncTimeout && status !== "Cloud synced") {
             clearTimeout(cloudSyncTimeout);
             cloudSyncTimeout = null;
         }
 
-        indicator.textContent = status;
+        dot.className = 'cloud-status-dot';
+
         if (status === "Cloud Fehler") {
-            indicator.style.color = "var(--danger)";
+            dot.classList.add('error');
+            document.getElementById('cloud-error-box').style.display = 'block';
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
         } else if (status === "Cloud synced") {
-            indicator.style.color = "var(--success)";
+            dot.classList.add('synced');
             cloudSyncTimeout = setTimeout(() => {
-                indicator.textContent = "Cloud Live";
-                indicator.style.color = "var(--text-secondary)";
+                dot.className = 'cloud-status-dot';
                 cloudSyncTimeout = null;
             }, 3000);
         } else if (status === "Cloud lädt") {
-            indicator.style.color = "var(--accent)";
-        } else {
-            indicator.style.color = "var(--text-secondary)";
+            dot.classList.add('loading');
         }
     }
 
@@ -676,6 +713,11 @@
 
         buildDOMFromTemplates();
         setGlobalMode(currentGlobalMode);
+        
+        requestAnimationFrame(() => {
+            document.body.classList.add('loaded');
+        });
+
         fetchHistoryStatus();
     }
 
@@ -1055,14 +1097,13 @@
                 });
 
                 updateTwoDayRuleStatus();
-                updateCloudStatus("Cloud Live");
+                updateCloudStatus("Cloud synced");
                 
                 if (document.getElementById('view-stats').classList.contains('active')) {
                     renderDashboard(historyArray);
                 }
             })
             .catch(err => {
-                document.getElementById('cloud-error-box').style.display = 'block';
                 updateCloudStatus("Cloud Fehler");
                 console.error(err);
             });
@@ -1089,7 +1130,6 @@
             }
         })
         .catch(err => {
-            document.getElementById('cloud-error-box').style.display = 'block';
             updateCloudStatus("Cloud Fehler");
             console.error(err);
         });
