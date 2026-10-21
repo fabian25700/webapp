@@ -45,7 +45,7 @@
             min-height: 100vh;
             padding-bottom: 40px;
             opacity: 0;
-            transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         body.loaded {
@@ -296,9 +296,23 @@
         }
         .category-header:active { background: var(--border-light); }
 
-        .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; flex: 1; }
+        .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+        .category-name-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
         
+        .category-progress-info {
+            font-size: 0.72rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-left: 6px;
+            text-transform: none;
+            letter-spacing: normal;
+            min-width: 55px;
+            text-align: right;
+            flex-shrink: 0;
+            display: inline-block;
+        }
+
         .category-meta { display: flex; align-items: center; gap: 6px; margin-left: auto; margin-right: 12px; flex-shrink: 0; }
         .status-dot-wrapper { display: flex; flex-direction: column; align-items: center; }
 
@@ -424,6 +438,41 @@
         .switch-content { display: none; }
         .switch-content.active { display: flex; flex-direction: column; }
 
+        /* Styles für die grafischen Streaks bei der Two-Day Rule */
+        .tdr-streaks-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: auto;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+        .tdr-streak-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 3px 8px;
+            min-width: 42px;
+        }
+        .tdr-streak-label {
+            font-size: 0.55rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            letter-spacing: 0.03em;
+            line-height: 1;
+        }
+        .tdr-streak-val {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1.2;
+            margin-top: 2px;
+        }
+
         @media (max-width: 420px) {
             .main-view-switch { width: 150px; }
             .main-switch-btn { font-size: 0.72rem; }
@@ -477,11 +526,16 @@
     <div id="view-tracker" class="view-section active">
         <div class="category-group" data-routine="TwoDayRule" id="routine-block-TwoDayRule">
             <div class="category-header" style="cursor: default;">
-                <div class="category-title"><div class="category-icon">⚡</div><span>2-Day Rule</span></div>
-                <div class="category-meta">
-                    <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-heute"></span></div>
-                    <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-gestern"></span></div>
-                    <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-TwoDayRule-vorgestern"></span></div>
+                <div class="category-title"><div class="category-icon">⚡</div><span class="category-name-text">2-Day Rule</span></div>
+                <div class="tdr-streaks-container">
+                    <div class="tdr-streak-badge" title="Current Streak">
+                        <span class="tdr-streak-label">Aktuell</span>
+                        <span class="tdr-streak-val" id="tdr-current-streak">0d</span>
+                    </div>
+                    <div class="tdr-streak-badge" title="Best Streak">
+                        <span class="tdr-streak-label">Rekord</span>
+                        <span class="tdr-streak-val" id="tdr-best-streak">0d</span>
+                    </div>
                 </div>
                 <div class="arrow" style="visibility: hidden;">▼</div>
             </div>
@@ -580,6 +634,13 @@
         "Abendroutine": "🌙",
         "TwoDayRule": "⚡"
     };
+
+    function getDisplayRoutineName(routineName) {
+        if (routineName === "Gesundheitsroutine") {
+            return window.innerWidth <= 768 ? "Gesundheitsr." : "Gesundheitsroutine";
+        }
+        return routineName;
+    }
 
     function updateCloudStatus(status) {
         const dot = document.getElementById('cloud-status-dot');
@@ -719,6 +780,15 @@
         });
 
         fetchHistoryStatus();
+        
+        window.addEventListener('resize', () => {
+            routineNamesOrdered.forEach(routineName => {
+                const nameSpan = document.getElementById(`name-text-${routineName}`);
+                if (nameSpan) {
+                    nameSpan.textContent = getDisplayRoutineName(routineName);
+                }
+            });
+        });
     }
 
     function buildDOMFromTemplates() {
@@ -776,10 +846,16 @@
                 </div>
             `;
 
+            const displayName = getDisplayRoutineName(routineName);
+
             activeContainer.innerHTML += `
                 <div class="category-group" data-routine="${routineName}" id="routine-block-${routineName}">
                     <div class="category-header" onclick="toggleGroup(this)">
-                        <div class="category-title"><div class="category-icon">${config.icon}</div><span>${routineName}</span><span id="progress-info-${routineName}" style="font-size: 0.72rem; font-weight: 500; color: var(--text-secondary); margin-left: 6px; text-transform: none; letter-spacing: normal;"></span></div>
+                        <div class="category-title">
+                            <div class="category-icon">${config.icon}</div>
+                            <span class="category-name-text" id="name-text-${routineName}">${displayName}</span>
+                            <span class="category-progress-info" id="progress-info-${routineName}"></span>
+                        </div>
                         <div class="category-meta">
                             <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-heute"></span></div>
                             <div class="status-dot-wrapper"><span class="yesterday-dot" id="dot-${routineName}-gestern"></span></div>
@@ -1041,9 +1117,86 @@
         if (document.getElementById("dot-TwoDayRule-gestern")) document.getElementById("dot-TwoDayRule-gestern").className = "yesterday-dot " + (tdrGesternJa ? "ja" : "nein");
         if (document.getElementById("dot-TwoDayRule-vorgestern")) document.getElementById("dot-TwoDayRule-vorgestern").className = "yesterday-dot " + (tdrVorgesternJa ? "ja" : "nein");
 
+        // Berechnung und Darstellung von Current Streak und Best Streak für Two-Day Rule
+        calculateAndRenderTdrStreaks(historyArray);
+
         if (document.getElementById('view-stats').classList.contains('active')) {
             renderDashboard(globalHistoryArray);
         }
+    }
+
+    function calculateAndRenderTdrStreaks(historyArray) {
+        if (!Array.isArray(historyArray) || historyArray.length === 0) return;
+
+        // Sortiere Historie chronologisch aufsteigend nach Datum
+        const sortedHistory = [...historyArray].sort((a, b) => {
+            const partsA = a.datum.split('.');
+            const partsB = b.datum.split('.');
+            const dateA = new Date(partsA[2], partsA[1] - 1, partsA[0]);
+            const dateB = new Date(partsB[2], partsB[1] - 1, partsB[0]);
+            return dateA - dateB;
+        });
+
+        let currentStreak = 0;
+        let bestStreak = 0;
+        let tempStreak = 0;
+
+        sortedHistory.forEach(item => {
+            const tdrState = item.routinen && item.routinen["TwoDayRule"] ? item.routinen["TwoDayRule"].toLowerCase() : "nein";
+            if (tdrState === "ja") {
+                tempStreak++;
+                if (tempStreak > bestStreak) {
+                    bestStreak = tempStreak;
+                }
+            } else {
+                tempStreak = 0;
+            }
+        });
+
+        // Für den aktuellen Streak prüfen wir von heute aus rückwärts
+        const today = new Date();
+        let checkDate = new Date(today);
+        let activeStreak = 0;
+
+        // Erstelle eine Map für schnellen Zugriff auf Tage
+        const dateMap = {};
+        sortedHistory.forEach(item => {
+            dateMap[item.datum] = item;
+        });
+
+        // Wir zählen rückwärts, solange TDR auf "ja" steht (erlaubt auch den heutigen Tag)
+        for (let i = 0; i < 365; i++) {
+            const dStr = formatDateToString(checkDate);
+            const dayData = dateMap[dStr];
+            const tdrState = dayData && dayData.routinen && dayData.routinen["TwoDayRule"] ? dayData.routinen["TwoDayRule"].toLowerCase() : "nein";
+            
+            if (tdrState === "ja") {
+                activeStreak++;
+                checkDate.setDate(checkDate.getDate() - 1);
+            } else {
+                // Wenn heute noch nicht erledigt ist, prüfen wir ob vielleicht gestern der Streak noch aktiv war, damit er nicht sofort auf 0springt
+                if (i === 0) {
+                    checkDate.setDate(checkDate.getDate() - 1);
+                    const yesterdayStr = formatDateToString(checkDate);
+                    const yDayData = dateMap[yesterdayStr];
+                    const yTdrState = yDayData && yDayData.routinen && yDayData.routinen["TwoDayRule"] ? yDayData.routinen["TwoDayRule"].toLowerCase() : "nein";
+                    if (yTdrState === "ja") {
+                        // Gestern war an, heute noch nicht -> zähle ab gestern weiter
+                        checkDate.setDate(checkDate.getDate() - 1);
+                        continue;
+                    }
+                }
+                break;
+            }
+        }
+
+        currentStreak = Math.max(activeStreak, tempStreak > 0 && activeStreak === 0 ? 0 : activeStreak);
+        if (bestStreak < currentStreak) bestStreak = currentStreak;
+
+        const currEl = document.getElementById('tdr-current-streak');
+        const bestEl = document.getElementById('tdr-best-streak');
+        if (currEl) currEl.textContent = `${currentStreak}d`;
+        if (bestEl) bestEl.textContent = `${bestStreak}d`;
     }
 
     function fetchHistoryStatus() {
