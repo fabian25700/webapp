@@ -2,9 +2,13 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#f0f2f5">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="manifest" href="manifest.json">
     <title>Routinen</title>
     <style>
         :root {
@@ -478,20 +482,14 @@
         <div class="category-group" data-routine="TwoDayRule" id="routine-block-TwoDayRule">
             <div class="category-header" style="cursor: default;">
                 <div class="category-title"><div class="category-icon">⚡</div><span>2-Day Rule</span></div>
-                <div class="category-meta" style="gap: 12px;">
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
-                        <span style="font-size: 0.55rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Current</span>
-                        <div style="display: flex; align-items: center; gap: 3px;">
-                            <span class="yesterday-dot" id="dot-TwoDayRule-heute"></span>
-                            <span class="yesterday-dot" id="dot-TwoDayRule-gestern"></span>
-                            <span class="yesterday-dot" id="dot-TwoDayRule-vorgestern"></span>
-                        </div>
+                <div class="category-meta" style="gap: 16px; align-items: center;">
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;">
+                        <span style="font-size: 0.65rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;" id="tdr-status-label">Current</span>
+                        <span style="font-size: 0.9rem; font-weight: 800;" id="tdr-text-value">0 Tage</span>
                     </div>
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
-                        <span style="font-size: 0.55rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Best</span>
-                        <div style="display: flex; align-items: center; gap: 3px;" id="best-streak-dots-container">
-                            <!-- Wird dynamisch befüllt -->
-                        </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 2px;" id="tdr-right-block">
+                        <span style="font-size: 0.65rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">Best</span>
+                        <span style="font-size: 0.9rem; font-weight: 800; color: var(--text-secondary);" id="tdr-best-value">0</span>
                     </div>
                 </div>
                 <div class="arrow" style="visibility: hidden;">▼</div>
@@ -1043,19 +1041,6 @@
             syncModuleToCloud("TwoDayRule", shouldTdrBeJa ? "ja" : "nein");
         }
 
-        let tdrGesternJa = false;
-        if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen["TwoDayRule"]) {
-            if (yesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrGesternJa = true;
-        }
-        let tdrVorgesternJa = false;
-        if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen["TwoDayRule"]) {
-            if (ereyesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrVorgesternJa = true;
-        }
-
-        if (document.getElementById("dot-TwoDayRule-heute")) document.getElementById("dot-TwoDayRule-heute").className = "yesterday-dot " + (todayData && todayData.routinen && todayData.routinen["TwoDayRule"] && todayData.routinen["TwoDayRule"].toLowerCase() === "ja" ? "ja" : "nein");
-        if (document.getElementById("dot-TwoDayRule-gestern")) document.getElementById("dot-TwoDayRule-gestern").className = "yesterday-dot " + (tdrGesternJa ? "ja" : "nein");
-        if (document.getElementById("dot-TwoDayRule-vorgestern")) document.getElementById("dot-TwoDayRule-vorgestern").className = "yesterday-dot " + (tdrVorgesternJa ? "ja" : "nein");
-
         renderTwoDayRuleStreaks(globalHistoryArray);
 
         if (document.getElementById('view-stats').classList.contains('active')) {
@@ -1116,22 +1101,34 @@
             }
         }
         currentStreak = Math.max(activeStreakCount, tempStreak);
+        if (bestStreak < currentStreak) bestStreak = currentStreak;
 
-        const bestContainer = document.getElementById('best-streak-dots-container');
-        if (bestContainer) {
-            let dotsHtml = '';
-            const maxDotsToDisplay = Math.min(bestStreak, 7);
-            if (maxDotsToDisplay === 0) {
-                dotsHtml = `<span style="font-size: 0.75rem; font-weight: 800; color: var(--text-secondary);">0</span>`;
+        const textValueEl = document.getElementById('tdr-text-value');
+        const bestValueEl = document.getElementById('tdr-best-value');
+        const rightBlockEl = document.getElementById('tdr-right-block');
+        const statusLabelEl = document.getElementById('tdr-status-label');
+
+        if (textValueEl && bestValueEl && rightBlockEl) {
+            bestValueEl.textContent = `${bestStreak} Tage`;
+
+            if (currentStreak >= bestStreak && bestStreak > 0) {
+                statusLabelEl.textContent = "Peak";
+                statusLabelEl.style.color = "#f1c40f";
+                textValueEl.innerHTML = `${currentStreak} Tage <span style="font-size: 0.65rem; color: #f1c40f; font-weight: 700; margin-left: 2px;">★ ATH</span>`;
+                textValueEl.style.color = "#f1c40f";
+                rightBlockEl.style.display = 'none';
             } else {
-                for (let i = 0; i < maxDotsToDisplay; i++) {
-                    dotsHtml += `<span class="yesterday-dot ja" style="width: 6px; height: 6px;"></span>`;
-                }
-                if (bestStreak > 7) {
-                    dotsHtml += `<span style="font-size: 0.6rem; font-weight: 800; color: var(--text-secondary);">+${bestStreak-7}</span>`;
+                statusLabelEl.textContent = "Current";
+                statusLabelEl.style.color = "var(--text-secondary)";
+                textValueEl.style.color = "var(--text-primary)";
+                rightBlockEl.style.display = 'flex';
+
+                if (bestStreak > 0) {
+                    textValueEl.innerHTML = `${currentStreak} <span style="font-size: 0.7rem; font-weight: 600; color: var(--text-secondary);">/ ${bestStreak}</span>`;
+                } else {
+                    textValueEl.textContent = `${currentStreak} Tage`;
                 }
             }
-            bestContainer.innerHTML = dotsHtml;
         }
     }
 
