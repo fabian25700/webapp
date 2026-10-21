@@ -300,6 +300,7 @@
         .category-name-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
         
+        /* Feste Breite und rechte Ausrichtung, damit die 3 Klammer-Zahlen perfekt untereinander stehen */
         .category-progress-info {
             font-size: 0.72rem;
             font-weight: 500;
@@ -308,7 +309,7 @@
             margin-right: 8px;
             text-transform: none;
             letter-spacing: normal;
-            min-width: 55px;
+            min-width: 58px;
             text-align: right;
             flex-shrink: 0;
             display: inline-block;
@@ -486,6 +487,10 @@
             .day-label { height: 20px; line-height: 20px; }
         }
     </style>
+    <!-- Fallback-Sicherung falls habits_input.js fehlt oder blockiert -->
+    <script>
+        window.ROUTINE_CONFIG = window.ROUTINE_CONFIG || {};
+    </script>
     <script src="habits_input.js"></script>
 </head>
 <body>
@@ -799,8 +804,7 @@
         const savedStates = getSavedStates();
         
         routineNamesOrdered.forEach((routineName, groupIdx) => {
-            const config = ROUTINE_CONFIG[routineName];
-            if (!config) return;
+            const config = (window.ROUTINE_CONFIG && window.ROUTINE_CONFIG[routineName]) || { icon: "🎯", home: [], sally: [], reise: [], krank: [] };
             
             const homeHabits = config.home || [];
             const sallyHabits = config.sally || [];
@@ -875,7 +879,7 @@
         
         groups.forEach((group) => {
             const routineName = group.getAttribute('data-routine');
-            const config = ROUTINE_CONFIG[routineName];
+            const config = window.ROUTINE_CONFIG && window.ROUTINE_CONFIG[routineName];
             if (!config) return;
 
             const activeList = config[currentGlobalMode] || [];
@@ -1031,7 +1035,7 @@
                     const state = habitState[routineName];
                     if (state) {
                         const needed = Math.ceil(state.total * TARGET_RATIO);
-                        infoSpan.textContent = `(${state.done} / ${needed} / ${state.total})`;
+                        infoSpan.textContent = `(${state.done}/${needed}/${state.total})`;
                     }
                 }
             }
@@ -1637,7 +1641,13 @@
         });
     }
 
-    window.onload = initApp;
+    window.onload = function() {
+        initApp();
+        // Fallback: Sollte das Skript durch eine fehlende externe Datei hängen, wird nach 600ms trotzdem eingeblendet
+        setTimeout(() => {
+            document.body.classList.add('loaded');
+        }, 600);
+    };
 </script>
 </body>
 </html>
