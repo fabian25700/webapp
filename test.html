@@ -1056,7 +1056,7 @@
         if (document.getElementById("dot-TwoDayRule-gestern")) document.getElementById("dot-TwoDayRule-gestern").className = "yesterday-dot " + (tdrGesternJa ? "ja" : "nein");
         if (document.getElementById("dot-TwoDayRule-vorgestern")) document.getElementById("dot-TwoDayRule-vorgestern").className = "yesterday-dot " + (tdrVorgesternJa ? "ja" : "nein");
 
-        renderTwoDayRuleStreaks(historyArray);
+        renderTwoDayRuleStreaks(globalHistoryArray);
 
         if (document.getElementById('view-stats').classList.contains('active')) {
             renderDashboard(globalHistoryArray);
