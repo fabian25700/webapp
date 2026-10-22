@@ -1591,8 +1591,15 @@
         allKeysWithTdr.forEach(routine => {
             let cellsHtml = '';
             matrixDates.forEach(dateStr => {
-                const color = calculateAmpelColor(dateStr, historyArray, routine);
-                cellsHtml += `<div class="matrix-cell ${color}"></div>`;
+                if (routine === "TwoDayRule") {
+                    const item = historyArray.find(h => h.datum === dateStr);
+                    const isTdrJa = item && item.routinen && item.routinen["TwoDayRule"] && item.routinen["TwoDayRule"].toLowerCase() === "ja";
+                    const matrixColor = isTdrJa ? "grun" : "rot";
+                    cellsHtml += `<div class="matrix-cell ${matrixColor}"></div>`;
+                } else {
+                    const color = calculateAmpelColor(dateStr, historyArray, routine);
+                    cellsHtml += `<div class="matrix-cell ${color}"></div>`;
+                }
             });
             const icon = routineIcons[routine] || "🎯";
             rowsContainer.innerHTML += `<div class="matrix-row"><div class="matrix-label"><span class="perf-icon">${icon}</span><span class="perf-name">${routine}</span></div><div class="matrix-cells">${cellsHtml}</div></div>`;
