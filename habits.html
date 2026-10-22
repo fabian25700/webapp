@@ -16,6 +16,10 @@
             --accent-soft: rgba(230, 126, 34, 0.1);
             --success: #27ae60;
             --success-soft: rgba(39, 174, 96, 0.1);
+            --warning: #f1c40f;
+            --warning-soft: rgba(241, 196, 15, 0.1);
+            --orange-risk: #e67e22;
+            --orange-risk-soft: rgba(230, 126, 34, 0.15);
             --danger: #e74c3c;
             --danger-soft: rgba(231, 76, 60, 0.3);
             --bg: #f0f2f5;
@@ -333,6 +337,10 @@
         .location-name { font-weight: 600; font-size: 0.95rem; flex: 1; white-space: pre-line; }
         
         .yesterday-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; background: var(--border); }
+        .yesterday-dot.grun { background: var(--success); box-shadow: 0 0 6px var(--success); }
+        .yesterday-dot.gelb { background: var(--warning); box-shadow: 0 0 6px var(--warning); }
+        .yesterday-dot.orange { background: var(--orange-risk); box-shadow: 0 0 6px var(--orange-risk); }
+        .yesterday-dot.rot { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
         .yesterday-dot.ja { background: var(--success); box-shadow: 0 0 6px var(--success); }
         .yesterday-dot.nein { background: var(--danger); box-shadow: 0 0 6px var(--danger); }
 
@@ -395,6 +403,10 @@
         }
         
         .matrix-cell { width: 24px; height: 24px; border-radius: 6px; background: var(--border-light); border: 1px solid var(--border); transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); flex-shrink: 0; }
+        .matrix-cell.grun { background: var(--success); border-color: var(--success); }
+        .matrix-cell.gelb { background: var(--warning); border-color: var(--warning); }
+        .matrix-cell.orange { background: var(--orange-risk); border-color: var(--orange-risk); }
+        .matrix-cell.rot { background: var(--danger); border-color: var(--danger); }
         .matrix-cell.ja { background: var(--success); border-color: var(--success); }
         .matrix-cell.nein { background: var(--danger-soft); border-color: var(--danger); opacity: 0.3; }
         
@@ -941,6 +953,41 @@
         return (state.done / state.total) >= TARGET_RATIO;
     }
 
+    function calculateAmpelColor(targetDateStr, historyArray, routineName) {
+        const [d, m, y] = targetDateStr.split('.').map(Number);
+        const dateObj = new Date(y, m - 1, d);
+
+        const isDone = (dateStr) => {
+            if (dateStr === formatDateToString(new Date()) && routineName !== "TwoDayRule") {
+                if (isRoutineApproved(routineName)) return true;
+            }
+            const item = historyArray.find(h => h.datum === dateStr);
+            return !!(item && item.routinen && item.routinen[routineName] && item.routinen[routineName].toLowerCase() === "ja");
+        };
+
+        const isDoneTarget = isDone(targetDateStr);
+
+        const prevDate = new Date(dateObj);
+        prevDate.setDate(prevDate.getDate() - 1);
+        const prevDateStr = formatDateToString(prevDate);
+        const isDonePrev = isDone(prevDateStr);
+
+        if (isDoneTarget) {
+            return 'grun';
+        }
+
+        if (isDonePrev) {
+            return 'gelb';
+        }
+
+        const isToday = (targetDateStr === formatDateToString(new Date()));
+        if (isToday) {
+            return 'orange';
+        }
+
+        return 'rot';
+    }
+
     function updateGlobalProgress() {
         const todayStr = formatDateToString(new Date());
         const todayData = Array.isArray(globalHistoryArray) ? globalHistoryArray.find(item => item.datum === todayStr) : null;
@@ -1042,10 +1089,43 @@
         }
 
         renderTwoDayRuleStreaks(globalHistoryArray);
+        updateTrackerDots();
 
         if (document.getElementById('view-stats').classList.contains('active')) {
             renderDashboard(globalHistoryArray);
         }
+    }
+
+    function updateTrackerDots() {
+        const today = new Date();
+        const yesterday = new Date(); yesterday.setDate(today.getDate() - 1);
+        const ereyesterday = new Date(); ereyesterday.setDate(today.getDate() - 2);
+
+        const todayStr = formatDateToString(today);
+        const yesterdayStr = formatDateToString(yesterday);
+        const ereyesterdayStr = formatDateToString(ereyesterday);
+
+        const allKeysWithTdr = [...routineNamesOrdered, "TwoDayRule"];
+
+        allKeysWithTdr.forEach(routineName => {
+            const heuteDot = document.getElementById(`dot-${routineName}-heute`);
+            if (heuteDot) {
+                const color = calculateAmpelColor(todayStr, globalHistoryArray, routineName);
+                heuteDot.className = "yesterday-dot " + color;
+            }
+
+            const gesternDot = document.getElementById(`dot-${routineName}-gestern`);
+            if (gesternDot) {
+                const color = calculateAmpelColor(yesterdayStr, globalHistoryArray, routineName);
+                gesternDot.className = "yesterday-dot " + color;
+            }
+
+            const vorgesternDot = document.getElementById(`dot-${routineName}-vorgestern`);
+            if (vorgesternDot) {
+                const color = calculateAmpelColor(ereyesterdayStr, globalHistoryArray, routineName);
+                vorgesternDot.className = "yesterday-dot " + color;
+            }
+        });
     }
 
     function renderTwoDayRuleStreaks(historyArray) {
@@ -1136,68 +1216,7 @@
                 if (!Array.isArray(historyArray)) return;
                 globalHistoryArray = historyArray;
 
-                const today = new Date();
-                const yesterday = new Date(); yesterday.setDate(today.getDate() - 1);
-                const ereyesterday = new Date(); ereyesterday.setDate(today.getDate() - 2);
-
-                const todayStr = formatDateToString(today);
-                const yesterdayStr = formatDateToString(yesterday);
-                const ereyesterdayStr = formatDateToString(ereyesterday);
-
-                const todayData = historyArray.find(item => item.datum === todayStr);
-                const yesterdayData = historyArray.find(item => item.datum === yesterdayStr);
-                const ereyesterdayData = historyArray.find(item => item.datum === ereyesterdayStr);
-
-                // Hier werden die letzten 3 Tage (heute, gestern, vorgestern) für alle regulären Routinen gesetzt
-                routineNamesOrdered.forEach(routineName => {
-                    const heuteDot = document.getElementById(`dot-${routineName}-heute`);
-                    if (heuteDot) {
-                        let statusHeute = "nein";
-                        if (todayData && todayData.routinen && todayData.routinen[routineName]) {
-                            statusHeute = todayData.routinen[routineName].toLowerCase();
-                        }
-                        heuteDot.className = "yesterday-dot " + statusHeute;
-                    }
-
-                    const gesternDot = document.getElementById(`dot-${routineName}-gestern`);
-                    if (gesternDot) {
-                        let statusGestern = "nein";
-                        if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen[routineName]) {
-                            statusGestern = yesterdayData.routinen[routineName].toLowerCase();
-                        }
-                        gesternDot.className = "yesterday-dot " + statusGestern;
-                    }
-
-                    const vorgesternDot = document.getElementById(`dot-${routineName}-vorgestern`);
-                    if (vorgesternDot) {
-                        let statusVorgestern = "nein";
-                        if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen[routineName]) {
-                            statusVorgestern = ereyesterdayData.routinen[routineName].toLowerCase();
-                        }
-                        vorgesternDot.className = "yesterday-dot " + statusVorgestern;
-                    }
-                });
-
-                // Auch Two-Day-Rule Punkte (heute, gestern, vorgestern) im Tracker-Header aktualisieren
-                let tdrGesternJa = false;
-                if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen["TwoDayRule"]) {
-                    if (yesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrGesternJa = true;
-                }
-                let tdrVorgesternJa = false;
-                if (ereyesterdayData && ereyesterdayData.routinen && ereyesterdayData.routinen["TwoDayRule"]) {
-                    if (ereyesterdayData.routinen["TwoDayRule"].toLowerCase() === "ja") tdrVorgesternJa = true;
-                }
-
-                if (document.getElementById("dot-TwoDayRule-heute")) {
-                    document.getElementById("dot-TwoDayRule-heute").className = "yesterday-dot " + (todayData && todayData.routinen && todayData.routinen["TwoDayRule"] && todayData.routinen["TwoDayRule"].toLowerCase() === "ja" ? "ja" : "nein");
-                }
-                if (document.getElementById("dot-TwoDayRule-gestern")) {
-                    document.getElementById("dot-TwoDayRule-gestern").className = "yesterday-dot " + (tdrGesternJa ? "ja" : "nein");
-                }
-                if (document.getElementById("dot-TwoDayRule-vorgestern")) {
-                    document.getElementById("dot-TwoDayRule-vorgestern").className = "yesterday-dot " + (tdrVorgesternJa ? "ja" : "nein");
-                }
-
+                updateTrackerDots();
                 updateTwoDayRuleStatus();
                 updateCloudStatus("Cloud synced");
                 
@@ -1572,10 +1591,8 @@
         allKeysWithTdr.forEach(routine => {
             let cellsHtml = '';
             matrixDates.forEach(dateStr => {
-                const dayData = historyArray.find(item => item.datum === dateStr);
-                let status = 'nein';
-                if (dayData && dayData.routinen && dayData.routinen[routine]) status = dayData.routinen[routine].toLowerCase();
-                cellsHtml += `<div class="matrix-cell ${status}"></div>`;
+                const color = calculateAmpelColor(dateStr, historyArray, routine);
+                cellsHtml += `<div class="matrix-cell ${color}"></div>`;
             });
             const icon = routineIcons[routine] || "🎯";
             rowsContainer.innerHTML += `<div class="matrix-row"><div class="matrix-label"><span class="perf-icon">${icon}</span><span class="perf-name">${routine}</span></div><div class="matrix-cells">${cellsHtml}</div></div>`;
