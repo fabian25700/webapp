@@ -1453,7 +1453,7 @@
                 let badgeHtml = `<span class="trend-badge neutral">${pct}% Erfüllung</span>`;
                 if (idx < limitedWeeks.length - 1) {
                     const prevWeek = limitedWeeks[idx + 1];
-                    const prevData = limitedWeeks[idx + 1];
+                    const prevData = weeklyData[prevWeek];
                     const prevPct = prevData.total > 0 ? Math.round((prevData.success / prevData.total) * 100) : 0;
                     const diff = pct - prevPct;
                     if (diff > 0) badgeHtml = `<span class="trend-badge up">▲ +${diff}% vs. Vorwoche (${pct}%)</span>`;
