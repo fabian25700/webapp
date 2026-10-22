@@ -404,7 +404,11 @@
         
         .matrix-cell { width: 24px; height: 24px; border-radius: 6px; background: var(--border-light); border: 1px solid var(--border); transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); flex-shrink: 0; }
         .matrix-cell.grun { background: var(--success); border-color: var(--success); }
-        .matrix-cell.rot { background: var(--danger-soft); border-color: var(--danger); opacity: 0.3; }
+        .matrix-cell.gelb { background: var(--warning); border-color: var(--warning); }
+        .matrix-cell.orange { background: var(--orange-risk); border-color: var(--orange-risk); }
+        .matrix-cell.rot { background: var(--danger); border-color: var(--danger); }
+        .matrix-cell.ja { background: var(--success); border-color: var(--success); }
+        .matrix-cell.nein { background: var(--danger-soft); border-color: var(--danger); opacity: 0.3; }
         
         .days-header { display: flex; width: 100%; margin-bottom: 2px; height: 16px; align-items: center; }
         .days-header-spacer { flex: 1; }
@@ -1587,10 +1591,15 @@
         allKeysWithTdr.forEach(routine => {
             let cellsHtml = '';
             matrixDates.forEach(dateStr => {
-                const item = historyArray.find(h => h.datum === dateStr);
-                const isJa = item && item.routinen && item.routinen[routine] && item.routinen[routine].toLowerCase() === "ja";
-                const matrixColor = isJa ? "grun" : "rot";
-                cellsHtml += `<div class="matrix-cell ${matrixColor}"></div>`;
+                if (routine === "TwoDayRule") {
+                    const item = historyArray.find(h => h.datum === dateStr);
+                    const isTdrJa = item && item.routinen && item.routinen["TwoDayRule"] && item.routinen["TwoDayRule"].toLowerCase() === "ja";
+                    const matrixColor = isTdrJa ? "grun" : "rot";
+                    cellsHtml += `<div class="matrix-cell ${matrixColor}"></div>`;
+                } else {
+                    const color = calculateAmpelColor(dateStr, historyArray, routine);
+                    cellsHtml += `<div class="matrix-cell ${color}"></div>`;
+                }
             });
             const icon = routineIcons[routine] || "🎯";
             rowsContainer.innerHTML += `<div class="matrix-row"><div class="matrix-label"><span class="perf-icon">${icon}</span><span class="perf-name">${routine}</span></div><div class="matrix-cells">${cellsHtml}</div></div>`;
