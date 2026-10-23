@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#f0f2f5">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="manifest" href="manifest.json">
+    <title>Ziele</title>
+    <style>
+        :root {
+            --accent: #e67e22;
+            --accent-soft: rgba(230, 126, 34, 0.1);
+            --success: #27ae60;
+            --success-soft: rgba(39, 174, 96, 0.1);
+            --warning: #f1c40f;
+            --warning-soft: rgba(241, 196, 15, 0.1);
+            --danger: #e74c3c;
+            --danger-soft: rgba(231, 76, 60, 0.3);
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --apple-switch-bg: #e3e3e6;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: #2d3f55;
+                --border-light: #253347;
+                --apple-switch-bg: #1c1c1e;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 40px;
+            opacity: 0;
+            transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body.loaded { opacity: 1; }
+
+        header {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--bg);
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left { 
+            display: flex; 
+            align-items: center; 
+        }
+
+        .back-container { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            text-decoration: none; 
+            color: var(--text-primary); 
+        }
+        
+        .back-container span { 
+            font-size: 0.95rem; 
+            font-weight: 700; 
+            line-height: 1;
+        }
+
+        .back-btn {
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            width: 32px; 
+            height: 32px; 
+            border-radius: 9px;
+            background: var(--surface); 
+            border: 1px solid var(--border);
+            color: var(--text-primary); 
+            box-shadow: var(--shadow);
+            flex-shrink: 0; 
+            font-size: 0.9rem;
+            line-height: 1;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mode-toggle-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 6px 10px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mode-toggle-btn.active {
+            color: var(--text-primary);
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .cloud-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--text-secondary);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .cloud-status-dot.synced { background-color: var(--success); box-shadow: 0 0 6px var(--success); }
+        .cloud-status-dot.loading { background-color: var(--accent); transform: scale(1.1); }
+        .cloud-status-dot.error { background-color: var(--danger); box-shadow: 0 0 8px var(--danger); }
+
+        main { 
+            padding: 16px; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 16px; 
+            transition: max-width 0.3s ease;
+        }
+
+        /* Mac / Desktop Modus (Kacheln nebeneinander) */
+        main.mac-layout {
+            max-width: 1200px;
+        }
+        main.mac-layout .matrix-grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        @media (min-width: 1024px) {
+            main.mac-layout .matrix-grid-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .matrix-grid-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .timeframe-section {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 18px; padding: 16px; box-shadow: var(--shadow);
+            display: flex; flex-direction: column; gap: 12px;
+            height: fit-content;
+        }
+
+        .timeframe-title {
+            font-size: 0.85rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--text-secondary);
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid var(--border-light); padding-bottom: 8px;
+        }
+
+        .category-container { display: flex; flex-direction: column; gap: 8px; }
+        .category-subheading {
+            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+            color: var(--accent); margin-top: 4px; display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .goal-card {
+            background: var(--bg); border-radius: 12px; border: 1px solid var(--border);
+            padding: 12px 14px; display: flex; align-items: center; gap: 12px;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .goal-card.done { opacity: 0.5; border-style: dashed; background: var(--border-light); }
+        .creation-mode-hidden { display: none !important; }
+
+        .status-circle {
+            width: 22px; height: 22px; border-radius: 6px;
+            border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .goal-card.done .status-circle { background: var(--success); border-color: var(--success); }
+        .status-circle::after { content: '✓'; color: white; font-size: 13px; font-weight: bold; display: none; }
+        .goal-card.done .status-circle::after { display: block; }
+
+        .goal-text { font-weight: 600; font-size: 0.9rem; flex: 1; word-break: break-word; }
+        
+        .goal-actions { display: flex; gap: 8px; align-items: center; }
+        .action-btn {
+            background: transparent; border: none; color: var(--text-secondary);
+            cursor: pointer; font-size: 0.85rem; padding: 4px;
+        }
+        .action-btn:hover { color: var(--danger); }
+
+        .add-goal-form {
+            display: flex; gap: 6px; margin-top: 4px;
+        }
+        .add-goal-input {
+            flex: 1; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 8px; padding: 8px 10px; color: var(--text-primary);
+            font-size: 0.85rem; outline: none;
+        }
+        .add-goal-btn {
+            background: var(--accent); color: white; border: none;
+            border-radius: 8px; padding: 0 12px; font-weight: 700;
+            cursor: pointer; font-size: 0.85rem;
+        }
+
+        /* Historie Sektion */
+        .history-section {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 18px; padding: 16px; box-shadow: var(--shadow);
+            display: flex; flex-direction: column; gap: 12px; margin-top: 8px;
+        }
+        .history-header {
+            font-size: 0.85rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--text-secondary);
+            cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+            user-select: none;
+        }
+        .history-content { display: none; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 12px; }
+        .history-section.expanded .history-content { display: flex; }
+
+        .toast-notification {
+            position: fixed; top: calc(env(safe-area-inset-top) + 20px);
+            left: 50%; transform: translateX(-50%) translateY(-20px);
+            background: var(--success); color: white; padding: 10px 20px;
+            border-radius: 12px; font-size: 0.85rem; font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none;
+        }
+        .toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    </style>
+    <script src="api.js"></script>
+</head>
+<body>
+
+<div class="toast-notification" id="toast-notice">Änderung gespeichert</div>
+
+<header>
+    <div class="header-left">
+        <a href="index.html" class="back-container">
+            <div class="back-btn">&larr;</div>
+            <span>Routinen</span>
+        </a>
+    </div>
+    <div class="header-right">
+        <button class="mode-toggle-btn" id="creation-mode-btn" onclick="toggleCreationMode()" title="Erstellungsmodus ein-/ausschalten">Erstellen: Aus</button>
+        <button class="mode-toggle-btn" id="layout-toggle-btn" onclick="toggleDeviceMode()" title="Handy / Mac Ansicht umschalten">Handy</button>
+        <div class="cloud-status-dot" id="cloud-status-dot" title="Cloud-Status"></div>
+    </div>
+</header>
+
+<main id="main-container">
+    <div class="matrix-grid-container" id="matrix-container">
+        <!-- Wird dynamisch gefüllt -->
+    </div>
+
+    <!-- Historie-Bereich -->
+    <div class="history-section" id="history-section-box">
+        <div class="history-header" onclick="toggleHistory()">
+            <span>Erledigte Ziele (Historie)</span>
+            <span id="history-arrow">▼</span>
+        </div>
+        <div class="history-content" id="history-container">
+            <!-- Erledigte Ziele -->
+        </div>
+    </div>
+</main>
+
+<script>
+    const categories = ["KARRIERE", "GESUNDHEIT", "LIFESTYLE"];
+    const timeframes = [
+        { key: "MONAT", label: "Monats-Fokus (1 je Kat.)", limit: 1 },
+        { key: "JAHR", label: "Jahres-Meilensteine (2 je Kat.)", limit: 2 },
+        { key: "DEKADE", label: "Dekaden-Ziele (3 je Kat.)", limit: 3 },
+        { key: "LEBEN", label: "Lebensziele (3 je Kat.)", limit: 3 }
+    ];
+
+    let creationModeActive = false;
+    let isMacMode = false;
+    let globalGoalsData = [];
+
+    function showToast(text, isError = false) {
+        const toast = document.getElementById('toast-notice');
+        toast.textContent = text;
+        toast.style.background = isError ? 'var(--danger)' : 'var(--success)';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    function setCloudStatus(status) {
+        const dot = document.getElementById('cloud-status-dot');
+        if (!dot) return;
+        dot.className = "cloud-status-dot " + status;
+    }
+
+    function toggleCreationMode() {
+        creationModeActive = !creationModeActive;
+        const btn = document.getElementById('creation-mode-btn');
+        btn.textContent = creationModeActive ? "Erstellen: An" : "Erstellen: Aus";
+        btn.classList.toggle('active', creationModeActive);
+        renderMatrix(globalGoalsData);
+    }
+
+    function toggleDeviceMode() {
+        isMacMode = !isMacMode;
+        const mainEl = document.getElementById('main-container');
+        const layoutBtn = document.getElementById('layout-toggle-btn');
+        
+        if (isMacMode) {
+            mainEl.classList.add('mac-layout');
+            layoutBtn.textContent = "Mac";
+            layoutBtn.classList.add('active');
+        } else {
+            mainEl.classList.remove('mac-layout');
+            layoutBtn.textContent = "Handy";
+            layoutBtn.classList.remove('active');
+        }
+        localStorage.setItem('goals_device_mode', isMacMode ? 'mac' : 'handy');
+    }
+
+    function toggleHistory() {
+        const box = document.getElementById('history-section-box');
+        box.classList.toggle('expanded');
+        const arrow = document.getElementById('history-arrow');
+        arrow.textContent = box.classList.contains('expanded') ? "▲" : "▼";
+    }
+
+    function loadAndRenderGoals() {
+        setCloudStatus("loading");
+        fetchGoals()
+            .then(goals => {
+                setCloudStatus("synced");
+                globalGoalsData = goals;
+                renderMatrix(goals);
+                document.body.classList.add('loaded');
+            })
+            .catch(() => setCloudStatus("error"));
+    }
+
+    function renderMatrix(goals) {
+        const container = document.getElementById('matrix-container');
+        const historyContainer = document.getElementById('history-container');
+        container.innerHTML = "";
+        historyContainer.innerHTML = "";
+
+        let hasCompletedGoals = false;
+
+        timeframes.forEach(tf => {
+            let tfSection = document.createElement('div');
+            tfSection.className = "timeframe-section";
+            
+            let tfHeader = document.createElement('div');
+            tfHeader.className = "timeframe-title";
+            tfHeader.innerHTML = `<span>${tf.label}</span>`;
+            tfSection.appendChild(tfHeader);
+
+            let catContainer = document.createElement('div');
+            catContainer.className = "category-container";
+
+            categories.forEach(cat => {
+                let catSub = document.createElement('div');
+                catSub.className = "category-subheading";
+                
+                const catGoals = goals.filter(g => g.timeframe === tf.key && g.category === cat);
+                const openGoals = catGoals.filter(g => !g.status);
+                const completedGoals = catGoals.filter(g => g.status);
+
+                catSub.innerHTML = `<span>${cat} (${catGoals.length}/${tf.limit})</span>`;
+                catContainer.appendChild(catSub);
+
+                // Nur offene Ziele standardmäßig oben anzeigen
+                openGoals.forEach(goal => {
+                    let card = document.createElement('div');
+                    card.className = `goal-card`;
+                    card.innerHTML = `
+                        <div class="status-circle" onclick="handleToggle('${goal.id}', true)"></div>
+                        <div class="goal-text">${escapeHtml(goal.goal_text)}</div>
+                        <div class="goal-actions">
+                            <button class="action-btn ${creationModeActive ? '' : 'creation-mode-hidden'}" onclick="handleDelete('${goal.id}')" title="Löschen">🗑️</button>
+                        </div>
+                    `;
+                    catContainer.appendChild(card);
+                });
+
+                // Erledigte Ziele für die Historie sammeln
+                completedGoals.forEach(goal => {
+                    hasCompletedGoals = true;
+                    let hCard = document.createElement('div');
+                    hCard.className = `goal-card done`;
+                    hCard.innerHTML = `
+                        <div class="status-circle" onclick="handleToggle('${goal.id}', false)"></div>
+                        <div class="goal-text">${escapeHtml(goal.goal_text)} <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: normal; margin-left: 6px;">[${tf.key} / ${cat}]</span></div>
+                        <div class="goal-actions">
+                            <button class="action-btn ${creationModeActive ? '' : 'creation-mode-hidden'}" onclick="handleDelete('${goal.id}')" title="Löschen">🗑️</button>
+                        </div>
+                    `;
+                    historyContainer.appendChild(hCard);
+                });
+
+                // Erstellungs-Input nur anzeigen, wenn Modus aktiv und Limit nicht erreicht
+                if (catGoals.length < tf.limit) {
+                    let formDiv = document.createElement('div');
+                    formDiv.className = `add-goal-form ${creationModeActive ? '' : 'creation-mode-hidden'}`;
+                    formDiv.innerHTML = `
+                        <input type="text" class="add-goal-input" id="input-${tf.key}-${cat}" placeholder="Neues Ziel für ${cat.toLowerCase()}...">
+                        <button class="add-goal-btn" onclick="handleAdd('${tf.key}', '${cat}')">+</button>
+                    `;
+                    catContainer.appendChild(formDiv);
+                }
+            });
+
+            tfSection.appendChild(catContainer);
+            container.appendChild(tfSection);
+        });
+
+        if (!hasCompletedGoals) {
+            historyContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary); padding: 4px;">Noch keine erledigten Ziele in der Historie.</div>`;
+        }
+    }
+
+    function handleToggle(id, newStatus) {
+        setCloudStatus("loading");
+        toggleGoalStatus(id, newStatus)
+            .then(() => {
+                setCloudStatus("synced");
+                showToast("Status aktualisiert");
+                loadAndRenderGoals();
+            })
+            .catch(() => setCloudStatus("error"));
+    }
+
+    function handleAdd(timeframe, category) {
+        const input = document.getElementById(`input-${timeframe}-${category}`);
+        const text = input ? input.value.trim() : "";
+        if (!text) return;
+
+        setCloudStatus("loading");
+        addGoal(timeframe, category, text)
+            .then(() => {})
+            .catch(() => {})
+            .finally(() => {
+                setCloudStatus("synced");
+                showToast("Ziel hinzugefügt");
+                setTimeout(loadAndRenderGoals, 800);
+            });
+    }
+
+    function handleDelete(id) {
+        if (!confirm("Ziel wirklich löschen?")) return;
+        setCloudStatus("loading");
+        deleteGoal(id)
+            .finally(() => {
+                setCloudStatus("synced");
+                showToast("Ziel gelöscht");
+                setTimeout(loadAndRenderGoals, 800);
+            });
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    window.onload = () => {
+        const savedMode = localStorage.getItem('goals_device_mode');
+        if (savedMode === 'mac') {
+            isMacMode = true;
+            document.getElementById('main-container').classList.add('mac-layout');
+            const layoutBtn = document.getElementById('layout-toggle-btn');
+            layoutBtn.textContent = "Mac";
+            layoutBtn.classList.add('active');
+        }
+        loadAndRenderGoals();
+    };
+</script>
+</body>
+</html>
