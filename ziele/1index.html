@@ -6,7 +6,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#f0f2f5">
-    <title>Ziel-Matrix</title>
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="manifest" href="manifest.json">
+    <title>Ziele</title>
     <style>
         :root {
             --accent: #e67e22;
@@ -24,6 +27,7 @@
             --border: #e2e8f0;
             --border-light: #f1f5f9;
             --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --apple-switch-bg: #e3e3e6;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -34,6 +38,7 @@
                 --text-secondary: #94a3b8;
                 --border: #2d3f55;
                 --border-light: #253347;
+                --apple-switch-bg: #1c1c1e;
             }
         }
 
@@ -57,13 +62,74 @@
             padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
             border-bottom: 1px solid var(--border-light);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            display: flex; align-items: center; justify-content: space-between;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .header-title { font-size: 1.1rem; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        .header-left { 
+            display: flex; 
+            align-items: center; 
+        }
+
+        .back-container { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            text-decoration: none; 
+            color: var(--text-primary); 
+        }
         
+        .back-container span { 
+            font-size: 0.95rem; 
+            font-weight: 700; 
+            line-height: 1;
+        }
+
+        .back-btn {
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            width: 32px; 
+            height: 32px; 
+            border-radius: 9px;
+            background: var(--surface); 
+            border: 1px solid var(--border);
+            color: var(--text-primary); 
+            box-shadow: var(--shadow);
+            flex-shrink: 0; 
+            font-size: 0.9rem;
+            line-height: 1;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mode-toggle-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 6px 10px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mode-toggle-btn.active {
+            color: var(--text-primary);
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
         .cloud-status-dot {
-            width: 10px; height: 10px; border-radius: 50%;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
             background-color: var(--text-secondary);
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
@@ -71,12 +137,43 @@
         .cloud-status-dot.loading { background-color: var(--accent); transform: scale(1.1); }
         .cloud-status-dot.error { background-color: var(--danger); box-shadow: 0 0 8px var(--danger); }
 
-        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+        main { 
+            padding: 16px; 
+            max-width: 600px; 
+            margin: 0 auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 16px; 
+            transition: max-width 0.3s ease;
+        }
+
+        /* Mac / Desktop Modus (Kacheln nebeneinander) */
+        main.mac-layout {
+            max-width: 1200px;
+        }
+        main.mac-layout .matrix-grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        @media (min-width: 1024px) {
+            main.mac-layout .matrix-grid-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .matrix-grid-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            width: 100%;
+        }
 
         .timeframe-section {
             background: var(--surface); border: 1px solid var(--border);
             border-radius: 18px; padding: 16px; box-shadow: var(--shadow);
             display: flex; flex-direction: column; gap: 12px;
+            height: fit-content;
         }
 
         .timeframe-title {
@@ -98,6 +195,7 @@
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .goal-card.done { opacity: 0.5; border-style: dashed; background: var(--border-light); }
+        .creation-mode-hidden { display: none !important; }
 
         .status-circle {
             width: 22px; height: 22px; border-radius: 6px;
@@ -123,13 +221,28 @@
         .add-goal-input {
             flex: 1; background: var(--bg); border: 1px solid var(--border);
             border-radius: 8px; padding: 8px 10px; color: var(--text-primary);
-            font-size: 0.85krem; outline: none;
+            font-size: 0.85rem; outline: none;
         }
         .add-goal-btn {
             background: var(--accent); color: white; border: none;
             border-radius: 8px; padding: 0 12px; font-weight: 700;
             cursor: pointer; font-size: 0.85rem;
         }
+
+        /* Historie Sektion */
+        .history-section {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 18px; padding: 16px; box-shadow: var(--shadow);
+            display: flex; flex-direction: column; gap: 12px; margin-top: 8px;
+        }
+        .history-header {
+            font-size: 0.85rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--text-secondary);
+            cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+            user-select: none;
+        }
+        .history-content { display: none; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 12px; }
+        .history-section.expanded .history-content { display: flex; }
 
         .toast-notification {
             position: fixed; top: calc(env(safe-area-inset-top) + 20px);
@@ -148,12 +261,34 @@
 <div class="toast-notification" id="toast-notice">Änderung gespeichert</div>
 
 <header>
-    <div class="header-title"><span>🎯</span> <span>Ziel-Matrix</span></div>
-    <div class="cloud-status-dot" id="cloud-status-dot" title="Cloud-Status"></div>
+    <div class="header-left">
+        <a href="index.html" class="back-container">
+            <div class="back-btn">&larr;</div>
+            <span>Routinen</span>
+        </a>
+    </div>
+    <div class="header-right">
+        <button class="mode-toggle-btn" id="creation-mode-btn" onclick="toggleCreationMode()" title="Erstellungsmodus ein-/ausschalten">Erstellen: Aus</button>
+        <button class="mode-toggle-btn" id="layout-toggle-btn" onclick="toggleDeviceMode()" title="Handy / Mac Ansicht umschalten">Handy</button>
+        <div class="cloud-status-dot" id="cloud-status-dot" title="Cloud-Status"></div>
+    </div>
 </header>
 
-<main id="matrix-container">
-    <!-- Wird dynamisch gefüllt -->
+<main id="main-container">
+    <div class="matrix-grid-container" id="matrix-container">
+        <!-- Wird dynamisch gefüllt -->
+    </div>
+
+    <!-- Historie-Bereich -->
+    <div class="history-section" id="history-section-box">
+        <div class="history-header" onclick="toggleHistory()">
+            <span>Erledigte Ziele (Historie)</span>
+            <span id="history-arrow">▼</span>
+        </div>
+        <div class="history-content" id="history-container">
+            <!-- Erledigte Ziele -->
+        </div>
+    </div>
 </main>
 
 <script>
@@ -164,6 +299,10 @@
         { key: "DEKADE", label: "Dekaden-Ziele (3 je Kat.)", limit: 3 },
         { key: "LEBEN", label: "Lebensziele (3 je Kat.)", limit: 3 }
     ];
+
+    let creationModeActive = false;
+    let isMacMode = false;
+    let globalGoalsData = [];
 
     function showToast(text, isError = false) {
         const toast = document.getElementById('toast-notice');
@@ -179,11 +318,44 @@
         dot.className = "cloud-status-dot " + status;
     }
 
+    function toggleCreationMode() {
+        creationModeActive = !creationModeActive;
+        const btn = document.getElementById('creation-mode-btn');
+        btn.textContent = creationModeActive ? "Erstellen: An" : "Erstellen: Aus";
+        btn.classList.toggle('active', creationModeActive);
+        renderMatrix(globalGoalsData);
+    }
+
+    function toggleDeviceMode() {
+        isMacMode = !isMacMode;
+        const mainEl = document.getElementById('main-container');
+        const layoutBtn = document.getElementById('layout-toggle-btn');
+        
+        if (isMacMode) {
+            mainEl.classList.add('mac-layout');
+            layoutBtn.textContent = "Mac";
+            layoutBtn.classList.add('active');
+        } else {
+            mainEl.classList.remove('mac-layout');
+            layoutBtn.textContent = "Handy";
+            layoutBtn.classList.remove('active');
+        }
+        localStorage.setItem('goals_device_mode', isMacMode ? 'mac' : 'handy');
+    }
+
+    function toggleHistory() {
+        const box = document.getElementById('history-section-box');
+        box.classList.toggle('expanded');
+        const arrow = document.getElementById('history-arrow');
+        arrow.textContent = box.classList.contains('expanded') ? "▲" : "▼";
+    }
+
     function loadAndRenderGoals() {
         setCloudStatus("loading");
         fetchGoals()
             .then(goals => {
                 setCloudStatus("synced");
+                globalGoalsData = goals;
                 renderMatrix(goals);
                 document.body.classList.add('loaded');
             })
@@ -192,7 +364,11 @@
 
     function renderMatrix(goals) {
         const container = document.getElementById('matrix-container');
+        const historyContainer = document.getElementById('history-container');
         container.innerHTML = "";
+        historyContainer.innerHTML = "";
+
+        let hasCompletedGoals = false;
 
         timeframes.forEach(tf => {
             let tfSection = document.createElement('div');
@@ -211,26 +387,45 @@
                 catSub.className = "category-subheading";
                 
                 const catGoals = goals.filter(g => g.timeframe === tf.key && g.category === cat);
+                const openGoals = catGoals.filter(g => !g.status);
+                const completedGoals = catGoals.filter(g => g.status);
+
                 catSub.innerHTML = `<span>${cat} (${catGoals.length}/${tf.limit})</span>`;
                 catContainer.appendChild(catSub);
 
-                catGoals.forEach(goal => {
+                // Nur offene Ziele standardmäßig oben anzeigen
+                openGoals.forEach(goal => {
                     let card = document.createElement('div');
-                    card.className = `goal-card ${goal.status ? 'done' : ''}`;
+                    card.className = `goal-card`;
                     card.innerHTML = `
-                        <div class="status-circle" onclick="handleToggle('${goal.id}', ${!goal.status})"></div>
+                        <div class="status-circle" onclick="handleToggle('${goal.id}', true)"></div>
                         <div class="goal-text">${escapeHtml(goal.goal_text)}</div>
                         <div class="goal-actions">
-                            <button class="action-btn" onclick="handleDelete('${goal.id}')" title="Löschen">🗑️</button>
+                            <button class="action-btn ${creationModeActive ? '' : 'creation-mode-hidden'}" onclick="handleDelete('${goal.id}')" title="Löschen">🗑️</button>
                         </div>
                     `;
                     catContainer.appendChild(card);
                 });
 
-                // Hinzufügen-Formular anzeigen, wenn Limit noch nicht erreicht
+                // Erledigte Ziele für die Historie sammeln
+                completedGoals.forEach(goal => {
+                    hasCompletedGoals = true;
+                    let hCard = document.createElement('div');
+                    hCard.className = `goal-card done`;
+                    hCard.innerHTML = `
+                        <div class="status-circle" onclick="handleToggle('${goal.id}', false)"></div>
+                        <div class="goal-text">${escapeHtml(goal.goal_text)} <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: normal; margin-left: 6px;">[${tf.key} / ${cat}]</span></div>
+                        <div class="goal-actions">
+                            <button class="action-btn ${creationModeActive ? '' : 'creation-mode-hidden'}" onclick="handleDelete('${goal.id}')" title="Löschen">🗑️</button>
+                        </div>
+                    `;
+                    historyContainer.appendChild(hCard);
+                });
+
+                // Erstellungs-Input nur anzeigen, wenn Modus aktiv und Limit nicht erreicht
                 if (catGoals.length < tf.limit) {
                     let formDiv = document.createElement('div');
-                    formDiv.className = "add-goal-form";
+                    formDiv.className = `add-goal-form ${creationModeActive ? '' : 'creation-mode-hidden'}`;
                     formDiv.innerHTML = `
                         <input type="text" class="add-goal-input" id="input-${tf.key}-${cat}" placeholder="Neues Ziel für ${cat.toLowerCase()}...">
                         <button class="add-goal-btn" onclick="handleAdd('${tf.key}', '${cat}')">+</button>
@@ -242,6 +437,10 @@
             tfSection.appendChild(catContainer);
             container.appendChild(tfSection);
         });
+
+        if (!hasCompletedGoals) {
+            historyContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary); padding: 4px;">Noch keine erledigten Ziele in der Historie.</div>`;
+        }
     }
 
     function handleToggle(id, newStatus) {
@@ -262,12 +461,12 @@
 
         setCloudStatus("loading");
         addGoal(timeframe, category, text)
-            .then(res => res.json) // da no-cors, direkt neu laden
+            .then(() => {})
             .catch(() => {})
             .finally(() => {
                 setCloudStatus("synced");
                 showToast("Ziel hinzugefügt");
-                setTimeout(loadAndRenderGoals, 800); // Kurzer Puffer für Sheets Write
+                setTimeout(loadAndRenderGoals, 800);
             });
     }
 
@@ -286,7 +485,17 @@
         return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
-    window.onload = loadAndRenderGoals;
+    window.onload = () => {
+        const savedMode = localStorage.getItem('goals_device_mode');
+        if (savedMode === 'mac') {
+            isMacMode = true;
+            document.getElementById('main-container').classList.add('mac-layout');
+            const layoutBtn = document.getElementById('layout-toggle-btn');
+            layoutBtn.textContent = "Mac";
+            layoutBtn.classList.add('active');
+        }
+        loadAndRenderGoals();
+    };
 </script>
 </body>
 </html>
