@@ -5,66 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#f0f2f5">
+    <meta name="theme-color" content="#f8fafc">
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     <link rel="apple-touch-icon" href="logo.png">
     <link rel="manifest" href="manifest.json">
     <title>Ziele</title>
     <style>
         :root {
-            --accent: #e67e22;
-            --accent-soft: rgba(230, 126, 34, 0.1);
-            --success: #27ae60;
-            --success-soft: rgba(39, 174, 96, 0.1);
-            --warning: #f1c40f;
-            --warning-soft: rgba(241, 196, 15, 0.1);
-            --danger: #e74c3c;
-            --danger-soft: rgba(231, 76, 60, 0.3);
-            --bg: #f0f2f5;
+            --accent: #d97706;
+            --accent-soft: rgba(217, 119, 6, 0.12);
+            --accent-glow: rgba(217, 119, 6, 0.25);
+            --success: #10b981;
+            --success-soft: rgba(16, 185, 129, 0.12);
+            --danger: #ef4444;
+            --danger-soft: rgba(239, 68, 68, 0.12);
+            --bg: #f8fafc;
             --surface: #ffffff;
-            --text-primary: #1e293b;
+            --surface-card: #f1f5f9;
+            --text-primary: #0f172a;
             --text-secondary: #64748b;
+            --text-muted: #94a3b8;
             --border: #e2e8f0;
             --border-light: #f1f5f9;
-            --shadow: 0 2px 8px rgba(0,0,0,0.06);
-            --apple-switch-bg: #e3e3e6;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 14px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.08);
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: #0f172a;
-                --surface: #1e293b;
-                --text-primary: #f1f5f9;
+                --bg: #090d16;
+                --surface: #131c2e;
+                --surface-card: #1c283e;
+                --text-primary: #f8fafc;
                 --text-secondary: #94a3b8;
-                --border: #2d3f55;
-                --border-light: #253347;
-                --apple-switch-bg: #1c1c1e;
+                --text-muted: #64748b;
+                --border: #233148;
+                --border-light: #182335;
+                --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+                --shadow-md: 0 4px 14px rgba(0,0,0,0.4);
+                --shadow-lg: 0 10px 25px rgba(0,0,0,0.5);
             }
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
             background: var(--bg);
             color: var(--text-primary);
             min-height: 100vh;
             padding-bottom: 40px;
             opacity: 0;
-            transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 0.3s ease;
+            -webkit-font-smoothing: antialiased;
         }
 
         body.loaded { opacity: 1; }
 
         header {
             position: sticky; top: 0; z-index: 100;
-            background: var(--bg);
-            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
-            border-bottom: 1px solid var(--border-light);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            background: rgba(248, 250, 252, 0.85);
+            padding: calc(env(safe-area-inset-top) + 14px) 24px 14px;
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
             display: flex;
             align-items: center;
             justify-content: space-between;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            header { background: rgba(9, 13, 22, 0.85); }
         }
 
         .header-left { 
@@ -75,14 +89,19 @@
         .back-container { 
             display: flex; 
             align-items: center; 
-            gap: 8px; 
+            gap: 10px; 
             text-decoration: none; 
             color: var(--text-primary); 
+            transition: transform 0.15s ease;
+        }
+        .back-container:active {
+            transform: scale(0.97);
         }
         
         .back-container span { 
-            font-size: 0.95rem; 
+            font-size: 1.05rem; 
             font-weight: 700; 
+            letter-spacing: -0.01em;
             line-height: 1;
         }
 
@@ -90,15 +109,16 @@
             display: flex; 
             align-items: center; 
             justify-content: center;
-            width: 32px; 
-            height: 32px; 
-            border-radius: 9px;
+            width: 34px; 
+            height: 34px; 
+            border-radius: var(--radius-md);
             background: var(--surface); 
             border: 1px solid var(--border);
             color: var(--text-primary); 
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-sm);
             flex-shrink: 0; 
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            font-weight: 600;
             line-height: 1;
         }
 
@@ -111,17 +131,17 @@
         .mode-toggle-btn {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 9px;
-            padding: 6px 10px;
-            font-size: 0.78rem;
+            border-radius: var(--radius-md);
+            padding: 7px 12px;
+            font-size: 0.8rem;
             font-weight: 700;
             color: var(--text-secondary);
             cursor: pointer;
-            box-shadow: var(--shadow);
+            box-shadow: var(--shadow-sm);
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .mode-toggle-btn.active {
-            color: var(--text-primary);
+            color: var(--accent);
             border-color: var(--accent);
             background: var(--accent-soft);
         }
@@ -130,126 +150,220 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background-color: var(--text-secondary);
+            background-color: var(--text-muted);
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .cloud-status-dot.synced { background-color: var(--success); box-shadow: 0 0 6px var(--success); }
-        .cloud-status-dot.loading { background-color: var(--accent); transform: scale(1.1); }
+        .cloud-status-dot.synced { background-color: var(--success); box-shadow: 0 0 8px var(--success); }
+        .cloud-status-dot.loading { background-color: var(--accent); transform: scale(1.15); }
         .cloud-status-dot.error { background-color: var(--danger); box-shadow: 0 0 8px var(--danger); }
 
         main { 
-            padding: 16px; 
-            max-width: 600px; 
+            padding: 20px 16px; 
+            max-width: 1200px; 
             margin: 0 auto; 
             display: flex; 
             flex-direction: column; 
-            gap: 16px; 
-            transition: max-width 0.3s ease;
+            gap: 20px; 
         }
 
-        /* Mac / Desktop Modus (Kacheln nebeneinander) */
-        main.mac-layout {
-            max-width: 1200px;
-        }
-        main.mac-layout .matrix-grid-container {
+        .matrix-grid-container {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            width: 100%;
         }
-        @media (min-width: 1024px) {
-            main.mac-layout .matrix-grid-container {
+
+        /* Automatische Erkennung für Desktop / Breiten Bildschirm */
+        @media (min-width: 900px) {
+            .matrix-grid-container {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
 
-        .matrix-grid-container {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            width: 100%;
-        }
-
         .timeframe-section {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 18px; padding: 16px; box-shadow: var(--shadow);
-            display: flex; flex-direction: column; gap: 12px;
+            background: var(--surface); 
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg); 
+            padding: 20px; 
+            box-shadow: var(--shadow-md);
+            display: flex; 
+            flex-direction: column; 
+            gap: 16px;
             height: fit-content;
         }
 
         .timeframe-title {
-            font-size: 0.85rem; font-weight: 800; text-transform: uppercase;
-            letter-spacing: 0.05em; color: var(--text-secondary);
-            display: flex; align-items: center; justify-content: space-between;
-            border-bottom: 1px solid var(--border-light); padding-bottom: 8px;
+            font-size: 0.88rem; 
+            font-weight: 800; 
+            text-transform: uppercase;
+            letter-spacing: 0.06em; 
+            color: var(--text-secondary);
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-light); 
+            padding-bottom: 12px;
         }
 
-        .category-container { display: flex; flex-direction: column; gap: 8px; }
+        .category-container { display: flex; flex-direction: column; gap: 14px; }
+        
         .category-subheading {
-            font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
-            color: var(--accent); margin-top: 4px; display: flex; align-items: center; justify-content: space-between;
+            font-size: 0.72rem; 
+            font-weight: 800; 
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--accent); 
+            background: var(--accent-soft);
+            padding: 4px 10px;
+            border-radius: 6px;
+            width: fit-content;
+            margin-top: 4px; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px;
         }
 
         .goal-card {
-            background: var(--bg); border-radius: 12px; border: 1px solid var(--border);
-            padding: 12px 14px; display: flex; align-items: center; gap: 12px;
+            background: var(--surface-card); 
+            border-radius: var(--radius-md); 
+            border: 1px solid var(--border);
+            padding: 12px 14px; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: var(--shadow-sm);
         }
-        .goal-card.done { opacity: 0.5; border-style: dashed; background: var(--border-light); }
+        .goal-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+        .goal-card.done { 
+            opacity: 0.6; 
+            border-style: dashed; 
+            background: var(--border-light); 
+        }
+        .goal-card.done:hover {
+            transform: none;
+        }
         .creation-mode-hidden { display: none !important; }
 
         .status-circle {
-            width: 22px; height: 22px; border-radius: 6px;
-            border: 2px solid var(--border); display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            width: 22px; 
+            height: 22px; 
+            border-radius: 7px;
+            border: 2px solid var(--border); 
+            background: var(--surface);
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            flex-shrink: 0; 
+            cursor: pointer; 
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .status-circle:hover {
+            border-color: var(--accent);
         }
         .goal-card.done .status-circle { background: var(--success); border-color: var(--success); }
         .status-circle::after { content: '✓'; color: white; font-size: 13px; font-weight: bold; display: none; }
         .goal-card.done .status-circle::after { display: block; }
 
-        .goal-text { font-weight: 600; font-size: 0.9rem; flex: 1; word-break: break-word; }
+        .goal-content-box {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            flex: 1;
+        }
+
+        .goal-text { 
+            font-weight: 600; 
+            font-size: 0.92rem; 
+            word-break: break-word; 
+            line-height: 1.35;
+        }
+
+        .timeframe-pill {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
         
         .goal-actions { display: flex; gap: 8px; align-items: center; }
         .action-btn {
             background: transparent; border: none; color: var(--text-secondary);
             cursor: pointer; font-size: 0.85rem; padding: 4px;
+            border-radius: var(--radius-sm);
+            transition: color 0.15s ease;
         }
         .action-btn:hover { color: var(--danger); }
 
         .add-goal-form {
-            display: flex; gap: 6px; margin-top: 4px;
+            display: flex; gap: 8px; margin-top: 2px;
         }
         .add-goal-input {
-            flex: 1; background: var(--bg); border: 1px solid var(--border);
-            border-radius: 8px; padding: 8px 10px; color: var(--text-primary);
-            font-size: 0.85rem; outline: none;
+            flex: 1; 
+            background: var(--surface-card); 
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md); 
+            padding: 9px 12px; 
+            color: var(--text-primary);
+            font-size: 0.88rem; 
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+        .add-goal-input:focus {
+            border-color: var(--accent);
         }
         .add-goal-btn {
-            background: var(--accent); color: white; border: none;
-            border-radius: 8px; padding: 0 12px; font-weight: 700;
-            cursor: pointer; font-size: 0.85rem;
+            background: var(--accent); 
+            color: white; 
+            border: none;
+            border-radius: var(--radius-md); 
+            padding: 0 14px; 
+            font-weight: 700;
+            cursor: pointer; 
+            font-size: 1rem;
+            transition: opacity 0.2s ease;
+        }
+        .add-goal-btn:hover {
+            opacity: 0.9;
         }
 
         /* Historie Sektion */
         .history-section {
-            background: var(--surface); border: 1px solid var(--border);
-            border-radius: 18px; padding: 16px; box-shadow: var(--shadow);
-            display: flex; flex-direction: column; gap: 12px; margin-top: 8px;
+            background: var(--surface); 
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg); 
+            padding: 18px 20px; 
+            box-shadow: var(--shadow-md);
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            margin-top: 10px;
         }
         .history-header {
-            font-size: 0.85rem; font-weight: 800; text-transform: uppercase;
-            letter-spacing: 0.05em; color: var(--text-secondary);
-            cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+            font-size: 0.88rem; 
+            font-weight: 800; 
+            text-transform: uppercase;
+            letter-spacing: 0.05em; 
+            color: var(--text-secondary);
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
             user-select: none;
         }
-        .history-content { display: none; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 12px; }
+        .history-content { display: none; flex-direction: column; gap: 10px; border-top: 1px solid var(--border-light); padding-top: 14px; }
         .history-section.expanded .history-content { display: flex; }
 
         .toast-notification {
             position: fixed; top: calc(env(safe-area-inset-top) + 20px);
             left: 50%; transform: translateX(-50%) translateY(-20px);
             background: var(--success); color: white; padding: 10px 20px;
-            border-radius: 12px; font-size: 0.85rem; font-weight: 700;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); opacity: 0; z-index: 1000;
+            border-radius: var(--radius-md); font-size: 0.85rem; font-weight: 700;
+            box-shadow: var(--shadow-lg); opacity: 0; z-index: 1000;
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none;
         }
         .toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -264,12 +378,11 @@
     <div class="header-left">
         <a href="index.html" class="back-container">
             <div class="back-btn">&larr;</div>
-            <span>Routinen</span>
+            <span>Ziele</span>
         </a>
     </div>
     <div class="header-right">
         <button class="mode-toggle-btn" id="creation-mode-btn" onclick="toggleCreationMode()" title="Erstellungsmodus ein-/ausschalten">Erstellen: Aus</button>
-        <button class="mode-toggle-btn" id="layout-toggle-btn" onclick="toggleDeviceMode()" title="Handy / Mac Ansicht umschalten">Handy</button>
         <div class="cloud-status-dot" id="cloud-status-dot" title="Cloud-Status"></div>
     </div>
 </header>
@@ -301,7 +414,6 @@
     ];
 
     let creationModeActive = false;
-    let isMacMode = false;
     let globalGoalsData = [];
 
     function showToast(text, isError = false) {
@@ -324,23 +436,6 @@
         btn.textContent = creationModeActive ? "Erstellen: An" : "Erstellen: Aus";
         btn.classList.toggle('active', creationModeActive);
         renderMatrix(globalGoalsData);
-    }
-
-    function toggleDeviceMode() {
-        isMacMode = !isMacMode;
-        const mainEl = document.getElementById('main-container');
-        const layoutBtn = document.getElementById('layout-toggle-btn');
-        
-        if (isMacMode) {
-            mainEl.classList.add('mac-layout');
-            layoutBtn.textContent = "Mac";
-            layoutBtn.classList.add('active');
-        } else {
-            mainEl.classList.remove('mac-layout');
-            layoutBtn.textContent = "Handy";
-            layoutBtn.classList.remove('active');
-        }
-        localStorage.setItem('goals_device_mode', isMacMode ? 'mac' : 'handy');
     }
 
     function toggleHistory() {
@@ -399,7 +494,10 @@
                     card.className = `goal-card`;
                     card.innerHTML = `
                         <div class="status-circle" onclick="handleToggle('${goal.id}', true)"></div>
-                        <div class="goal-text">${escapeHtml(goal.goal_text)}</div>
+                        <div class="goal-content-box">
+                            <div class="goal-text">${escapeHtml(goal.goal_text)}</div>
+                            <div class="timeframe-pill">${tf.key} &bull; ${cat}</div>
+                        </div>
                         <div class="goal-actions">
                             <button class="action-btn ${creationModeActive ? '' : 'creation-mode-hidden'}" onclick="handleDelete('${goal.id}')" title="Löschen">🗑️</button>
                         </div>
@@ -414,7 +512,10 @@
                     hCard.className = `goal-card done`;
                     hCard.innerHTML = `
                         <div class="status-circle" onclick="handleToggle('${goal.id}', false)"></div>
-                        <div class="goal-text">${escapeHtml(goal.goal_text)} <span style="font-size: 0.7rem; color: var(--text-secondary); font-weight: normal; margin-left: 6px;">[${tf.key} / ${cat}]</span></div>
+                        <div class="goal-content-box">
+                            <div class="goal-text">${escapeHtml(goal.goal_text)}</div>
+                            <div class="timeframe-pill">${tf.key} &bull; ${cat}</div>
+                        </div>
                         <div class="goal-actions">
                             <button class="action-btn ${creationModeActive ? '' : 'creation-mode-hidden'}" onclick="handleDelete('${goal.id}')" title="Löschen">🗑️</button>
                         </div>
@@ -439,7 +540,7 @@
         });
 
         if (!hasCompletedGoals) {
-            historyContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary); padding: 4px;">Noch keine erledigten Ziele in der Historie.</div>`;
+            historyContainer.innerHTML = `<div style="font-size: 0.82rem; color: var(--text-muted); padding: 4px;">Noch keine erledigten Ziele in der Historie.</div>`;
         }
     }
 
@@ -486,14 +587,6 @@
     }
 
     window.onload = () => {
-        const savedMode = localStorage.getItem('goals_device_mode');
-        if (savedMode === 'mac') {
-            isMacMode = true;
-            document.getElementById('main-container').classList.add('mac-layout');
-            const layoutBtn = document.getElementById('layout-toggle-btn');
-            layoutBtn.textContent = "Mac";
-            layoutBtn.classList.add('active');
-        }
         loadAndRenderGoals();
     };
 </script>
