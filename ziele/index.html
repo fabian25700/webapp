@@ -5,103 +5,94 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#f8fafc">
+    <meta name="theme-color" content="#f0f2f5">
     <link rel="icon" type="image/svg+xml" href="logo.svg">
     <link rel="apple-touch-icon" href="logo.png">
     <link rel="manifest" href="manifest.json">
     <title>Ziele</title>
     <style>
         :root {
-            --accent: #d97706;
-            --accent-soft: rgba(217, 119, 6, 0.12);
-            --accent-glow: rgba(217, 119, 6, 0.25);
-            --success: #10b981;
-            --success-soft: rgba(16, 185, 129, 0.12);
-            --danger: #ef4444;
-            --danger-soft: rgba(239, 68, 68, 0.12);
-            --bg: #f8fafc;
+            --accent: #e67e22;
+            --accent-soft: rgba(230, 126, 34, 0.1);
+            --success: #27ae60;
+            --success-soft: rgba(39, 174, 96, 0.1);
+            --danger: #e74c3c;
+            --danger-soft: rgba(231, 76, 60, 0.3);
+            --bg: #f0f2f5;
             --surface: #ffffff;
-            --surface-card: #f1f5f9;
-            --text-primary: #0f172a;
+            --text-primary: #1e293b;
             --text-secondary: #64748b;
-            --text-muted: #94a3b8;
             --border: #e2e8f0;
             --border-light: #f1f5f9;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 14px rgba(0,0,0,0.06);
-            --shadow-lg: 0 10px 25px rgba(0,0,0,0.08);
-            --radius-lg: 20px;
-            --radius-md: 12px;
-            --radius-sm: 8px;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --apple-switch-bg: #e3e3e6;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: #090d16;
-                --surface: #131c2e;
-                --surface-card: #1c283e;
-                --text-primary: #f8fafc;
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --text-primary: #f1f5f9;
                 --text-secondary: #94a3b8;
-                --text-muted: #64748b;
-                --border: #233148;
-                --border-light: #182335;
-                --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
-                --shadow-md: 0 4px 14px rgba(0,0,0,0.4);
-                --shadow-lg: 0 10px 25px rgba(0,0,0,0.5);
+                --border: #2d3f55;
+                --border-light: #253347;
+                --apple-switch-bg: #1c1c1e;
             }
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
             background: var(--bg);
             color: var(--text-primary);
             min-height: 100vh;
-            padding-bottom: 40px;
+            padding-bottom: 80px;
             opacity: 0;
-            transition: opacity 0.3s ease;
-            -webkit-font-smoothing: antialiased;
+            transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         body.loaded { opacity: 1; }
 
         header {
             position: sticky; top: 0; z-index: 100;
-            background: rgba(248, 250, 252, 0.85);
-            padding: calc(env(safe-area-inset-top) + 14px) 24px 14px;
-            border-bottom: 1px solid var(--border);
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+            background: var(--bg);
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-top { 
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
+            width: 100%;
+            position: relative;
         }
-
-        @media (prefers-color-scheme: dark) {
-            header { background: rgba(9, 13, 22, 0.85); }
-        }
-
+        
         .header-left { 
             display: flex; 
             align-items: center; 
+            position: absolute;
+            left: 0;
+            z-index: 10;
         }
 
         .back-container { 
             display: flex; 
             align-items: center; 
-            gap: 10px; 
+            gap: 8px; 
             text-decoration: none; 
             color: var(--text-primary); 
-            transition: transform 0.15s ease;
-        }
-        .back-container:active {
-            transform: scale(0.97);
         }
         
         .back-container span { 
-            font-size: 1.05rem; 
+            font-size: 0.95rem; 
             font-weight: 700; 
-            letter-spacing: -0.01em;
             line-height: 1;
         }
 
@@ -109,319 +100,311 @@
             display: flex; 
             align-items: center; 
             justify-content: center;
-            width: 34px; 
-            height: 34px; 
-            border-radius: var(--radius-md);
+            width: 32px; 
+            height: 32px; 
+            border-radius: 9px;
             background: var(--surface); 
             border: 1px solid var(--border);
             color: var(--text-primary); 
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow);
             flex-shrink: 0; 
-            font-size: 0.95rem;
-            font-weight: 600;
+            font-size: 0.9rem;
             line-height: 1;
         }
 
         .header-right {
             display: flex;
             align-items: center;
-            gap: 12px;
-        }
-
-        .mode-toggle-btn {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md);
-            padding: 7px 12px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            cursor: pointer;
-            box-shadow: var(--shadow-sm);
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .mode-toggle-btn.active {
-            color: var(--accent);
-            border-color: var(--accent);
-            background: var(--accent-soft);
+            justify-content: center;
+            position: absolute;
+            right: 0;
+            z-index: 10;
+            width: 32px;
+            height: 32px;
         }
 
         .cloud-status-dot {
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background-color: var(--text-muted);
+            background-color: var(--text-secondary);
             transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .cloud-status-dot.synced { background-color: var(--success); box-shadow: 0 0 8px var(--success); }
-        .cloud-status-dot.loading { background-color: var(--accent); transform: scale(1.15); }
+        .cloud-status-dot.synced { background-color: var(--success); box-shadow: 0 0 6px var(--success); }
+        .cloud-status-dot.loading { background-color: var(--accent); transform: scale(1.1); }
         .cloud-status-dot.error { background-color: var(--danger); box-shadow: 0 0 8px var(--danger); }
 
-        main { 
-            padding: 20px 16px; 
-            max-width: 1200px; 
-            margin: 0 auto; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 20px; 
-        }
-
-        .matrix-grid-container {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 20px;
+        .outside-switch-area {
+            display: flex;
+            justify-content: center;
+            margin: 12px auto 4px auto;
             width: 100%;
+            max-width: 600px;
+            padding: 0 16px;
         }
 
-        /* Automatische Erkennung für Desktop / Breiten Bildschirm */
-        @media (min-width: 900px) {
-            .matrix-grid-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        .timeframe-section {
-            background: var(--surface); 
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg); 
-            padding: 20px; 
-            box-shadow: var(--shadow-md);
+        .apple-switch-container {
             display: flex; 
-            flex-direction: column; 
-            gap: 16px;
-            height: fit-content;
+            background: var(--apple-switch-bg); 
+            border-radius: 9px;
+            padding: 2px; 
+            width: 100%; 
+            height: 36px; 
+            flex-shrink: 0;
         }
-
-        .timeframe-title {
-            font-size: 0.88rem; 
-            font-weight: 800; 
-            text-transform: uppercase;
-            letter-spacing: 0.06em; 
-            color: var(--text-secondary);
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between;
-            border-bottom: 1px solid var(--border-light); 
-            padding-bottom: 12px;
-        }
-
-        .category-container { display: flex; flex-direction: column; gap: 14px; }
         
-        .category-subheading {
-            font-size: 0.72rem; 
-            font-weight: 800; 
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--accent); 
-            background: var(--accent-soft);
-            padding: 4px 10px;
-            border-radius: 6px;
-            width: fit-content;
-            margin-top: 4px; 
-            display: flex; 
-            align-items: center; 
-            gap: 6px;
-        }
-
-        .goal-card {
-            background: var(--surface-card); 
-            border-radius: var(--radius-md); 
-            border: 1px solid var(--border);
-            padding: 12px 14px; 
-            display: flex; 
-            align-items: center; 
-            gap: 12px;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: var(--shadow-sm);
-        }
-        .goal-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-1px);
-        }
-        .goal-card.done { 
-            opacity: 0.6; 
-            border-style: dashed; 
-            background: var(--border-light); 
-        }
-        .goal-card.done:hover {
-            transform: none;
-        }
-        .creation-mode-hidden { display: none !important; }
-
-        .status-circle {
-            width: 22px; 
-            height: 22px; 
-            border-radius: 7px;
-            border: 2px solid var(--border); 
-            background: var(--surface);
+        .apple-switch-btn {
+            flex: 1; 
+            text-align: center; 
             display: flex; 
             align-items: center; 
             justify-content: center;
-            flex-shrink: 0; 
-            cursor: pointer; 
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .status-circle:hover {
-            border-color: var(--accent);
-        }
-        .goal-card.done .status-circle { background: var(--success); border-color: var(--success); }
-        .status-circle::after { content: '✓'; color: white; font-size: 13px; font-weight: bold; display: none; }
-        .goal-card.done .status-circle::after { display: block; }
-
-        .goal-content-box {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-            flex: 1;
-        }
-
-        .goal-text { 
-            font-weight: 600; 
-            font-size: 0.92rem; 
-            word-break: break-word; 
-            line-height: 1.35;
-        }
-
-        .timeframe-pill {
-            font-size: 0.68rem;
+            font-size: 0.75rem; 
             font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
-        
-        .goal-actions { display: flex; gap: 8px; align-items: center; }
-        .action-btn {
-            background: transparent; border: none; color: var(--text-secondary);
-            cursor: pointer; font-size: 0.85rem; padding: 4px;
-            border-radius: var(--radius-sm);
-            transition: color 0.15s ease;
-        }
-        .action-btn:hover { color: var(--danger); }
-
-        .add-goal-form {
-            display: flex; gap: 8px; margin-top: 2px;
-        }
-        .add-goal-input {
-            flex: 1; 
-            background: var(--surface-card); 
-            border: 1px solid var(--border);
-            border-radius: var(--radius-md); 
-            padding: 9px 12px; 
-            color: var(--text-primary);
-            font-size: 0.88rem; 
-            outline: none;
-            transition: border-color 0.2s ease;
-        }
-        .add-goal-input:focus {
-            border-color: var(--accent);
-        }
-        .add-goal-btn {
-            background: var(--accent); 
-            color: white; 
-            border: none;
-            border-radius: var(--radius-md); 
-            padding: 0 14px; 
-            font-weight: 700;
-            cursor: pointer; 
-            font-size: 1rem;
-            transition: opacity 0.2s ease;
-        }
-        .add-goal-btn:hover {
-            opacity: 0.9;
-        }
-
-        /* Historie Sektion */
-        .history-section {
-            background: var(--surface); 
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg); 
-            padding: 18px 20px; 
-            box-shadow: var(--shadow-md);
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px; 
-            margin-top: 10px;
-        }
-        .history-header {
-            font-size: 0.88rem; 
-            font-weight: 800; 
-            text-transform: uppercase;
-            letter-spacing: 0.05em; 
+            border-radius: 7px; 
+            border: none; 
+            background: transparent;
             color: var(--text-secondary);
             cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between;
-            user-select: none;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); 
+            height: 100%;
+            line-height: 1;
         }
-        .history-content { display: none; flex-direction: column; gap: 10px; border-top: 1px solid var(--border-light); padding-top: 14px; }
-        .history-section.expanded .history-content { display: flex; }
+        
+        .apple-switch-btn.active {
+            background: var(--surface);
+            color: var(--text-primary);
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
+        }
 
         .toast-notification {
-            position: fixed; top: calc(env(safe-area-inset-top) + 20px);
-            left: 50%; transform: translateX(-50%) translateY(-20px);
-            background: var(--success); color: white; padding: 10px 20px;
-            border-radius: var(--radius-md); font-size: 0.85rem; font-weight: 700;
-            box-shadow: var(--shadow-lg); opacity: 0; z-index: 1000;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none;
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 20px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: var(--success);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            opacity: 0;
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
         }
         .toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+        .category-group { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); position: relative; }
+        
+        .category-header {
+            padding: 16px; display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; user-select: none; transition: background 0.2s;
+        }
+        .category-header:active { background: var(--border-light); }
+
+        .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+        .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        
+        .arrow { font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.3s; flex-shrink: 0; }
+        .category-group.open .arrow { transform: rotate(180deg); }
+
+        .category-content { display: none; padding: 0 16px 16px; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 16px; }
+        .category-group.open .category-content { display: flex; }
+
+        .bucket-card {
+            background: var(--bg); border-radius: 12px; border: 1px solid var(--border);
+            padding: 14px 16px; display: flex; align-items: center; gap: 14px;
+            cursor: pointer; user-select: none; transition: all 0.2s;
+        }
+        .bucket-card:active { transform: scale(0.99); }
+        .bucket-card.done { opacity: 0.5; background: var(--border-light); }
+
+        .status-circle {
+            width: 22px; height: 22px; border-radius: 6px;
+            border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            transition: all 0.2s; order: -1;
+        }
+        .done .status-circle { background: var(--success); border-color: var(--success); }
+        .status-circle::after { content: '✓'; color: white; font-size: 13px; font-weight: bold; display: none; }
+        .done .status-circle::after { display: block; }
+
+        .location-name { font-weight: 600; font-size: 0.95rem; flex: 1; word-break: break-word; }
+        .goal-meta-sub { font-size: 0.7rem; color: var(--text-secondary); margin-top: 2px; }
+
+        /* Historie Sektion */
+        .history-master-container { margin-top: 12px; border-top: 1px dashed var(--border); padding-top: 16px; }
+        .history-master-trigger {
+            font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+            padding: 12px; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);
+        }
+        .history-hidden-wrapper { display: none; flex-direction: column; gap: 12px; margin-top: 12px; }
+        .history-master-container.expanded .history-hidden-wrapper { display: flex; }
+
+        /* Floating Action Button (FAB) */
+        .fab {
+            position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px;
+            background: var(--accent); border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; box-shadow: 0 4px 16px rgba(230, 126, 34, 0.4);
+            cursor: pointer; z-index: 90; border: none; color: white; transition: transform 0.2s;
+        }
+        .fab:active { transform: scale(0.92); }
+        .fab svg { width: 28px; height: 28px; fill: currentColor; }
+
+        /* Modal */
+        .modal {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.4); z-index: 200;
+            display: none; align-items: flex-end; justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--bg); width: 100%; max-height: 88vh;
+            border-top-left-radius: 24px; border-top-right-radius: 24px;
+            padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px;
+        }
+        @media (min-width: 601px) {
+            .modal { align-items: center; }
+            .modal-content { width: 500px; border-radius: 24px; max-height: 85vh; }
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .modal-title { font-size: 1.1rem; font-weight: 700; }
+        .close-modal {
+            background: var(--border); border: none; width: 30px; height: 30px;
+            border-radius: 50%; cursor: pointer; color: var(--text-primary); font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; padding: 16px; box-shadow: var(--shadow);
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .card-title { font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); }
+        .text-input, .filter-select {
+            width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--border);
+            background: var(--bg); color: var(--text-primary); font-size: 16px; font-weight: 600; outline: none;
+        }
+        .text-input:focus, .filter-select:focus { border-color: var(--accent); }
+        
+        .category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .category-btn {
+            background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+            padding: 10px 6px; color: var(--text-primary); display: flex; flex-direction: column;
+            align-items: center; gap: 4px; cursor: pointer; font-size: 0.78rem; font-weight: 600;
+        }
+        .category-btn.selected { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+        .submit-btn {
+            width: 100%; padding: 14px; border-radius: 12px; border: none;
+            background: var(--accent); color: white; font-size: 0.9rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+        }
+        .delete-btn {
+            width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--danger);
+            background: transparent; color: var(--danger); font-size: 0.9rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; margin-top: 4px;
+        }
     </style>
     <script src="api.js"></script>
 </head>
 <body>
 
-<div class="toast-notification" id="toast-notice">Änderung gespeichert</div>
+<div class="toast-notification" id="toast-notice">Erfolgreich gespeichert!</div>
 
 <header>
-    <div class="header-left">
-        <a href="index.html" class="back-container">
-            <div class="back-btn">&larr;</div>
-            <span>Ziele</span>
-        </a>
-    </div>
-    <div class="header-right">
-        <button class="mode-toggle-btn" id="creation-mode-btn" onclick="toggleCreationMode()" title="Erstellungsmodus ein-/ausschalten">Erstellen: Aus</button>
-        <div class="cloud-status-dot" id="cloud-status-dot" title="Cloud-Status"></div>
+    <div class="header-top">
+        <div class="header-left">
+            <a href="index.html" class="back-container">
+                <div class="back-btn">&larr;</div>
+                <span>Ziele</span>
+            </a>
+        </div>
+        <div class="header-right">
+            <div class="cloud-status-dot" id="cloud-status-dot" title="Cloud-Status"></div>
+        </div>
     </div>
 </header>
 
-<main id="main-container">
-    <div class="matrix-grid-container" id="matrix-container">
-        <!-- Wird dynamisch gefüllt -->
+<div class="outside-switch-area">
+    <div class="apple-switch-container">
+        <button class="apple-switch-btn active" id="tab-MONAT" onclick="switchTimeframe('MONAT')">Monat</button>
+        <button class="apple-switch-btn" id="tab-JAHR" onclick="switchTimeframe('JAHR')">Jahr</button>
+        <button class="apple-switch-btn" id="tab-DEKADE" onclick="switchTimeframe('DEKADE')">Dekade</button>
+        <button class="apple-switch-btn" id="tab-LEBEN" onclick="switchTimeframe('LEBEN')">Leben</button>
     </div>
+</div>
 
-    <!-- Historie-Bereich -->
-    <div class="history-section" id="history-section-box">
-        <div class="history-header" onclick="toggleHistory()">
-            <span>Erledigte Ziele (Historie)</span>
-            <span id="history-arrow">▼</span>
-        </div>
-        <div class="history-content" id="history-container">
-            <!-- Erledigte Ziele -->
-        </div>
-    </div>
+<main id="main-container">
+    <!-- Aktive Ziele -->
 </main>
+
+<button class="fab" onclick="openModalForCreate()" aria-label="Ziel erstellen">
+    <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+</button>
+
+<!-- Modal -->
+<div id="goal-modal" class="modal" onclick="closeModalOnOutside(event)">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="modal-title" id="modal-title-text">Ziel bearbeiten</span>
+            <button class="close-modal" onclick="closeModal()">×</button>
+        </div>
+
+        <div class="card">
+            <span class="card-title">Zielbeschreibung</span>
+            <input type="text" class="text-input" id="modal-goal-text" placeholder="z.B. Zieltext...">
+        </div>
+
+        <div class="card">
+            <span class="card-title">Zeithorizont</span>
+            <select id="modal-timeframe-select" class="filter-select">
+                <option value="MONAT">Monat</option>
+                <option value="JAHR">Jahr</option>
+                <option value="DEKADE">Dekade</option>
+                <option value="LEBEN">Leben</option>
+            </select>
+        </div>
+
+        <div class="card">
+            <span class="card-title">Zeitstempel / Periode (z.B. 2026, 2026-10, 2020-2030)</span>
+            <input type="text" class="text-input" id="modal-period-text" placeholder="Wird automatisch ermittelt oder manuell anpassen">
+        </div>
+
+        <div class="card">
+            <span class="card-title">Kategorie</span>
+            <div class="category-grid" id="modal-category-grid">
+                <button type="button" class="category-btn" onclick="selectModalCategory('KARRIERE', this)">Karriere</button>
+                <button type="button" class="category-btn" onclick="selectModalCategory('GESUNDHEIT', this)">Gesundheit</button>
+                <button type="button" class="category-btn" onclick="selectModalCategory('LIFESTYLE', this)">Lifestyle</button>
+            </div>
+        </div>
+
+        <button class="submit-btn" onclick="saveModalGoal()">Speichern</button>
+        <button class="delete-btn" id="modal-delete-btn" style="display:none;" onclick="deleteCurrentModalGoal()">Löschen</button>
+    </div>
+</div>
 
 <script>
     const categories = ["KARRIERE", "GESUNDHEIT", "LIFESTYLE"];
-    const timeframes = [
-        { key: "MONAT", label: "Monats-Fokus (1 je Kat.)", limit: 1 },
-        { key: "JAHR", label: "Jahres-Meilensteine (2 je Kat.)", limit: 2 },
-        { key: "DEKADE", label: "Dekaden-Ziele (3 je Kat.)", limit: 3 },
-        { key: "LEBEN", label: "Lebensziele (3 je Kat.)", limit: 3 }
-    ];
-
-    let creationModeActive = false;
+    const categoryIcons = { "KARRIERE": "💼", "GESUNDHEIT": "❤️", "LIFESTYLE": "🌟" };
+    
+    let activeTimeframe = "MONAT";
     let globalGoalsData = [];
+    let editingGoalId = null;
+    let selectedModalCategory = "KARRIERE";
 
     function showToast(text, isError = false) {
         const toast = document.getElementById('toast-notice');
         toast.textContent = text;
         toast.style.background = isError ? 'var(--danger)' : 'var(--success)';
         toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2500);
+        setTimeout(() => toast.classList.remove('show'), 2000);
     }
 
     function setCloudStatus(status) {
@@ -430,165 +413,256 @@
         dot.className = "cloud-status-dot " + status;
     }
 
-    function toggleCreationMode() {
-        creationModeActive = !creationModeActive;
-        const btn = document.getElementById('creation-mode-btn');
-        btn.textContent = creationModeActive ? "Erstellen: An" : "Erstellen: Aus";
-        btn.classList.toggle('active', creationModeActive);
-        renderMatrix(globalGoalsData);
+    function switchTimeframe(tf) {
+        activeTimeframe = tf;
+        ['MONAT', 'JAHR', 'DEKADE', 'LEBEN'].forEach(t => {
+            document.getElementById(`tab-${t}`).classList.toggle('active', t === tf);
+        });
+        renderGoals(globalGoalsData);
     }
 
-    function toggleHistory() {
-        const box = document.getElementById('history-section-box');
-        box.classList.toggle('expanded');
-        const arrow = document.getElementById('history-arrow');
-        arrow.textContent = box.classList.contains('expanded') ? "▲" : "▼";
-    }
-
-    function loadAndRenderGoals() {
+    function loadData() {
         setCloudStatus("loading");
         fetchGoals()
             .then(goals => {
                 setCloudStatus("synced");
-                globalGoalsData = goals;
-                renderMatrix(goals);
+                globalGoalsData = Array.isArray(goals) ? goals : [];
+                renderGoals(globalGoalsData);
                 document.body.classList.add('loaded');
             })
             .catch(() => setCloudStatus("error"));
     }
 
-    function renderMatrix(goals) {
-        const container = document.getElementById('matrix-container');
-        const historyContainer = document.getElementById('history-container');
+    // Hilfsfunktion zur Ermittlung des aktuellen Zeitfilters
+    function getCurrentPeriodKey(tf) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        if (tf === 'MONAT') return `${year}-${month}`;
+        if (tf === 'JAHR') return `${year}`;
+        if (tf === 'DEKADE') return `2020-2030`; // Aktuelle Dekade anpassen falls nötig
+        return '';
+    }
+
+    function isCurrentPeriod(goal) {
+        if (goal.timeframe === 'LEBEN') return true;
+        const currentPeriod = getCurrentPeriodKey(goal.timeframe);
+        if (!goal.period) return true; // Fallback falls kein Feld existiert
+        return goal.period.trim() === currentPeriod;
+    }
+
+    function renderGoals(goals) {
+        const container = document.getElementById('main-container');
         container.innerHTML = "";
-        historyContainer.innerHTML = "";
 
-        let hasCompletedGoals = false;
-
-        timeframes.forEach(tf => {
-            let tfSection = document.createElement('div');
-            tfSection.className = "timeframe-section";
+        // 1. Aktive Ziele für den gewählten Reiter filtern (aktuelle Periode)
+        categories.forEach(cat => {
+            const catGoals = goals.filter(g => g.timeframe === activeTimeframe && g.category === cat && isCurrentPeriod(g));
             
-            let tfHeader = document.createElement('div');
-            tfHeader.className = "timeframe-title";
-            tfHeader.innerHTML = `<span>${tf.label}</span>`;
-            tfSection.appendChild(tfHeader);
-
-            let catContainer = document.createElement('div');
-            catContainer.className = "category-container";
-
-            categories.forEach(cat => {
-                let catSub = document.createElement('div');
-                catSub.className = "category-subheading";
-                
-                const catGoals = goals.filter(g => g.timeframe === tf.key && g.category === cat);
-                const openGoals = catGoals.filter(g => !g.status);
-                const completedGoals = catGoals.filter(g => g.status);
-
-                catSub.innerHTML = `<span>${cat} (${catGoals.length}/${tf.limit})</span>`;
-                catContainer.appendChild(catSub);
-
-                // Nur offene Ziele standardmäßig oben anzeigen
-                openGoals.forEach(goal => {
-                    let card = document.createElement('div');
-                    card.className = `goal-card`;
-                    card.innerHTML = `
-                        <div class="status-circle" onclick="handleToggle('${goal.id}', true)"></div>
-                        <div class="goal-content-box">
-                            <div class="goal-text">${escapeHtml(goal.goal_text)}</div>
-                            <div class="timeframe-pill">${tf.key} &bull; ${cat}</div>
-                        </div>
-                        <div class="goal-actions">
-                            <button class="action-btn ${creationModeActive ? '' : 'creation-mode-hidden'}" onclick="handleDelete('${goal.id}')" title="Löschen">🗑️</button>
+            let habitsHtml = '';
+            if (catGoals.length === 0) {
+                habitsHtml = `<div style="font-size: 0.85rem; color: var(--text-secondary); padding: 6px 0;">Keine aktuellen Ziele in dieser Kategorie.</div>`;
+            } else {
+                catGoals.forEach(goal => {
+                    habitsHtml += `
+                        <div class="bucket-card ${goal.status ? 'done' : ''}" onclick="openModalForEdit('${goal.id}')">
+                            <div class="status-circle" onclick="event.stopPropagation(); toggleGoalStatusDirect('${goal.id}', ${!goal.status})"></div>
+                            <div class="location-name">
+                                ${escapeHtml(goal.goal_text)}
+                                ${goal.period ? `<div class="goal-meta-sub">Periode: ${goal.period}</div>` : ''}
+                            </div>
                         </div>
                     `;
-                    catContainer.appendChild(card);
                 });
+            }
 
-                // Erledigte Ziele für die Historie sammeln
-                completedGoals.forEach(goal => {
-                    hasCompletedGoals = true;
-                    let hCard = document.createElement('div');
-                    hCard.className = `goal-card done`;
-                    hCard.innerHTML = `
-                        <div class="status-circle" onclick="handleToggle('${goal.id}', false)"></div>
-                        <div class="goal-content-box">
-                            <div class="goal-text">${escapeHtml(goal.goal_text)}</div>
-                            <div class="timeframe-pill">${tf.key} &bull; ${cat}</div>
-                        </div>
-                        <div class="goal-actions">
-                            <button class="action-btn ${creationModeActive ? '' : 'creation-mode-hidden'}" onclick="handleDelete('${goal.id}')" title="Löschen">🗑️</button>
-                        </div>
-                    `;
-                    historyContainer.appendChild(hCard);
-                });
-
-                // Erstellungs-Input nur anzeigen, wenn Modus aktiv und Limit nicht erreicht
-                if (catGoals.length < tf.limit) {
-                    let formDiv = document.createElement('div');
-                    formDiv.className = `add-goal-form ${creationModeActive ? '' : 'creation-mode-hidden'}`;
-                    formDiv.innerHTML = `
-                        <input type="text" class="add-goal-input" id="input-${tf.key}-${cat}" placeholder="Neues Ziel für ${cat.toLowerCase()}...">
-                        <button class="add-goal-btn" onclick="handleAdd('${tf.key}', '${cat}')">+</button>
-                    `;
-                    catContainer.appendChild(formDiv);
-                }
-            });
-
-            tfSection.appendChild(catContainer);
-            container.appendChild(tfSection);
+            const groupDiv = document.createElement('div');
+            groupDiv.className = "category-group open";
+            groupDiv.innerHTML = `
+                <div class="category-header" onclick="toggleGroup(this)">
+                    <div class="category-title">
+                        <div class="category-icon">${categoryIcons[cat] || '📌'}</div>
+                        <span>${cat}</span>
+                    </div>
+                    <div class="arrow">▼</div>
+                </div>
+                <div class="category-content">${habitsHtml}</div>
+            `;
+            container.appendChild(groupDiv);
         });
 
-        if (!hasCompletedGoals) {
-            historyContainer.innerHTML = `<div style="font-size: 0.82rem; color: var(--text-muted); padding: 4px;">Noch keine erledigten Ziele in der Historie.</div>`;
+        // 2. Historie Sektion mit Toggles für alte Ziele einfügen
+        renderHistorySection(goals);
+    }
+
+    function renderHistorySection(goals) {
+        const oldGoals = goals.filter(g => !isCurrentPeriod(g));
+        
+        let historyMaster = document.getElementById('history-master-box');
+        if (!historyMaster) {
+            historyMaster = document.createElement('div');
+            historyMaster.id = 'history-master-box';
+            historyMaster.className = 'history-master-container';
+            document.getElementById('main-container').appendChild(historyMaster);
+        }
+
+        let historyHtml = `
+            <div class="history-master-trigger" onclick="toggleHistoryMaster()">Alte Ziele (Historie) anzeigen ▼</div>
+            <div class="history-hidden-wrapper" id="history-hidden-content">
+        `;
+
+        if (oldGoals.length === 0) {
+            historyHtml += `<div style="font-size: 0.82rem; color: var(--text-secondary); padding: 8px;">Keine alten/vergangenen Ziele vorhanden.</div>`;
+        } else {
+            // Nach Zeithorizont gruppieren
+            ['MONAT', 'JAHR', 'DEKADE'].forEach(tf => {
+                const tfOldGoals = oldGoals.filter(g => g.timeframe === tf);
+                if (tfOldGoals.length > 0) {
+                    historyHtml += `<div style="font-size: 0.8rem; font-weight: 800; text-transform: uppercase; color: var(--text-secondary); margin-top: 6px;">${tf}-Historie</div>`;
+                    tfOldGoals.forEach(goal => {
+                        historyHtml += `
+                            <div class="bucket-card ${goal.status ? 'done' : ''}" onclick="openModalForEdit('${goal.id}')">
+                                <div class="status-circle" onclick="event.stopPropagation(); toggleGoalStatusDirect('${goal.id}', ${!goal.status})"></div>
+                                <div class="location-name">
+                                    ${escapeHtml(goal.goal_text)}
+                                    <div class="goal-meta-sub">${goal.category} &bull; Periode: ${goal.period || 'Unbekannt'}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            });
+        }
+
+        historyHtml += `</div>`;
+        historyMaster.innerHTML = historyHtml;
+    }
+
+    function toggleHistoryMaster() {
+        const box = document.getElementById('history-master-box');
+        box.classList.toggle('expanded');
+        const trigger = box.querySelector('.history-master-trigger');
+        if (box.classList.contains('expanded')) {
+            trigger.textContent = "Alte Ziele (Historie) ausblenden ▲";
+        } else {
+            trigger.textContent = "Alte Ziele (Historie) anzeigen ▼";
         }
     }
 
-    function handleToggle(id, newStatus) {
+    function toggleGroup(header) {
+        header.parentElement.classList.toggle('open');
+    }
+
+    function openModalForCreate() {
+        editingGoalId = null;
+        document.getElementById('modal-title-text').innerText = "Neues Ziel erstellen";
+        document.getElementById('modal-goal-text').value = "";
+        document.getElementById('modal-timeframe-select').value = activeTimeframe;
+        document.getElementById('modal-period-text').value = getCurrentPeriodKey(activeTimeframe);
+        document.getElementById('modal-delete-btn').style.display = 'none';
+        selectModalCategory('KARRIERE', document.querySelector('.category-btn'));
+        document.getElementById('goal-modal').classList.add('active');
+    }
+
+    function openModalForEdit(id) {
+        const goal = globalGoalsData.find(g => g.id === id);
+        if (!goal) return;
+
+        editingGoalId = id;
+        document.getElementById('modal-title-text').innerText = "Ziel bearbeiten";
+        document.getElementById('modal-goal-text').value = goal.goal_text;
+        document.getElementById('modal-timeframe-select').value = goal.timeframe;
+        document.getElementById('modal-period-text').value = goal.period || getCurrentPeriodKey(goal.timeframe);
+        document.getElementById('modal-delete-btn').style.display = 'block';
+
+        const catBtns = document.querySelectorAll('.category-btn');
+        catBtns.forEach(btn => {
+            if (btn.textContent.trim().toUpperCase() === goal.category) {
+                selectModalCategory(goal.category, btn);
+            }
+        });
+
+        document.getElementById('goal-modal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('goal-modal').classList.remove('active');
+        editingGoalId = null;
+    }
+
+    function closeModalOnOutside(e) {
+        if (e.target.id === 'goal-modal') closeModal();
+    }
+
+    function selectModalCategory(cat, btnElement) {
+        selectedModalCategory = cat;
+        document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
+        if (btnElement) btnElement.classList.add('selected');
+    }
+
+    function toggleGoalStatusDirect(id, newStatus) {
         setCloudStatus("loading");
         toggleGoalStatus(id, newStatus)
             .then(() => {
                 setCloudStatus("synced");
                 showToast("Status aktualisiert");
-                loadAndRenderGoals();
+                loadData();
             })
             .catch(() => setCloudStatus("error"));
     }
 
-    function handleAdd(timeframe, category) {
-        const input = document.getElementById(`input-${timeframe}-${category}`);
-        const text = input ? input.value.trim() : "";
-        if (!text) return;
+    function saveModalGoal() {
+        const text = document.getElementById('modal-goal-text').value.trim();
+        const tf = document.getElementById('modal-timeframe-select').value;
+        const period = document.getElementById('modal-period-text').value.trim() || getCurrentPeriodKey(tf);
+        if (!text) {
+            alert('Bitte gib einen Text ein.');
+            return;
+        }
 
         setCloudStatus("loading");
-        addGoal(timeframe, category, text)
-            .then(() => {})
-            .catch(() => {})
-            .finally(() => {
-                setCloudStatus("synced");
-                showToast("Ziel hinzugefügt");
-                setTimeout(loadAndRenderGoals, 800);
-            });
+        closeModal();
+
+        const saveData = () => {
+            // Übergabe mit Period-Eigenschaft falls von der API unterstützt
+            return addGoal(tf, selectedModalCategory, text, period);
+        };
+
+        if (editingGoalId) {
+            deleteGoal(editingGoalId)
+                .then(() => saveData())
+                .finally(() => {
+                    setCloudStatus("synced");
+                    showToast("Ziel aktualisiert");
+                    loadData();
+                });
+        } else {
+            saveData()
+                .finally(() => {
+                    setCloudStatus("synced");
+                    showToast("Ziel erstellt");
+                    loadData();
+                });
+        }
     }
 
-    function handleDelete(id) {
-        if (!confirm("Ziel wirklich löschen?")) return;
+    function deleteCurrentModalGoal() {
+        if (!editingGoalId || !confirm("Ziel wirklich löschen?")) return;
         setCloudStatus("loading");
-        deleteGoal(id)
+        closeModal();
+        deleteGoal(editingGoalId)
             .finally(() => {
                 setCloudStatus("synced");
                 showToast("Ziel gelöscht");
-                setTimeout(loadAndRenderGoals, 800);
+                loadData();
             });
     }
 
     function escapeHtml(str) {
-        return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
 
-    window.onload = () => {
-        loadAndRenderGoals();
-    };
+    window.onload = loadData;
 </script>
 </body>
 </html>
