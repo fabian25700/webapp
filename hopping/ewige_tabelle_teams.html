@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Ewige Tabelle Teams</title>
+    <style>
+        :root {
+            --bg: #f2f2f7;
+            --card-bg: #ffffff;
+            --text-main: #000000;
+            --text-sub: #8e8e93;
+            --accent: #007aff;
+            --accent-soft: rgba(0, 122, 255, 0.08);
+            --border: #e5e5ea;
+            --radius-large: 20px;
+            --radius-card: 16px;
+            --shadow: 0 4px 18px rgba(0, 0, 0, 0.03);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #000000;
+                --card-bg: #1c1c1e;
+                --text-main: #ffffff;
+                --text-sub: #8e8e93;
+                --accent: #0a84ff;
+                --accent-soft: rgba(10, 132, 255, 0.15);
+                --border: #2c2c2e;
+                --shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-top: calc(env(safe-area-inset-top) + 16px);
+            padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
+            padding-left: 16px;
+            padding-right: 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        header {
+            background: var(--card-bg);
+            border-radius: var(--radius-large);
+            padding: 16px 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-main);
+        }
+
+        .filter-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--accent-soft);
+            padding: 6px 14px;
+            border-radius: 12px;
+        }
+
+        .filter-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .filter-input {
+            width: 46px;
+            border: none;
+            background: var(--card-bg);
+            color: var(--accent);
+            font-size: 1.1rem;
+            font-weight: 800;
+            text-align: center;
+            border-radius: 8px;
+            padding: 3px 0;
+            outline: none;
+            box-shadow: inset 0 0 0 1px var(--border);
+            font-family: inherit;
+        }
+
+        .filter-input::-webkit-inner-spin-button, 
+        .filter-input::-webkit-outer-spin-button { 
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .filter-input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        .user-subtitle {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            letter-spacing: -0.01em;
+        }
+
+        .loading-screen {
+            background: var(--card-bg);
+            border-radius: var(--radius-large);
+            padding: 30px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-sub);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        .card-table-wrapper {
+            background: var(--card-bg);
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.82rem;
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.02);
+            color: var(--text-sub);
+            font-weight: 700;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: -0.01em;
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            th {
+                background-color: rgba(255, 255, 255, 0.03);
+            }
+        }
+
+        td {
+            padding: 12px 8px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .col-platz {
+            width: 36px;
+            text-align: center;
+        }
+
+        .badge-platz {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-weight: 800;
+            font-size: 0.75rem;
+        }
+
+        .col-team {
+            font-weight: 700;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .col-num {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .col-num-accent {
+            text-align: right;
+            font-weight: 800;
+            color: var(--accent);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .empty-state {
+            padding: 30px 20px;
+            text-align: center;
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <header>
+        <div class="header-title">Ewige Tabelle Teams</div>
+        <div class="filter-control">
+            <span class="filter-label">Mind. Spiele:</span>
+            <input type="number" id="min-games" class="filter-input" value="2" min="1" max="99" oninput="renderTable()">
+        </div>
+        <div class="user-subtitle" id="subtitle-text">(mind. 2 Spiele)</div>
+    </header>
+
+    <div id="loading" class="loading-screen">Daten werden geladen...</div>
+
+    <div id="table-card" class="card-table-wrapper" style="display: none;">
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="col-platz">Platz</th>
+                        <th>Team</th>
+                        <th class="col-num">Punkte/Spiel</th>
+                        <th class="col-num">Torediff./Spiel</th>
+                        <th class="col-num">Spiele</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <!-- Dynamische Tabellenzeilen -->
+                </tbody>
+            </table>
+        </div>
+        <div id="empty-message" class="empty-state" style="display: none;">
+            Keine Teams mit dieser Mindestanzahl an Spielen gefunden.
+        </div>
+    </div>
+
+</div>
+
+<script src="api.js"></script>
+<script>
+    let rawMatches = [];
+
+    // Hilfsfunktion zum Zerlegen des Begegnung-Strings (Team Heim : Team Auswärts)
+    function parseTeams(begegnungStr) {
+        if (!begegnungStr || !begegnungStr.includes(':')) return null;
+        const index = begegnungStr.indexOf(':');
+        return {
+            home: begegnungStr.substring(0, index).trim(),
+            away: begegnungStr.substring(index + 1).trim()
+        };
+    }
+
+    // Daten ausschließlich über api.js laden
+    window.addEventListener('DOMContentLoaded', () => {
+        if (typeof getHoppingData === 'function') {
+            getHoppingData()
+                .then(data => initApp(data))
+                .catch(err => {
+                    document.getElementById('loading').innerText = "Fehler beim Laden der Schnittstelle.";
+                    console.error(err);
+                });
+        } else {
+            document.getElementById('loading').innerText = "api.js wurde nicht gefunden.";
+        }
+    });
+
+    function initApp(data) {
+        rawMatches = data || [];
+        if (rawMatches.length === 0) {
+            document.getElementById('loading').innerText = "Keine Daten verfügbar.";
+            return;
+        }
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('table-card').style.display = 'block';
+
+        renderTable();
+    }
+
+    function renderTable() {
+        if (rawMatches.length === 0) return;
+
+        const inputVal = parseInt(document.getElementById('min-games').value) || 1;
+        document.getElementById('subtitle-text').innerText = `(mind. ${inputVal} Spiele)`;
+
+        // Statistik pro Team berechnen
+        const stats = {};
+
+        rawMatches.forEach(m => {
+            const teams = parseTeams(m.Begegnung);
+            if (!teams || !m.Ergebnis || !String(m.Ergebnis).includes(':')) return;
+
+            const resParts = String(m.Ergebnis).split(':');
+            const gHome = parseInt(resParts[0]);
+            const gAway = parseInt(resParts[1]);
+
+            if (isNaN(gHome) || isNaN(gAway)) return;
+
+            [teams.home, teams.away].forEach((tName, idx) => {
+                if (!tName) return;
+                if (!stats[tName]) {
+                    stats[tName] = { name: tName, points: 0, goalsFor: 0, goalsAgainst: 0, games: 0 };
+                }
+
+                const isHome = (idx === 0);
+                const goalsFor = isHome ? gHome : gAway;
+                const goalsAgainst = isHome ? gAway : gHome;
+
+                stats[tName].games += 1;
+                stats[tName].goalsFor += goalsFor;
+                stats[tName].goalsAgainst += goalsAgainst;
+
+                if (goalsFor > goalsAgainst) {
+                    stats[tName].points += 3;
+                } else if (goalsFor === goalsAgainst) {
+                    stats[tName].points += 1;
+                }
+            });
+        });
+
+        // Teams filtern (Spiele >= inputVal) und Durchschnitte berechnen
+        let teamArray = Object.values(stats)
+            .filter(t => t.games >= inputVal)
+            .map(t => {
+                const ptsPerGame = t.points / t.games;
+                const diffPerGame = (t.goalsFor - t.goalsAgainst) / t.games;
+                return {
+                    name: t.name,
+                    ptsPerGame: ptsPerGame,
+                    diffPerGame: diffPerGame,
+                    games: t.games
+                };
+            });
+
+        // Sortierung analog Excel-Formel:
+        // 1. Punkte/Spiel (p) absteigend
+        // 2. Tordifferenz/Spiel (d) absteigend
+        // 3. Teamname (n) alphabetisch aufsteigend (A-Z)
+        teamArray.sort((a, b) => {
+            if (b.ptsPerGame !== a.ptsPerGame) return b.ptsPerGame - a.ptsPerGame;
+            if (b.diffPerGame !== a.diffPerGame) return b.diffPerGame - a.diffPerGame;
+            return a.name.localeCompare(b.name, 'de', { sensitivity: 'base' });
+        });
+
+        // DOM Rendering
+        const tbody = document.getElementById('table-body');
+        const emptyMsg = document.getElementById('empty-message');
+        tbody.innerHTML = '';
+
+        if (teamArray.length === 0) {
+            emptyMsg.style.display = 'block';
+            return;
+        }
+        emptyMsg.style.display = 'none';
+
+        teamArray.forEach((team, index) => {
+            const tr = document.createElement('tr');
+
+            // Formatierung analog TEXT(x; "0,00")
+            const ptsFormatted = team.ptsPerGame.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            let diffFormatted = team.diffPerGame.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            
+            // Vorzeichen hinzufügen bei positiven Werten
+            if (team.diffPerGame > 0) {
+                diffFormatted = '+' + diffFormatted;
+            }
+
+            tr.innerHTML = `
+                <td class="col-platz"><span class="badge-platz">${index + 1}</span></td>
+                <td class="col-team">${escapeHtml(team.name)}</td>
+                <td class="col-num-accent">${ptsFormatted}</td>
+                <td class="col-num">${diffFormatted}</td>
+                <td class="col-num">${team.games}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/&/g, "&amp;")
+                  .replace(/</g, "&lt;")
+                  .replace(/>/g, "&gt;")
+                  .replace(/"/g, "&quot;")
+                  .replace(/'/g, "&#039;");
+    }
+</script>
+</body>
+</html>
