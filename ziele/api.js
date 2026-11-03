@@ -1,4 +1,4 @@
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWJ-ShjHI3JQVwMkCTnAC3O2pInXxpFL82Z4p91UwbebnP-4ervP8mFxIBcin3FhUv/exec";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwAFOCoxPHAd246HL5_z7cYOlFNt2MvsXKSyRDn78FR5YidwIs9qpjczGI6x43ypJ7p/exec";
 
 function fetchGoals() {
     return fetch(GOOGLE_SCRIPT_URL)
