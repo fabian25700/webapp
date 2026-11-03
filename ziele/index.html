@@ -333,7 +333,8 @@
 
 <div class="outside-switch-area">
     <div class="apple-switch-container">
-        <button class="apple-switch-btn active" id="tab-MONAT" onclick="switchTimeframe('MONAT')">Monat</button>
+        <button class="apple-switch-btn active" id="tab-REGELN" onclick="switchTimeframe('REGELN')">Regeln</button>
+        <button class="apple-switch-btn" id="tab-MONAT" onclick="switchTimeframe('MONAT')">Monat</button>
         <button class="apple-switch-btn" id="tab-JAHR" onclick="switchTimeframe('JAHR')">Jahr</button>
         <button class="apple-switch-btn" id="tab-DEKADE" onclick="switchTimeframe('DEKADE')">Dekade</button>
         <button class="apple-switch-btn" id="tab-LEBEN" onclick="switchTimeframe('LEBEN')">Leben</button>
@@ -341,10 +342,10 @@
 </div>
 
 <main id="main-container">
-    <!-- Aktive Ziele -->
+    <!-- Aktive Ziele oder Regeln -->
 </main>
 
-<button class="fab" onclick="openModalForCreate()" aria-label="Ziel erstellen">
+<button class="fab" id="main-fab" onclick="openModalForCreate()" aria-label="Ziel erstellen" style="display:none;">
     <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
 </button>
 
@@ -373,7 +374,7 @@
 
         <div class="card">
             <span class="card-title">Zeitstempel / Periode (z.B. 2026, 2026-10, 2020-2030)</span>
-            <input type="text" class="text-input" id="modal-period-text" placeholder="Wird automatisch ermittelt oder manuell anpassen">
+            <input type="text" class="text-input" id="modal-period-text" placeholder="z.B. 2026 oder 2026-10">
         </div>
 
         <div class="card">
@@ -394,7 +395,7 @@
     const categories = ["KARRIERE", "GESUNDHEIT", "LIFESTYLE"];
     const categoryIcons = { "KARRIERE": "💼", "GESUNDHEIT": "❤️", "LIFESTYLE": "🌟" };
     
-    let activeTimeframe = "MONAT";
+    let activeTimeframe = "REGELN";
     let globalGoalsData = [];
     let editingGoalId = null;
     let selectedModalCategory = "KARRIERE";
@@ -415,10 +416,30 @@
 
     function switchTimeframe(tf) {
         activeTimeframe = tf;
-        ['MONAT', 'JAHR', 'DEKADE', 'LEBEN'].forEach(t => {
-            document.getElementById(`tab-${t}`).classList.toggle('active', t === tf);
+        ['REGELN', 'MONAT', 'JAHR', 'DEKADE', 'LEBEN'].forEach(t => {
+            const btn = document.getElementById(`tab-${t}`);
+            if (btn) btn.classList.toggle('active', t === tf);
         });
+        
+        // FAB nur bei Zielen anzeigen, nicht bei Regeln
+        const fab = document.getElementById('main-fab');
+        if (fab) {
+            fab.style.display = (tf === 'REGELN') ? 'none' : 'flex';
+        }
+
         renderGoals(globalGoalsData);
+    }
+
+    function normalizeGoal(g, index) {
+        if (!g) return null;
+        return {
+            id: g.id || g.ID || g._id || `gen_id_${index}_${Math.random().toString(36).substr(2, 6)}`,
+            goal_text: g.goal_text || g.Goal_Text || g.GoalText || g.goal || g.Goal || g.text || g.Text || '',
+            category: (g.category || g.Category || 'KARRIERE').toUpperCase(),
+            timeframe: (g.timeframe || g.Timeframe || 'MONAT').toUpperCase(),
+            period: g.period || g.Period || g.target_date || g.Target_Date || g.targetDate || g.TargetDate || '',
+            status: g.status === true || g.status === 'true' || g.status === 1 || g.Status === true || g.Status === 'TRUE' || g.Status === 1
+        };
     }
 
     function loadData() {
@@ -426,28 +447,28 @@
         fetchGoals()
             .then(goals => {
                 setCloudStatus("synced");
-                globalGoalsData = Array.isArray(goals) ? goals : [];
+                const rawList = Array.isArray(goals) ? goals : [];
+                globalGoalsData = rawList.map((g, idx) => normalizeGoal(g, idx)).filter(Boolean);
                 renderGoals(globalGoalsData);
                 document.body.classList.add('loaded');
             })
             .catch(() => setCloudStatus("error"));
     }
 
-    // Hilfsfunktion zur Ermittlung des aktuellen Zeitfilters
     function getCurrentPeriodKey(tf) {
         const now = new Date();
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
         if (tf === 'MONAT') return `${year}-${month}`;
         if (tf === 'JAHR') return `${year}`;
-        if (tf === 'DEKADE') return `2020-2030`; // Aktuelle Dekade anpassen falls nötig
+        if (tf === 'DEKADE') return `2020-2030`;
         return '';
     }
 
     function isCurrentPeriod(goal) {
         if (goal.timeframe === 'LEBEN') return true;
         const currentPeriod = getCurrentPeriodKey(goal.timeframe);
-        if (!goal.period) return true; // Fallback falls kein Feld existiert
+        if (!goal.period) return true;
         return goal.period.trim() === currentPeriod;
     }
 
@@ -455,7 +476,71 @@
         const container = document.getElementById('main-container');
         container.innerHTML = "";
 
-        // 1. Aktive Ziele für den gewählten Reiter filtern (aktuelle Periode)
+        // Wenn der Regeln-Reiter aktiv ist
+        if (activeTimeframe === 'REGELN') {
+            container.innerHTML = `
+                <div class="category-group open">
+                    <div class="category-header" style="cursor: default;">
+                        <div class="category-title">
+                            <div class="category-icon">📜</div>
+                            <span>Ziel-Regeln & Prinzipien</span>
+                        </div>
+                    </div>
+                    <div class="category-content" style="display: flex; gap: 12px; font-size: 0.9rem; line-height: 1.5;">
+                        <div style="background: var(--bg); padding: 14px; border-radius: 12px; border: 1px solid var(--border);">
+                            <strong>Formulierung:</strong><br>
+                            Formuliere dein Ziel so, dass es <strong>spezifisch, messbar, attraktiv, realistisch und terminiert</strong> ist!
+                        </div>
+                        <div style="background: var(--bg); padding: 14px; border-radius: 12px; border: 1px solid var(--border);">
+                            <strong>Wichtige Ausschlüsse:</strong>
+                            <ul style="margin-left: 20px; margin-top: 6px;">
+                                <li>Keine Wochenziele!</li>
+                                <li>Keine Routinen-Themen in Ziele!</li>
+                                <li>Keine Aufgaben in Zielen!</li>
+                            </ul>
+                        </div>
+                        <div style="background: var(--bg); padding: 14px; border-radius: 12px; border: 1px solid var(--border);">
+                            <strong>Fokus & Steuerung:</strong>
+                            <ul style="margin-left: 20px; margin-top: 6px;">
+                                <li>Jeden Monat ein Ziel, welches gerade schlecht läuft.</li>
+                                <li>Nur Ziele, die ich 100% steuern kann, messbar und realistisch sind.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="category-group open">
+                    <div class="category-header" style="cursor: default;">
+                        <div class="category-title">
+                            <div class="category-icon">🗂️</div>
+                            <span>Kategorien & Quoten</span>
+                        </div>
+                    </div>
+                    <div class="category-content" style="display: flex; gap: 12px; font-size: 0.9rem; line-height: 1.5;">
+                        <div style="background: var(--bg); padding: 14px; border-radius: 12px; border: 1px solid var(--border);">
+                            <strong>Bereiche:</strong>
+                            <ul style="margin-left: 20px; margin-top: 6px;">
+                                <li><strong>Karriere:</strong> (Beruf, Bildung, Finanzen)</li>
+                                <li><strong>Gesundheit:</strong> (Sport, Schlaf, Ernährung)</li>
+                                <li><strong>Lifestyle:</strong> (Reisen, Beziehungen, Spaß)</li>
+                            </ul>
+                        </div>
+                        <div style="background: var(--bg); padding: 14px; border-radius: 12px; border: 1px solid var(--border);">
+                            <strong>Ziel-Quoten (je Kategorie):</strong>
+                            <ul style="margin-left: 20px; margin-top: 6px;">
+                                <li><strong>3 Ziele</strong> je Kat. pro Leben</li>
+                                <li><strong>3 Ziele</strong> je Kat. pro Dekade</li>
+                                <li><strong>2 Ziele</strong> je Kat. pro Jahr</li>
+                                <li><strong>1 Ziel</strong> je Kat. pro Monat</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        // Aktive Ziele für den gewählten Zeithorizont filtern
         categories.forEach(cat => {
             const catGoals = goals.filter(g => g.timeframe === activeTimeframe && g.category === cat && isCurrentPeriod(g));
             
@@ -491,7 +576,7 @@
             container.appendChild(groupDiv);
         });
 
-        // 2. Historie Sektion mit Toggles für alte Ziele einfügen
+        // Historie Sektion einfügen
         renderHistorySection(goals);
     }
 
@@ -514,7 +599,6 @@
         if (oldGoals.length === 0) {
             historyHtml += `<div style="font-size: 0.82rem; color: var(--text-secondary); padding: 8px;">Keine alten/vergangenen Ziele vorhanden.</div>`;
         } else {
-            // Nach Zeithorizont gruppieren
             ['MONAT', 'JAHR', 'DEKADE'].forEach(tf => {
                 const tfOldGoals = oldGoals.filter(g => g.timeframe === tf);
                 if (tfOldGoals.length > 0) {
@@ -557,8 +641,9 @@
         editingGoalId = null;
         document.getElementById('modal-title-text').innerText = "Neues Ziel erstellen";
         document.getElementById('modal-goal-text').value = "";
-        document.getElementById('modal-timeframe-select').value = activeTimeframe;
-        document.getElementById('modal-period-text').value = getCurrentPeriodKey(activeTimeframe);
+        const defaultTf = (activeTimeframe === 'REGELN') ? 'MONAT' : activeTimeframe;
+        document.getElementById('modal-timeframe-select').value = defaultTf;
+        document.getElementById('modal-period-text').value = getCurrentPeriodKey(defaultTf);
         document.getElementById('modal-delete-btn').style.display = 'none';
         selectModalCategory('KARRIERE', document.querySelector('.category-btn'));
         document.getElementById('goal-modal').classList.add('active');
@@ -624,7 +709,6 @@
         closeModal();
 
         const saveData = () => {
-            // Übergabe mit Period-Eigenschaft falls von der API unterstützt
             return addGoal(tf, selectedModalCategory, text, period);
         };
 
@@ -652,9 +736,9 @@
         closeModal();
         deleteGoal(editingGoalId)
             .finally(() => {
-                setCloudStatus("synced");
-                showToast("Ziel gelöscht");
-                loadData();
+                    setCloudStatus("synced");
+                    showToast("Ziel gelöscht");
+                    loadData();
             });
     }
 
