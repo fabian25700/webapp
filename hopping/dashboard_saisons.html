@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Groundhopping - Dashboard Saison</title>
+    <style>
+        :root {
+            --bg-page: #f2f2f7;
+            --card-bg: #ffffff;
+            --accent-blue: #00a0e9;
+            --header-blue: #29b6f6;
+            --box-bg-light: #f4f6f8;
+            --box-bg-blue: #e1f5fe;
+            --text-main: #1c1c1e;
+            --text-sub: #48484a;
+            --border: #e5e5ea;
+            --radius-card: 16px;
+            --radius-box: 10px;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            --drawer-width: 290px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-page: #000000;
+                --card-bg: #1c1c1e;
+                --accent-blue: #29b6f6;
+                --header-blue: #0288d1;
+                --box-bg-light: #2c2c2e;
+                --box-bg-blue: rgba(41, 182, 246, 0.15);
+                --text-main: #ffffff;
+                --text-sub: #aeaeb2;
+                --border: #3a3a3c;
+                --shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 30px;
+        }
+
+        /* Top Bar Navbar */
+        .top-navbar {
+            width: 100%;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-btn {
+            background: rgba(0, 160, 233, 0.1);
+            border: none;
+            color: var(--accent-blue);
+            font-size: 1.25rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .menu-btn:active {
+            transform: scale(0.95);
+        }
+
+        .nav-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+        }
+
+        /* Drawer Sidebar */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .drawer-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: calc(-1 * var(--drawer-width));
+            width: var(--drawer-width);
+            height: 100vh;
+            background: var(--card-bg);
+            z-index: 201;
+            box-shadow: 4px 0 25px rgba(0,0,0,0.15);
+            transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(0, 160, 233, 0.08);
+        }
+
+        .sidebar-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.4rem;
+            color: var(--text-sub);
+            cursor: pointer;
+        }
+
+        .nav-menu {
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.92rem;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .menu-item:hover, .menu-item:active {
+            background: rgba(0, 160, 233, 0.08);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding-left: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .accordion-content.open {
+            max-height: 400px;
+            padding-top: 4px;
+            padding-bottom: 8px;
+        }
+
+        .sub-menu-item {
+            display: block;
+            padding: 9px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-sub);
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .sub-menu-item:hover, .sub-menu-item.active {
+            color: var(--accent-blue);
+            background: rgba(0, 160, 233, 0.08);
+            font-weight: 700;
+        }
+
+        .chevron {
+            transition: transform 0.3s ease;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        .chevron.rotated {
+            transform: rotate(180deg);
+        }
+
+        /* Dashboard Container */
+        .main-wrapper {
+            width: 100%;
+            max-width: 480px;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Graphic Card Container (Screenshot Style) */
+        .dashboard-card {
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: var(--radius-card);
+            border: 2px solid var(--border);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Blue Banner */
+        .banner-header {
+            background-color: var(--header-blue);
+            color: #ffffff;
+            text-align: center;
+            padding: 12px 10px;
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            font-family: Georgia, "Times New Roman", serif;
+        }
+
+        /* Hero Season Select */
+        .hero-section {
+            padding: 18px 16px 14px 16px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .season-dropdown-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .season-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background: transparent;
+            border: none;
+            color: var(--accent-blue);
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            text-align-last: center;
+            cursor: pointer;
+            outline: none;
+            padding: 0 20px;
+            font-family: inherit;
+        }
+
+        .user-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-top: 2px;
+        }
+
+        /* Stats Grid Content */
+        .stats-grid {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Row 1: 3 Column Tiles */
+        .row-3-col {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        /* Row 2: 2 Column Tiles */
+        .row-2-col {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        /* Tile Boxes */
+        .stat-box {
+            border-radius: var(--radius-box);
+            padding: 12px 8px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-box.light {
+            background-color: var(--box-bg-light);
+        }
+
+        .stat-box.blue {
+            background-color: var(--box-bg-blue);
+        }
+
+        .stat-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .stat-subtitle {
+            font-size: 0.72rem;
+            font-weight: 500;
+            color: var(--text-sub);
+            margin-top: 1px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value-large {
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            line-height: 1.15;
+            margin: 4px 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-subtext {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-top: 2px;
+            line-height: 1.2;
+        }
+
+        /* Single Centered Tile Box */
+        .row-center-single {
+            display: flex;
+            justify-content: center;
+        }
+
+        .row-center-single .stat-box {
+            width: 60%;
+        }
+
+        /* Full Width Tile Box */
+        .row-full {
+            width: 100%;
+        }
+
+        .row-full .stat-box {
+            width: 100%;
+            padding: 14px 10px;
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            text-align: center;
+            padding: 40px 20px;
+            font-weight: 600;
+            color: var(--text-sub);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top Navigation Bar -->
+<div class="top-navbar">
+    <div class="nav-left">
+        <button class="menu-btn" onclick="toggleSidebar(true)">☰</button>
+        <div class="nav-title">Groundhopping</div>
+    </div>
+</div>
+
+<!-- Slide-Over Drawer Navigation -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="toggleSidebar(false)"></div>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-title">Menü</div>
+        <button class="close-btn" onclick="toggleSidebar(false)">✕</button>
+    </div>
+    <div class="nav-menu">
+        <a href="index.html" class="menu-item">
+            <span>🏠 Startseite</span>
+        </a>
+
+        <!-- Accordion Dashboards -->
+        <div class="menu-item" onclick="toggleAccordion('dashboards-sub', 'chevron-dash')">
+            <span>📊 Dashboards</span>
+            <span class="chevron rotated" id="chevron-dash">▼</span>
+        </div>
+        <div class="accordion-content open" id="dashboards-sub">
+            <a href="dashboard_jahre.html" class="sub-menu-item">📅 Dashboard Jahre</a>
+            <a href="dashboard_saison.html" class="sub-menu-item active">🏆 Dashboard Saison</a>
+            <a href="dashboard_stadion.html" class="sub-menu-item">🏟️ Dashboard Stadion</a>
+            <a href="dashboard_verein.html" class="sub-menu-item">🛡️ Dashboard Verein</a>
+            <a href="dashboard_wettbewerb.html" class="sub-menu-item">🥇 Dashboard Wettbewerb</a>
+            <a href="dashboard_begegnung.html" class="sub-menu-item">⚔️ Dashboard Begegnung</a>
+        </div>
+
+        <a href="ewige_tabelle_teams.html" class="menu-item">
+            <span>📈 Ewige Tabelle Teams</span>
+        </a>
+    </div>
+</div>
+
+<!-- Main App Container -->
+<div class="main-wrapper">
+    <div class="dashboard-card">
+        
+        <!-- Header Title Banner -->
+        <div class="banner-header">Groundhopping</div>
+
+        <!-- Season Selector Header -->
+        <div class="hero-section">
+            <div class="season-dropdown-wrapper">
+                <select id="season-select" class="season-select" onchange="renderDashboard()">
+                    <!-- Dynamisch befüllt -->
+                </select>
+            </div>
+            <div class="user-name">Fabian</div>
+        </div>
+
+        <div id="loading" class="loading-screen">Daten werden geladen...</div>
+
+        <!-- Stats Grid (Exakt nach Screenshot) -->
+        <div class="stats-grid" id="stats-content" style="display: none;">
+            
+            <!-- Row 1: Tore, Spiele, Länder (Neu) -->
+            <div class="row-3-col">
+                <div class="stat-box light">
+                    <div class="stat-title">Tore</div>
+                    <div class="stat-value-large" id="val-tore">0</div>
+                </div>
+                <div class="stat-box blue">
+                    <div class="stat-title">Spiele</div>
+                    <div class="stat-value-large" id="val-spiele">0</div>
+                </div>
+                <div class="stat-box light">
+                    <div class="stat-title">Länder (Neu)</div>
+                    <div class="stat-value-large" id="val-laender">0 (0)</div>
+                </div>
+            </div>
+
+            <!-- Row 2: Teams, Grounds ++ -->
+            <div class="row-2-col">
+                <div class="stat-box blue">
+                    <div class="stat-title">Teams</div>
+                    <div class="stat-subtitle">Anzahl (Neu) / Meistgesehen</div>
+                    <div class="stat-value-large" id="val-teams-main">0 (0)</div>
+                    <div class="stat-subtext" id="val-teams-sub">-</div>
+                </div>
+                <div class="stat-box light">
+                    <div class="stat-title">Grounds ++</div>
+                    <div class="stat-subtitle">Anzahl (Neu) / Meistgesehen</div>
+                    <div class="stat-value-large" id="val-grounds-main">0 (0)</div>
+                    <div class="stat-subtext" id="val-grounds-sub">-</div>
+                </div>
+            </div>
+
+            <!-- Row 3: Wettbewerbe, Zuschauer -->
+            <div class="row-2-col">
+                <div class="stat-box light">
+                    <div class="stat-title">Wettbewerbe</div>
+                    <div class="stat-subtitle">Anzahl / Meistgesehen</div>
+                    <div class="stat-value-large" id="val-wettbewerbe-main">0</div>
+                    <div class="stat-subtext" id="val-wettbewerbe-sub">-</div>
+                </div>
+                <div class="stat-box blue">
+                    <div class="stat-title">Zuschauer</div>
+                    <div class="stat-subtitle">Minimum / Mittelwert / Maximum</div>
+                    <div class="stat-value-large" id="val-zuschauer-main">0 / 0 / 0</div>
+                </div>
+            </div>
+
+            <!-- Row 4: Visits (Länder) -->
+            <div class="row-center-single">
+                <div class="stat-box light">
+                    <div class="stat-title">Visits (Länder)</div>
+                    <div class="stat-value-large" id="val-visits">0 (0)</div>
+                </div>
+            </div>
+
+            <!-- Row 5: Torreichstes Spiel -->
+            <div class="row-full">
+                <div class="stat-box blue">
+                    <div class="stat-title">Torreichstes Spiel</div>
+                    <div class="stat-subtext" id="val-torreichstes-spiel" style="font-size: 0.88rem; margin-top: 6px;">-</div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- API Integration Script -->
+<script src="api.js"></script>
+
+<script>
+    // Fallback Mock-Daten für Standalone Tests
+    const fallbackMatches = [
+        { SpielNr: "1", Datum: "10.08.2026", Jahr: "2026", Saison: "2026/2027", Begegnung: "SC 08 Elsdorf : Rot-Gelb Wesseling", Ergebnis: "17:1", Ground: "Müngersdorfer Stadion", Ort: "Köln", Land: "Deutschland", Wettbewerb: "Testspiel", Zuschauer: 30 },
+        { SpielNr: "2", Datum: "15.09.2026", Jahr: "2026", Saison: "2026/2027", Begegnung: "1. FC Köln : FC Bayern München", Ergebnis: "2:1", Ground: "Müngersdorfer Stadion", Ort: "Köln", Land: "Deutschland", Wettbewerb: "Bundesliga", Zuschauer: 50000 },
+        { SpielNr: "3", Datum: "20.10.2026", Jahr: "2026", Saison: "2026/2027", Begegnung: "1. FC Köln : Borussia Dortmund", Ergebnis: "1:1", Ground: "Müngersdorfer Stadion", Ort: "Köln", Land: "Deutschland", Wettbewerb: "Bundesliga", Zuschauer: 50000 },
+        { SpielNr: "4", Datum: "12.11.2026", Jahr: "2026", Saison: "2026/2027", Begegnung: "1. FC Köln : Bayer Leverkusen", Ergebnis: "3:2", Ground: "Müngersdorfer Stadion", Ort: "Köln", Land: "Deutschland", Wettbewerb: "Bundesliga", Zuschauer: 50000 },
+        { SpielNr: "5", Datum: "05.12.2026", Jahr: "2026", Saison: "2026/2027", Begegnung: "Real Madrid : FC Barcelona", Ergebnis: "2:2", Ground: "Santiago Bernabéu", Ort: "Madrid", Land: "Spanien", Wettbewerb: "La Liga", Zuschauer: 60000 },
+        { SpielNr: "6", Datum: "12.01.2027", Jahr: "2027", Saison: "2026/2027", Begegnung: "Paris Saint-Germain : Marseille", Ergebnis: "4:0", Ground: "Parc des Princes", Ort: "Paris", Land: "Frankreich", Wettbewerb: "Ligue 1", Zuschauer: 45000 },
+        { SpielNr: "7", Datum: "20.02.2027", Jahr: "2027", Saison: "2026/2027", Begegnung: "Rapid Wien : Austria Wien", Ergebnis: "1:0", Ground: "Allianz Stadion", Ort: "Wien", Land: "Österreich", Wettbewerb: "Bundesliga", Zuschauer: 24000 },
+        { SpielNr: "8", Datum: "15.03.2027", Jahr: "2027", Saison: "2026/2027", Begegnung: "Red Bull Salzburg : Sturm Graz", Ergebnis: "2:1", Ground: "Red Bull Arena", Ort: "Salzburg", Land: "Österreich", Wettbewerb: "Bundesliga", Zuschauer: 12000 },
+        
+        // Vorherige Saisons für "(Neu)"-Berechnung
+        { SpielNr: "9", Datum: "10.08.2025", Jahr: "2025", Saison: "2025/2026", Begegnung: "1. FC Köln : HSV", Ergebnis: "2:0", Ground: "Müngersdorfer Stadion", Ort: "Köln", Land: "Deutschland", Wettbewerb: "2. Bundesliga", Zuschauer: 50000 },
+        { SpielNr: "10", Datum: "12.09.2025", Jahr: "2025", Saison: "2025/2026", Begegnung: "FC Barcelona : Valencia", Ergebnis: "3:0", Ground: "Camp Nou", Ort: "Barcelona", Land: "Spanien", Wettbewerb: "La Liga", Zuschauer: 75000 },
+        { SpielNr: "11", Datum: "05.10.2024", Jahr: "2024", Saison: "2024/2025", Begegnung: "1. FC Köln : Schalke 04", Ergebnis: "3:1", Ground: "Müngersdorfer Stadion", Ort: "Köln", Land: "Deutschland", Wettbewerb: "2. Bundesliga", Zuschauer: 50000 }
+    ];
+
+    let rawMatches = [];
+
+    // Datums-Helper zum Parsen deutscher Daten (DD.MM.YYYY)
+    function parseGermanDate(dateStr) {
+        if (!dateStr) return new Date(0);
+        const parts = String(dateStr).trim().split('.');
+        if (parts.length === 3) {
+            return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+        }
+        return new Date(dateStr);
+    }
+
+    // Heim & Auswärts-Team aus "Heim : Auswärts" ermitteln
+    function parseTeams(begegnungStr) {
+        if (!begegnungStr || !begegnungStr.includes(':')) return [];
+        const parts = begegnungStr.split(':');
+        return [parts[0].trim(), parts[1].trim()];
+    }
+
+    // Erstes Jahr eines Grounds im Gesamtdatenbestand ermitteln
+    function getGroundFirstYear(groundName) {
+        let minYear = 9999;
+        rawMatches.forEach(m => {
+            if (m.Ground === groundName) {
+                const yr = parseInt(m.Jahr || (m.Datum ? m.Datum.split('.')[2] : 0));
+                if (yr && yr < minYear) minYear = yr;
+            }
+        });
+        return minYear !== 9999 ? minYear : '';
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        if (typeof getHoppingData === 'function') {
+            getHoppingData()
+                .then(data => initApp(data))
+                .catch(err => {
+                    console.warn("API Error. Verwende Fallback-Daten.", err);
+                    initApp(fallbackMatches);
+                });
+        } else {
+            initApp(fallbackMatches);
+        }
+    });
+
+    function initApp(data) {
+        rawMatches = (data && data.length > 0) ? data : fallbackMatches;
+
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('stats-content').style.display = 'flex';
+
+        populateSeasonDropdown();
+        renderDashboard();
+    }
+
+    // Befüllt das Saison-Dropdown automatisch aus allen Spalten #Saison / Saison
+    function populateSeasonDropdown() {
+        const select = document.getElementById('season-select');
+        const seasonsSet = new Set();
+
+        rawMatches.forEach(m => {
+            const s = m['#Saison'] || m.Saison;
+            if (s && String(s).trim() !== '') {
+                seasonsSet.add(String(s).trim());
+            }
+        });
+
+        // Absteigend sortieren (z.B. 2026/2027, 2025/2026 ...)
+        const sortedSeasons = Array.from(seasonsSet).sort((a, b) => b.localeCompare(a));
+
+        select.innerHTML = '';
+        sortedSeasons.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s;
+            opt.textContent = s;
+            select.appendChild(opt);
+        });
+
+        // Zusätzliche Option für Alle Saisons
+        const allOpt = document.createElement('option');
+        allOpt.value = 'ALL';
+        allOpt.textContent = 'Alle Saisons';
+        select.appendChild(allOpt);
+    }
+
+    function renderDashboard() {
+        const selectedSeason = document.getElementById('season-select').value;
+        const isAll = (selectedSeason === 'ALL');
+
+        // Spiele der gewählten Saison filtern
+        const seasonMatches = isAll ? rawMatches : rawMatches.filter(m => (m['#Saison'] || m.Saison) === selectedSeason);
+
+        if (seasonMatches.length === 0) {
+            resetStatsDisplay();
+            return;
+        }
+
+        // Früheste Spieldatum der aktuellen Saison für die "(Neu)"-Berechnung ermitteln
+        let seasonStartDate = new Date(8640000000000000); // Max Date
+        seasonMatches.forEach(m => {
+            const d = parseGermanDate(m.Datum);
+            if (d < seasonStartDate) seasonStartDate = d;
+        });
+
+        // Vorherige Spiele vor dieser Saison für Neuheiten-Vergleich
+        const previousMatches = isAll ? [] : rawMatches.filter(m => {
+            const d = parseGermanDate(m.Datum);
+            return d < seasonStartDate && (m['#Saison'] || m.Saison) !== selectedSeason;
+        });
+
+        // Historische Sets vor dieser Saison
+        const prevLaenderSet = new Set(previousMatches.map(m => m.Land).filter(Boolean));
+        const prevGroundsSet = new Set(previousMatches.map(m => m.Ground).filter(Boolean));
+        const prevTeamsSet = new Set();
+        previousMatches.forEach(m => {
+            parseTeams(m.Begegnung).forEach(t => prevTeamsSet.add(t));
+        });
+
+        // 1. Tore & Spiele
+        let totalTore = 0;
+        let totalSpiele = seasonMatches.length;
+
+        // Stats Accumulators
+        const seasonLaenderSet = new Set();
+        const seasonNewLaenderSet = new Set();
+        let visitsLänderCount = 0;
+
+        const teamCounts = {};
+        const newTeamsSet = new Set();
+
+        const groundCounts = {};
+        const newGroundsSet = new Set();
+
+        const wettbewerbCounts = {};
+        const zuschauerList = [];
+
+        let maxGoalsMatch = null;
+        let maxGoalsCount = -1;
+
+        seasonMatches.forEach(m => {
+            // Tore
+            if (m.Ergebnis && String(m.Ergebnis).includes(':')) {
+                const parts = String(m.Ergebnis).split(':');
+                const h = parseInt(parts[0]);
+                const a = parseInt(parts[1]);
+                if (!isNaN(h) && !isNaN(a)) {
+                    const matchGoals = h + a;
+                    totalTore += matchGoals;
+
+                    if (matchGoals > maxGoalsCount) {
+                        maxGoalsCount = matchGoals;
+                        maxGoalsMatch = m;
+                    }
+                }
+            }
+
+            // Länder & Visits
+            if (m.Land) {
+                seasonLaenderSet.add(m.Land);
+                visitsLänderCount++;
+                if (!prevLaenderSet.has(m.Land)) {
+                    seasonNewLaenderSet.add(m.Land);
+                }
+            }
+
+            // Teams
+            const teams = parseTeams(m.Begegnung);
+            teams.forEach(t => {
+                if (t) {
+                    teamCounts[t] = (teamCounts[t] || 0) + 1;
+                    if (!prevTeamsSet.has(t)) {
+                        newTeamsSet.add(t);
+                    }
+                }
+            });
+
+            // Grounds
+            if (m.Ground) {
+                groundCounts[m.Ground] = (groundCounts[m.Ground] || 0) + 1;
+                if (!prevGroundsSet.has(m.Ground)) {
+                    newGroundsSet.add(m.Ground);
+                }
+            }
+
+            // Wettbewerbe
+            if (m.Wettbewerb) {
+                wettbewerbCounts[m.Wettbewerb] = (wettbewerbCounts[m.Wettbewerb] || 0) + 1;
+            }
+
+            // Zuschauer
+            if (m.Zuschauer !== undefined && m.Zuschauer !== null && m.Zuschauer !== '') {
+                const z = parseInt(String(m.Zuschauer).replace(/\./g, ''));
+                if (!isNaN(z)) {
+                    zuschauerList.push(z);
+                }
+            }
+        });
+
+        // UI Updates: Row 1 (Tore, Spiele, Länder)
+        document.getElementById('val-tore').innerText = totalTore.toLocaleString('de-DE');
+        document.getElementById('val-spiele').innerText = totalSpiele.toLocaleString('de-DE');
+        document.getElementById('val-laender').innerText = `${seasonLaenderSet.size} (${seasonNewLaenderSet.size})`;
+
+        // UI Updates: Row 2 (Teams)
+        const uniqueTeamsCount = Object.keys(teamCounts).length;
+        const topTeam = getTopKey(teamCounts);
+        document.getElementById('val-teams-main').innerText = `${uniqueTeamsCount} (${newTeamsSet.size})`;
+        document.getElementById('val-teams-sub').innerText = topTeam ? `${topTeam.count}x ${topTeam.name}` : '-';
+
+        // UI Updates: Row 2 (Grounds ++)
+        const uniqueGroundsCount = Object.keys(groundCounts).length;
+        const topGround = getTopKey(groundCounts);
+        let topGroundSub = '-';
+        if (topGround) {
+            const firstYr = getGroundFirstYear(topGround.name);
+            topGroundSub = `${topGround.count}x ${topGround.name} ${firstYr ? '(' + firstYr + ')' : ''}`;
+        }
+        document.getElementById('val-grounds-main').innerText = `${uniqueGroundsCount} (${newGroundsSet.size})`;
+        document.getElementById('val-grounds-sub').innerText = topGroundSub;
+
+        // UI Updates: Row 3 (Wettbewerbe)
+        const uniqueWettbewerbeCount = Object.keys(wettbewerbCounts).length;
+        const topWettbewerb = getTopKey(wettbewerbCounts);
+        document.getElementById('val-wettbewerbe-main').innerText = uniqueWettbewerbeCount.toLocaleString('de-DE');
+        document.getElementById('val-wettbewerbe-sub').innerText = topWettbewerb ? `${topWettbewerb.count}x ${topWettbewerb.name}` : '-';
+
+        // UI Updates: Row 3 (Zuschauer)
+        if (zuschauerList.length > 0) {
+            const minZ = Math.min(...zuschauerList);
+            const maxZ = Math.max(...zuschauerList);
+            const avgZ = Math.round(zuschauerList.reduce((a, b) => a + b, 0) / zuschauerList.length);
+            document.getElementById('val-zuschauer-main').innerText = `${fmtNum(minZ)} / ${fmtNum(avgZ)} / ${fmtNum(maxZ)}`;
+        } else {
+            document.getElementById('val-zuschauer-main').innerText = '0 / 0 / 0';
+        }
+
+        // UI Updates: Row 4 (Visits)
+        document.getElementById('val-visits').innerText = `${visitsLänderCount} (${seasonNewLaenderSet.size})`;
+
+        // UI Updates: Row 5 (Torreichstes Spiel)
+        if (maxGoalsMatch) {
+            document.getElementById('val-torreichstes-spiel').innerText = `${maxGoalsMatch.Begegnung}, ${maxGoalsMatch.Ergebnis}`;
+        } else {
+            document.getElementById('val-torreichstes-spiel').innerText = '-';
+        }
+    }
+
+    function getTopKey(obj) {
+        let topName = null;
+        let maxCount = -1;
+        for (const [key, count] of Object.entries(obj)) {
+            if (count > maxCount) {
+                maxCount = count;
+                topName = key;
+            }
+        }
+        return topName ? { name: topName, count: maxCount } : null;
+    }
+
+    function fmtNum(num) {
+        return num.toLocaleString('de-DE');
+    }
+
+    function resetStatsDisplay() {
+        document.getElementById('val-tore').innerText = '0';
+        document.getElementById('val-spiele').innerText = '0';
+        document.getElementById('val-laender').innerText = '0 (0)';
+        document.getElementById('val-teams-main').innerText = '0 (0)';
+        document.getElementById('val-teams-sub').innerText = '-';
+        document.getElementById('val-grounds-main').innerText = '0 (0)';
+        document.getElementById('val-grounds-sub').innerText = '-';
+        document.getElementById('val-wettbewerbe-main').innerText = '0';
+        document.getElementById('val-wettbewerbe-sub').innerText = '-';
+        document.getElementById('val-zuschauer-main').innerText = '0 / 0 / 0';
+        document.getElementById('val-visits').innerText = '0 (0)';
+        document.getElementById('val-torreichstes-spiel').innerText = '-';
+    }
+
+    /* Sidebar Drawer Controls */
+    function toggleSidebar(open) {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('drawer-overlay');
+        if (open) {
+            sidebar.classList.add('open');
+            overlay.classList.add('open');
+        } else {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+        }
+    }
+
+    function toggleAccordion(contentId, chevronId) {
+        const content = document.getElementById(contentId);
+        const chevron = document.getElementById(chevronId);
+        content.classList.toggle('open');
+        chevron.classList.toggle('rotated');
+    }
+</script>
+</body>
+</html>
