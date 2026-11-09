@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Groundhopping - Home</title>
+    <style>
+        :root {
+            --bg-page: #f2f2f7;
+            --card-bg: #ffffff;
+            --accent: #007aff;
+            --accent-soft: rgba(0, 122, 255, 0.08);
+            --header-blue: #24b3f0;
+            --text-main: #000000;
+            --text-sub: #8e8e93;
+            --border: #e5e5ea;
+            --radius-main: 16px;
+            --radius-card: 12px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            --drawer-width: 290px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-page: #000000;
+                --card-bg: #1c1c1e;
+                --accent: #0a84ff;
+                --accent-soft: rgba(10, 132, 255, 0.15);
+                --header-blue: #1fa2dc;
+                --text-main: #ffffff;
+                --text-sub: #8e8e93;
+                --border: #2c2c2e;
+                --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 30px;
+        }
+
+        /* Header Navigation Top Bar */
+        .top-navbar {
+            width: 100%;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-btn {
+            background: var(--accent-soft);
+            border: none;
+            color: var(--accent);
+            font-size: 1.25rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .menu-btn:active {
+            transform: scale(0.95);
+        }
+
+        .nav-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.02em;
+        }
+
+        /* Sidebar Drawer */
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .drawer-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: calc(-1 * var(--drawer-width));
+            width: var(--drawer-width);
+            height: 100vh;
+            background: var(--card-bg);
+            z-index: 201;
+            box-shadow: 4px 0 25px rgba(0,0,0,0.15);
+            transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar.open {
+            left: 0;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--accent-soft);
+        }
+
+        .sidebar-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.4rem;
+            color: var(--text-sub);
+            cursor: pointer;
+        }
+
+        .nav-menu {
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.92rem;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .menu-item:hover, .menu-item:active {
+            background: var(--accent-soft);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+            padding-left: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .accordion-content.open {
+            max-height: 400px;
+            padding-top: 4px;
+            padding-bottom: 8px;
+        }
+
+        .sub-menu-item {
+            display: block;
+            padding: 9px 12px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-sub);
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: background 0.15s ease, color 0.15s ease;
+        }
+
+        .sub-menu-item:hover {
+            color: var(--accent);
+            background: rgba(0, 122, 255, 0.05);
+        }
+
+        .chevron {
+            transition: transform 0.3s ease;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        .chevron.rotated {
+            transform: rotate(180deg);
+        }
+
+        /* App Main Container */
+        .app-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Quick Overview Cards Grid */
+        .overview-title {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-left: 4px;
+            margin-bottom: 8px;
+        }
+
+        .quick-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .stat-card-mini {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-card);
+            padding: 12px 8px;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card-mini .val {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .stat-card-mini .lbl {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-top: 2px;
+        }
+
+        /* "An diesem Tag..." Section */
+        .on-this-day-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-main);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            padding: 18px 16px;
+        }
+
+        .otd-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .otd-title-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .otd-badge {
+            background: #ff9500;
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            text-transform: uppercase;
+        }
+
+        .otd-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .otd-date-picker {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--accent-soft);
+            padding: 4px 10px;
+            border-radius: 8px;
+        }
+
+        .otd-date-picker input {
+            border: none;
+            background: transparent;
+            color: var(--accent);
+            font-weight: 700;
+            font-family: inherit;
+            font-size: 0.85rem;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Match Item Row */
+        .match-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .match-item {
+            background: var(--bg-page);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-card);
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: transform 0.15s ease, background 0.15s ease;
+        }
+
+        .match-item:hover, .match-item:active {
+            transform: scale(0.99);
+            background: var(--accent-soft);
+        }
+
+        .match-year {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--accent);
+            width: 50px;
+            flex-shrink: 0;
+        }
+
+        .match-details {
+            flex-grow: 1;
+            padding: 0 10px;
+            overflow: hidden;
+        }
+
+        .match-teams {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-main);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .match-meta {
+            font-size: 0.75rem;
+            color: var(--text-sub);
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .match-score {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--text-main);
+            background: var(--card-bg);
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 24px 12px;
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Match Detail Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+            padding: 16px;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: var(--card-bg);
+            border-radius: var(--radius-main);
+            width: 100%;
+            max-width: 520px;
+            max-height: 88vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            transform: translateY(20px);
+            transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-overlay.open .modal-card {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            background: var(--header-blue);
+            color: #ffffff;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .modal-header-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        .modal-close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #ffffff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .detail-hero-score {
+            text-align: center;
+            background: var(--accent-soft);
+            padding: 14px;
+            border-radius: var(--radius-card);
+            border: 1px solid var(--border);
+        }
+
+        .detail-teams {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .detail-score {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .detail-item {
+            background: var(--bg-page);
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .detail-item.full-width {
+            grid-column: span 2;
+        }
+
+        .detail-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-sub);
+            text-transform: uppercase;
+        }
+
+        .detail-val {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 2px;
+        }
+
+        @media (max-width: 480px) {
+            .quick-stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .quick-stats-grid .stat-card-mini:last-child {
+                grid-column: span 2;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Top Bar Navbar -->
+<div class="top-navbar">
+    <div class="nav-left">
+        <button class="menu-btn" onclick="toggleSidebar(true)">☰</button>
+        <div class="nav-title">Groundhopping</div>
+    </div>
+</div>
+
+<!-- Slide-Over Sidebar Drawer -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="toggleSidebar(false)"></div>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-title">Menü</div>
+        <button class="close-btn" onclick="toggleSidebar(false)">✕</button>
+    </div>
+    <div class="nav-menu">
+        <a href="index.html" class="menu-item" style="color: var(--accent);">
+            <span>🏠 Startseite</span>
+        </a>
+
+        <!-- Accordion Dashboards -->
+        <div class="menu-item" onclick="toggleAccordion('dashboards-sub', 'chevron-dash')">
+            <span>📊 Dashboards</span>
+            <span class="chevron" id="chevron-dash">▼</span>
+        </div>
+        <div class="accordion-content" id="dashboards-sub">
+            <a href="webapp/hopping/dashboard_jahre.html" class="sub-menu-item">📅 Dashboard Jahre</a>
+            <a href="webapp/hopping/dashboard_saison.html" class="sub-menu-item">🏆 Dashboard Saison</a>
+            <a href="webapp/hopping/dashboard_stadion.html" class="sub-menu-item">🏟️ Dashboard Stadion</a>
+            <a href="webapp/hopping/dashboard_verein.html" class="sub-menu-item">🛡️ Dashboard Verein</a>
+            <a href="webapp/hopping/dashboard_wettbewerb.html" class="sub-menu-item">🥇 Dashboard Wettbewerb</a>
+            <a href="webapp/hopping/dashboard_begegnung.html" class="sub-menu-item">⚔️ Dashboard Begegnung</a>
+        </div>
+
+        <a href="webapp/hopping/ewige_tabelle_teams.html" class="menu-item">
+            <span>📈 Ewige Tabelle Teams</span>
+        </a>
+    </div>
+</div>
+
+<!-- Main App Container -->
+<div class="app-container">
+
+    <!-- Quick Stats Grid -->
+    <div>
+        <div class="overview-title">Gesamt Übersicht</div>
+        <div class="quick-stats-grid">
+            <div class="stat-card-mini">
+                <div class="val" id="qs-spiele">0</div>
+                <div class="lbl">Spiele</div>
+            </div>
+            <div class="stat-card-mini">
+                <div class="val" id="qs-tore">0</div>
+                <div class="lbl">Tore</div>
+            </div>
+            <div class="stat-card-mini">
+                <div class="val" id="qs-grounds">0</div>
+                <div class="lbl">Grounds</div>
+            </div>
+            <div class="stat-card-mini">
+                <div class="val" id="qs-laender">0</div>
+                <div class="lbl">Länder</div>
+            </div>
+            <div class="stat-card-mini">
+                <div class="val" id="qs-wettbewerbe">0</div>
+                <div class="lbl">Wettbewerbe</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- "An diesem Tag im Jahr..." Section -->
+    <div class="on-this-day-card">
+        <div class="otd-header">
+            <div class="otd-title-group">
+                <span class="otd-badge">Historie</span>
+                <div class="otd-title" id="otd-title-text">Spiele am 09.11.</div>
+            </div>
+            <div class="otd-date-picker">
+                <span>📅 Tag:</span>
+                <input type="date" id="date-filter" onchange="onDateFilterChange()">
+            </div>
+        </div>
+
+        <!-- Dynamic List of Matches -->
+        <div class="match-list" id="otd-match-list">
+            <!-- Dynamisch gefüllt -->
+        </div>
+    </div>
+
+</div>
+
+<!-- Match Detail Modal Mask -->
+<div class="modal-overlay" id="match-modal" onclick="closeModalOnOverlay(event)">
+    <div class="modal-card">
+        <div class="modal-header">
+            <div class="modal-header-title">Spiel Details</div>
+            <button class="modal-close-btn" onclick="closeModal()">✕</button>
+        </div>
+        <div class="modal-body" id="modal-body-content">
+            <!-- Dynamisch befüllt -->
+        </div>
+    </div>
+</div>
+
+<!-- API Integration -->
+<script src="api.js"></script>
+
+<script>
+    // Fallback Data aus Excel-Struktur
+    const fallbackMatches = [
+        { SpielNr: "1", Datum: "09.11.2007", Jahr: "2007", Saison: "2007/08", Begegnung: "1. FC Köln : FC Erzgebirge Aue", Ergebnis: "1:1", Ground: "Müngersdorfer Stadion", Ort: "Köln", Land: "Deutschland", Wettbewerb: "2. Bundesliga", Zuschauer: "41000", Kat: "Profis", Block: "Sektor O", Untergrund: "Naturrasen", ArtStadion: "Stadion" },
+        { SpielNr: "2", Datum: "09.11.2012", Jahr: "2012", Saison: "2012/13", Begegnung: "1. FC Köln : MSV Duisburg", Ergebnis: "0:0", Ground: "RheinEnergieStadion", Ort: "Köln", Land: "Deutschland", Wettbewerb: "2. Bundesliga", Zuschauer: "43000", Kat: "Profis", Block: "Nord", Untergrund: "Naturrasen", ArtStadion: "Stadion" },
+        { SpielNr: "3", Datum: "09.11.2019", Jahr: "2019", Saison: "2019/20", Begegnung: "VfB Homberg : SC Verl", Ergebnis: "1:3", Ground: "PCC-Stadion", Ort: "Duisburg", Land: "Deutschland", Wettbewerb: "Regionalliga West", Zuschauer: "650", Kat: "Amateure", Block: "Stehplatz", Untergrund: "Naturrasen", ArtStadion: "Stadion" },
+        { SpielNr: "4", Datum: "09.11.2022", Jahr: "2022", Saison: "2022/23", Begegnung: "1. FC Köln : Bayer 04 Leverkusen", Ergebnis: "1:2", Ground: "RheinEnergieStadion", Ort: "Köln", Land: "Deutschland", Wettbewerb: "Bundesliga", Zuschauer: "50000", Kat: "Profis", Block: "Süd", Untergrund: "Naturrasen", ArtStadion: "Stadion" },
+        { SpielNr: "5", Datum: "09.11.2023", Jahr: "2023", Saison: "2023/24", Begegnung: "FC Rheinsüd Köln : DJK Südwest Köln", Ergebnis: "2:4", Ground: "Sportanlage Sürther Feld", Ort: "Köln", Land: "Deutschland", Wettbewerb: "Bezirksliga", Zuschauer: "120", Kat: "Amateure", Block: "Band", Untergrund: "Kunstrasen", ArtStadion: "Sportplatz" },
+        { SpielNr: "6", Datum: "09.11.2024", Jahr: "2024", Saison: "2024/25", Begegnung: "1. FC Köln : Spvg Greuther Fürth", Ergebnis: "1:0", Ground: "RheinEnergieStadion", Ort: "Köln", Land: "Deutschland", Wettbewerb: "2. Bundesliga", Zuschauer: "50000", Kat: "Profis", Block: "Ost", Untergrund: "Naturrasen", ArtStadion: "Stadion" }
+    ];
+
+    let allMatches = [];
+
+    window.addEventListener('DOMContentLoaded', () => {
+        // Datumsfilter auf HEUTE setzen
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        document.getElementById('date-filter').value = `${yyyy}-${mm}-${dd}`;
+
+        if (typeof getHoppingData === 'function') {
+            getHoppingData()
+                .then(data => initApp(data))
+                .catch(err => {
+                    console.warn("API Call gescheitert. Fallback-Daten werden verwendet.", err);
+                    initApp(fallbackMatches);
+                });
+        } else {
+            console.log("api.js nicht vorhanden. Verwende Fallback-Daten.");
+            initApp(fallbackMatches);
+        }
+    });
+
+    function initApp(data) {
+        allMatches = (data && data.length > 0) ? data : fallbackMatches;
+        renderOverallStats();
+        renderOnThisDay();
+    }
+
+    /* Quick Stats berechnen */
+    function renderOverallStats() {
+        let spieleCount = allMatches.length;
+        let toreCount = 0;
+        const groundsSet = new Set();
+        const laenderSet = new Set();
+        const wettbewerbeSet = new Set();
+
+        allMatches.forEach(m => {
+            // Tore
+            if (m.Ergebnis && String(m.Ergebnis).includes(':')) {
+                const parts = String(m.Ergebnis).split(':');
+                const h = parseInt(parts[0]);
+                const a = parseInt(parts[1]);
+                if (!isNaN(h) && !isNaN(a)) toreCount += (h + a);
+            }
+            if (m.Ground) groundsSet.add(m.Ground);
+            if (m.Land) laenderSet.add(m.Land);
+            if (m.Wettbewerb) wettbewerbeSet.add(m.Wettbewerb);
+        });
+
+        document.getElementById('qs-spiele').innerText = spieleCount.toLocaleString('de-DE');
+        document.getElementById('qs-tore').innerText = toreCount.toLocaleString('de-DE');
+        document.getElementById('qs-grounds').innerText = groundsSet.size.toLocaleString('de-DE');
+        document.getElementById('qs-laender').innerText = laenderSet.size.toLocaleString('de-DE');
+        document.getElementById('qs-wettbewerbe').innerText = wettbewerbeSet.size.toLocaleString('de-DE');
+    }
+
+    /* "An diesem Tag im Jahr..." rendern */
+    function renderOnThisDay() {
+        const dateVal = document.getElementById('date-filter').value;
+        if (!dateVal) return;
+
+        const dateObj = new Date(dateVal);
+        const dayStr = String(dateObj.getDate()).padStart(2, '0');
+        const monthStr = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const targetDayMonth = `${dayStr}.${monthStr}.`;
+
+        document.getElementById('otd-title-text').innerText = `Spiele am ${dayStr}.${monthStr}.`;
+
+        // Filtern aller Spiele mit übereinstimmendem Tag & Monat
+        const matchingMatches = allMatches.filter(m => {
+            if (!m.Datum) return false;
+            return m.Datum.startsWith(targetDayMonth);
+        }).sort((a, b) => {
+            const yearA = parseInt(a.Jahr || getYearFromDate(a.Datum)) || 0;
+            const yearB = parseInt(b.Jahr || getYearFromDate(b.Datum)) || 0;
+            return yearA - yearB;
+        });
+
+        const container = document.getElementById('otd-match-list');
+        container.innerHTML = '';
+
+        if (matchingMatches.length === 0) {
+            container.innerHTML = `<div class="empty-state">An diesem Tag (${dayStr}.${monthStr}.) wurde bisher kein Spiel besucht.</div>`;
+            return;
+        }
+
+        matchingMatches.forEach((m, index) => {
+            const year = m.Jahr || getYearFromDate(m.Datum) || '????';
+            const item = document.createElement('div');
+            item.className = 'match-item';
+            item.onclick = () => openMatchModal(m);
+
+            item.innerHTML = `
+                <div class="match-year">${year}</div>
+                <div class="match-details">
+                    <div class="match-teams">${escapeHtml(m.Begegnung || 'Unbekannt')}</div>
+                    <div class="match-meta">${escapeHtml(m.Ground || '')} • ${escapeHtml(m.Wettbewerb || '')}</div>
+                </div>
+                <div class="match-score">${escapeHtml(m.Ergebnis || '-')}</div>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    function onDateFilterChange() {
+        renderOnThisDay();
+    }
+
+    function getYearFromDate(dateStr) {
+        if (!dateStr) return '';
+        const p = dateStr.split('.');
+        return p.length === 3 ? p[2].trim() : '';
+    }
+
+    /* Modal Maske öffnen / schließen */
+    function openMatchModal(match) {
+        const body = document.getElementById('modal-body-content');
+        
+        body.innerHTML = `
+            <div class="detail-hero-score">
+                <div class="detail-teams">${escapeHtml(match.Begegnung || 'Unbekannte Begegnung')}</div>
+                <div class="detail-score">${escapeHtml(match.Ergebnis || '-')}</div>
+            </div>
+
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="detail-label">Datum</div>
+                    <div class="detail-val">${escapeHtml(match.Datum || '-')}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Saison</div>
+                    <div class="detail-val">${escapeHtml(match.Saison || '-')}</div>
+                </div>
+
+                <div class="detail-item full-width">
+                    <div class="detail-label">Stadion / Ground</div>
+                    <div class="detail-val">${escapeHtml(match.Ground || '-')}</div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">Spielort</div>
+                    <div class="detail-val">${escapeHtml(match.Ort || '-')}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Land</div>
+                    <div class="detail-val">${escapeHtml(match.Land || '-')}</div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">Wettbewerb</div>
+                    <div class="detail-val">${escapeHtml(match.Wettbewerb || '-')}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Zuschauer</div>
+                    <div class="detail-val">${match.Zuschauer ? parseInt(match.Zuschauer).toLocaleString('de-DE') : '-'}</div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">Kategorie</div>
+                    <div class="detail-val">${escapeHtml(match.Kat || match.Kategorie || '-')}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Block / Platz</div>
+                    <div class="detail-val">${escapeHtml(match.Block || '-')}</div>
+                </div>
+
+                <div class="detail-item">
+                    <div class="detail-label">Untergrund</div>
+                    <div class="detail-val">${escapeHtml(match.Untergrund || '-')}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Stadion-Art</div>
+                    <div class="detail-val">${escapeHtml(match.ArtStadion || match['Art Stadion'] || '-')}</div>
+                </div>
+
+                ${match.Teilnehmer ? `
+                <div class="detail-item full-width">
+                    <div class="detail-label">Teilnehmer / Mitreisende</div>
+                    <div class="detail-val">${escapeHtml(match.Teilnehmer)}</div>
+                </div>` : ''}
+            </div>
+        `;
+
+        document.getElementById('match-modal').classList.add('open');
+    }
+
+    function closeModal() {
+        document.getElementById('match-modal').classList.remove('open');
+    }
+
+    function closeModalOnOverlay(e) {
+        if (e.target.id === 'match-modal') closeModal();
+    }
+
+    /* Sidebar Controls */
+    function toggleSidebar(open) {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('drawer-overlay');
+        if (open) {
+            sidebar.classList.add('open');
+            overlay.classList.add('open');
+        } else {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+        }
+    }
+
+    function toggleAccordion(contentId, chevronId) {
+        const content = document.getElementById(contentId);
+        const chevron = document.getElementById(chevronId);
+        content.classList.toggle('open');
+        chevron.classList.toggle('rotated');
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+</script>
+</body>
+</html>
