@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Groundhopping Statistik</title>
+    <style>
+        :root {
+            --bg-page: #f5f7fa;
+            --card-bg: #ffffff;
+            --header-blue: #24b3f0;
+            --box-bg-light: #f4f6f8;
+            --box-bg-blue: #e3f2fd;
+            --text-dark: #1d1d1f;
+            --text-muted: #555555;
+            --text-blue: #24b3f0;
+            --border-color: #d1d5db;
+            --radius-main: 16px;
+            --radius-card: 8px;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-page: #121212;
+                --card-bg: #1e1e1e;
+                --header-blue: #1fa2dc;
+                --box-bg-light: #2a2a2c;
+                --box-bg-blue: #193347;
+                --text-dark: #f5f5f7;
+                --text-muted: #aaaaaa;
+                --text-blue: #38bdf8;
+                --border-color: #333333;
+                --shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px 12px;
+        }
+
+        .stat-card {
+            width: 100%;
+            max-width: 580px;
+            background: var(--card-bg);
+            border: 2px solid var(--text-dark);
+            border-radius: var(--radius-main);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Blue Bar */
+        .header-bar {
+            background-color: var(--header-blue);
+            color: #ffffff;
+            text-align: center;
+            padding: 14px 10px;
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .card-body {
+            padding: 20px 18px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        /* Top Controls Section */
+        .top-section {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 4px;
+        }
+
+        .year-select-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .year-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background: transparent;
+            border: none;
+            color: var(--text-blue);
+            font-size: 2.3rem;
+            font-weight: 800;
+            text-align: center;
+            cursor: pointer;
+            padding: 2px 24px 2px 8px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .year-select-wrapper::after {
+            content: '▼';
+            font-size: 0.9rem;
+            color: var(--text-blue);
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .user-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* Grid Layouts */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .grid-1 {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .grid-center {
+            display: flex;
+            justify-content: center;
+        }
+
+        .grid-center .stat-box {
+            width: 60%;
+        }
+
+        /* Stat Box Component */
+        .stat-box {
+            border-radius: var(--radius-card);
+            padding: 12px 10px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 84px;
+        }
+
+        .bg-light {
+            background-color: var(--box-bg-light);
+        }
+
+        .bg-blue {
+            background-color: var(--box-bg-blue);
+        }
+
+        .box-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 2px;
+        }
+
+        .box-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .box-value {
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: var(--text-blue);
+            line-height: 1.2;
+        }
+
+        .box-subdetail {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-top: 4px;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Responsive Fixes for Small Mobile Screens */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px 6px;
+            }
+
+            .card-body {
+                padding: 14px 10px;
+                gap: 10px;
+            }
+
+            .year-select {
+                font-size: 1.9rem;
+            }
+
+            .grid-3 {
+                gap: 8px;
+            }
+
+            .grid-2 {
+                gap: 8px;
+            }
+
+            .grid-center .stat-box {
+                width: 80%;
+            }
+
+            .box-title {
+                font-size: 0.85rem;
+            }
+
+            .box-subtitle {
+                font-size: 0.7rem;
+            }
+
+            .box-value {
+                font-size: 1.2rem;
+            }
+
+            .box-subdetail {
+                font-size: 0.72rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="stat-card">
+    <!-- Header -->
+    <div class="header-bar">
+        Groundhopping
+    </div>
+
+    <div class="card-body">
+        <!-- Top Controls: Year Dropdown & Name -->
+        <div class="top-section">
+            <div class="year-select-wrapper">
+                <select id="year-select" class="year-select" onchange="renderStats()">
+                    <option value="2026">2026</option>
+                </select>
+            </div>
+            <div class="user-name">Fabian</div>
+        </div>
+
+        <!-- Grid 1: Tore, Spiele, Länder (Neu) -->
+        <div class="grid-3">
+            <div class="stat-box bg-light">
+                <div class="box-title">Tore</div>
+                <div class="box-value" id="val-tore">0</div>
+            </div>
+            <div class="stat-box bg-blue">
+                <div class="box-title">Spiele</div>
+                <div class="box-value" id="val-spiele">0</div>
+            </div>
+            <div class="stat-box bg-light">
+                <div class="box-title">Länder (Neu)</div>
+                <div class="box-value" id="val-laender">0 (0)</div>
+            </div>
+        </div>
+
+        <!-- Grid 2: Teams & Grounds -->
+        <div class="grid-2">
+            <div class="stat-box bg-blue">
+                <div class="box-title">Teams</div>
+                <div class="box-subtitle">Anzahl (Neu) / Meistgesehen</div>
+                <div class="box-value" id="val-teams-count">0 (0)</div>
+                <div class="box-subdetail" id="val-teams-top">-</div>
+            </div>
+            <div class="stat-box bg-light">
+                <div class="box-title">Grounds ++</div>
+                <div class="box-subtitle">Anzahl (Neu) / Meistgesehen</div>
+                <div class="box-value" id="val-grounds-count">0 (0)</div>
+                <div class="box-subdetail" id="val-grounds-top">-</div>
+            </div>
+        </div>
+
+        <!-- Grid 3: Wettbewerbe & Zuschauer -->
+        <div class="grid-2">
+            <div class="stat-box bg-light">
+                <div class="box-title">Wettbewerbe</div>
+                <div class="box-subtitle">Anzahl / Meistgesehen</div>
+                <div class="box-value" id="val-wettbewerbe-count">0</div>
+                <div class="box-subdetail" id="val-wettbewerbe-top">-</div>
+            </div>
+            <div class="stat-box bg-blue">
+                <div class="box-title">Zuschauer</div>
+                <div class="box-subtitle">Minimum / Mittelwert / Maximum</div>
+                <div class="box-value" id="val-zuschauer" style="font-size: 1.05rem;">0 / 0 / 0</div>
+            </div>
+        </div>
+
+        <!-- Grid 4: Visits (Länder) -->
+        <div class="grid-center">
+            <div class="stat-box bg-light">
+                <div class="box-title">Visits (Länder)</div>
+                <div class="box-value" id="val-visits">0 (0)</div>
+            </div>
+        </div>
+
+        <!-- Grid 5: Torreichstes Spiel -->
+        <div class="grid-1">
+            <div class="stat-box bg-blue">
+                <div class="box-title">Torreichstes Spiel</div>
+                <div class="box-subdetail" id="val-torreichstes" style="font-size: 0.9rem; font-weight: 600;">-</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Einbinden von api.js (falls vorhanden) -->
+<script src="api.js"></script>
+
+<script>
+    // Fallback-Beispieldaten, falls api.js nicht vorhanden/lokal aufgerufen wird
+    const fallbackMatches = [
+        { Datum: "15.03.2026", Begegnung: "1. FC Köln : Borussia Dortmund", Ergebnis: "2:1", Ground: "Müngersdorfer Stadion", Zuschauer: "50000", Wettbewerb: "Bundesliga", Land: "Deutschland" },
+        { Datum: "20.03.2026", Begegnung: "SC 08 Elsdorf : Rot-Gelb Wesseling", Ergebnis: "17:1", Ground: "Stadion Elsdorf", Zuschauer: "200", Wettbewerb: "Bezirksliga", Land: "Deutschland" },
+        { Datum: "05.04.2026", Begegnung: "1. FC Köln : Bayer Leverkusen", Ergebnis: "3:3", Ground: "Müngersdorfer Stadion", Zuschauer: "50000", Wettbewerb: "Bundesliga", Land: "Deutschland" },
+        { Datum: "12.04.2026", Begegnung: "PSG : Olympique Marseille", Ergebnis: "2:0", Ground: "Parc des Princes", Zuschauer: "47000", Wettbewerb: "Ligue 1", Land: "Frankreich" },
+        { Datum: "10.05.2025", Begegnung: "1. FC Köln : FC Schalke 04", Ergebnis: "1:0", Ground: "Müngersdorfer Stadion", Zuschauer: "50000", Wettbewerb: "Bundesliga", Land: "Deutschland" },
+        { Datum: "18.06.2025", Begegnung: "FC Barcelona : Real Madrid", Ergebnis: "3:2", Ground: "Camp Nou", Zuschauer: "95000", Wettbewerb: "La Liga", Land: "Spanien" },
+        { Datum: "22.08.2024", Begegnung: "Arsenal FC : Chelsea FC", Ergebnis: "2:2", Ground: "Emirates Stadium", Zuschauer: "60000", Wettbewerb: "Premier League", Land: "England" }
+    ];
+
+    let allMatches = [];
+
+    // Initialisierung
+    window.addEventListener('DOMContentLoaded', () => {
+        if (typeof getHoppingData === 'function') {
+            getHoppingData()
+                .then(data => startApp(data))
+                .catch(err => {
+                    console.warn("API geladen mit Fehler, verwende Fallback-Daten:", err);
+                    startApp(fallbackMatches);
+                });
+        } else {
+            console.log("api.js nicht gefunden. Verwende Fallback-Daten.");
+            startApp(fallbackMatches);
+        }
+    });
+
+    function startApp(data) {
+        allMatches = parseMatchData(data || []);
+        populateYearDropdown();
+        renderStats();
+    }
+
+    // Hilfsfunktion zur Bereinigung & Konvertierung der Matchdaten
+    function parseMatchData(raw) {
+        return raw.map(m => {
+            let year = null;
+            if (m.Datum) {
+                const parts = m.Datum.split('.');
+                if (parts.length === 3) {
+                    year = parts[2].trim();
+                } else if (m.Datum.includes('-')) {
+                    year = m.Datum.split('-')[0].trim();
+                }
+            }
+
+            // Teams zerlegen
+            let homeTeam = '', awayTeam = '';
+            if (m.Begegnung && m.Begegnung.includes(':')) {
+                const idx = m.Begegnung.indexOf(':');
+                homeTeam = m.Begegnung.substring(0, idx).trim();
+                awayTeam = m.Begegnung.substring(idx + 1).trim();
+            }
+
+            // Tore zerlegen
+            let gHome = 0, gAway = 0, totalGoals = 0, validGoals = false;
+            if (m.Ergebnis && String(m.Ergebnis).includes(':')) {
+                const resParts = String(m.Ergebnis).split(':');
+                const h = parseInt(resParts[0]);
+                const a = parseInt(resParts[1]);
+                if (!isNaN(h) && !isNaN(a)) {
+                    gHome = h;
+                    gAway = a;
+                    totalGoals = h + a;
+                    validGoals = true;
+                }
+            }
+
+            // Zuschauer parsen
+            let zuschauerNum = null;
+            if (m.Zuschauer) {
+                const cleanZ = String(m.Zuschauer).replace(/\./g, '').replace(/,/g, '').trim();
+                const parsedZ = parseInt(cleanZ);
+                if (!isNaN(parsedZ)) zuschauerNum = parsedZ;
+            }
+
+            return {
+                ...m,
+                ParsedYear: year,
+                HomeTeam: homeTeam,
+                AwayTeam: awayTeam,
+                TotalGoals: totalGoals,
+                ValidGoals: validGoals,
+                ZuschauerNum: zuschauerNum,
+                Land: m.Land || 'Unbekannt',
+                Ground: m.Ground || 'Unbekannt',
+                Wettbewerb: m.Wettbewerb || 'Unbekannt'
+            };
+        }).sort((a, b) => {
+            // Nach Datum sortieren (älteste zuerst für genaue Berechnung von "Neu")
+            return parseGermanDate(a.Datum) - parseGermanDate(b.Datum);
+        });
+    }
+
+    function parseGermanDate(dateStr) {
+        if (!dateStr) return 0;
+        const p = dateStr.split('.');
+        if (p.length === 3) return new Date(p[2], p[1] - 1, p[0]).getTime();
+        return new Date(dateStr).getTime() || 0;
+    }
+
+    // Jahres-Dropdown füllen
+    function populateYearDropdown() {
+        const yearSelect = document.getElementById('year-select');
+        const yearsSet = new Set();
+
+        allMatches.forEach(m => {
+            if (m.ParsedYear && m.ParsedYear.length === 4) {
+                yearsSet.add(m.ParsedYear);
+            }
+        });
+
+        const sortedYears = Array.from(yearsSet).sort((a, b) => b - a); // Neueste zuerst
+
+        yearSelect.innerHTML = '';
+        
+        // Option "Gesamt"
+        const optAll = document.createElement('option');
+        optAll.value = 'ALL';
+        optAll.innerText = 'Gesamt';
+        yearSelect.appendChild(optAll);
+
+        sortedYears.forEach(y => {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.innerText = y;
+            yearSelect.appendChild(opt);
+        });
+
+        // Standardmäßig neuestes Jahr auswählen (falls vorhanden)
+        if (sortedYears.length > 0) {
+            yearSelect.value = sortedYears[0];
+        } else {
+            yearSelect.value = 'ALL';
+        }
+    }
+
+    // Statistik für das gewählte Jahr berechnen und rendern
+    function renderStats() {
+        const selectedYear = document.getElementById('year-select').value;
+        const isAll = (selectedYear === 'ALL');
+
+        // Historie vor dem ausgewählten Jahr zur Ermittlung von "Neu" aufbauen
+        const priorLaender = new Set();
+        const priorTeams = new Set();
+        const priorGrounds = new Set();
+
+        if (!isAll) {
+            allMatches.forEach(m => {
+                if (m.ParsedYear && m.ParsedYear < selectedYear) {
+                    if (m.Land) priorLaender.add(m.Land);
+                    if (m.HomeTeam) priorTeams.add(m.HomeTeam);
+                    if (m.AwayTeam) priorTeams.add(m.AwayTeam);
+                    if (m.Ground) priorGrounds.add(m.Ground);
+                }
+            });
+        }
+
+        // Spiele des aktuellen Zeitraums filtern
+        const currentMatches = allMatches.filter(m => isAll || m.ParsedYear === selectedYear);
+
+        // Metriken Variablen
+        let totalTore = 0;
+        let totalSpiele = currentMatches.length;
+
+        const yearLaender = new Set();
+        const newLaender = new Set();
+
+        const teamCounts = {};
+        const yearTeams = new Set();
+        const newTeams = new Set();
+
+        const groundCounts = {};
+        const yearGrounds = new Set();
+        const newGrounds = new Set();
+
+        const wettbewerbCounts = {};
+        const zuschauerList = [];
+
+        let maxGoalsMatch = null;
+
+        currentMatches.forEach(m => {
+            // Tore
+            if (m.ValidGoals) {
+                totalTore += m.TotalGoals;
+                if (!maxGoalsMatch || m.TotalGoals > maxGoalsMatch.TotalGoals) {
+                    maxGoalsMatch = m;
+                }
+            }
+
+            // Länder
+            if (m.Land) {
+                yearLaender.add(m.Land);
+                if (!isAll && !priorLaender.has(m.Land)) {
+                    newLaender.add(m.Land);
+                }
+            }
+
+            // Teams
+            [m.HomeTeam, m.AwayTeam].forEach(t => {
+                if (t) {
+                    yearTeams.add(t);
+                    teamCounts[t] = (teamCounts[t] || 0) + 1;
+                    if (!isAll && !priorTeams.has(t)) {
+                        newTeams.add(t);
+                    }
+                }
+            });
+
+            // Grounds
+            if (m.Ground) {
+                yearGrounds.add(m.Ground);
+                groundCounts[m.Ground] = (groundCounts[m.Ground] || 0) + 1;
+                if (!isAll && !priorGrounds.has(m.Ground)) {
+                    newGrounds.add(m.Ground);
+                }
+            }
+
+            // Wettbewerbe
+            if (m.Wettbewerb) {
+                wettbewerbCounts[m.Wettbewerb] = (wettbewerbCounts[m.Wettbewerb] || 0) + 1;
+            }
+
+            // Zuschauer
+            if (m.ZuschauerNum !== null) {
+                zuschauerList.push(m.ZuschauerNum);
+            }
+        });
+
+        // Most Frequent Calculations
+        const topTeam = getTopItem(teamCounts);
+        const topGround = getTopItem(groundCounts);
+        const topWettbewerb = getTopItem(wettbewerbCounts);
+
+        // Zuschauer Auswertung
+        let zMin = 0, zAvg = 0, zMax = 0;
+        if (zuschauerList.length > 0) {
+            zMin = Math.min(...zuschauerList);
+            zMax = Math.max(...zuschauerList);
+            const sum = zuschauerList.reduce((a, b) => a + b, 0);
+            zAvg = Math.round(sum / zuschauerList.length);
+        }
+
+        // DOM Aktualisierung
+        document.getElementById('val-tore').innerText = totalTore.toLocaleString('de-DE');
+        document.getElementById('val-spiele').innerText = totalSpiele.toLocaleString('de-DE');
+
+        const newLaenderCnt = isAll ? 0 : newLaender.size;
+        document.getElementById('val-laender').innerText = `${yearLaender.size} (${newLaenderCnt})`;
+
+        const newTeamsCnt = isAll ? 0 : newTeams.size;
+        document.getElementById('val-teams-count').innerText = `${yearTeams.size} (${newTeamsCnt})`;
+        document.getElementById('val-teams-top').innerText = topTeam ? `${topTeam.count}x ${topTeam.name}` : '-';
+
+        const newGroundsCnt = isAll ? 0 : newGrounds.size;
+        document.getElementById('val-grounds-count').innerText = `${yearGrounds.size} (${newGroundsCnt})`;
+        document.getElementById('val-grounds-top').innerText = topGround ? `${topGround.count}x ${topGround.name}` : '-';
+
+        document.getElementById('val-wettbewerbe-count').innerText = Object.keys(wettbewerbCounts).length;
+        document.getElementById('val-wettbewerbe-top').innerText = topWettbewerb ? `${topWettbewerb.count}x ${topWettbewerb.name}` : '-';
+
+        document.getElementById('val-zuschauer').innerText = `${zMin.toLocaleString('de-DE')} / ${zAvg.toLocaleString('de-DE')} / ${zMax.toLocaleString('de-DE')}`;
+
+        // Visits (Länder-Besuche insgesamt im Zeitraum)
+        document.getElementById('val-visits').innerText = `${yearLaender.size} (${newLaenderCnt})`;
+
+        // Torreichstes Spiel
+        if (maxGoalsMatch) {
+            document.getElementById('val-torreichstes').innerText = `${maxGoalsMatch.Begegnung}, ${maxGoalsMatch.Ergebnis}`;
+        } else {
+            document.getElementById('val-torreichstes').innerText = '-';
+        }
+    }
+
+    function getTopItem(countsObj) {
+        let maxCount = 0;
+        let topName = null;
+        for (const [name, count] of Object.entries(countsObj)) {
+            if (count > maxCount) {
+                maxCount = count;
+                topName = name;
+            }
+        }
+        return topName ? { name: topName, count: maxCount } : null;
+    }
+</script>
+</body>
+</html>
