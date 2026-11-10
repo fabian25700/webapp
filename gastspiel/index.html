@@ -7,15 +7,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Gastspiel Magazin</title>
 
-    <!-- PDF.js zum Auslesen des PDFs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    </script>
-
-    <!-- PageFlip Bibliothek für den Magazin-Blättereffekt -->
-    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
-
     <style>
         :root {
             --bg-color: #f0f2f5;
@@ -90,48 +81,27 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            padding: 24px;
-            overflow: hidden;
+            padding: 20px;
         }
 
-        #flipbook-container {
+        .pdf-container {
             width: 100%;
             height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .page {
-            background-color: #ffffff;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            max-width: 1000px;
+            max-height: 85vh;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .page canvas {
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: contain;
-        }
-
-        .loading {
-            position: absolute;
-            font-size: 0.95rem;
-            color: #64748b;
-            font-weight: 500;
-        }
-
-        .magazine-hints {
-            position: absolute;
-            bottom: 8px;
+        iframe, embed {
             width: 100%;
-            text-align: center;
-            font-size: 0.75rem;
-            color: #94a3b8;
-            pointer-events: none;
+            height: 100%;
+            border: none;
         }
     </style>
 </head>
@@ -144,49 +114,16 @@
     </header>
 
     <main class="content-main">
-        <div class="loading" id="loading-text">Magazin wird geladen...</div>
-        <div id="flipbook-container">
-            <div id="magazine"></div>
+        <div class="pdf-container">
+            <!-- Nutzt den nativen, extrem stabilen Browser-PDF-Viewer mit exakter A5-Größenanpassung -->
+            <iframe src="gastspiel.pdf#toolbar=0&navpanes=0&scrollbar=0" type="application/pdf"></iframe>
         </div>
-        <div class="magazine-hints">Blättern per Wischen oder Klick auf die Ränder</div>
     </main>
 
     <script>
-        const pdfUrl = 'gastspiel.pdf';
-
-        async function initMagazine() {
-            const container = document.getElementById('magazine');
-            const loadingText = document.getElementById('loading-text');
-
-            try {
-                const loadingTask = pdfjsLib.getDocument(pdfUrl);
-                const pdf = await loadingTask.promise;
-                const totalPages = pdf.numPages;
-
-                const isMobile = window.innerWidth < 768;
-                
-                // Exaktes A5 Seitenverhältnis (1400x2000 entspricht ca. 0.7)
-                const a5AspectRatio = 1400 / 2000; 
-
-                // Deutlich konservativere Platzberechnung, damit überall ein schöner, sichtbarer Rand bleibt
-                const maxAvailableWidth = window.innerWidth * (isMobile ? 0.88 : 0.70);
-                const maxAvailableHeight = (window.innerHeight - 80) * 0.78;
-
-                let pageWidth, pageHeight;
-
-                if (isMobile) {
-                    // Auf Smartphones: Einzelne Seite im Hochformat (A5)
-                    pageHeight = maxAvailableHeight;
-                    pageWidth = pageHeight * a5AspectRatio;
-
-                    if (pageWidth > maxAvailableWidth) {
-                        pageWidth = maxAvailableWidth;
-                        pageHeight = pageWidth / a5AspectRatio;
-                    }
-                } else {
-                    // Auf Mac/Desktop: Doppelseite (Breite = 2 x A5-Einzelseite)
-                    // Wir leiten die Dimensionen strikt aus der verfügbaren Höhe ab
-                    pageHeight = maxAvailableHeight;
-                    pageWidth = pageHeight * a5AspectRatio;
-
-                    //
+        document.getElementById('preorder-btn').addEventListener('click', (e) => {
+            // Hier optional den Link zur Vorbestellung einfügen
+        });
+    </script>
+</body>
+</html>
