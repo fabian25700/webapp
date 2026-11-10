@@ -90,7 +90,7 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            padding: 20px;
+            padding: 24px;
             overflow: hidden;
         }
 
@@ -126,7 +126,7 @@
 
         .magazine-hints {
             position: absolute;
-            bottom: 10px;
+            bottom: 8px;
             width: 100%;
             text-align: center;
             font-size: 0.75rem;
@@ -165,90 +165,28 @@
 
                 const isMobile = window.innerWidth < 768;
                 
-                // Maximale Maße für das Magazin (mit großzügigem Sicherheitsabstand/Rand)
-                const maxAvailableWidth = window.innerWidth * (isMobile ? 0.90 : 0.80);
-                const maxAvailableHeight = (window.innerHeight - 80) * 0.82;
+                // Exaktes A5 Seitenverhältnis (1400x2000 entspricht ca. 0.7)
+                const a5AspectRatio = 1400 / 2000; 
 
-                // Format der 1. Seite laden
-                const page1 = await pdf.getPage(1);
-                const viewport1 = page1.getViewport({ scale: 1.0 });
-                const aspectRatio = viewport1.width / viewport1.height;
+                // Deutlich konservativere Platzberechnung, damit überall ein schöner, sichtbarer Rand bleibt
+                const maxAvailableWidth = window.innerWidth * (isMobile ? 0.88 : 0.70);
+                const maxAvailableHeight = (window.innerHeight - 80) * 0.78;
 
                 let pageWidth, pageHeight;
 
                 if (isMobile) {
-                    // Auf Smartphones: Einzelne Seite
+                    // Auf Smartphones: Einzelne Seite im Hochformat (A5)
                     pageHeight = maxAvailableHeight;
-                    pageWidth = pageHeight * aspectRatio;
+                    pageWidth = pageHeight * a5AspectRatio;
 
                     if (pageWidth > maxAvailableWidth) {
                         pageWidth = maxAvailableWidth;
-                        pageHeight = pageWidth / aspectRatio;
+                        pageHeight = pageWidth / a5AspectRatio;
                     }
                 } else {
-                    // Auf Mac/Desktop: Doppelseite (Breite = 2 x Einzelseite)
+                    // Auf Mac/Desktop: Doppelseite (Breite = 2 x A5-Einzelseite)
+                    // Wir leiten die Dimensionen strikt aus der verfügbaren Höhe ab
                     pageHeight = maxAvailableHeight;
-                    pageWidth = pageHeight * aspectRatio;
+                    pageWidth = pageHeight * a5AspectRatio;
 
-                    // Wenn die Doppelseite zu breit für den Bildschirm ist, anhand der Breite herunterrechnen
-                    if ((pageWidth * 2) > maxAvailableWidth) {
-                        pageWidth = maxAvailableWidth / 2;
-                        pageHeight = pageWidth / aspectRatio;
-                    }
-                }
-
-                const pageFlip = new St.PageFlip(container, {
-                    width: Math.round(pageWidth),
-                    height: Math.round(pageHeight),
-                    size: "fixed",
-                    minWidth: 200,
-                    maxWidth: 1000,
-                    minHeight: 300,
-                    maxHeight: 1200,
-                    drawShadow: true,
-                    showCover: true,
-                    mobileScrollSupport: true,
-                    usePortrait: isMobile
-                });
-
-                const pagesDOM = [];
-                for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-                    const page = await pdf.getPage(pageNum);
-                    const scale = 2.0; // Scharfe Auflösung
-                    const viewport = page.getViewport({ scale: scale });
-
-                    const pageDiv = document.createElement('div');
-                    pageDiv.className = 'page';
-
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-
-                    await page.render({
-                        canvasContext: context,
-                        viewport: viewport
-                    }).promise;
-
-                    pageDiv.appendChild(canvas);
-                    pagesDOM.push(pageDiv);
-                }
-
-                pageFlip.loadFromHTML(pagesDOM);
-                loadingText.style.display = 'none';
-
-            } catch (error) {
-                console.error("Fehler beim Laden des Magazins:", error);
-                loadingText.innerText = "Fehler beim Laden der 'gastspiel.pdf'.";
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', initMagazine);
-
-        document.getElementById('preorder-btn').addEventListener('click', (e) => {
-            // e.preventDefault();
-            // window.location.href = 'https://deine-bestellseite.de';
-        });
-    </script>
-</body>
-</html>
+                    //
