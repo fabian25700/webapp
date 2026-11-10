@@ -18,12 +18,13 @@
 
     <style>
         :root {
-            --bg-color: #0f172a;
-            --header-bg: rgba(15, 23, 42, 0.90);
-            --header-text: #f1f5f9;
-            --header-border: rgba(255, 255, 255, 0.1);
+            --bg-color: #f0f2f5;
+            --header-bg: rgba(240, 242, 245, 0.95);
+            --header-text: #1e293b;
+            --header-border: #e2e8f0;
             --accent-color: #2563eb;
             --accent-hover: #1d4ed8;
+            --page-padding: 20px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -69,7 +70,7 @@
             font-size: 0.85rem;
             font-weight: 600;
             transition: background 0.2s ease, transform 0.1s ease;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
 
         .btn-preorder:hover {
@@ -82,8 +83,7 @@
 
         .content-main {
             flex: 1;
-            padding-top: calc(env(safe-area-inset-top) + 65px);
-            padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
+            padding: calc(env(safe-area-inset-top) + 75px) var(--page-padding) calc(env(safe-area-inset-bottom) + 20px);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -101,11 +101,12 @@
 
         .page {
             background-color: #ffffff;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            border-radius: 4px;
         }
 
         .page canvas {
@@ -116,19 +117,18 @@
 
         .loading {
             position: absolute;
-            font-size: 1rem;
-            color: #94a3b8;
+            font-size: 0.95rem;
+            color: #64748b;
             font-weight: 500;
         }
 
-        /* Navigations-Hinweise für Desktop unten dezent einblenden */
         .magazine-hints {
             position: absolute;
             bottom: 8px;
             width: 100%;
             text-align: center;
             font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.4);
+            color: #64748b;
             pointer-events: none;
         }
     </style>
@@ -146,7 +146,7 @@
         <div id="flipbook-container">
             <div id="magazine"></div>
         </div>
-        <div class="magazine-hints">Blättern per Wischen, Klick auf die Ränder oder Tastatur</div>
+        <div class="magazine-hints">Blättern per Wischen oder Klick auf die Ränder</div>
     </main>
 
     <script>
@@ -157,17 +157,15 @@
             const loadingText = document.getElementById('loading-text');
 
             try {
-                // PDF Dokument laden
                 const loadingTask = pdfjsLib.getDocument(pdfUrl);
                 const pdf = await loadingTask.promise;
                 const totalPages = pdf.numPages;
 
-                // Bildschirmgröße prüfen (Handy vs Mac/Desktop)
                 const isMobile = window.innerWidth < 768;
-                const availableWidth = window.innerWidth * 0.92;
-                const availableHeight = (window.innerHeight - 90) * 0.92;
+                // Genügend Abstand (Puffer), damit das Magazin nicht am Rand klebt
+                const availableWidth = window.innerWidth - 40;
+                const availableHeight = (window.innerHeight - 100) - 40;
 
-                // Seitenverhältnis der ersten PDF-Seite ermitteln
                 const page1 = await pdf.getPage(1);
                 const viewport1 = page1.getViewport({ scale: 1.0 });
                 const aspectRatio = viewport1.width / viewport1.height;
@@ -175,39 +173,41 @@
                 let pageWidth, pageHeight;
 
                 if (isMobile) {
-                    // Auf Smartphones: Einzelne Seite im Fokus
-                    pageWidth = Math.min(availableWidth, 500);
+                    pageWidth = Math.min(availableWidth, 450);
                     pageHeight = pageWidth / aspectRatio;
                     if (pageHeight > availableHeight) {
                         pageHeight = availableHeight;
                         pageWidth = pageHeight * aspectRatio;
                     }
                 } else {
-                    // Auf Mac/Desktop: Doppelseite (Booklet-Modus) -> Gesamtbreite aufteilen
-                    pageHeight = Math.min(availableHeight, 800);
+                    // Auf Desktop/Mac: Doppelseite einpassen mit gutem Rand
+                    pageHeight = Math.min(availableHeight, 750);
                     pageWidth = pageHeight * aspectRatio;
+                    // Bei Doppelseite prüfen, ob die Gesamtbreite passt
+                    if ((pageWidth * 2) > availableWidth) {
+                        pageWidth = (availableWidth / 2) * 0.95;
+                        pageHeight = pageWidth / aspectRatio;
+                    }
                 }
 
-                // PageFlip Initialisierung
                 const pageFlip = new St.PageFlip(container, {
                     width: Math.round(pageWidth),
                     height: Math.round(pageHeight),
                     size: isMobile ? "fixed" : "stretch",
-                    minWidth: 300,
-                    maxWidth: 800,
+                    minWidth: 280,
+                    maxWidth: 700,
                     minHeight: 400,
-                    maxHeight: 1200,
+                    maxHeight: 1000,
                     drawShadow: true,
                     showCover: true,
                     mobileScrollSupport: true,
-                    usePortrait: isMobile // True auf Handy (Einzelseite), False auf Mac (Doppelseite)
+                    usePortrait: isMobile
                 });
 
-                // Alle PDF-Seiten rendern und als HTML-Elemente übergeben
                 const pagesDOM = [];
                 for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
                     const page = await pdf.getPage(pageNum);
-                    const scale = 2.0; // Hohe Auflösung für gestochen scharfen Text auf Retina-Displays
+                    const scale = 2.0; // Hohe Auflösung für Retina-Displays
                     const viewport = page.getViewport({ scale: scale });
 
                     const pageDiv = document.createElement('div');
@@ -232,16 +232,14 @@
 
             } catch (error) {
                 console.error("Fehler beim Laden des Magazins:", error);
-                loadingText.innerText = "Fehler beim Laden der 'gastspiel.pdf'. Bitte prüfe den Dateinamen.";
+                loadingText.innerText = "Fehler beim Laden der 'gastspiel.pdf'.";
             }
         }
 
         window.addEventListener('DOMContentLoaded', initMagazine);
 
-        // Vorbestellen-Button Event
         document.getElementById('preorder-btn').addEventListener('click', (e) => {
-            // Passe hier das Ziel an (z.B. Link zu einem Bestellformular oder Shop)
-            // e.preventDefault();
+            // Hier Link zur Vorbestellung hinterlegen, z.B.:
             // window.location.href = 'https://dein-shop-link.de';
         });
     </script>
