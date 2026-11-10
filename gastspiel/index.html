@@ -6,25 +6,24 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Gastspiel Magazin</title>
-
-    <!-- PDF.js für zuverlässiges Rendering auf allen Geräten -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    </script>
-
-    <!-- StPageFlip Bibliothek für den Blätter-Effekt -->
-    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
-
     <style>
         :root {
-            --bg-color: #0f172a;
-            --header-bg: rgba(15, 23, 42, 0.90);
-            --header-text: #f1f5f9;
-            --header-border: rgba(255, 255, 255, 0.1);
+            --bg-color: #f0f2f5;
+            --header-bg: rgba(240, 242, 245, 0.95);
+            --header-text: #1e293b;
+            --header-border: #e2e8f0;
             --accent-color: #2563eb;
             --accent-hover: #1d4ed8;
             --page-padding: 16px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0f172a;
+                --header-bg: rgba(15, 23, 42, 0.95);
+                --header-text: #f1f5f9;
+                --header-border: #1e293b;
+            }
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -54,6 +53,12 @@
             border-bottom: 1px solid var(--header-border);
         }
 
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
         header h1 {
             color: var(--header-text);
             font-size: 1.15rem;
@@ -61,6 +66,29 @@
             letter-spacing: -0.01em;
         }
 
+        /* Hamburger Menü Button */
+        .menu-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 24px;
+            height: 18px;
+            padding: 0;
+        }
+
+        .menu-btn span {
+            display: block;
+            height: 2px;
+            width: 100%;
+            background-color: var(--header-text);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* Vorbestellen Button */
         .btn-preorder {
             background-color: var(--accent-color);
             color: #ffffff;
@@ -81,145 +109,253 @@
             transform: scale(0.96);
         }
 
+        /* Slide-Over Drawer / Menü */
+        .drawer {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background: var(--header-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--header-border);
+            z-index: 1000;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            padding: calc(env(safe-area-inset-top) + 20px) 20px 20px;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        .drawer.open {
+            left: 0;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--header-border);
+        }
+
+        .drawer-header h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--header-text);
+            cursor: pointer;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--header-text);
+            font-size: 0.95rem;
+            font-weight: 500;
+            padding: 10px 12px;
+            border-radius: 8px;
+            display: block;
+            transition: background 0.2s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--accent-color);
+        }
+
+        /* Accordion für Dashboards */
+        .accordion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: background 0.2s;
+        }
+
+        .accordion-header:hover {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--accent-color);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-left: 12px;
+        }
+
+        .accordion-content a {
+            font-size: 0.88rem;
+            padding: 8px 10px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(3px);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Hauptbereich & PDF Viewer */
         .content-main {
             flex: 1;
-            padding-top: calc(env(safe-area-inset-top) + 65px);
-            padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
+            padding-top: calc(env(safe-area-inset-top) + 75px);
+            padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
+            padding-left: var(--page-padding);
+            padding-right: var(--page-padding);
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
+        }
+
+        .pdf-wrapper {
+            width: 100%;
+            height: 100%;
+            max-width: 1200px;
+            background: #ffffff;
+            border-radius: 16px;
             overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
-        #flipbook-container {
+        @media (prefers-color-scheme: dark) {
+            .pdf-wrapper {
+                box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            }
+        }
+
+        embed, iframe {
             width: 100%;
             height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .page {
-            background-color: #fff;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .page canvas {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .loading {
-            position: absolute;
-            font-size: 0.95rem;
-            color: #94a3b8;
+            border: none;
+            display: block;
         }
     </style>
 </head>
 <body>
 
+    <!-- Header -->
     <header>
-        <h1>Gastspiel</h1>
+        <div class="header-left">
+            <button class="menu-btn" id="menuToggle" aria-label="Menü öffnen">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <h1>Gastspiel</h1>
+        </div>
         <!-- Vorbestellen-Button oben rechts -->
-        <a href="#vorbestellen" class="btn-preorder" id="preorder-btn">Vorbestellen</a>
+        <a href="#vorbestellen" class="btn-preorder" id="preorderBtn">Vorbestellen</a>
     </header>
 
+    <!-- Slide-Over Navigation (Menüband) -->
+    <div class="overlay" id="overlay"></div>
+    <nav class="drawer" id="drawer">
+        <div class="drawer-header">
+            <h2>Navigation</h2>
+            <button class="close-btn" id="menuClose">&times;</button>
+        </div>
+        <ul class="nav-links">
+            <li><a href="index.html">Startseite</a></li>
+            
+            <!-- Dashboard Accordion -->
+            <li>
+                <div class="accordion-header" id="dashboardsToggle">
+                    <span>Dashboards</span>
+                    <span id="arrow">▼</span>
+                </div>
+                <div class="accordion-content" id="dashboardsContent">
+                    <a href="dashboard_jahre.html">Dashboard Jahre</a>
+                    <a href="dashboard_saison.html">Dashboard Saison</a>
+                    <a href="dashboard_stadion.html">Dashboard Stadion</a>
+                    <a href="dashboard_verein.html">Dashboard Verein</a>
+                    <a href="dashboard_wettbewerb.html">Dashboard Wettbewerb</a>
+                    <a href="dashboard_begegnung.html">Dashboard Begegnung</a>
+                </div>
+            </li>
+
+            <li><a href="ewige_tabelle_teams.html">Ewige Tabelle Teams</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hauptbereich mit direkt eingebettetem PDF -->
     <main class="content-main">
-        <div class="loading" id="loading-text">Magazin wird geladen...</div>
-        <div id="flipbook-container">
-            <div id="magazine"></div>
+        <div class="pdf-wrapper">
+            <embed src="gastspiel.pdf" type="application/pdf" width="100%" height="100%" />
         </div>
     </main>
 
     <script>
-        const pdfUrl = './gastspiel.pdf'; // Greift direkt auf die Datei im GitHub-Ordner zu
+        // Menü Steuerung (Öffnen / Schließen)
+        const menuToggle = document.getElementById('menuToggle');
+        const menuClose = document.getElementById('menuClose');
+        const drawer = document.getElementById('drawer');
+        const overlay = document.getElementById('overlay');
 
-        async function initMagazine() {
-            const container = document.getElementById('magazine');
-            const loadingText = document.getElementById('loading-text');
-
-            try {
-                // PDF laden
-                const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
-                const totalPages = pdf.numPages;
-
-                // Responsive Dimensionen ermitteln
-                const isMobile = window.innerWidth < 768;
-                const availableWidth = window.innerWidth;
-                const availableHeight = window.innerHeight - 90;
-
-                // Seitengröße aus der 1. Seite extrahieren
-                const page1 = await pdf.getPage(1);
-                const viewport1 = page1.getViewport({ scale: 1.0 });
-                const aspectRatio = viewport1.width / viewport1.height;
-
-                let pageHeight = availableHeight * 0.9;
-                let pageWidth = pageHeight * aspectRatio;
-
-                if (isMobile && pageWidth > availableWidth * 0.95) {
-                    pageWidth = availableWidth * 0.95;
-                    pageHeight = pageWidth / aspectRatio;
-                }
-
-                // PageFlip Initialisieren
-                const pageFlip = new St.PageFlip(container, {
-                    width: Math.round(pageWidth),
-                    height: Math.round(pageHeight),
-                    size: "fixed",
-                    minWidth: 280,
-                    maxWidth: 1000,
-                    minHeight: 400,
-                    maxHeight: 1400,
-                    drawShadow: true,
-                    showCover: true,
-                    mobileScrollSupport: true,
-                    usePortrait: isMobile // Einzelseiten-Ansicht auf Mobilgeräten, Doppelseite auf Mac
-                });
-
-                // Alle PDF-Seiten rendern und an das Flipbook anhängen
-                const pagesDOM = [];
-                for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-                    const page = await pdf.getPage(pageNum);
-                    const scale = 2; // Hohe Auflösung für scharfen Text
-                    const viewport = page.getViewport({ scale: scale });
-
-                    const pageDiv = document.createElement('div');
-                    pageDiv.className = 'page';
-
-                    const canvas = document.createElement('canvas');
-                    const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-
-                    await page.render({
-                        canvasContext: context,
-                        viewport: viewport
-                    }).promise;
-
-                    pageDiv.appendChild(canvas);
-                    pagesDOM.appendChild(pageDiv);
-                }
-
-                pageFlip.loadFromHTML(pagesDOM);
-                loadingText.style.display = 'none';
-
-            } catch (error) {
-                console.error("Fehler beim Laden des PDFs:", error);
-                loadingText.innerText = "PDF konnte nicht geladen werden. Bitte stelle sicher, dass 'gastspiel.pdf' im selben Ordner liegt.";
-            }
+        function toggleMenu() {
+            drawer.classList.toggle('open');
+            overlay.classList.toggle('active');
         }
 
-        window.addEventListener('DOMContentLoaded', initMagazine);
+        menuToggle.addEventListener('click', toggleMenu);
+        menuClose.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
 
-        // Vorbestellen-Button Handler (hier optional Link oder Modal hinterlegen)
-        document.getElementById('preorder-btn').addEventListener('click', (e) => {
-            // e.preventDefault(); // Entfernen, falls es ein normaler HTTP-Link ist
-            // alert('Vorbestell-Dialog öffnen');
+        // Accordion für Dashboards ein-/ausklappen
+        const dashboardsToggle = document.getElementById('dashboardsToggle');
+        const dashboardsContent = document.getElementById('dashboardsContent');
+        const arrow = document.getElementById('arrow');
+
+        dashboardsToggle.addEventListener('click', () => {
+            if (dashboardsContent.style.maxHeight) {
+                dashboardsContent.style.maxHeight = null;
+                arrow.style.transform = 'rotate(0deg)';
+            } else {
+                dashboardsContent.style.maxHeight = dashboardsContent.scrollHeight + "px";
+                arrow.style.transform = 'rotate(180deg)';
+            }
+        });
+
+        // Vorbestellen-Button Aktion (Hier kannst du z.B. einen Link oder ein Modal hinterlegen)
+        document.getElementById('preorderBtn').addEventListener('click', (e) => {
+            // Beispiel: Wenn es ein direkter Link sein soll, den Link im HTML (href) anpassen.
+            // Falls hier JavaScript-Logik (z.B. Checkout/Formular) greifen soll:
+            // e.preventDefault();
+            // alert("Vorbestell-Funktion wird geöffnet.");
         });
     </script>
 </body>
