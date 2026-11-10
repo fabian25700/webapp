@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Gastspiel Magazin</title>
+
+    <!-- PDF.js für zuverlässiges Rendering auf allen Geräten -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
+
+    <!-- StPageFlip Bibliothek für den Blätter-Effekt -->
+    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --header-bg: rgba(15, 23, 42, 0.90);
+            --header-text: #f1f5f9;
+            --header-border: rgba(255, 255, 255, 0.1);
+            --accent-color: #2563eb;
+            --accent-hover: #1d4ed8;
+            --page-padding: 16px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            color: var(--header-text);
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+            padding: calc(env(safe-area-inset-top) + 12px) 20px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--header-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--header-border);
+        }
+
+        header h1 {
+            color: var(--header-text);
+            font-size: 1.15rem;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+        }
+
+        .btn-preorder {
+            background-color: var(--accent-color);
+            color: #ffffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: background 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-preorder:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-preorder:active {
+            transform: scale(0.96);
+        }
+
+        .content-main {
+            flex: 1;
+            padding-top: calc(env(safe-area-inset-top) + 65px);
+            padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #flipbook-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .page {
+            background-color: #fff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .page canvas {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .loading {
+            position: absolute;
+            font-size: 0.95rem;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Gastspiel</h1>
+        <!-- Vorbestellen-Button oben rechts -->
+        <a href="#vorbestellen" class="btn-preorder" id="preorder-btn">Vorbestellen</a>
+    </header>
+
+    <main class="content-main">
+        <div class="loading" id="loading-text">Magazin wird geladen...</div>
+        <div id="flipbook-container">
+            <div id="magazine"></div>
+        </div>
+    </main>
+
+    <script>
+        const pdfUrl = 'gastspiel.pdf'; // Greift direkt auf die Datei im GitHub-Ordner zu
+
+        async function initMagazine() {
+            const container = document.getElementById('magazine');
+            const loadingText = document.getElementById('loading-text');
+
+            try {
+                // PDF laden
+                const pdf = await pdfjsLib.getDocument(pdfUrl).promise;
+                const totalPages = pdf.numPages;
+
+                // Responsive Dimensionen ermitteln
+                const isMobile = window.innerWidth < 768;
+                const availableWidth = window.innerWidth;
+                const availableHeight = window.innerHeight - 90;
+
+                // Seitengröße aus der 1. Seite extrahieren
+                const page1 = await pdf.getPage(1);
+                const viewport1 = page1.getViewport({ scale: 1.0 });
+                const aspectRatio = viewport1.width / viewport1.height;
+
+                let pageHeight = availableHeight * 0.9;
+                let pageWidth = pageHeight * aspectRatio;
+
+                if (isMobile && pageWidth > availableWidth * 0.95) {
+                    pageWidth = availableWidth * 0.95;
+                    pageHeight = pageWidth / aspectRatio;
+                }
+
+                // PageFlip Initialisieren
+                const pageFlip = new St.PageFlip(container, {
+                    width: Math.round(pageWidth),
+                    height: Math.round(pageHeight),
+                    size: "fixed",
+                    minWidth: 280,
+                    maxWidth: 1000,
+                    minHeight: 400,
+                    maxHeight: 1400,
+                    drawShadow: true,
+                    showCover: true,
+                    mobileScrollSupport: true,
+                    usePortrait: isMobile // Einzelseiten-Ansicht auf Mobilgeräten, Doppelseite auf Mac
+                });
+
+                // Alle PDF-Seiten rendern und an das Flipbook anhängen
+                const pagesDOM = [];
+                for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+                    const page = await pdf.getPage(pageNum);
+                    const scale = 2; // Hohe Auflösung für scharfen Text
+                    const viewport = page.getViewport({ scale: scale });
+
+                    const pageDiv = document.createElement('div');
+                    pageDiv.className = 'page';
+
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+
+                    await page.render({
+                        canvasContext: context,
+                        viewport: viewport
+                    }).promise;
+
+                    pageDiv.appendChild(canvas);
+                    pagesDOM.appendChild(pageDiv);
+                }
+
+                pageFlip.loadFromHTML(pagesDOM);
+                loadingText.style.display = 'none';
+
+            } catch (error) {
+                console.error("Fehler beim Laden des PDFs:", error);
+                loadingText.innerText = "PDF konnte nicht geladen werden. Bitte stelle sicher, dass 'gastspiel.pdf' im selben Ordner liegt.";
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', initMagazine);
+
+        // Vorbestellen-Button Handler (hier optional Link oder Modal hinterlegen)
+        document.getElementById('preorder-btn').addEventListener('click', (e) => {
+            // e.preventDefault(); // Entfernen, falls es ein normaler HTTP-Link ist
+            // alert('Vorbestell-Dialog öffnen');
+        });
+    </script>
+</body>
+</html>
