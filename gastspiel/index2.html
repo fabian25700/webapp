@@ -91,6 +91,17 @@
 
   /* Seitenhintergrund, solange Bilder laden */
   .stf__item { background: #fff; }
+  .page { background: #fff; overflow: hidden; }
+  .page img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    image-rendering: auto;
+  }
 
   /* Ladeanzeige / Fehler */
   #status {
@@ -154,14 +165,71 @@
     #book-wrap { transition: none; }
     .spinner { animation-duration: 2s; }
   }
+
+  /* ---------- Reservierungsformular ---------- */
+  .is-hidden { display: none !important; }
+  .backdrop {
+    position: fixed; inset: 0; z-index: 50;
+    display: none; align-items: center; justify-content: center;
+    padding: max(16px, env(safe-area-inset-top, 0px)) 16px max(16px, env(safe-area-inset-bottom, 0px));
+    background: rgba(0, 0, 0, 0.32);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  .backdrop.open { display: flex; }
+  .sheet {
+    width: 100%; max-width: 420px; max-height: 92vh; max-height: 92dvh; overflow-y: auto;
+    background: #fff; border-radius: 22px; padding: 26px 24px 22px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+    position: relative;
+  }
+  .sheet h2 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 4px; }
+  .sheet .sub { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+  .close {
+    position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border: none; border-radius: 50%;
+    background: #f0f2f5; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer;
+  }
+  .field { margin-bottom: 16px; }
+  .field > label, .field > .lbl { display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+  .field input[type="text"], .field input[type="email"] {
+    width: 100%; padding: 12px 14px; font: inherit; font-size: 16px; color: var(--text-color);
+    border: 1px solid #d2d2d7; border-radius: 12px; background: #fff; outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15); }
+  .stepper { display: inline-flex; align-items: center; border: 1px solid #d2d2d7; border-radius: 12px; overflow: hidden; }
+  .stepper button { width: 44px; height: 44px; border: none; background: #f5f5f7; font-size: 20px; color: var(--text-color); cursor: pointer; }
+  .stepper button:active { background: #e8e8ed; }
+  .stepper output { min-width: 48px; text-align: center; font-size: 17px; font-variant-numeric: tabular-nums; }
+  .pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pills input { position: absolute; opacity: 0; pointer-events: none; }
+  .pills label {
+    padding: 9px 16px; border-radius: 980px; border: 1px solid #d2d2d7; font-size: 15px; color: var(--text-color);
+    cursor: pointer; transition: all 0.15s; margin: 0;
+  }
+  .pills input:checked + label { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .pills input:focus-visible + label { box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.25); }
+  .submit {
+    width: 100%; margin-top: 4px; padding: 13px; border: none; border-radius: 14px;
+    background: var(--accent); color: #fff; font: inherit; font-size: 16px; font-weight: 500; cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+  }
+  .submit:hover { background: var(--accent-hover); }
+  .submit:disabled { opacity: 0.55; cursor: default; }
+  .form-msg { font-size: 14px; color: #b3261e; margin-top: 12px; min-height: 1em; }
+  .privacy { font-size: 12px; color: var(--muted); margin-top: 14px; line-height: 1.4; }
+  .done { text-align: center; padding: 18px 0 6px; }
+  .done .check {
+    width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 50%; background: #34c759; color: #fff;
+    display: grid; place-items: center; font-size: 28px;
+  }
+  .done p { color: var(--muted); font-size: 15px; margin-top: 6px; }
 </style>
 </head>
 <body>
 <div class="app">
   <header>
     <h1>Gastspiel</h1>
-    <!-- HIER den Link für Vorbestellungen eintragen (z. B. Shop oder mailto:) -->
-    <a class="preorder" id="preorder" href="#vorbestellen">Vorbestellen</a>
+    <a class="preorder" id="preorder" href="#reservieren" role="button">Vorbestellen</a>
   </header>
 
   <main id="stage">
@@ -180,6 +248,64 @@
   </div>
 </div>
 
+
+<div class="backdrop" id="backdrop" aria-hidden="true">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+    <button class="close" id="close" type="button" aria-label="Schließen">×</button>
+
+    <form id="rform" novalidate>
+      <h2 id="sheet-title">Exemplar reservieren</h2>
+      <p class="sub">Unverbindlich – du gehst keine Verpflichtung ein.</p>
+
+      <!-- Spam-Falle (für Menschen unsichtbar) -->
+      <input type="checkbox" name="botcheck" class="is-hidden" tabindex="-1" autocomplete="off">
+
+      <div class="field">
+        <label for="f-name">Name</label>
+        <input type="text" id="f-name" autocomplete="name" required>
+      </div>
+
+      <div class="field">
+        <span class="lbl">Anzahl Exemplare</span>
+        <div class="stepper">
+          <button type="button" id="minus" aria-label="Weniger">−</button>
+          <output id="qty" aria-live="polite">1</output>
+          <button type="button" id="plus" aria-label="Mehr">+</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="lbl">Wie bist du aufmerksam geworden?</span>
+        <div class="pills" role="radiogroup">
+          <input type="radio" name="source" id="s-friends" value="Freunde / Familie"><label for="s-friends">Freunde / Familie</label>
+          <input type="radio" name="source" id="s-twitter" value="Twitter"><label for="s-twitter">Twitter</label>
+          <input type="radio" name="source" id="s-other" value="Sonstiges"><label for="s-other">Sonstiges</label>
+        </div>
+      </div>
+
+      <div class="field is-hidden" id="other-wrap">
+        <label for="f-other">Wo genau?</label>
+        <input type="text" id="f-other">
+      </div>
+
+      <div class="field is-hidden" id="contact-wrap">
+        <label for="f-contact">Kontakt (E-Mail oder Telegram/Instagram/Twitter)</label>
+        <input type="text" id="f-contact" autocomplete="email">
+      </div>
+
+      <button class="submit" type="submit" id="submit">Reservieren</button>
+      <p class="form-msg" id="form-msg" role="alert"></p>
+      <p class="privacy">Deine Angaben werden nur für diese Reservierung verwendet.</p>
+    </form>
+
+    <div class="done is-hidden" id="done">
+      <div class="check">✓</div>
+      <h2>Reserviert</h2>
+      <p>Danke! Ich melde mich bei dir.</p>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.min.js"></script>
 <script>
@@ -188,7 +314,7 @@
 
   const PDF_URL = 'gastspiel.pdf';
   const PAGE_RATIO = 1400 / 2000;     // A5: Breite / Höhe = 0.7
-  const RENDER_WIDTH = 1200;          // Auflösung der gerenderten Seiten (px)
+  const RENDER_WIDTH = 1800;          // Auflösung der gerenderten Seiten (px)
   const MAX_PAGE_HEIGHT = 1000;       // Obergrenze für die Anzeige (CSS-px)
 
   const stage = document.getElementById('stage');
@@ -227,7 +353,8 @@
       canvas.width = Math.round(viewport.width);
       canvas.height = Math.round(viewport.height);
       await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-      out.push(canvas.toDataURL('image/jpeg', 0.88));
+      const blob = await new Promise(function (res) { canvas.toBlob(res, 'image/jpeg', 0.93); });
+      out.push(URL.createObjectURL(blob));
       canvas.width = canvas.height = 0; // Speicher freigeben
     }
     return out;
@@ -286,7 +413,19 @@
       swipeDistance: 25,
       clickEventForward: false
     });
-    pageFlip.loadFromImages(images);
+    // HTML-Modus: echte <img>-Elemente, vom Browser scharf (Retina) dargestellt
+    images.forEach(function (src, i) {
+      const page = document.createElement('div');
+      page.className = 'page';
+      if (i === 0 || i === images.length - 1) page.setAttribute('data-density', 'hard');
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = 'Seite ' + (i + 1);
+      img.draggable = false;
+      page.appendChild(img);
+      el.appendChild(page);
+    });
+    pageFlip.loadFromHTML(el.querySelectorAll('.page'));
     if (startPage > 0) pageFlip.turnToPage(startPage);
 
     pageFlip.on('flip', function (e) { update(e.data); });
@@ -322,7 +461,7 @@
   prevBtn.addEventListener('click', function () { if (pageFlip) pageFlip.flipPrev(); });
   nextBtn.addEventListener('click', function () { if (pageFlip) pageFlip.flipNext(); });
   document.addEventListener('keydown', function (e) {
-    if (!pageFlip) return;
+    if (!pageFlip || formOpen()) return;
     if (e.key === 'ArrowRight') pageFlip.flipNext();
     if (e.key === 'ArrowLeft') pageFlip.flipPrev();
   });
@@ -334,6 +473,89 @@
   window.addEventListener('orientationchange', function () {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(build, 350);
+  });
+
+  // ---------- Reservierungsformular ----------
+  // 1) Auf https://web3forms.com kostenlos Access Key holen (E-Mail eintragen, Key kommt per Mail)
+  // 2) Key hier einsetzen:
+  const WEB3FORMS_KEY = 'DEIN_ACCESS_KEY';
+
+  const backdrop = document.getElementById('backdrop');
+  const rform = document.getElementById('rform');
+  const done = document.getElementById('done');
+  const msg = document.getElementById('form-msg');
+  const submitBtn = document.getElementById('submit');
+  const qtyEl = document.getElementById('qty');
+  const otherWrap = document.getElementById('other-wrap');
+  const contactWrap = document.getElementById('contact-wrap');
+  let qty = 1;
+
+  function openForm() {
+    backdrop.classList.add('open');
+    backdrop.setAttribute('aria-hidden', 'false');
+    setTimeout(function () { document.getElementById('f-name').focus(); }, 50);
+  }
+  function closeForm() {
+    backdrop.classList.remove('open');
+    backdrop.setAttribute('aria-hidden', 'true');
+  }
+  function formOpen() { return backdrop.classList.contains('open'); }
+
+  document.getElementById('preorder').addEventListener('click', function (e) { e.preventDefault(); openForm(); });
+  document.getElementById('close').addEventListener('click', closeForm);
+  backdrop.addEventListener('click', function (e) { if (e.target === backdrop) closeForm(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && formOpen()) closeForm(); });
+
+  document.getElementById('minus').addEventListener('click', function () { qty = Math.max(1, qty - 1); qtyEl.textContent = qty; });
+  document.getElementById('plus').addEventListener('click', function () { qty = Math.min(20, qty + 1); qtyEl.textContent = qty; });
+
+  // Kontakt nur für Nicht-Freunde, Textfeld nur bei "Sonstiges"
+  rform.addEventListener('change', function () {
+    const src = (rform.querySelector('input[name="source"]:checked') || {}).value;
+    contactWrap.classList.toggle('is-hidden', !src || src === 'Freunde / Familie');
+    otherWrap.classList.toggle('is-hidden', src !== 'Sonstiges');
+  });
+
+  rform.addEventListener('submit', function (e) {
+    e.preventDefault();
+    msg.textContent = '';
+    const name = document.getElementById('f-name').value.trim();
+    const srcEl = rform.querySelector('input[name="source"]:checked');
+    const contact = document.getElementById('f-contact').value.trim();
+    const other = document.getElementById('f-other').value.trim();
+
+    if (!name) { msg.textContent = 'Bitte gib deinen Namen an.'; return; }
+    if (!srcEl) { msg.textContent = 'Bitte wähle, wie du aufmerksam geworden bist.'; return; }
+    const needsContact = srcEl.value !== 'Freunde / Familie';
+    if (needsContact && !contact) { msg.textContent = 'Bitte gib eine Kontaktmöglichkeit an, damit ich dich erreichen kann.'; return; }
+    if (WEB3FORMS_KEY === 'DEIN_ACCESS_KEY') { msg.textContent = 'Formular noch nicht eingerichtet (Access Key fehlt).'; return; }
+    if (rform.botcheck.checked) return; // Bot
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Wird gesendet …';
+
+    fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({
+        access_key: WEB3FORMS_KEY,
+        subject: 'Gastspiel Reservierung: ' + name + ' (' + qty + 'x)',
+        from_name: 'Gastspiel Webseite',
+        Name: name,
+        Anzahl: qty,
+        Aufmerksam_durch: srcEl.value,
+        Sonstiges_Details: other || '-',
+        Kontakt: needsContact ? contact : '-'
+      })
+    }).then(function (r) { return r.json(); }).then(function (d) {
+      if (!d.success) throw new Error(d.message || 'Fehler');
+      rform.classList.add('is-hidden');
+      done.classList.remove('is-hidden');
+    }).catch(function () {
+      msg.textContent = 'Senden hat nicht geklappt. Bitte versuch es später noch einmal.';
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Reservieren';
+    });
   });
 
   // ---------- Start ----------
