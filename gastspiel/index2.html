@@ -476,9 +476,8 @@
   });
 
   // ---------- Reservierungsformular ----------
-  // 1) Auf https://web3forms.com kostenlos Access Key holen (E-Mail eintragen, Key kommt per Mail)
-  // 2) Key hier einsetzen:
-  const WEB3FORMS_KEY = 'DEIN_ACCESS_KEY';
+  // URL der Apps-Script-Web-App einsetzen (endet auf /exec)
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzfJ30JcSyqSTefoWJhJ25OoDQVBZiWBpzUlkfPIeVn2-I4hOPeJWLLxyWR_gb8uMLm/exec';
 
   const backdrop = document.getElementById('backdrop');
   const rform = document.getElementById('rform');
@@ -528,27 +527,23 @@
     if (!srcEl) { msg.textContent = 'Bitte wähle, wie du aufmerksam geworden bist.'; return; }
     const needsContact = srcEl.value !== 'Freunde / Familie';
     if (needsContact && !contact) { msg.textContent = 'Bitte gib eine Kontaktmöglichkeit an, damit ich dich erreichen kann.'; return; }
-    if (WEB3FORMS_KEY === 'DEIN_ACCESS_KEY') { msg.textContent = 'Formular noch nicht eingerichtet (Access Key fehlt).'; return; }
+    if (SCRIPT_URL === 'DEINE_WEB_APP_URL') { msg.textContent = 'Formular noch nicht eingerichtet (Web-App-URL fehlt).'; return; }
     if (rform.botcheck.checked) return; // Bot
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Wird gesendet …';
 
-    fetch('https://api.web3forms.com/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-      body: JSON.stringify({
-        access_key: WEB3FORMS_KEY,
-        subject: 'Gastspiel Reservierung: ' + name + ' (' + qty + 'x)',
-        from_name: 'Gastspiel Webseite',
-        Name: name,
-        Anzahl: qty,
-        Aufmerksam_durch: srcEl.value,
-        Sonstiges_Details: other || '-',
-        Kontakt: needsContact ? contact : '-'
-      })
-    }).then(function (r) { return r.json(); }).then(function (d) {
-      if (!d.success) throw new Error(d.message || 'Fehler');
+    const body = new URLSearchParams({
+      name: name,
+      anzahl: String(qty),
+      source: srcEl.value,
+      other: other,
+      contact: needsContact ? contact : ''
+    });
+
+    // no-cors: Antwort von Google ist nicht lesbar, ein Absenden ohne Netzwerkfehler gilt als Erfolg
+    fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: body })
+    .then(function () {
       rform.classList.add('is-hidden');
       done.classList.remove('is-hidden');
     }).catch(function () {
