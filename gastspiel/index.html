@@ -1,99 +1,360 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Gastspiel Magazin</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gastspiel</title>
+<style>
+  :root {
+    --bg-color: #f0f2f5;
+    --text-color: #1d1d1f;
+    --muted: #6e6e73;
+    --accent: #0071e3;
+    --accent-hover: #0077ed;
+    --header-h: 56px;
+    --controls-h: 60px;
+  }
 
-    <!-- PDF.js zum Auslesen des PDFs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    </script>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <!-- PageFlip Bibliothek für den Magazin-Blättereffekt -->
-    <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
 
-    <style>
-        :root {
-            --bg-color: #f0f2f5;
-            --header-bg: rgba(240, 242, 245, 0.95);
-            --header-text: #1e293b;
-            --header-border: #e2e8f0;
-            --accent-color: #2563eb;
-            --accent-hover: #1d4ed8;
-        }
+  .app {
+    height: 100vh;
+    height: 100dvh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* Header: nur Titel + Button */
+  header {
+    padding-top: env(safe-area-inset-top, 0px);
+    height: calc(var(--header-h) + env(safe-area-inset-top, 0px));
+    padding-left: max(20px, env(safe-area-inset-left, 0px));
+    padding-right: max(20px, env(safe-area-inset-right, 0px));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(240, 242, 245, 0.72);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    z-index: 10;
+  }
 
-        body {
-            background: var(--bg-color);
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            color: var(--header-text);
-        }
+  h1 {
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
 
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            height: 60px;
-            z-index: 100;
-            padding: 0 24px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--header-bg);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-bottom: 1px solid var(--header-border);
-        }
+  .preorder {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 18px;
+    border-radius: 980px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.15s ease;
+  }
+  .preorder:hover { background: var(--accent-hover); }
+  .preorder:active { transform: scale(0.96); }
+  .preorder:focus-visible { outline: 3px solid rgba(0, 113, 227, 0.4); outline-offset: 2px; }
 
-        header h1 {
-            color: var(--header-text);
-            font-size: 1.15rem;
-            font-weight: 800;
-            letter-spacing: -0.01em;
-        }
+  /* Bühne für das Magazin */
+  #stage {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    min-height: 0;
+    touch-action: pan-y;
+  }
 
-        .btn-preorder {
-            background-color: var(--accent-color);
-            color: #ffffff;
-            padding: 8px 18px;
-            border-radius: 20px;
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: background 0.2s ease, transform 0.1s ease;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-        }
+  #book-wrap {
+    transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
 
-        .btn-preorder:hover {
-            background-color: var(--accent-hover);
-        }
+  /* Seitenhintergrund, solange Bilder laden */
+  .stf__item { background: #fff; }
 
-        .btn-preorder:active {
-            transform: scale(0.96);
-        }
+  /* Ladeanzeige / Fehler */
+  #status {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    text-align: center;
+    padding: 24px;
+    color: var(--muted);
+    font-size: 15px;
+    background: var(--bg-color);
+    z-index: 5;
+  }
+  #status.hidden { display: none; }
+  .spinner {
+    width: 28px; height: 28px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  #status.error .spinner { display: none; }
+  #status.error { color: #b3261e; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-        .content-main {
-            flex: 1;
-            margin-top: 60px;
-            width: 100%;
-            height: calc(100vh - 60px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            padding: 24px;
-            overflow: hidden;
-        }
+  /* Steuerung unten */
+  .controls {
+    height: var(--controls-h);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    color: var(--muted);
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .controls button {
+    width: 38px; height: 38px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    color: var(--text-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: transform 0.15s ease, opacity 0.2s ease;
+  }
+  .controls button:hover { transform: scale(1.06); }
+  .controls button:active { transform: scale(0.94); }
+  .controls button:focus-visible { outline: 3px solid rgba(0, 113, 227, 0.4); outline-offset: 2px; }
+  .controls button:disabled { opacity: 0.35; cursor: default; transform: none; }
+  .controls svg { width: 18px; height: 18px; }
+  #counter { min-width: 110px; text-align: center; }
 
-        #flipbook-container {
-            width: 100%;
-            height: 1
+  @media (prefers-reduced-motion: reduce) {
+    #book-wrap { transition: none; }
+    .spinner { animation-duration: 2s; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Gastspiel</h1>
+    <!-- HIER den Link für Vorbestellungen eintragen (z. B. Shop oder mailto:) -->
+    <a class="preorder" id="preorder" href="#vorbestellen">Vorbestellen</a>
+  </header>
+
+  <main id="stage">
+    <div id="book-wrap"></div>
+    <div id="status"><div class="spinner"></div><div id="status-text">Magazin wird geladen …</div></div>
+  </main>
+
+  <div class="controls">
+    <button id="prev" aria-label="Vorherige Seite" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+    </button>
+    <div id="counter">–</div>
+    <button id="next" aria-label="Nächste Seite" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  const PDF_URL = 'gastspiel.pdf';
+  const PAGE_RATIO = 1400 / 2000;     // A5: Breite / Höhe = 0.7
+  const RENDER_WIDTH = 1200;          // Auflösung der gerenderten Seiten (px)
+  const MAX_PAGE_HEIGHT = 1000;       // Obergrenze für die Anzeige (CSS-px)
+
+  const stage = document.getElementById('stage');
+  const wrap = document.getElementById('book-wrap');
+  const status = document.getElementById('status');
+  const statusText = document.getElementById('status-text');
+  const counter = document.getElementById('counter');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+
+  let images = [];
+  let pageFlip = null;
+  let singleMode = false;
+  let lastKey = '';
+  let resizeTimer = null;
+
+  function showError(msg) {
+    status.classList.remove('hidden');
+    status.classList.add('error');
+    statusText.textContent = msg;
+  }
+
+  // ---------- PDF -> Bilder ----------
+  async function renderPdf() {
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const pdf = await pdfjsLib.getDocument(PDF_URL).promise;
+    const out = [];
+    for (let i = 1; i <= pdf.numPages; i++) {
+      statusText.textContent = 'Magazin wird geladen … ' + i + ' / ' + pdf.numPages;
+      const page = await pdf.getPage(i);
+      const base = page.getViewport({ scale: 1 });
+      const viewport = page.getViewport({ scale: RENDER_WIDTH / base.width });
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(viewport.width);
+      canvas.height = Math.round(viewport.height);
+      await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+      out.push(canvas.toDataURL('image/jpeg', 0.88));
+      canvas.width = canvas.height = 0; // Speicher freigeben
+    }
+    return out;
+  }
+
+  // ---------- Größe berechnen ----------
+  function computeLayout() {
+    const w = stage.clientWidth;
+    const h = stage.clientHeight;
+    // Einzelseite auf Smartphones / im Hochformat, Doppelseite auf Desktop
+    const single = window.innerWidth < 700 || (window.innerWidth / window.innerHeight) < 1.15;
+    // Luftiger Rand rundherum
+    const pad = single ? Math.max(18, Math.min(w, h) * 0.05) : Math.max(36, Math.min(w, h) * 0.07);
+    const availW = Math.max(120, w - pad * 2);
+    const availH = Math.max(160, h - pad * 2);
+    const spreadRatio = single ? PAGE_RATIO : PAGE_RATIO * 2;
+    let pageH = Math.min(availH, availW / spreadRatio, MAX_PAGE_HEIGHT);
+    pageH = Math.floor(pageH);
+    const pageW = Math.floor(pageH * PAGE_RATIO);
+    return { single, pageW, pageH };
+  }
+
+  // ---------- Magazin aufbauen ----------
+  function build() {
+    if (!images.length) return;
+    const { single, pageW, pageH } = computeLayout();
+    const key = single + '-' + pageW + 'x' + pageH;
+    if (key === lastKey) return;
+    lastKey = key;
+
+    let startPage = 0;
+    if (pageFlip) {
+      try { startPage = pageFlip.getCurrentPageIndex(); } catch (e) {}
+      try { pageFlip.destroy(); } catch (e) {}
+    }
+    wrap.innerHTML = '';
+    wrap.style.transform = 'none';
+    const el = document.createElement('div');
+    wrap.appendChild(el);
+
+    singleMode = single;
+    wrap.style.width = (single ? pageW : pageW * 2) + 'px';
+    wrap.style.height = pageH + 'px';
+
+    pageFlip = new St.PageFlip(el, {
+      width: pageW,
+      height: pageH,
+      size: 'fixed',
+      showCover: true,
+      usePortrait: true,
+      drawShadow: true,
+      maxShadowOpacity: 0.35,
+      flippingTime: 800,
+      mobileScrollSupport: false,
+      useMouseEvents: true,
+      swipeDistance: 25,
+      clickEventForward: false
+    });
+    pageFlip.loadFromImages(images);
+    if (startPage > 0) pageFlip.turnToPage(startPage);
+
+    pageFlip.on('flip', function (e) { update(e.data); });
+    update(pageFlip.getCurrentPageIndex());
+  }
+
+  // ---------- Anzeige aktualisieren ----------
+  function update(idx) {
+    const total = images.length;
+    prevBtn.disabled = idx <= 0;
+    nextBtn.disabled = singleMode ? idx >= total - 1 : idx >= total - 1 || (idx > 0 && idx + 1 >= total - 1 && total % 2 === 1);
+
+    if (singleMode) {
+      counter.textContent = (idx + 1) + ' / ' + total;
+      wrap.style.transform = 'none';
+    } else {
+      const left = idx + 1;
+      const right = idx + 2;
+      counter.textContent = (idx > 0 && right <= total)
+        ? 'Seite ' + left + '–' + right + ' von ' + total
+        : 'Seite ' + left + ' von ' + total;
+
+      // Einzelne Cover-Seite mittig halten
+      const half = parseFloat(wrap.style.width) / 4;
+      let shift = 0;
+      if (idx === 0) shift = -half;
+      else if (idx === total - 1 && total % 2 === 0) shift = half;
+      wrap.style.transform = 'translateX(' + shift + 'px)';
+    }
+  }
+
+  // ---------- Steuerung ----------
+  prevBtn.addEventListener('click', function () { if (pageFlip) pageFlip.flipPrev(); });
+  nextBtn.addEventListener('click', function () { if (pageFlip) pageFlip.flipNext(); });
+  document.addEventListener('keydown', function (e) {
+    if (!pageFlip) return;
+    if (e.key === 'ArrowRight') pageFlip.flipNext();
+    if (e.key === 'ArrowLeft') pageFlip.flipPrev();
+  });
+
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(build, 200);
+  });
+  window.addEventListener('orientationchange', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(build, 350);
+  });
+
+  // ---------- Start ----------
+  if (typeof pdfjsLib === 'undefined' || typeof St === 'undefined') {
+    showError('Bibliotheken konnten nicht geladen werden. Bitte Internetverbindung prüfen.');
+    return;
+  }
+  if (location.protocol === 'file:') {
+    showError('Bitte über GitHub Pages oder einen lokalen Server öffnen – direkt als Datei kann das PDF nicht geladen werden.');
+    return;
+  }
+
+  renderPdf().then(function (imgs) {
+    images = imgs;
+    status.classList.add('hidden');
+    build();
+  }).catch(function (err) {
+    console.error(err);
+    showError('„gastspiel.pdf“ konnte nicht geladen werden. Liegt die Datei im selben Ordner wie index.html?');
+  });
+})();
+</script>
+</body>
+</html>
