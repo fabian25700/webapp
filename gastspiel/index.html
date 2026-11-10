@@ -24,7 +24,6 @@
             --header-border: #e2e8f0;
             --accent-color: #2563eb;
             --accent-hover: #1d4ed8;
-            --page-padding: 20px;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -43,8 +42,9 @@
             position: fixed;
             top: 0;
             width: 100%;
+            height: 60px;
             z-index: 100;
-            padding: calc(env(safe-area-inset-top) + 12px) 20px 12px;
+            padding: 0 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -64,7 +64,7 @@
         .btn-preorder {
             background-color: var(--accent-color);
             color: #ffffff;
-            padding: 8px 16px;
+            padding: 8px 18px;
             border-radius: 20px;
             text-decoration: none;
             font-size: 0.85rem;
@@ -83,11 +83,14 @@
 
         .content-main {
             flex: 1;
-            padding: calc(env(safe-area-inset-top) + 75px) var(--page-padding) calc(env(safe-area-inset-bottom) + 20px);
+            margin-top: 60px;
+            width: 100%;
+            height: calc(100vh - 60px);
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
+            padding: 20px;
             overflow: hidden;
         }
 
@@ -101,12 +104,11 @@
 
         .page {
             background-color: #ffffff;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
             display: flex;
             justify-content: center;
             align-items: center;
             overflow: hidden;
-            border-radius: 4px;
         }
 
         .page canvas {
@@ -124,11 +126,11 @@
 
         .magazine-hints {
             position: absolute;
-            bottom: 8px;
+            bottom: 10px;
             width: 100%;
             text-align: center;
             font-size: 0.75rem;
-            color: #64748b;
+            color: #94a3b8;
             pointer-events: none;
         }
     </style>
@@ -162,10 +164,12 @@
                 const totalPages = pdf.numPages;
 
                 const isMobile = window.innerWidth < 768;
-                // Genügend Abstand (Puffer), damit das Magazin nicht am Rand klebt
-                const availableWidth = window.innerWidth - 40;
-                const availableHeight = (window.innerHeight - 100) - 40;
+                
+                // Maximale Maße für das Magazin (mit großzügigem Sicherheitsabstand/Rand)
+                const maxAvailableWidth = window.innerWidth * (isMobile ? 0.90 : 0.80);
+                const maxAvailableHeight = (window.innerHeight - 80) * 0.82;
 
+                // Format der 1. Seite laden
                 const page1 = await pdf.getPage(1);
                 const viewport1 = page1.getViewport({ scale: 1.0 });
                 const aspectRatio = viewport1.width / viewport1.height;
@@ -173,19 +177,22 @@
                 let pageWidth, pageHeight;
 
                 if (isMobile) {
-                    pageWidth = Math.min(availableWidth, 450);
-                    pageHeight = pageWidth / aspectRatio;
-                    if (pageHeight > availableHeight) {
-                        pageHeight = availableHeight;
-                        pageWidth = pageHeight * aspectRatio;
+                    // Auf Smartphones: Einzelne Seite
+                    pageHeight = maxAvailableHeight;
+                    pageWidth = pageHeight * aspectRatio;
+
+                    if (pageWidth > maxAvailableWidth) {
+                        pageWidth = maxAvailableWidth;
+                        pageHeight = pageWidth / aspectRatio;
                     }
                 } else {
-                    // Auf Desktop/Mac: Doppelseite einpassen mit gutem Rand
-                    pageHeight = Math.min(availableHeight, 750);
+                    // Auf Mac/Desktop: Doppelseite (Breite = 2 x Einzelseite)
+                    pageHeight = maxAvailableHeight;
                     pageWidth = pageHeight * aspectRatio;
-                    // Bei Doppelseite prüfen, ob die Gesamtbreite passt
-                    if ((pageWidth * 2) > availableWidth) {
-                        pageWidth = (availableWidth / 2) * 0.95;
+
+                    // Wenn die Doppelseite zu breit für den Bildschirm ist, anhand der Breite herunterrechnen
+                    if ((pageWidth * 2) > maxAvailableWidth) {
+                        pageWidth = maxAvailableWidth / 2;
                         pageHeight = pageWidth / aspectRatio;
                     }
                 }
@@ -193,11 +200,11 @@
                 const pageFlip = new St.PageFlip(container, {
                     width: Math.round(pageWidth),
                     height: Math.round(pageHeight),
-                    size: isMobile ? "fixed" : "stretch",
-                    minWidth: 280,
-                    maxWidth: 700,
-                    minHeight: 400,
-                    maxHeight: 1000,
+                    size: "fixed",
+                    minWidth: 200,
+                    maxWidth: 1000,
+                    minHeight: 300,
+                    maxHeight: 1200,
                     drawShadow: true,
                     showCover: true,
                     mobileScrollSupport: true,
@@ -207,7 +214,7 @@
                 const pagesDOM = [];
                 for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
                     const page = await pdf.getPage(pageNum);
-                    const scale = 2.0; // Hohe Auflösung für Retina-Displays
+                    const scale = 2.0; // Scharfe Auflösung
                     const viewport = page.getViewport({ scale: scale });
 
                     const pageDiv = document.createElement('div');
@@ -239,8 +246,8 @@
         window.addEventListener('DOMContentLoaded', initMagazine);
 
         document.getElementById('preorder-btn').addEventListener('click', (e) => {
-            // Hier Link zur Vorbestellung hinterlegen, z.B.:
-            // window.location.href = 'https://dein-shop-link.de';
+            // e.preventDefault();
+            // window.location.href = 'https://deine-bestellseite.de';
         });
     </script>
 </body>
