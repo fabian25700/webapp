@@ -2,39 +2,41 @@ const ROUTINE_CONFIG = {
     "Schlafroutine": {
         icon: "🛌",
         home: [
-            "nichts essen nach 20 Uhr",
+            "nichts essen nach 20:00",
             "Magnesium nehmen",
             "Handy Schlafmodus + anderer Raum",
-            "22 Uhr im Bett",
+            "22:00 im Bett",
             "lesen vor schlafen",
-            "6:30 ohne Snooze aufstehen",
+            "6:30 ohne Snooze Bett verlassen",
             "15 Minuten Tageslichtlampe"
         ],
         sally: [
-            "nichts essen nach 20:30",
+            "nichts essen nach 20:00",
             "Magnesium nehmen",
             "22:30 im Bett",
             "Handy Schlafmodus + zu Kleidung",
-            "ohne Snooze aufstehen"
+            "6:30 ohne Snooze Bett verlassen"
         ],
         reise: [
-            "nichts essen nach 20 Uhr",
+            "nichts essen nach 21:00",
+            "Magnesium nehmen",
             "Handy Schlafmodus + zu Kleidung",
-            "ohne Snooze aufstehen"
+            "6:30 ohne Snooze Bett verlassen"
         ],
         krank: [
-            "21 Uhr im Bett",
+            "nichts essen nach 19:30",
+            "21:00 im Bett",
             "Magnesium nehmen",
             "Handy Schlafmodus + anderer Raum",
-            "Ohne Snooze aufstehen"
+            "6:30 ohne Snooze Bett verlassen"
         ]
     },
     "Morgenroutine": {
         icon: "☀️",
         home: [
             "Wiegen",
-            "alle Rollladen / Fenster",
             "Schlafzimmer aufräumen",
+            "Stoßlüften",
             "Zungenscharber / Zahnseide / Mundspülung",
             "Zähne putzen",
             "duschen / Gesicht waschen",
@@ -45,6 +47,7 @@ const ROUTINE_CONFIG = {
             "Mails checken"
         ],
         sally: [
+            "Schlafplatz machen",
             "Zähne putzen",
             "duschen / Gesicht waschen",
             "Stoisches Kapitel",
@@ -76,26 +79,25 @@ const ROUTINE_CONFIG = {
     "Sportroutine": {
         icon: "🏃‍♂️",
         home: [
-            "Sporteinheit (wie in Notizen)"
+            "Sporteinheit (wie in Notizen)",
+            "Hüfte / Arsch - Workout"
         ],
         sally: [
             "Sporteinheit (wie in Notizen)"
         ],
         reise: [
-            "8.000 Schritte gemacht"
+            "9.000 Schritte gemacht o. Sporteinheit"
         ],
         krank: [
-            "Nap / 8h+ Schlaf"
+            "Nap o. 8h+ Schlaf"
         ]
     },
     "Gesundheitsroutine": {
         icon: "🥗",
         home: [
-            "nichts essen vor 8 Uhr",
+            "nichts essen vor 8:00",
             "Tabletten genommen",
-            "Creatin genommen",
-            "an Gesundheit arbeiten (Notizen/Notion)",
-            "Nasen dusche"
+            "Creatin genommen"
         ],
         sally: [
             "nichts essen vor 8 Uhr",
@@ -107,30 +109,31 @@ const ROUTINE_CONFIG = {
         ],
         krank: [
             "nichts essen vor 8 Uhr",
-            "Medizin nehmen"
+            "Medizin nehmen",
+            "Nasen dusche (wenn Nase zu)"
         ]
     },
     "Fokusroutine": {
         icon: "🧠",
         home: [
             "To-Do’s heute leer",
-            "bis 13:30 Uhr nicht stören an",
+            "bis 14:00 Uhr nicht stören an",
             "an Wohnung arbeiten (putzen / einrichten)",
             "an Freizeit To-Do’s arbeiten",
-            "an Zielen arbeiten"
+            "an Gesundheit arbeiten"
         ],
         sally: [
             "To-Do’s heute leer",
-            "bis 12:30 Uhr nicht stören an",
-            "an Zielen arbeiten",
+            "bis 13:00 Uhr nicht stören an",
+            "an Gastspiel arbeiten",
             "an digitaler Ordnung arbeiten",
             "10 Minuten lesen"
         ],
         reise: [
-            "bis 11:00 Uhr nicht stören an"
+            "bis 12:00 Uhr nicht stören an"
         ],
         krank: [
-            "bis 12:30 Uhr nicht stören an",
+            "bis 13:00 Uhr nicht stören an",
             "10 Minuten lesen"
         ]
     },
@@ -143,7 +146,7 @@ const ROUTINE_CONFIG = {
             "Wasser parat",
             "Wecker stellen",
             "Kleidung rauslegen",
-            "alle Rollladen und Fenster",
+            "Stoßlüften und Rollladen",
             "Zungenscharber / Zahnseide / Mundspülung",
             "Zähne putzen",
             "warm duschen / Gesicht waschen"
@@ -155,7 +158,7 @@ const ROUTINE_CONFIG = {
             "Meine Sachen aufräumen",
             "Wasser parat",
             "Kleidung rauslegen",
-            "Rollladen und Fenster",
+            "Bett abdunkeln",
             "Zähne putzen",
             "warm duschen / Gesicht waschen"
         ],
@@ -166,7 +169,7 @@ const ROUTINE_CONFIG = {
             "Wecker stellen",
             "Meine Sachen aufräumen",
             "Kleidung rauslegen",
-            "Rollladen und Fenster",
+            "Abdunkeln und Fenster",
             "Zähne putzen",
             "warm duschen / Gesicht waschen"
         ],
