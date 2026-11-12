@@ -8,7 +8,7 @@ const ROUTINE_CONFIG = {
             "22:00 im Bett",
             "lesen vor schlafen",
             "6:30 ohne Snooze Bett verlassen",
-            "15 Minuten Tageslichtlampe"
+            "15 Minuten Tageslichtlampe o. Sonnenlicht/aufgang "
         ],
         sally: [
             "nichts essen nach 20:00",
