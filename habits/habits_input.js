@@ -130,6 +130,7 @@ const ROUTINE_CONFIG = {
             "10 Minuten lesen"
         ],
         reise: [
+            "Reise-Excel aktualisieren",
             "bis 12:00 Uhr nicht stören an"
         ],
         krank: [
