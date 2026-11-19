@@ -864,18 +864,79 @@
             text-align: center;
             white-space: nowrap;
         }
+
+        /* Header im Stil der index.html */
+        body { padding-bottom: 40px; }
+        .finance-header {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--bg);
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            display: flex; flex-direction: column; align-items: center; gap: 12px;
+        }
+        .header-top { display:flex; align-items:center; justify-content:center; width:100%; position:relative; min-height:32px; }
+        .header-left { display:flex; align-items:center; position:absolute; left:0; z-index:10; }
+        .back-container { display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--text-primary); }
+        .back-container span { font-size:.95rem; font-weight:700; line-height:1; }
+        .back-btn {
+            display:flex; align-items:center; justify-content:center; width:32px; height:32px;
+            border-radius:9px; background:var(--surface); border:1px solid var(--border);
+            color:var(--text-primary); box-shadow:var(--shadow); flex-shrink:0; font-size:1rem; line-height:1;
+        }
+        .header-center-title { font-size:1.05rem; font-weight:800; letter-spacing:-.02em; }
+        .header-right-link {
+            position:absolute; right:0; z-index:10; display:flex; align-items:center; justify-content:center;
+            gap:5px; min-height:32px; padding:0 10px; border-radius:9px;
+            background:var(--surface); border:1px solid var(--border); box-shadow:var(--shadow);
+            color:var(--text-primary); text-decoration:none; font-size:.82rem; font-weight:700;
+        }
+        .header-right-placeholder { position:absolute; right:0; width:32px; height:32px; }
+        .tracker-page .container { display:none !important; }
+        .tracker-page .fab { display:none !important; }
+        .stats-page .fab { display:none !important; }
+        .tracker-page #tracking-modal.active {
+            position:fixed; top:calc(env(safe-area-inset-top) + 62px); left:0; right:0; bottom:0;
+            background:transparent; backdrop-filter:none; -webkit-backdrop-filter:none;
+            display:flex; align-items:stretch; justify-content:center; z-index:80;
+        }
+        .tracker-page #tracking-modal .modal-content {
+            width:100%; max-width:600px; max-height:100%; height:100%;
+            border-radius:0; padding:12px 16px calc(18px + env(safe-area-inset-bottom));
+            overflow-y:auto !important; -webkit-overflow-scrolling:touch;
+            box-shadow:none; justify-content:flex-start; gap:10px;
+        }
+        .tracker-page #tracking-modal .modal-header { position:sticky; top:-12px; z-index:5; background:var(--bg); padding:4px 0 8px; }
+        .tracker-page #tracking-modal .card { flex-shrink:0; }
+        .tracker-page #tracking-modal .submit-btn { flex-shrink:0; margin-top:4px; }
+        .tracker-page #tracking-modal .delete-btn { flex-shrink:0; }
+        .tracker-page #tracking-modal .number-input { font-size:2rem; }
+        .tracker-page #tracking-modal .text-input { font-size:16px; }
+        .stats-page .container { padding-top:16px; }
+        @media (min-width:601px) {
+            .tracker-page #tracking-modal.active { top:0; align-items:center; background:rgba(0,0,0,.35); }
+            .tracker-page #tracking-modal .modal-content {
+                width:min(560px, calc(100% - 32px)); height:auto; max-height:90vh;
+                border-radius:24px; box-shadow:0 4px 24px rgba(0,0,0,.2); overflow-y:auto !important;
+            }
+            .tracker-page #tracking-modal .modal-header { position:static; }
+        }
+
     </style>
 </head>
-<body>
+<body class="tracker-page">
 
-    <header>
-        <div class="header-left">
-            <a href="index.html" class="back-btn" aria-label="Zurück">
-                <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-            </a>
-            <div class="header-title-left">Mein Budget</div>
+    <header class="finance-header">
+        <div class="header-top">
+            <div class="header-left">
+                <a href="../index.html" class="back-container" aria-label="Zurück zur Startseite">
+                    <div class="back-btn">←</div>
+                    <span>Finanzen</span>
+                </a>
+            </div>
+            <div class="header-center-title">Finanzen</div>
+            <a class="header-right-link" href="stats.html" aria-label="Zu den Statistiken">Stats <span>→</span></a>
         </div>
-        <div class="header-right" id="cloud-status-text"></div>
     </header>
 
     <div class="container">
@@ -1015,22 +1076,16 @@
     </button>
 
     <!-- Tracking Modal -->
-    <div id="tracking-modal" class="modal" onclick="closeTrackingModalOnOutsideClick(event)">
+    <div id="tracking-modal" class="modal active" onclick="closeTrackingModalOnOutsideClick(event)">
         <div class="modal-content expense" id="modal-content-container">
             <div class="modal-header">
                 <span class="modal-title" id="tracking-modal-title">Eintrag tracken</span>
-                <button class="close-modal" onclick="closeTrackingModal()">×</button>
+                <span aria-hidden="true"></span>
             </div>
 
             <div class="segmented-control" id="modal-type-switcher">
                 <button class="segmented-btn active expense-toggle" onclick="setEntryType('expense')">Ausgabe</button>
                 <button class="segmented-btn income-toggle" onclick="setEntryType('income')">Einnahme</button>
-            </div>
-
-            <div class="card">
-                <div class="input-group">
-                    <input type="number" step="0.01" class="number-input" id="amount" placeholder="-0,00 €" onfocus="clearPlaceholder(this)" onblur="restorePlaceholder(this)">
-                </div>
             </div>
 
             <div class="card">
@@ -1043,7 +1098,13 @@
                 </div>
                 <div class="input-group">
                     <label for="title">Titel</label>
-                    <input type="text" class="text-input" id="title" placeholder="z.B. REWE, Miete, Strom">
+                    <input type="text" class="text-input" id="title" placeholder="z.B. REWE, Miete, Strom" autofocus enterkeyhint="next">
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="input-group">
+                    <input type="text" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="number-input" id="amount" placeholder="-0,00 €" enterkeyhint="done" onfocus="clearPlaceholder(this)" onblur="restorePlaceholder(this)" aria-label="Betrag">
                 </div>
             </div>
 
@@ -1219,6 +1280,31 @@
     <iframe id="api-handler" src="geld_api.html" style="display:none;"></iframe>
 
     <script>
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const titleInput = document.getElementById('title');
+            const amountInput = document.getElementById('amount');
+            if (titleInput && amountInput) {
+                titleInput.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        amountInput.focus();
+                    }
+                });
+                amountInput.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        const firstCategory = document.querySelector('#grid-expense .category-btn');
+                        if (firstCategory) firstCategory.focus();
+                    }
+                });
+            }
+        });
+
+        if (document.body.classList.contains('tracker-page')) {
+            window.addEventListener('load', () => { setTimeout(() => document.getElementById('title')?.focus(), 250); });
+        }
+
         document.addEventListener('gesturestart', function (e) {
             e.preventDefault();
         });
@@ -1355,11 +1441,12 @@
         }
 
         function closeTrackingModal() {
-            document.getElementById('tracking-modal').classList.remove('active');
+            if (!document.body.classList.contains('tracker-page')) document.getElementById('tracking-modal').classList.remove('active');
             editingRowIndex = null;
         }
 
         function closeTrackingModalOnOutsideClick(e) {
+            if (document.body.classList.contains('tracker-page')) return;
             if (e.target.id === 'tracking-modal') {
                 closeTrackingModal();
             }
@@ -1699,6 +1786,22 @@
         function clearPlaceholder(input) { input.placeholder = ''; }
         function restorePlaceholder(input) { input.placeholder = currentType === 'expense' ? "-0,00 €" : "+0,00 €"; }
 
+        function parseGermanAmount(value) {
+            let cleaned = String(value ?? '').trim().replace(/\s|€/g, '');
+            if (!cleaned) return NaN;
+            // Komma und Punkt werden als Dezimaltrenner akzeptiert.
+            // Bei beiden Zeichen gilt das jeweils letzte Zeichen als Dezimaltrenner.
+            if (cleaned.includes(',') && cleaned.includes('.')) {
+                const decimalSeparator = cleaned.lastIndexOf(',') > cleaned.lastIndexOf('.') ? ',' : '.';
+                const thousandsSeparator = decimalSeparator === ',' ? /\./g : /,/g;
+                cleaned = cleaned.replace(thousandsSeparator, '').replace(decimalSeparator, '.');
+            } else {
+                cleaned = cleaned.replace(',', '.');
+            }
+            if (!/^[-+]?\d+(\.\d{0,2})?$/.test(cleaned)) return NaN;
+            return Number(cleaned);
+        }
+
         function formatCurrency(val) {
             return val.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
         }
@@ -1747,7 +1850,15 @@
             btnText.textContent = "Übertrag läuft...";
             updateCloudStatus("Cloud lädt");
 
-            const adjustedAmount = currentType === 'expense' ? -Math.abs(parseFloat(amount)) : Math.abs(parseFloat(amount));
+            const parsedAmount = parseGermanAmount(amount);
+            if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+                alert('Bitte einen gültigen Betrag eingeben.');
+                submitBtn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = 'Speichern';
+                return;
+            }
+            const adjustedAmount = currentType === 'expense' ? -Math.abs(parsedAmount) : Math.abs(parsedAmount);
             const now = new Date();
             const datum = formatDate(now);
             const uhrzeit = now.toLocaleTimeString('de-DE', {hour: '2-digit', minute:'2-digit'});
@@ -1792,7 +1903,13 @@
                 document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
                 selectedCategoryValue = '';
                 
-                closeTrackingModal();
+                if (document.body.classList.contains('tracker-page')) {
+                    editingRowIndex = null;
+                    document.getElementById('tracking-modal-title').innerText = 'Eintrag tracken';
+                    document.getElementById('title').focus();
+                } else {
+                    closeTrackingModal();
+                }
                 setTimeout(loadTemplatesAndStats, 500);
 
             } catch(e) {
