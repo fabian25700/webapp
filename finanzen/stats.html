@@ -865,7 +865,7 @@
             white-space: nowrap;
         }
 
-        /* Header im Stil der index.html */
+        /* Header identisch zur Tracker-Seite */
         body { padding-bottom: 40px; }
         .finance-header {
             position: sticky; top: 0; z-index: 100;
@@ -873,25 +873,31 @@
             padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
             border-bottom: 1px solid var(--border-light);
             backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            display: flex; flex-direction: column; align-items: center; gap: 12px;
         }
-        .header-top { display:flex; align-items:center; justify-content:center; width:100%; position:relative; min-height:32px; }
-        .header-left { display:flex; align-items:center; position:absolute; left:0; z-index:10; }
-        .back-container { display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--text-primary); }
-        .back-container span { font-size:.95rem; font-weight:700; line-height:1; }
-        .back-btn {
-            display:flex; align-items:center; justify-content:center; width:32px; height:32px;
-            border-radius:9px; background:var(--surface); border:1px solid var(--border);
-            color:var(--text-primary); box-shadow:var(--shadow); flex-shrink:0; font-size:1rem; line-height:1;
+        .header-top { width:100%; min-height:32px; display:flex; align-items:center; justify-content:space-between; position:relative; }
+        .header-left, .header-right { display:flex; align-items:center; z-index:2; position:relative; }
+        .finance-header-title {
+            position:absolute; left:50%; transform:translateX(-50%);
+            display:flex; align-items:center; justify-content:center; gap:9px;
+            color:var(--text-primary); font-size:1rem; font-weight:800;
+            letter-spacing:-.02em; white-space:nowrap; pointer-events:none;
         }
-        .header-center-title { font-size:1.05rem; font-weight:800; letter-spacing:-.02em; }
-        .header-right-link {
-            position:absolute; right:0; z-index:10; display:flex; align-items:center; justify-content:center;
-            gap:5px; min-height:32px; padding:0 10px; border-radius:9px;
-            background:var(--surface); border:1px solid var(--border); box-shadow:var(--shadow);
-            color:var(--text-primary); text-decoration:none; font-size:.82rem; font-weight:700;
+        .header-action-btn {
+            min-height:32px; display:inline-flex; align-items:center; justify-content:center;
+            gap:7px; padding:0 10px; border-radius:9px; background:var(--surface);
+            border:1px solid var(--border); color:var(--text-primary); box-shadow:var(--shadow);
+            text-decoration:none; font-family:inherit; font-size:.82rem; font-weight:700;
+            line-height:1; white-space:nowrap;
         }
-        .header-right-placeholder { position:absolute; right:0; width:32px; height:32px; }
+        .back-container { width:32px; min-width:32px; padding:0; }
+        .back-btn { width:auto; height:auto; padding:0; border:0; border-radius:0; background:transparent; box-shadow:none; font-size:.95rem; color:inherit; }
+        .stats-header-btn { min-width:76px; text-transform:uppercase; letter-spacing:.05em; font-size:.72rem; }
+        .cloud-status-dot { width:10px; height:10px; border-radius:50%; flex:0 0 10px; background:var(--text-secondary); transition:all .3s; }
+        .cloud-status-dot.synced { background:var(--success); box-shadow:0 0 6px var(--success); }
+        .cloud-status-dot.loading { background:var(--accent); transform:scale(1.1); }
+        .cloud-status-dot.error { background:var(--danger); box-shadow:0 0 8px var(--danger); animation:pulse-danger 1.5s infinite; }
+        @keyframes pulse-danger { 0%{transform:scale(1);opacity:1} 50%{transform:scale(1.25);opacity:.7} 100%{transform:scale(1);opacity:1} }
+        .stats-page .container { padding-top:16px; }
         .tracker-page .container { display:none !important; }
         .tracker-page .fab { display:none !important; }
         .stats-page .fab { display:none !important; }
@@ -929,13 +935,15 @@
     <header class="finance-header">
         <div class="header-top">
             <div class="header-left">
-                <a href="finanzen.html" class="back-container" aria-label="Zurück zum Tracker">
-                    <div class="back-btn">←</div>
-                    <span>Tracker</span>
-                </a>
+                <a href="finanzen.html" class="header-action-btn back-container" aria-label="Zurück zum Tracker"><span class="back-btn">←</span></a>
             </div>
-            <div class="header-center-title">Finanzen</div>
-            <div class="header-right-placeholder"></div>
+            <div class="finance-header-title">
+                <span>Finanzen</span>
+                <div class="cloud-status-dot" id="cloud-status-dot" title="Cloud-Status" aria-label="Cloud-Status"></div>
+            </div>
+            <div class="header-right">
+                <a class="header-action-btn stats-header-btn" href="finanzen.html" aria-label="Zum Tracker">Tracker <span>→</span></a>
+            </div>
         </div>
     </header>
 
@@ -1029,7 +1037,7 @@
                 <div class="card-title" style="margin-bottom: 8px;">
                     <div class="card-title-left">
                         <div class="card-icon">🍕</div>
-                        <span>Kategorie-Verteilungen</span>
+                        <span>Kategorien</span>
                     </div>
                     <div class="segmented-control" style="width: auto; max-width: 100px; padding: 1px; border-radius: 6px;">
                         <button id="chart-toggle-exp" class="segmented-btn active" style="padding: 4px 8px; font-size: 0.8rem; border-radius: 5px; font-weight: 800;" onclick="setChartDistributionType('expense')">─</button>
@@ -1038,19 +1046,6 @@
                 </div>
                 <div id="unified-chart-container" style="display: flex; flex-direction: column; gap: 4px;">
                     <p class="status-text-loader">Lade Auswertungen...</p>
-                </div>
-            </div>
-
-            <!-- Kategorien Liste -->
-            <div class="card">
-                <div class="card-title">
-                    <div class="card-title-left">
-                        <div class="card-icon">📋</div>
-                        <span>Kategorien</span>
-                    </div>
-                </div>
-                <div id="stats-distribution" style="display: flex; flex-direction: column;">
-                    <p class="status-text-loader">Lade Daten...</p>
                 </div>
             </div>
 
@@ -1068,6 +1063,17 @@
                 <button class="inline-action-btn" style="margin-top: 14px; width: 100%; padding: 12px; text-transform: uppercase; letter-spacing: 0.05em;" onclick="openHistoryModal()">Alle Buchungen</button>
             </div>
         </section>
+
+        <div class="card" id="finance-export-card">
+            <div class="card-title">
+                <div class="card-title-left"><div class="card-icon">📋</div><span>Monatswerte exportieren</span></div>
+            </div>
+            <div class="segmented-control" style="margin-top:8px;">
+                <button id="export-income-btn" class="segmented-btn active" onclick="exportMonthlyValues('income')">Einnahmen</button>
+                <button id="export-expense-btn" class="segmented-btn" onclick="exportMonthlyValues('expense')">Ausgaben</button>
+            </div>
+            <p id="export-feedback" class="status-text-loader" style="margin-top:10px; text-align:center;">Werte werden für den oben ausgewählten Zeitraum kopiert.</p>
+        </div>
     </div>
 
     <!-- Floating Action Button -->
@@ -1343,28 +1349,34 @@
         });
 
         function updateCloudStatus(status) {
-            const indicator = document.getElementById('cloud-status-text');
-            if (!indicator) return;
-            
+            const dot = document.getElementById('cloud-status-dot');
+            if (!dot) return;
             if (cloudSyncTimeout && status !== "Cloud synced") {
                 clearTimeout(cloudSyncTimeout);
                 cloudSyncTimeout = null;
             }
-
-            indicator.textContent = status;
+            dot.className = 'cloud-status-dot';
             if (status === "Cloud Fehler") {
-                indicator.style.color = "var(--danger)";
+                dot.classList.add('error');
+                dot.title = 'Cloud-Fehler';
+                dot.setAttribute('aria-label', 'Cloud-Fehler');
             } else if (status === "Cloud synced") {
-                indicator.style.color = "var(--success)";
+                dot.classList.add('synced');
+                dot.title = 'Cloud synchronisiert';
+                dot.setAttribute('aria-label', 'Cloud synchronisiert');
                 cloudSyncTimeout = setTimeout(() => {
-                    indicator.textContent = "Cloud Live";
-                    indicator.style.color = "var(--text-secondary)";
+                    dot.className = 'cloud-status-dot';
+                    dot.title = 'Cloud Live';
+                    dot.setAttribute('aria-label', 'Cloud Live');
                     cloudSyncTimeout = null;
                 }, 3000);
             } else if (status === "Cloud lädt") {
-                indicator.style.color = "var(--accent)";
+                dot.classList.add('loading');
+                dot.title = 'Cloud lädt';
+                dot.setAttribute('aria-label', 'Cloud lädt');
             } else {
-                indicator.style.color = "var(--text-secondary)";
+                dot.title = 'Cloud Live';
+                dot.setAttribute('aria-label', 'Cloud Live');
             }
         }
 
@@ -2203,7 +2215,6 @@
 
             renderChartDistribution(null, catDistribution, incomeCatDistribution, expense, income);
             renderTimelineChart(timelineData);
-            renderCategoriesTable(catDistribution, incomeCatDistribution, catItemsMap);
             renderRecentBookings(rows);
         }
 
@@ -2305,6 +2316,11 @@
                 const percentageOfMax = maxVal > 0 ? (val / maxVal) * 100 : 0;
                 const graphRow = document.createElement('div');
                 graphRow.className = 'bar-visual-wrapper';
+                graphRow.style.cursor = 'pointer';
+                graphRow.onclick = () => {
+                    const categoryRows = globalRawData.filter(row => (row.kategorie || 'Sonstiges') === cat);
+                    openCategoryModal(cat, categoryRows, globalRawData);
+                };
                 graphRow.innerHTML = `
                     <div class="bar-visual-row">
                         <span>${categoryEmojis[cat] || '📦'} ${cat}</span>
@@ -2358,6 +2374,62 @@
                 `;
                 distContainer.appendChild(tableRow);
             });
+        }
+
+        function exportMonthlyValues(type) {
+            const isIncome = type === 'income';
+            document.getElementById('export-income-btn').classList.toggle('active', isIncome);
+            document.getElementById('export-expense-btn').classList.toggle('active', !isIncome);
+
+            const selectedYear = document.getElementById('filter-year').value;
+            const selectedMonth = document.getElementById('filter-month').value;
+            const categories = isIncome ? ['Lohn', 'MG', 'Sonstige'] : ['Gesundheit', 'Freizeit', 'Kleidung', 'Mobilität', 'Sonstiges', 'Urlaub', 'Wohnen'];
+            const normalized = value => String(value || '').trim().toLowerCase();
+            const totals = Object.fromEntries(categories.map(cat => [cat, 0]));
+
+            (globalRawData || []).forEach(row => {
+                const raw = String(row.betrag || 0).trim().replace(/\s/g, '').replace(',', '.');
+                const amount = Number.parseFloat(raw);
+                if (!Number.isFinite(amount)) return;
+                const date = parseRowDate(row.datum);
+                if (date.year !== selectedYear) return;
+                if (selectedMonth !== 'all' && date.month !== selectedMonth) return;
+                if (isIncome ? amount <= 0 : amount >= 0) return;
+
+                const cat = normalized(row.kategorie);
+                const match = categories.find(item => normalized(item) === cat || (item === 'Sonstige' && cat === 'sonstiges'));
+                if (match) totals[match] += Math.abs(amount);
+            });
+
+            // Tab-getrennte Zahlenzeilen: direkt in Excel einfügbar, ohne Überschriften oder Währung.
+            const payload = categories.map(cat => totals[cat].toFixed(2).replace('.', ',')).join('\n');
+            const feedback = document.getElementById('export-feedback');
+            const copied = () => {
+                const monthLabel = selectedMonth === 'all' ? 'Gesamtes Jahr' : document.getElementById('filter-month').selectedOptions[0]?.textContent || selectedMonth;
+                feedback.textContent = `${isIncome ? 'Einnahmen' : 'Ausgaben'} für ${monthLabel} ${selectedYear} kopiert.`;
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(payload).then(copied).catch(() => fallbackCopy(payload, feedback, copied));
+            } else {
+                fallbackCopy(payload, feedback, copied);
+            }
+        }
+
+        function fallbackCopy(text, feedback, onSuccess) {
+            const helper = document.createElement('textarea');
+            helper.value = text;
+            helper.setAttribute('readonly', '');
+            helper.style.position = 'fixed';
+            helper.style.opacity = '0';
+            document.body.appendChild(helper);
+            helper.select();
+            try {
+                if (document.execCommand('copy')) onSuccess();
+                else feedback.textContent = 'Kopieren nicht möglich. Bitte Browser-Berechtigung prüfen.';
+            } catch (error) {
+                feedback.textContent = 'Kopieren nicht möglich. Bitte Browser-Berechtigung prüfen.';
+            }
+            helper.remove();
         }
 
         function renderRecentBookings(rows) {
