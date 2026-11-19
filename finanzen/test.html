@@ -41,6 +41,7 @@
             margin: 0;
             padding: 0;
             touch-action: manipulation;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
         }
 
         html, body {
@@ -51,7 +52,6 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
             background: var(--bg);
             color: var(--text-primary);
             min-height: 100vh;
@@ -132,6 +132,28 @@
             -webkit-overflow-scrolling: touch;
         }
 
+        #tracking-modal .modal-content {
+            max-height: 96vh;
+            height: auto;
+            overflow: hidden !important;
+            padding: 12px 16px;
+            gap: 8px;
+            justify-content: space-between;
+        }
+
+        #tracking-modal .card {
+            padding: 10px 12px;
+            border-radius: 14px;
+        }
+
+        #tracking-modal .card-title {
+            margin-bottom: 6px;
+        }
+
+        #tracking-modal .input-group {
+            margin-bottom: 0;
+        }
+
         @media (min-width: 601px) {
             .modal {
                 align-items: center;
@@ -140,6 +162,10 @@
                 width: 500px;
                 max-height: 85vh;
                 border-radius: 24px;
+            }
+            #tracking-modal .modal-content {
+                height: max-content;
+                max-height: 90vh;
             }
         }
 
@@ -238,6 +264,243 @@
             font-size: 1rem;
             flex-shrink: 0;
         }
+
+        .modal-content.income .card-icon {
+            background: var(--success-soft);
+            color: var(--success);
+        }
+
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .input-group:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .number-input {
+            width: 100%;
+            text-align: center;
+            background: transparent;
+            border: none;
+            color: var(--danger);
+            font-size: 2.2rem;
+            font-weight: 800;
+            outline: none;
+            padding: 8px 0;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        #tracking-modal .number-input {
+            font-size: 1.8rem;
+            padding: 2px 0;
+        }
+
+        .modal-content.income .number-input { color: var(--success); }
+
+        .text-input {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 600;
+            outline: none;
+            -webkit-user-select: text;
+            user-select: text;
+        }
+
+        #tracking-modal .text-input {
+            padding: 8px 12px;
+        }
+
+        .text-input:focus {
+            border-color: var(--accent);
+        }
+        
+        .modal-content.income .text-input:focus {
+            border-color: var(--success);
+        }
+
+        /* Category Grid */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        #tracking-modal .category-grid {
+            gap: 6px;
+        }
+
+        .category-btn {
+            background: var(--bg);
+            border: 1px solid transparent;
+            border-radius: 14px;
+            padding: 12px 6px;
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-size: 0.78rem;
+            font-weight: 600;
+            touch-action: manipulation;
+        }
+
+        #tracking-modal .category-btn {
+            padding: 6px 4px;
+            font-size: 0.72rem;
+            gap: 2px;
+            border-radius: 10px;
+        }
+
+        .category-btn span.icon-wrapper {
+            font-size: 1.2rem;
+            display: block;
+        }
+
+        #tracking-modal .category-btn span.icon-wrapper {
+            font-size: 1rem;
+        }
+
+        .modal-content.expense .category-btn.selected {
+            background: var(--danger-soft);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .modal-content.income .category-btn.selected {
+            background: var(--success-soft);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        /* Switches */
+        .option-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .apple-switch {
+            position: relative;
+            display: inline-block;
+            width: 51px;
+            height: 31px;
+        }
+
+        .apple-switch input { opacity: 0; width: 0; height: 0; }
+
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--apple-switch-bg);
+            transition: .3s; border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute; content: ""; height: 27px; width: 27px; left: 2px; bottom: 2px;
+            background-color: white; transition: .3s; border-radius: 50%;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+        }
+
+        .modal-content.expense input:checked + .slider { background-color: var(--accent); }
+        .modal-content.income input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        /* Buttons */
+        .inline-action-btn {
+            background: var(--border-light);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--text-primary);
+            touch-action: manipulation;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: none;
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            touch-action: manipulation;
+        }
+
+        #tracking-modal .submit-btn {
+            padding: 12px;
+        }
+
+        .modal-content.expense .submit-btn { background: var(--accent); }
+        .modal-content.income .submit-btn { background: var(--success); }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .delete-btn {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid var(--danger);
+            background: transparent;
+            color: var(--danger);
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 8px;
+            touch-action: manipulation;
+        }
+
+        #tracking-modal .delete-btn {
+            padding: 10px;
+            margin-top: 0;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 20px; height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            display: none;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
 
         /* Dashboard */
         .dashboard-row {
@@ -353,10 +616,20 @@
         }
         .dist-item:last-child { border-bottom: none; }
         .dist-label { display: flex; align-items: center; gap: 12px; font-weight: 600; color: var(--text-primary); }
+        .dist-value { font-weight: 700; }
 
         .status-text-loader {
             text-align: center; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; padding: 20px 0;
         }
+
+        /* Toast */
+        .toast {
+            position: fixed; top: 24px; left: 50%; transform: translateX(-50%) translateY(-100px);
+            background: var(--success); color: white; padding: 12px 24px; border-radius: 30px;
+            font-weight: 700; font-size: 0.9rem; box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            z-index: 300; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .toast.active { transform: translateX(-50%) translateY(0); }
 
         /* Netto Trend Diagramm */
         .net-trend-chart {
@@ -508,7 +781,7 @@
             min-height:32px; display:inline-flex; align-items:center; justify-content:center;
             gap:7px; padding:0 10px; border-radius:9px; background:var(--surface);
             border:1px solid var(--border); color:var(--text-primary); box-shadow:var(--shadow);
-            text-decoration:none; font-family:inherit; font-size:.82rem; font-weight:700;
+            text-decoration:none; font-size:.82rem; font-weight:700;
             line-height:1; white-space:nowrap;
         }
         .back-container { width:32px; min-width:32px; padding:0; }
@@ -730,7 +1003,7 @@
         </div>
     </div>
 
-    <!-- Historie Modal -->
+    <!-- Historie Modal mit Bearbeitungsfunktion -->
     <div id="history-modal" class="modal" onclick="closeHistoryModalOnOutsideClick(event)">
         <div class="modal-content" style="background: var(--bg); max-height: 95vh;">
             <div class="modal-header" style="background: var(--surface); padding: 12px 16px; margin: -20px -20px 12px -20px; border-bottom: 1px solid var(--border-light); border-top-left-radius: 24px; border-top-right-radius: 24px;">
@@ -747,6 +1020,77 @@
         </div>
     </div>
 
+    <!-- Tracking/Edit Modal -->
+    <div id="tracking-modal" class="modal" onclick="closeTrackingModalOnOutsideClick(event)">
+        <div class="modal-content expense" id="modal-content-container">
+            <div class="modal-header">
+                <span class="modal-title" id="tracking-modal-title">Eintrag bearbeiten</span>
+                <button class="close-modal" onclick="closeTrackingModal()">×</button>
+            </div>
+
+            <div class="segmented-control" id="modal-type-switcher" style="display: none;">
+                <button class="segmented-btn active expense-toggle" onclick="setEntryType('expense')">Ausgabe</button>
+                <button class="segmented-btn income-toggle" onclick="setEntryType('income')">Einnahme</button>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-title-left">
+                        <div class="card-icon">📝</div>
+                        <span>Details</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="title">Titel</label>
+                    <input type="text" class="text-input" id="title" placeholder="z.B. REWE, Miete, Strom">
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="input-group">
+                    <input type="text" inputmode="decimal" autocomplete="off" autocorrect="off" spellcheck="false" class="number-input" id="amount" placeholder="-0,00 €" onfocus="clearPlaceholder(this)" onblur="restorePlaceholder(this)" aria-label="Betrag">
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">
+                    <div class="card-title-left">
+                        <div class="card-icon">📁</div>
+                        <span>Kategorie wählen</span>
+                    </div>
+                </div>
+                
+                <div id="grid-expense" class="category-grid">
+                    <button class="category-btn" onclick="selectCategory(this, 'Kleidung')"><span class="icon-wrapper">👕</span>Kleidung</button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Urlaub')"><span class="icon-wrapper">🧳</span>Urlaub</button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Gesundheit')"><span class="icon-wrapper">🩺</span>Gesundheit</button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Freizeit')"><span class="icon-wrapper">🎬</span>Freizeit</button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Mobilität')"><span class="icon-wrapper">🚗</span>Mobilität</button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Wohnen')"><span class="icon-wrapper">🏠</span>Wohnen</button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Sonstiges')"><span class="icon-wrapper">📦</span>Sonstiges</button>
+                </div>
+
+                <div id="grid-income" class="category-grid" style="display: none;">
+                    <button class="category-btn" onclick="selectCategory(this, 'Lohn')"><span class="icon-wrapper">💼</span>Lohn</button>
+                    <button class="category-btn" onclick="selectCategory(this, 'Sonstige')"><span class="icon-wrapper">🪙</span>Sonstige</button>
+                    <button class="category-btn" onclick="selectCategory(this, 'MG')"><span class="icon-wrapper">🎖️</span>MG</button>
+                </div>
+            </div>
+
+            <button class="submit-btn" id="btn-submit-data" onclick="submitData()">
+                <div class="spinner" id="submit-spinner"></div>
+                <span id="submit-btn-text">Speichern</span>
+            </button>
+            
+            <button class="delete-btn" id="btn-delete-data" onclick="deleteData()">
+                <span>Löschen</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="app-toast" class="toast">Erfolgreich gespeichert!</div>
+
     <iframe id="api-handler" src="geld_api.html" style="display:none;"></iframe>
 
     <script>
@@ -760,6 +1104,9 @@
         let viewMode = 'month';
         let chartDistributionType = 'expense';
         let activeCategoryName = '';
+        let editingRowIndex = null;
+        let currentType = 'expense';
+        let selectedCategoryValue = '';
 
         const initialDate = new Date();
         const initialYearStr = initialDate.getFullYear().toString();
@@ -944,6 +1291,10 @@
                     const item = document.createElement('div');
                     item.className = 'dist-item';
                     item.style.padding = '12px 6px';
+                    item.onclick = () => {
+                        closeHistoryModal();
+                        openEditModal(row);
+                    };
                     item.innerHTML = `
                         <div style="display:flex; align-items:center; gap:10px;">
                             <span style="font-size:1.2rem;">${emo}</span>
@@ -969,6 +1320,200 @@
             if (e.target.id === 'history-modal') {
                 closeHistoryModal();
             }
+        }
+
+        function openEditModal(row) {
+            editingRowIndex = row.row_index;
+            let cleanBetrag = (row.betrag || 0).toString().replace(',','.');
+            const val = parseFloat(cleanBetrag);
+            const isExpense = val < 0;
+
+            setEntryType(isExpense ? 'expense' : 'income');
+            document.getElementById('amount').value = Math.abs(val);
+            document.getElementById('title').value = row.titel || '';
+
+            const searchCat = (row.kategorie || '').trim().toLowerCase();
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                const btnText = btn.innerText.replace(/[\n\r]/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+                if(btnText.includes(searchCat)) {
+                    selectCategory(btn, row.kategorie);
+                }
+            });
+
+            document.getElementById('tracking-modal').classList.add('active');
+        }
+
+        function closeTrackingModal() {
+            document.getElementById('tracking-modal').classList.remove('active');
+            editingRowIndex = null;
+        }
+
+        function closeTrackingModalOnOutsideClick(e) {
+            if (e.target.id === 'tracking-modal') {
+                closeTrackingModal();
+            }
+        }
+
+        function setEntryType(type) {
+            currentType = type;
+            const container = document.getElementById('modal-content-container');
+            const expGrid = document.getElementById('grid-expense');
+            const incGrid = document.getElementById('grid-income');
+            const amountInput = document.getElementById('amount');
+            
+            document.querySelectorAll('#modal-type-switcher .segmented-btn').forEach(b => b.classList.remove('active'));
+            
+            if(type === 'expense') {
+                container.className = "modal-content expense";
+                expGrid.style.display = 'grid';
+                incGrid.style.display = 'none';
+                amountInput.placeholder = "-0,00 €";
+            } else {
+                container.className = "modal-content income";
+                expGrid.style.display = 'none';
+                incGrid.style.display = 'grid';
+                amountInput.placeholder = "+0,00 €";
+            }
+            selectedCategoryValue = '';
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
+        }
+
+        function selectCategory(btn, cat) {
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedCategoryValue = cat;
+        }
+
+        function clearPlaceholder(input) { input.placeholder = ''; }
+        function restorePlaceholder(input) { input.placeholder = currentType === 'expense' ? "-0,00 €" : "+0,00 €"; }
+
+        function parseGermanAmount(value) {
+            let cleaned = String(value ?? '').trim().replace(/\s|€/g, '');
+            if (!cleaned) return NaN;
+            if (cleaned.includes(',') && cleaned.includes('.')) {
+                const decimalSeparator = cleaned.lastIndexOf(',') > cleaned.lastIndexOf('.') ? ',' : '.';
+                const thousandsSeparator = decimalSeparator === ',' ? /\./g : /,/g;
+                cleaned = cleaned.replace(thousandsSeparator, '').replace(decimalSeparator, '.');
+            } else {
+                cleaned = cleaned.replace(',', '.');
+            }
+            if (!/^[-+]?\d+(\.\d{0,2})?$/.test(cleaned)) return NaN;
+            return Number(cleaned);
+        }
+
+        async function submitData() {
+            const amountEl = document.getElementById('amount');
+            const titleEl = document.getElementById('title');
+            const submitBtn = document.getElementById('btn-submit-data');
+            const spinner = document.getElementById('submit-spinner');
+            const btnText = document.getElementById('submit-btn-text');
+
+            const amount = amountEl.value;
+            const title = titleEl.value;
+
+            if(!amount || !selectedCategoryValue || !title) {
+                alert('Bitte Betrag, Titel und Kategorie wählen.');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            spinner.style.display = 'block';
+            btnText.textContent = "Übertrag läuft...";
+            updateCloudStatus("Cloud lädt");
+
+            const parsedAmount = parseGermanAmount(amount);
+            if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+                alert('Bitte einen gültigen Betrag eingeben.');
+                submitBtn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = 'Speichern';
+                return;
+            }
+            const adjustedAmount = currentType === 'expense' ? -Math.abs(parsedAmount) : Math.abs(parsedAmount);
+
+            const payload = {
+                kategorie: selectedCategoryValue,
+                titel: title,
+                betrag: adjustedAmount
+            };
+
+            if(editingRowIndex !== null) {
+                payload.row_index = editingRowIndex;
+            }
+
+            if(!apiEndpoint) {
+                alert('API URL fehlt.');
+                submitBtn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = "Speichern";
+                updateCloudStatus("Cloud Fehler");
+                return;
+            }
+
+            try {
+                await fetch(apiEndpoint, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    redirect: 'follow',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                updateCloudStatus("Cloud synced");
+                showToast();
+                closeTrackingModal();
+                setTimeout(loadStatsData, 500);
+
+            } catch(e) {
+                console.error(e);
+                updateCloudStatus("Cloud Fehler");
+                alert('Fehler beim Speichern.');
+            } finally {
+                submitBtn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.textContent = "Speichern";
+            }
+        }
+
+        async function deleteData() {
+            if(editingRowIndex === null) return;
+            if(!confirm('Möchtest du diesen Eintrag wirklich löschen?')) return;
+
+            const submitBtn = document.getElementById('btn-submit-data');
+            submitBtn.disabled = true;
+            updateCloudStatus("Cloud lädt");
+
+            const payload = {
+                row_index: editingRowIndex,
+                delete: true
+            };
+
+            try {
+                await fetch(apiEndpoint, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    redirect: 'follow',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                updateCloudStatus("Cloud synced");
+                showToast();
+                closeTrackingModal();
+                setTimeout(loadStatsData, 500);
+            } catch(e) {
+                console.error(e);
+                updateCloudStatus("Cloud Fehler");
+                alert('Fehler beim Löschen.');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+
+        function showToast() {
+            const toast = document.getElementById('app-toast');
+            toast.classList.add('active');
+            setTimeout(() => { toast.classList.remove('active'); }, 2500);
         }
 
         function openCategoryModal(categoryName, rows, allRows) {
@@ -1096,6 +1641,11 @@
                     
                     const item = document.createElement('div');
                     item.className = 'dashboard-row';
+                    item.style.cursor = 'pointer';
+                    item.onclick = () => {
+                        closeCategoryModal();
+                        openEditModal(row);
+                    };
                     item.innerHTML = `
                         <div style="display:flex; flex-direction:column;">
                             <span style="font-weight:700; color:var(--text-primary); font-size:0.95rem;">${row.titel || 'Ohne Titel'}</span>
@@ -1449,7 +1999,7 @@
                 if (isIncome ? amount <= 0 : amount >= 0) return;
 
                 const cat = normalized(row.kategorie);
-                const match = categories.find(item => normalized(item) === cat || (item === 'Sonstige' && cat === 'sonstiges'));
+                const match = categories.find(item => normalized(item) === cat || (item === 'Sonstige' === cat === 'sonstiges'));
                 if (match) totals[match] += Math.abs(amount);
             });
 
@@ -1504,6 +2054,7 @@
                 const div = document.createElement('div');
                 div.className = 'dist-item';
                 div.style.padding = '12px 0';
+                div.onclick = () => openEditModal(row);
                 div.innerHTML = `
                     <div class="dist-label">
                         <span style="font-size: 1.2rem;">${emo}</span>
