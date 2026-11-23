@@ -102,6 +102,7 @@ const ROUTINE_CONFIG = {
         ],
         sally: [
             "nichts essen vor 8 Uhr",
+            "Creatin genommen",
             "Tabletten genommen"
         ],
         reise: [
@@ -127,8 +128,8 @@ const ROUTINE_CONFIG = {
             "To-Do’s heute leer",
             "bis 13:00 Uhr nicht stören an",
             "an Gastspiel arbeiten",
-            "an digitaler Ordnung arbeiten",
-            "10 Minuten lesen"
+            "an Hub/App arbeiten",
+            "15 Minuten lesen"
         ],
         reise: [
             "Reise-Excel aktualisieren",
@@ -136,7 +137,7 @@ const ROUTINE_CONFIG = {
         ],
         krank: [
             "bis 13:00 Uhr nicht stören an",
-            "10 Minuten lesen"
+            "15 Minuten lesen"
         ]
     },
     "Abendroutine": {
