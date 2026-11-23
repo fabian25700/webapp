@@ -20,6 +20,7 @@ const ROUTINE_CONFIG = {
         reise: [
             "nichts essen nach 21:00",
             "Magnesium nehmen",
+            "23:00 im Bett",
             "Handy Schlafmodus + zu Kleidung",
             "6:30 ohne Snooze Bett verlassen"
         ],
