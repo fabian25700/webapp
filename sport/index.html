@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#f0f2f5">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="manifest" href="manifest.json">
+    <title>Sport</title>
+    <style>
+        :root {
+            --accent: #e67e22;
+            --accent-soft: rgba(230, 126, 34, 0.1);
+            --success: #27ae60;
+            --success-soft: rgba(39, 174, 96, 0.1);
+            --warning: #f1c40f;
+            --warning-soft: rgba(241, 196, 15, 0.15);
+            --danger: #e74c3c;
+            --danger-soft: rgba(231, 76, 60, 0.3);
+            --danger-tint: rgba(231, 76, 60, 0.12);
+            --blue: #3b82f6;
+            --blue-soft: rgba(59, 130, 246, 0.12);
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --apple-switch-bg: #e3e3e6;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: #2d3f55;
+                --border-light: #253347;
+                --apple-switch-bg: #1c1c1e;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 40px;
+            opacity: 0;
+            transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        body.loaded { opacity: 1; }
+
+        /* Header (identisch zu Routinen) */
+        .finance-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg);
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        .header-top {
+            width: 100%;
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+        .header-left, .header-right { display: flex; align-items: center; z-index: 2; position: relative; }
+        .finance-header-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+        .header-action-btn {
+            min-height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 0 10px;
+            border-radius: 9px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            box-shadow: var(--shadow);
+            text-decoration: none;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 700;
+            line-height: 1;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .back-container { width: 32px; min-width: 32px; padding: 0; }
+        .back-btn {
+            width: auto; height: auto; padding: 0; border: 0; border-radius: 0;
+            background: transparent; box-shadow: none; font-size: 0.95rem; color: inherit;
+            display: flex; align-items: center; justify-content: center; text-decoration: none;
+        }
+
+        .cloud-status-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background-color: var(--text-secondary);
+            transition: all .3s cubic-bezier(.16,1,.3,1);
+            flex: 0 0 10px;
+        }
+        .cloud-status-dot.synced { background-color: var(--success); box-shadow: 0 0 6px var(--success); }
+        .cloud-status-dot.loading { background-color: var(--accent); transform: scale(1.1); }
+        .cloud-status-dot.error { background-color: var(--danger); box-shadow: 0 0 8px var(--danger); animation: pulse-danger 1.5s infinite; }
+        @keyframes pulse-danger {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.25); opacity: .7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Status-Schalter (Krank / Reise) */
+        .outside-switch-area {
+            display: flex;
+            justify-content: center;
+            margin: 12px auto 4px auto;
+            width: 100%;
+            max-width: 600px;
+            padding: 0 16px;
+        }
+        .apple-switch-container {
+            display: flex;
+            background: var(--apple-switch-bg);
+            border-radius: 9px;
+            padding: 2px;
+            width: 200px;
+            height: 32px;
+            flex-shrink: 0;
+        }
+        .apple-switch-btn {
+            flex: 1;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border-radius: 7px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            height: 100%;
+            line-height: 1;
+        }
+        .apple-switch-btn.on {
+            background: var(--surface);
+            box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04);
+        }
+        .apple-switch-btn.on-red { color: var(--danger); }
+        .apple-switch-btn.on-travel { color: var(--accent); }
+
+        .cloud-error-banner {
+            display: none;
+            background: var(--danger-soft);
+            border: 1px solid var(--danger);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 12px 16px 0;
+        }
+
+        .toast-notification {
+            position: fixed;
+            top: calc(env(safe-area-inset-top) + 110px);
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: var(--success);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            opacity: 0;
+            z-index: 1000;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+        }
+        .toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+        /* Karten-Gruppen (identisch zu Routinen) */
+        .category-group { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; overflow: hidden; box-shadow: var(--shadow); position: relative; }
+        .category-header {
+            padding: 16px; display: flex; align-items: center; justify-content: space-between;
+            cursor: pointer; user-select: none; transition: background 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .category-header:active { background: var(--border-light); }
+        .category-title { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+        .category-icon { width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+        .arrow { font-size: 0.8rem; color: var(--text-secondary); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); flex-shrink: 0; }
+        .category-group.open .arrow { transform: rotate(180deg); }
+        .category-content { display: none; padding: 0 16px 16px; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 16px; }
+        .category-group.open .category-content { display: flex; }
+
+        /* Feste Karten (immer offen) */
+        .category-group.static .category-header { cursor: default; }
+        .category-group.static .category-header:active { background: transparent; }
+        .category-group.static .category-content { display: flex; gap: 0; padding: 4px 16px 8px; }
+
+        .row {
+            display: flex; align-items: flex-start; gap: 14px;
+            padding: 11px 0; border-top: 1px solid var(--border-light);
+        }
+        .row:first-child { border-top: 0; }
+        .row-day { width: 78px; flex-shrink: 0; font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); padding-top: 3px; }
+        .row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+        .row-title { font-weight: 600; font-size: 0.95rem; }
+        .row-sub { font-size: 0.75rem; color: var(--text-secondary); }
+        .row-tags { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+        .row-empty { color: var(--text-secondary); font-size: 0.9rem; }
+
+        .tag {
+            background: var(--bg); border: 1px solid var(--border);
+            padding: 3px 9px; border-radius: 8px;
+            font-size: 0.75rem; font-weight: 600;
+        }
+
+        /* Empfehlung heute */
+        .rec-card {
+            --rec: var(--accent);
+            --rec-soft: var(--accent-soft);
+            background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+            box-shadow: var(--shadow); padding: 20px; display: flex; flex-direction: column; gap: 16px;
+        }
+        .rec-card.m-red { --rec: var(--danger); --rec-soft: var(--danger-tint); }
+        .rec-card.m-travel { --rec: #d4a017; --rec-soft: var(--warning-soft); }
+        .rec-card.m-deload { --rec: var(--blue); --rec-soft: var(--blue-soft); }
+        .rec-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+        .rec-label { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .rec-reason { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-align: right; }
+        .rec-body { display: flex; align-items: center; gap: 14px; }
+        .rec-icon {
+            width: 52px; height: 52px; border-radius: 14px; background: var(--rec-soft);
+            display: flex; align-items: center; justify-content: center; font-size: 1.7rem; flex-shrink: 0;
+        }
+        .rec-title { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; }
+        .rec-btn {
+            width: 100%; height: 50px; border: none; border-radius: 14px;
+            background: var(--rec); color: #fff; font-family: inherit;
+            font-size: 0.95rem; font-weight: 800; cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s;
+        }
+        .rec-btn:active { transform: scale(0.99); }
+        .rec-btn:disabled { cursor: default; }
+        .rec-btn.done { background: var(--success); }
+        .rec-btn.wait { opacity: 0.45; }
+        .rec-logged { display: flex; flex-wrap: wrap; gap: 6px; }
+
+        /* Manuell loggen */
+        .sub-label { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin: 8px 0 0; }
+        .sub-label:first-child { margin-top: 0; }
+        .bucket-card {
+            background: var(--bg); border-radius: 12px; border: 1px solid var(--border);
+            padding: 14px 16px; display: flex; align-items: center; gap: 14px;
+            cursor: pointer; user-select: none; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .bucket-card:active { transform: scale(0.99); }
+        .bucket-card.done { opacity: 0.5; border-style: dashed; background: var(--border-light); cursor: default; }
+        .status-circle {
+            width: 22px; height: 22px; border-radius: 6px;
+            border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); order: -1;
+        }
+        .done .status-circle { background: var(--success); border-color: var(--success); }
+        .status-circle::after { content: '✓'; color: white; font-size: 13px; font-weight: bold; display: none; }
+        .done .status-circle::after { display: block; }
+        .location-name { font-weight: 600; font-size: 0.95rem; flex: 1; }
+
+        @media (max-width: 420px) {
+            .finance-header-title { font-size: 0.95rem; }
+            .finance-header { padding-left: 14px; padding-right: 14px; }
+            .rec-title { font-size: 1.3rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="toast-notification" id="toast-notice">Gespeichert</div>
+
+<header class="finance-header">
+    <div class="header-top">
+        <div class="header-left">
+            <a href="../index.html" class="header-action-btn back-container" aria-label="Zurück zur Übersicht">
+                <span class="back-btn">&larr;</span>
+            </a>
+        </div>
+        <div class="finance-header-title">
+            <span>Sport</span>
+            <div class="cloud-status-dot" id="cloud-status-dot" title="Cloud-Status" aria-label="Cloud-Status"></div>
+        </div>
+        <div class="header-right">
+            <button class="header-action-btn back-container" onclick="loadData()" aria-label="Aktualisieren">↻</button>
+        </div>
+    </div>
+</header>
+
+<div class="cloud-error-banner" id="cloud-error-box">Sync-Fehler: Keine Verbindung zur Cloud möglich.</div>
+
+<div class="outside-switch-area">
+    <div class="apple-switch-container">
+        <button class="apple-switch-btn" id="flag-red" onclick="toggleFlag('red')">Krank</button>
+        <button class="apple-switch-btn" id="flag-travel" onclick="toggleFlag('travel')">Reise</button>
+    </div>
+</div>
+
+<main>
+    <!-- Letzte 7 Tage -->
+    <div class="category-group static">
+        <div class="category-header">
+            <div class="category-title"><div class="category-icon">📅</div><span>Letzte 7 Tage</span></div>
+        </div>
+        <div class="category-content" id="last7-list"></div>
+    </div>
+
+    <!-- Heute -->
+    <div class="rec-card" id="rec-card">
+        <div class="rec-head">
+            <span class="rec-label">Heute</span>
+            <span class="rec-reason" id="rec-reason"></span>
+        </div>
+        <div class="rec-body">
+            <div class="rec-icon" id="rec-icon">⏳</div>
+            <div class="rec-title" id="rec-title">Lädt…</div>
+        </div>
+        <button class="rec-btn wait" id="rec-btn" onclick="logRecommended()" disabled>Loggen</button>
+        <div class="rec-logged" id="rec-logged"></div>
+    </div>
+
+    <!-- Nächste 3 Tage -->
+    <div class="category-group static">
+        <div class="category-header">
+            <div class="category-title"><div class="category-icon">🧭</div><span>Nächste 3 Tage</span></div>
+        </div>
+        <div class="category-content" id="next3-list"></div>
+    </div>
+
+    <!-- Manuell loggen -->
+    <div class="category-group" id="manual-group">
+        <div class="category-header" onclick="document.getElementById('manual-group').classList.toggle('open')">
+            <div class="category-title"><div class="category-icon">＋</div><span>Manuell loggen</span></div>
+            <div class="arrow">▼</div>
+        </div>
+        <div class="category-content" id="manual-content"></div>
+    </div>
+</main>
+
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzVwFL_Hautxy7ajFw9qwvldiYLXjiVPRLkNzY0sapE0lgamT6YvydAaBUppysapVQRGQ/exec";
+
+    const WEAKNESS_WORKOUTS = ["Gesäß-Workout", "Shin Splits-Workout", "Griffkraft-Workout", "Yoga-Workout"];
+    const BIG_RUNS = ["Ausdauerlauf", "Intervalllauf"];
+    const BIG_STRENGTH = ["Ganzkörper Calisthenics", "Ganzkörper Homeworkout"];
+
+    const MANUAL_GROUPS = [
+        { label: "Große Einheiten", items: ["Wettkampf", "Ausdauerlauf", "Intervalllauf", "Ganzkörper Calisthenics", "Ganzkörper Homeworkout"] },
+        { label: "Schwächen", items: WEAKNESS_WORKOUTS },
+        { label: "Basis", items: ["Spaziergang", "Krank-Mittagsschlaf"] }
+    ];
+
+    const ICONS = {
+        "Wettkampf": "🏆",
+        "Ausdauerlauf": "🏃",
+        "Intervalllauf": "⚡",
+        "Ganzkörper Calisthenics": "🤸",
+        "Ganzkörper Homeworkout": "🏋️",
+        "Gesäß-Workout": "🍑",
+        "Shin Splits-Workout": "🦵",
+        "Griffkraft-Workout": "✊",
+        "Yoga-Workout": "🧘",
+        "Spaziergang": "🚶",
+        "Krank-Mittagsschlaf": "😴"
+    };
+
+    const WEEKDAYS = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+
+    const state = {
+        red: false,
+        travel: false,
+        hist: {},        // { "YYYY-MM-DD": [workouts] }
+        loaded: false,
+        plan: null,
+        busy: false
+    };
+
+    let cloudSyncTimeout = null;
+    let toastTimeout = null;
+
+    /* ---------- Hilfsfunktionen ---------- */
+
+    function esc(s) {
+        return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    }
+
+    function fmtDate(d) {
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    }
+
+    function todayStr() { return fmtDate(new Date()); }
+
+    function parseDate(str) {
+        const [y, m, d] = str.split("-").map(Number);
+        return new Date(y, m - 1, d);
+    }
+
+    function addDays(str, n) {
+        const [y, m, d] = str.split("-").map(Number);
+        return fmtDate(new Date(y, m - 1, d + n));
+    }
+
+    function dayLabel(str) {
+        const d = parseDate(str);
+        return `${WEEKDAYS[d.getDay()]} ${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}.`;
+    }
+
+    function iconFor(items) { return ICONS[items[0]] || "🏃"; }
+
+    function showToast(text) {
+        const toast = document.getElementById("toast-notice");
+        toast.textContent = text;
+        toast.classList.add("show");
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.classList.remove("show"), 1800);
+    }
+
+    function setCloud(status) {
+        const dot = document.getElementById("cloud-status-dot");
+        const banner = document.getElementById("cloud-error-box");
+        if (cloudSyncTimeout) { clearTimeout(cloudSyncTimeout); cloudSyncTimeout = null; }
+        dot.className = "cloud-status-dot";
+        if (status === "error") {
+            dot.classList.add("error");
+            banner.style.display = "block";
+        } else if (status === "synced") {
+            dot.classList.add("synced");
+            banner.style.display = "none";
+            cloudSyncTimeout = setTimeout(() => { dot.className = "cloud-status-dot"; }, 3000);
+        } else if (status === "loading") {
+            dot.classList.add("loading");
+        }
+    }
+
+    /* ---------- Status-Schalter ---------- */
+
+    function loadFlags() {
+        try {
+            const f = JSON.parse(localStorage.getItem("sport_flags") || "null");
+            if (f && f.date === todayStr()) {
+                state.red = !!f.red;
+                state.travel = !!f.travel;
+                return;
+            }
+        } catch (e) {}
+        state.red = false;
+        state.travel = false;
+    }
+
+    function saveFlags() {
+        try {
+            localStorage.setItem("sport_flags", JSON.stringify({ date: todayStr(), red: state.red, travel: state.travel }));
+        } catch (e) {}
+    }
+
+    function toggleFlag(type) {
+        if (type === "red") state.red = !state.red;
+        if (type === "travel") state.travel = !state.travel;
+        saveFlags();
+        renderAll();
+    }
+
+    function renderFlags() {
+        const red = document.getElementById("flag-red");
+        const travel = document.getElementById("flag-travel");
+        red.className = "apple-switch-btn" + (state.red ? " on on-red" : "");
+        travel.className = "apple-switch-btn" + (state.travel ? " on on-travel" : "");
+        red.textContent = state.red ? "Krank ✕" : "Krank";
+        travel.textContent = state.travel ? "Reise ✕" : "Reise";
+    }
+
+    /* ---------- Algorithmus ---------- */
+
+    function pickLeastRecentWeakness(last7) {
+        const counts = {};
+        WEAKNESS_WORKOUTS.forEach(w => counts[w] = 0);
+        last7.forEach(d => d.workouts.forEach(w => { if (counts[w] !== undefined) counts[w]++; }));
+        return [...WEAKNESS_WORKOUTS].sort((a, b) => counts[a] - counts[b])[0];
+    }
+
+    // hist: { datum: [workouts] }, flags: { red, travel }
+    function recommend(hist, dateStr, flags) {
+        const last7 = [];
+        for (let i = 1; i <= 7; i++) {
+            last7.push({ daysAgo: i, workouts: hist[addDays(dateStr, -i)] || [] });
+        }
+
+        // 1. Krank
+        if (flags.red) {
+            return { mode: "red", items: ["Krank-Mittagsschlaf"], reason: "Krank" };
+        }
+
+        // 2. Wettkampf in den letzten Tagen
+        let compDaysAgo = null;
+        for (const entry of last7) {
+            if (entry.workouts.includes("Wettkampf")) { compDaysAgo = entry.daysAgo; break; }
+        }
+        if (compDaysAgo !== null && compDaysAgo <= 5) {
+            if (compDaysAgo === 1) {
+                return { mode: "deload", items: ["Spaziergang"], reason: "Wettkampf gestern" };
+            }
+            if (compDaysAgo === 2 || compDaysAgo === 3) {
+                return { mode: "deload", items: ["Yoga-Workout", "Spaziergang"], reason: `Wettkampf vor ${compDaysAgo} Tagen` };
+            }
+            return { mode: "deload", items: [pickLeastRecentWeakness(last7)], reason: `Wettkampf vor ${compDaysAgo} Tagen` };
+        }
+
+        // 3. Reise
+        if (flags.travel) {
+            return { mode: "travel", items: ["Spaziergang"], reason: "Reise" };
+        }
+
+        // 4. Große Einheiten
+        let lastBigCategory = null;
+        let lastStrengthType = null;
+        let intervalCount7d = 0;
+        let enduranceCount7d = 0;
+
+        for (const day of last7) {
+            for (const w of day.workouts) {
+                if (w === "Intervalllauf") intervalCount7d++;
+                if (w === "Ausdauerlauf") enduranceCount7d++;
+                if (lastBigCategory === null) {
+                    if (BIG_RUNS.includes(w) || w === "Wettkampf") lastBigCategory = "RUN";
+                    else if (BIG_STRENGTH.includes(w)) lastBigCategory = "STRENGTH";
+                }
+                if (lastStrengthType === null && BIG_STRENGTH.includes(w)) lastStrengthType = w;
+            }
+        }
+
+        if (lastBigCategory === "RUN") {
+            const next = lastStrengthType === "Ganzkörper Calisthenics" ? "Ganzkörper Homeworkout" : "Ganzkörper Calisthenics";
+            return { mode: "normal", items: [next], reason: "Nach Lauf" };
+        }
+
+        const base = lastBigCategory === "STRENGTH" ? "Nach Kraft" : "Start";
+        const counts = `${enduranceCount7d}× Ausdauer, ${intervalCount7d}× Intervall`;
+        if (intervalCount7d === 0 && enduranceCount7d >= 1) {
+            return { mode: "normal", items: ["Intervalllauf"], reason: `${base} · ${counts}` };
+        }
+        return { mode: "normal", items: ["Ausdauerlauf"], reason: `${base} · ${counts}` };
+    }
+
+    function computePlan() {
+        const today = todayStr();
+        const todayRec = recommend(state.hist, today, { red: state.red, travel: state.travel });
+
+        // Simulation: heute zählt, was geloggt wurde – sonst die Empfehlung
+        const sim = {};
+        Object.keys(state.hist).forEach(k => sim[k] = [...state.hist[k]]);
+        const loggedToday = state.hist[today] || [];
+        sim[today] = loggedToday.length ? [...loggedToday] : [...todayRec.items];
+
+        const next = [];
+        for (let i = 1; i <= 3; i++) {
+            const ds = addDays(today, i);
+            const rec = recommend(sim, ds, { red: false, travel: false });
+            sim[ds] = [...rec.items];
+            next.push({ date: ds, rec });
+        }
+        return { today: todayRec, next };
+    }
+
+    /* ---------- Rendering ---------- */
+
+    function renderLast7() {
+        const el = document.getElementById("last7-list");
+        const today = todayStr();
+        let html = "";
+        for (let i = 1; i <= 7; i++) {
+            const ds = addDays(today, -i);
+            const workouts = state.hist[ds] || [];
+            const label = i === 1 ? "Gestern" : dayLabel(ds);
+            const tags = workouts.length
+                ? workouts.map(w => `<span class="tag">${esc(w)}</span>`).join("")
+                : `<span class="row-empty">–</span>`;
+            html += `<div class="row"><div class="row-day">${label}</div><div class="row-tags">${tags}</div></div>`;
+        }
+        el.innerHTML = html;
+    }
+
+    function renderToday() {
+        const card = document.getElementById("rec-card");
+        const btn = document.getElementById("rec-btn");
+        const logged = document.getElementById("rec-logged");
+
+        if (!state.loaded) {
+            card.className = "rec-card";
+            document.getElementById("rec-icon").textContent = "⏳";
+            document.getElementById("rec-title").textContent = "Lädt…";
+            document.getElementById("rec-reason").textContent = "";
+            btn.className = "rec-btn wait";
+            btn.disabled = true;
+            btn.textContent = "Loggen";
+            logged.innerHTML = "";
+            return;
+        }
+
+        const rec = state.plan.today;
+        const todayLogged = state.hist[todayStr()] || [];
+        const allDone = rec.items.every(w => todayLogged.includes(w));
+
+        card.className = "rec-card m-" + rec.mode;
+        document.getElementById("rec-icon").textContent = iconFor(rec.items);
+        document.getElementById("rec-title").textContent = rec.items.join(" + ");
+        document.getElementById("rec-reason").textContent = rec.reason;
+
+        btn.disabled = allDone || state.busy;
+        btn.className = "rec-btn" + (allDone ? " done" : "");
+        btn.textContent = allDone ? "✓ Geloggt" : "Loggen";
+
+        logged.innerHTML = todayLogged
+            .filter(w => !rec.items.includes(w))
+            .map(w => `<span class="tag">${esc(w)}</span>`).join("");
+    }
+
+    function renderNext3() {
+        const el = document.getElementById("next3-list");
+        if (!state.loaded) { el.innerHTML = ""; return; }
+        const labels = ["Morgen", "Übermorgen"];
+        el.innerHTML = state.plan.next.map((n, idx) => {
+            const label = labels[idx] || dayLabel(n.date);
+            return `<div class="row">
+                <div class="row-day">${label}</div>
+                <div class="row-main">
+                    <div class="row-title">${ICONS[n.rec.items[0]] || ""} ${esc(n.rec.items.join(" + "))}</div>
+                    <div class="row-sub">${esc(n.rec.reason)}</div>
+                </div>
+            </div>`;
+        }).join("");
+    }
+
+    function renderManual() {
+        const el = document.getElementById("manual-content");
+        const todayLogged = state.hist[todayStr()] || [];
+        let html = "";
+        MANUAL_GROUPS.forEach(group => {
+            html += `<div class="sub-label">${esc(group.label)}</div>`;
+            group.items.forEach(name => {
+                const done = todayLogged.includes(name);
+                html += `<div class="bucket-card ${done ? "done" : ""}" data-workout="${esc(name)}">
+                    <div class="status-circle"></div>
+                    <div class="location-name">${esc(name)}</div>
+                </div>`;
+            });
+        });
+        el.innerHTML = html;
+        el.querySelectorAll(".bucket-card").forEach(card => {
+            card.addEventListener("click", () => logWorkout(card.getAttribute("data-workout")));
+        });
+    }
+
+    function renderAll() {
+        if (state.loaded) state.plan = computePlan();
+        renderFlags();
+        renderLast7();
+        renderToday();
+        renderNext3();
+        renderManual();
+    }
+
+    /* ---------- Cloud ---------- */
+
+    async function loadData() {
+        setCloud("loading");
+        try {
+            const res = await fetch(API_URL);
+            const json = await res.json();
+            if (json.status !== "success") throw new Error(json.message || "Fehler");
+            const hist = {};
+            (json.data || []).forEach(r => {
+                const key = String(r.date);
+                hist[key] = (hist[key] || []).concat(r.workouts || []);
+            });
+            state.hist = hist;
+            state.loaded = true;
+            setCloud("synced");
+        } catch (err) {
+            console.error(err);
+            setCloud("error");
+        }
+        renderAll();
+    }
+
+    async function logWorkout(name) {
+        if (!state.loaded || state.busy) return;
+        const today = todayStr();
+        const arr = state.hist[today] || (state.hist[today] = []);
+        if (arr.includes(name)) return;
+
+        state.busy = true;
+        arr.push(name);
+        renderAll();
+        setCloud("loading");
+
+        try {
+            const res = await fetch(API_URL, {
+                method: "POST",
+                body: JSON.stringify({ date: today, workout: name })
+            });
+            const json = await res.json();
+            if (json.status !== "success") throw new Error(json.message || "Fehler");
+            setCloud("synced");
+            showToast("Gespeichert");
+        } catch (err) {
+            console.error(err);
+            const i = arr.lastIndexOf(name);
+            if (i > -1) arr.splice(i, 1);
+            setCloud("error");
+        } finally {
+            state.busy = false;
+            renderAll();
+        }
+    }
+
+    async function logRecommended() {
+        if (!state.loaded) return;
+        const todayLogged = state.hist[todayStr()] || [];
+        const missing = state.plan.today.items.filter(w => !todayLogged.includes(w));
+        for (const w of missing) {
+            await logWorkout(w);
+        }
+    }
+
+    /* ---------- Start ---------- */
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+            loadFlags();
+            loadData();
+        }
+    });
+
+    window.onload = () => {
+        loadFlags();
+        renderAll();
+        requestAnimationFrame(() => document.body.classList.add("loaded"));
+        loadData();
+    };
+</script>
+</body>
+</html>
