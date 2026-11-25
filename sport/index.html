@@ -568,6 +568,17 @@
         return [...WEAKNESS_WORKOUTS].sort((a, b) => counts[a] - counts[b])[0];
     }
 
+    function shortName(w) { return w.replace(/^Ganzkörper /, ""); }
+
+    // Zusatzzeilen unter der Einheit: Alternativen + Anforderungen
+    function recNotes(rec) {
+        const n = [];
+        if (rec.alt && rec.alt.length) n.push("oder " + rec.alt.map(shortName).join(" / "));
+        if (rec.note) n.push(rec.note);
+        if (rec.weak) n.push("+ 1 Schwäche");
+        return n;
+    }
+
     // hist: { datum: [workouts] }, flags: { red, travel }
     function recommend(hist, dateStr, flags) {
         const last7 = [];
@@ -577,7 +588,7 @@
 
         // 1. Krank
         if (flags.red) {
-            return { mode: "red", items: ["Krank-Mittagsschlaf"], reason: "" };
+            return { mode: "red", items: ["Krank-Mittagsschlaf"], note: "oder höherwertige Einheit" };
         }
 
         // 2. Wettkampf in den letzten Tagen
@@ -587,17 +598,21 @@
         }
         if (compDaysAgo !== null && compDaysAgo <= 5) {
             if (compDaysAgo === 1) {
-                return { mode: "deload", items: ["Spaziergang"], reason: "" };
+                return { mode: "deload", items: ["Spaziergang"] };
             }
             if (compDaysAgo === 2 || compDaysAgo === 3) {
-                return { mode: "deload", items: ["Yoga-Workout", "Spaziergang"], reason: "" };
+                return { mode: "deload", items: ["Yoga-Workout", "Spaziergang"] };
             }
-            return { mode: "deload", items: [pickLeastRecentWeakness(last7)], reason: "" };
+            const pick = pickLeastRecentWeakness(last7);
+            return {
+                mode: "deload", items: [pick], anyOf: WEAKNESS_WORKOUTS,
+                note: "oder andere Schwäche", weakPick: true
+            };
         }
 
         // 3. Reise
         if (flags.travel) {
-            return { mode: "travel", items: ["Spaziergang"], reason: "oder Homeworkout / Schwäche" };
+            return { mode: "travel", items: ["Spaziergang"], note: "oder Homeworkout / Schwäche" };
         }
 
         // 4. Große Einheiten
@@ -620,13 +635,13 @@
 
         if (lastBigCategory === "RUN") {
             const next = lastStrengthType === "Ganzkörper Calisthenics" ? "Ganzkörper Homeworkout" : "Ganzkörper Calisthenics";
-            return { mode: "normal", items: [next], reason: "+ 1 Schwäche", weak: true };
+            const other = BIG_STRENGTH.find(w => w !== next);
+            return { mode: "normal", items: [next], alt: [other], anyOf: [next, other], weak: true };
         }
 
-        if (intervalCount7d === 0 && enduranceCount7d >= 1) {
-            return { mode: "normal", items: ["Intervalllauf"], reason: "+ 1 Schwäche", weak: true };
-        }
-        return { mode: "normal", items: ["Ausdauerlauf"], reason: "+ 1 Schwäche", weak: true };
+        const pickRun = (intervalCount7d === 0 && enduranceCount7d >= 1) ? "Intervalllauf" : "Ausdauerlauf";
+        const otherRun = BIG_RUNS.find(w => w !== pickRun);
+        return { mode: "normal", items: [pickRun], alt: [otherRun], anyOf: [pickRun, otherRun], weak: true };
     }
 
     function computePlan() {
@@ -685,7 +700,7 @@
 
         const rec = state.plan.today;
         const todayLogged = state.hist[todayStr()] || [];
-        const allDone = rec.items.every(w => todayLogged.includes(w));
+        const allDone = rec.anyOf ? rec.anyOf.some(w => todayLogged.includes(w)) : rec.items.every(w => todayLogged.includes(w));
         const weakDone = WEAKNESS_WORKOUTS.some(w => todayLogged.includes(w));
 
         if (rec.weak) {
@@ -702,13 +717,13 @@
                 <div class="rec-icon">${iconFor(rec.items)}</div>
                 <div>
                     <div class="rec-title">${esc(rec.items.join(" + "))}</div>
-                    ${rec.reason ? `<div class="rec-sub">${esc(rec.reason)}</div>` : ""}
+                    ${recNotes(rec).map(t => `<div class="rec-sub">${esc(t)}</div>`).join("")}
                 </div>
             </div>
             <button class="rec-btn ${allDone ? "done" : ""}" id="rec-btn" ${allDone || state.busy ? "disabled" : ""}>${allDone ? "✓ Geloggt" : "Loggen"}</button>
         </div>`;
 
-        if (rec.weak) {
+        if (rec.weak || rec.weakPick) {
             html += `<div class="sub-label">Schwäche</div><div class="opt-grid">`;
             WEAKNESS_WORKOUTS.forEach(name => {
                 const done = todayLogged.includes(name);
@@ -758,7 +773,7 @@
                 <div class="row-day">${label}</div>
                 <div class="row-main">
                     <div class="row-title">${ICONS[n.rec.items[0]] || ""} ${esc(n.rec.items.join(" + "))}</div>
-                    ${n.rec.reason ? `<div class="row-sub">${esc(n.rec.reason)}</div>` : ""}
+                    ${recNotes(n.rec).map(t => `<div class="row-sub">${esc(t)}</div>`).join("")}
                 </div>
             </div>`;
         }).join("");
