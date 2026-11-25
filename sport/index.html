@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hybrid Training Engine</title>
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: #181b20;
+      --border: #2a2f3a;
+      --text: #e6e8ec;
+      --muted: #8b949e;
+      --accent: #2ea043;
+      --accent-hover: #3fb950;
+      --danger: #da3633;
+      --warn: #d29922;
+      --blue: #388bfd;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 20px;
+      max-width: 720px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .date-badge {
+      font-size: 0.85rem;
+      color: var(--muted);
+      background: var(--card);
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .section-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    /* Status Toggles (Kreuze) */
+    .toggle-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .toggle-btn {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #121418;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+
+    .toggle-btn.active-red {
+      border-color: var(--danger);
+      background: rgba(218, 54, 51, 0.12);
+    }
+
+    .toggle-btn.active-travel {
+      border-color: var(--warn);
+      background: rgba(210, 153, 34, 0.12);
+    }
+
+    .checkbox-box {
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      border: 1px solid var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .toggle-btn.active-red .checkbox-box {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    .toggle-btn.active-travel .checkbox-box {
+      border-color: var(--warn);
+      color: var(--warn);
+    }
+
+    /* Recommendation Box */
+    .rec-box {
+      border-left: 4px solid var(--accent);
+    }
+
+    .rec-box.is-red {
+      border-left-color: var(--danger);
+    }
+
+    .rec-box.is-travel {
+      border-left-color: var(--warn);
+    }
+
+    .rec-box.is-deload {
+      border-left-color: var(--blue);
+    }
+
+    .rec-main {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .rec-reason {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* All Workouts Manual Override Grid */
+    .category-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin: 12px 0 6px 0;
+    }
+
+    .workout-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+      gap: 8px;
+    }
+
+    .workout-btn {
+      background: #121418;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 6px;
+      text-align: left;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: border-color 0.15s;
+    }
+
+    .workout-btn:hover {
+      border-color: var(--blue);
+    }
+
+    /* History Table */
+    .history-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+
+    .history-row:last-child {
+      border-bottom: none;
+    }
+
+    .history-date {
+      color: var(--muted);
+      min-width: 95px;
+    }
+
+    .history-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: flex-end;
+    }
+
+    .tag {
+      background: #21262d;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    .status-bar {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>TRAINING ALGORITHMUS</h1>
+    <div class="date-badge" id="today-display">Lade...</div>
+  </header>
+
+  <!-- 1. Temporäre Status-Kreuze (beeinflussen nicht Google Sheet) -->
+  <div class="card">
+    <div class="section-title">Tages-Status (Nur Berechnung, kein Sheet-Write)</div>
+    <div class="toggle-grid">
+      <div class="toggle-btn" id="btn-red" onclick="toggleFlag('red')">
+        <span>Red Recovery / Krank</span>
+        <div class="checkbox-box" id="box-red"></div>
+      </div>
+      <div class="toggle-btn" id="btn-travel" onclick="toggleFlag('travel')">
+        <span>Auf Reise</span>
+        <div class="checkbox-box" id="box-travel"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Algorithmus Output -->
+  <div class="card rec-box" id="rec-card">
+    <div class="section-title">Empfehlung für heute</div>
+    <div class="rec-main" id="rec-title">Berechne...</div>
+    <div class="rec-reason" id="rec-reason">Daten aus Google Sheet werden geladen...</div>
+    <button class="btn-primary" id="btn-log-rec" onclick="logRecommended()">Empfohlene Einheit heute loggen</button>
+  </div>
+
+  <!-- 3. Alle Einheiten (Jederzeit höherwertige oder alternative Einheit loggen) -->
+  <div class="card">
+    <div class="section-title">Manuell loggen (Alle Einheiten / Höherwertig möglich)</div>
+
+    <div class="category-label">Große Einheiten & Peak</div>
+    <div class="workout-grid">
+      <button class="workout-btn" onclick="logWorkout('Wettkampf')">Wettkampf (Halbmarathon etc.)</button>
+      <button class="workout-btn" onclick="logWorkout('Ausdauerlauf')">Ausdauerlauf</button>
+      <button class="workout-btn" onclick="logWorkout('Intervalllauf')">Intervalllauf</button>
+      <button class="workout-btn" onclick="logWorkout('Ganzkörper Calisthenics')">Ganzkörper Calisthenics</button>
+      <button class="workout-btn" onclick="logWorkout('Ganzkörper Homeworkout')">Ganzkörper Homeworkout</button>
+    </div>
+
+    <div class="category-label">Schwächen (4 Einheiten)</div>
+    <div class="workout-grid">
+      <button class="workout-btn" onclick="logWorkout('Gesäß-Workout')">Gesäß-Workout</button>
+      <button class="workout-btn" onclick="logWorkout('Shin Splits-Workout')">Shin Splits-Workout</button>
+      <button class="workout-btn" onclick="logWorkout('Griffkraft-Workout')">Griffkraft-Workout</button>
+      <button class="workout-btn" onclick="logWorkout('Yoga-Workout')">Yoga-Workout</button>
+    </div>
+
+    <div class="category-label">Regeneration & Basis</div>
+    <div class="workout-grid">
+      <button class="workout-btn" onclick="logWorkout('Spaziergang')">Spaziergang</button>
+      <button class="workout-btn" onclick="logWorkout('Krank-Mittagsschlaf')">Krank-Mittagsschlaf</button>
+    </div>
+  </div>
+
+  <!-- 4. Letzte 7 Tage Übersicht -->
+  <div class="card">
+    <div class="section-title">Letzte 7 Tage (aus Google Sheet)</div>
+    <div id="history-list">Lade Historie...</div>
+  </div>
+
+  <div class="status-bar" id="status-msg">Bereit</div>
+
+  <script>
+    // HIER DEINE GOOGLE APPS SCRIPT WEB-APP URL EINTRAGEN:
+    const API_URL = "https://script.google.com/macros/s/AKfycbzVwFL_Hautxy7ajFw9qwvldiYLXjiVPRLkNzY0sapE0lgamT6YvydAaBUppysapVQRGQ/exec";
+
+    const WEAKNESS_WORKOUTS = [
+      "Gesäß-Workout",
+      "Shin Splits-Workout",
+      "Griffkraft-Workout",
+      "Yoga-Workout"
+    ];
+
+    const BIG_RUNS = ["Ausdauerlauf", "Intervalllauf"];
+    const BIG_STRENGTH = ["Ganzkörper Calisthenics", "Ganzkörper Homeworkout"];
+
+    let state = {
+      redRecovery: false,
+      onTravel: false,
+      sheetData: [],
+      recommendedToLog: []
+    };
+
+    function getLocalDateStr(offsetDays = 0) {
+      const d = new Date();
+      d.setDate(d.getDate() + offsetDays);
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function parseDateDiffDays(dateStr, todayStr) {
+      const d1 = new Date(dateStr + "T00:00:00");
+      const d2 = new Date(todayStr + "T00:00:00");
+      return Math.round((d2 - d1) / (1000 * 60 * 60 * 24));
+    }
+
+    function toggleFlag(type) {
+      if (type === "red") {
+        state.redRecovery = !state.redRecovery;
+        document.getElementById("btn-red").classList.toggle("active-red", state.redRecovery);
+        document.getElementById("box-red").textContent = state.redRecovery ? "✕" : "";
+      } else if (type === "travel") {
+        state.onTravel = !state.onTravel;
+        document.getElementById("btn-travel").classList.toggle("active-travel", state.onTravel);
+        document.getElementById("box-travel").textContent = state.onTravel ? "✕" : "";
+      }
+      runAlgorithm();
+    }
+
+    async function fetchSheetData() {
+      const statusEl = document.getElementById("status-msg");
+      statusEl.textContent = "Lade Daten aus Google Sheets...";
+
+      if (API_URL.includes("DEINE_GOOGLE_APPS_SCRIPT")) {
+        statusEl.textContent = "Demo-Modus: Bitte API_URL im Code hinterlegen.";
+        state.sheetData = [];
+        renderHistory();
+        runAlgorithm();
+        return;
+      }
+
+      try {
+        const res = await fetch(API_URL);
+        const json = await res.json();
+        if (json.status === "success") {
+          state.sheetData = json.data || [];
+          statusEl.textContent = "Verbunden mit Google Sheets.";
+        } else {
+          statusEl.textContent = "Fehler beim Laden: " + json.message;
+        }
+      } catch (err) {
+        statusEl.textContent = "Netzwerkfehler beim Laden.";
+      }
+
+      renderHistory();
+      runAlgorithm();
+    }
+
+    function getLast7DaysEntries() {
+      const todayStr = getLocalDateStr(0);
+      const entries = [];
+      for (let i = 1; i <= 7; i++) {
+        const dStr = getLocalDateStr(-i);
+        const found = state.sheetData.find(r => r.date === dStr);
+        entries.push({
+          daysAgo: i,
+          date: dStr,
+          workouts: found ? found.workouts : []
+        });
+      }
+      return entries;
+    }
+
+    function runAlgorithm() {
+      const todayStr = getLocalDateStr(0);
+      const last7 = getLast7DaysEntries();
+      const recCard = document.getElementById("rec-card");
+      const recTitle = document.getElementById("rec-title");
+      const recReason = document.getElementById("rec-reason");
+
+      recCard.className = "card rec-box";
+
+      // 1. PRIORITÄT: Red Recovery / Krank -> Krank-Mittagsschlaf
+      if (state.redRecovery) {
+        recCard.classList.add("is-red");
+        recTitle.textContent = "Krank-Mittagsschlaf";
+        recReason.textContent = "Red Recovery / Krank ist aktiv. Fokus auf Erholung (höherwertige Einheit bleibt manuell möglich).";
+        state.recommendedToLog = ["Krank-Mittagsschlaf"];
+        return;
+      }
+
+      // 2. PRIORITÄT: Wettkampf in den letzten 7 Tagen (Post-Wettkampf-Protokoll)
+      let compDaysAgo = null;
+      for (const entry of last7) {
+        if (entry.workouts.includes("Wettkampf")) {
+          compDaysAgo = entry.daysAgo;
+          break; // Jüngster Wettkampf zählt
+        }
+      }
+
+      if (compDaysAgo !== null && compDaysAgo >= 1 && compDaysAgo <= 5) {
+        recCard.classList.add("is-deload");
+
+        if (compDaysAgo === 1) {
+          recTitle.textContent = "Spaziergang";
+          recReason.textContent = "Wettkampf war gestern (Tag 1 danach): Lockere Durchblutung ohne Belastung.";
+          state.recommendedToLog = ["Spaziergang"];
+          return;
+        }
+        if (compDaysAgo === 2 || compDaysAgo === 3) {
+          recTitle.textContent = "Yoga-Workout + Spaziergang";
+          recReason.textContent = `Wettkampf war vor ${compDaysAgo} Tagen (Tag ${compDaysAgo} danach): Sanfte Mobilisation & Bewegung.`;
+          state.recommendedToLog = ["Yoga-Workout", "Spaziergang"];
+          return;
+        }
+        if (compDaysAgo === 4 || compDaysAgo === 5) {
+          const nextWeakness = pickLeastRecentWeakness(last7);
+          recTitle.textContent = `Schwächen: ${nextWeakness}`;
+          recReason.textContent = `Wettkampf war vor ${compDaysAgo} Tagen (Tag ${compDaysAgo} danach): Gezielte Arbeit an Schwachstellen vor Wiedereinstieg.`;
+          state.recommendedToLog = [nextWeakness];
+          return;
+        }
+        // Ab Tag 6 (compDaysAgo >= 6) greift wieder normale Logik der großen Einheiten!
+      }
+
+      // 3. PRIORITÄT: Auf Reise -> Spaziergang
+      if (state.onTravel) {
+        recCard.classList.add("is-travel");
+        recTitle.textContent = "Spaziergang";
+        recReason.textContent = "Reise-Modus aktiv. Basis-Bewegung sichern (oder manuell Homeworkout / Schwächen wählen).";
+        state.recommendedToLog = ["Spaziergang"];
+        return;
+      }
+
+      // 4. PRIORITÄT: Große Einheiten basierend auf den letzten 7 Tagen
+      // Alle absolvierten großen Einheiten der letzten 7 Tage chronologisch sammeln (neueste zuerst)
+      const allWorkoutsLast7 = [];
+      let lastBigCategory = null; // "RUN" oder "STRENGTH"
+      let lastStrengthType = null; // "Ganzkörper Calisthenics" oder "Ganzkörper Homeworkout"
+      let intervalCount7d = 0;
+      let enduranceCount7d = 0;
+
+      for (const day of last7) {
+        for (const w of day.workouts) {
+          allWorkoutsLast7.push(w);
+          if (w === "Intervalllauf") intervalCount7d++;
+          if (w === "Ausdauerlauf") enduranceCount7d++;
+
+          if (lastBigCategory === null) {
+            if (BIG_RUNS.includes(w) || w === "Wettkampf") {
+              lastBigCategory = "RUN";
+            } else if (BIG_STRENGTH.includes(w)) {
+              lastBigCategory = "STRENGTH";
+            }
+          }
+          if (lastStrengthType === null && BIG_STRENGTH.includes(w)) {
+            lastStrengthType = w;
+          }
+        }
+      }
+
+      // Wechsel zwischen Laufen und Kraftsport
+      if (lastBigCategory === "RUN") {
+        // Heute ist KRAFTSPORT dran
+        const nextStrength = lastStrengthType === "Ganzkörper Calisthenics"
+          ? "Ganzkörper Homeworkout"
+          : "Ganzkörper Calisthenics";
+
+        recTitle.textContent = nextStrength;
+        recReason.textContent = `Letzte große Einheit war Laufen. Im Wechsel folgt Kraftsport (Zuletzt: ${lastStrengthType || "keins in 7T"}).`;
+        state.recommendedToLog = [nextStrength];
+      } else {
+        // Heute ist LAUFEN dran (wenn zuletzt Kraft war oder noch keine große Einheit in 7 Tagen)
+        // Verhältnis: 2x Ausdauerlauf, 1-2x Intervalllauf pro Woche
+        if (intervalCount7d === 0 && enduranceCount7d >= 1) {
+          recTitle.textContent = "Intervalllauf";
+          recReason.textContent = `Letzte große Einheit war Kraft (oder Start). In den letzten 7 Tagen: ${enduranceCount7d}x Ausdauer, 0x Intervall.`;
+          state.recommendedToLog = ["Intervalllauf"];
+        } else {
+          recTitle.textContent = "Ausdauerlauf";
+          recReason.textContent = `Letzte große Einheit war Kraft (oder Start). In den letzten 7 Tagen: ${enduranceCount7d}x Ausdauer, ${intervalCount7d}x Intervall.`;
+          state.recommendedToLog = ["Ausdauerlauf"];
+        }
+      }
+    }
+
+    function pickLeastRecentWeakness(last7) {
+      // Sucht die Schwächen-Einheit, die in den letzten 7 Tagen am längsten nicht gemacht wurde
+      for (let i = WEAKNESS_WORKOUTS.length - 1; i >= 0; i--) {
+        // Prüfe welche überhaupt nicht in last7 vorkommen
+      }
+      const counts = {};
+      WEAKNESS_WORKOUTS.forEach(w => counts[w] = 0);
+      last7.forEach(d => {
+        d.workouts.forEach(w => {
+          if (counts[w] !== undefined) counts[w]++;
+        });
+      });
+      // Sortiere nach geringster Häufigkeit in den letzten 7 Tagen
+      return [...WEAKNESS_WORKOUTS].sort((a, b) => counts[a] - counts[b])[0];
+    }
+
+    async function logRecommended() {
+      for (const w of state.recommendedToLog) {
+        await logWorkout(w);
+      }
+    }
+
+    async function logWorkout(workoutName) {
+      const todayStr = getLocalDateStr(0);
+      const statusEl = document.getElementById("status-msg");
+      const btnRec = document.getElementById("btn-log-rec");
+
+      btnRec.disabled = true;
+      statusEl.textContent = `Speichere "${workoutName}" in Google Sheets...`;
+
+      // Optimistisches Update im lokalen State
+      let todayEntry = state.sheetData.find(r => r.date === todayStr);
+      if (todayEntry) {
+        todayEntry.workouts.push(workoutName);
+      } else {
+        state.sheetData.unshift({ date: todayStr, workouts: [workoutName] });
+      }
+      renderHistory();
+
+      if (API_URL.includes("DEINE_GOOGLE_APPS_SCRIPT")) {
+        statusEl.textContent = `Lokal geloggt (Demo): ${workoutName}`;
+        btnRec.disabled = false;
+        return;
+      }
+
+      try {
+        const res = await fetch(API_URL, {
+          method: "POST",
+          body: JSON.stringify({ date: todayStr, workout: workoutName })
+        });
+        const json = await res.json();
+        if (json.status === "success") {
+          statusEl.textContent = `Gespeichert: ${workoutName} (${todayStr})`;
+        } else {
+          statusEl.textContent = "Fehler beim Speichern: " + json.message;
+        }
+      } catch (err) {
+        statusEl.textContent = "Fehler bei der Verbindung zum Sheet.";
+      } finally {
+        btnRec.disabled = false;
+      }
+    }
+
+    function renderHistory() {
+      const container = document.getElementById("history-list");
+      container.innerHTML = "";
+
+      for (let i = 0; i <= 7; i++) {
+        const dStr = getLocalDateStr(-i);
+        const found = state.sheetData.find(r => r.date === dStr);
+        const label = i === 0 ? `${dStr} (Heute)` : dStr;
+
+        const row = document.createElement("div");
+        row.className = "history-row";
+
+        const dateDiv = document.createElement("div");
+        dateDiv.className = "history-date";
+        dateDiv.textContent = label;
+
+        const tagsDiv = document.createElement("div");
+        tagsDiv.className = "history-tags";
+
+        if (found && found.workouts.length > 0) {
+          found.workouts.forEach(w => {
+            const span = document.createElement("span");
+            span.className = "tag";
+            span.textContent = w;
+            tagsDiv.appendChild(span);
+          });
+        } else {
+          const span = document.createElement("span");
+          span.style.color = "#555";
+          span.textContent = "–";
+          tagsDiv.appendChild(span);
+        }
+
+        row.appendChild(dateDiv);
+        row.appendChild(tagsDiv);
+        container.appendChild(row);
+      }
+    }
+
+    // Init
+    document.getElementById("today-display").textContent = getLocalDateStr(0);
+    fetchSheetData();
+  </script>
+</body>
+</html>
