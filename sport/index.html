@@ -230,10 +230,8 @@
         .category-content { display: none; padding: 0 16px 16px; flex-direction: column; gap: 8px; border-top: 1px solid var(--border-light); padding-top: 16px; }
         .category-group.open .category-content { display: flex; }
 
-        /* Feste Karten (immer offen) */
-        .category-group.static .category-header { cursor: default; }
-        .category-group.static .category-header:active { background: transparent; }
-        .category-group.static .category-content { display: flex; gap: 0; padding: 4px 16px 8px; }
+        .category-content.list { gap: 0; padding-top: 6px; padding-bottom: 8px; }
+        .category-meta { margin-left: auto; margin-right: 12px; font-size: 0.8rem; font-weight: 800; color: var(--success); flex-shrink: 0; }
 
         .row {
             display: flex; align-items: flex-start; gap: 14px;
@@ -253,19 +251,16 @@
             font-size: 0.75rem; font-weight: 600;
         }
 
-        /* Empfehlung heute */
-        .rec-card {
+        /* Heute */
+        .rec-inner {
             --rec: var(--accent);
             --rec-soft: var(--accent-soft);
-            background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
-            box-shadow: var(--shadow); padding: 20px; display: flex; flex-direction: column; gap: 16px;
+            display: flex; flex-direction: column; gap: 16px;
         }
-        .rec-card.m-red { --rec: var(--danger); --rec-soft: var(--danger-tint); }
-        .rec-card.m-travel { --rec: #d4a017; --rec-soft: var(--warning-soft); }
-        .rec-card.m-deload { --rec: var(--blue); --rec-soft: var(--blue-soft); }
-        .rec-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-        .rec-label { font-weight: 800; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.05em; }
-        .rec-reason { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-align: right; }
+        .rec-inner.m-red { --rec: var(--danger); --rec-soft: var(--danger-tint); }
+        .rec-inner.m-travel { --rec: #d4a017; --rec-soft: var(--warning-soft); }
+        .rec-inner.m-deload { --rec: var(--blue); --rec-soft: var(--blue-soft); }
+        .rec-reason { font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); }
         .rec-body { display: flex; align-items: center; gap: 14px; }
         .rec-icon {
             width: 52px; height: 52px; border-radius: 14px; background: var(--rec-soft);
@@ -282,7 +277,15 @@
         .rec-btn:disabled { cursor: default; }
         .rec-btn.done { background: var(--success); }
         .rec-btn.wait { opacity: 0.45; }
-        .rec-logged { display: flex; flex-wrap: wrap; gap: 6px; }
+        .done-list { display: flex; flex-wrap: wrap; gap: 6px; }
+        .manual-trigger {
+            font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+            padding: 12px; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;
+            background: var(--border-light); border: 1px dashed var(--border); border-radius: 12px;
+        }
+        .manual-wrap { display: none; flex-direction: column; gap: 8px; }
+        .manual-wrap.open { display: flex; }
 
         /* Manuell loggen */
         .sub-label { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin: 8px 0 0; }
@@ -342,43 +345,32 @@
 </div>
 
 <main>
-    <!-- Letzte 7 Tage -->
-    <div class="category-group static">
-        <div class="category-header">
-            <div class="category-title"><div class="category-icon">📅</div><span>Letzte 7 Tage</span></div>
+    <!-- Vorschau -->
+    <div class="category-group" id="grp-next3">
+        <div class="category-header" onclick="toggleGroup('next3')">
+            <div class="category-title"><div class="category-icon">🧭</div><span>Vorschau</span></div>
+            <div class="arrow">▼</div>
         </div>
-        <div class="category-content" id="last7-list"></div>
+        <div class="category-content list" id="next3-list"></div>
     </div>
 
     <!-- Heute -->
-    <div class="rec-card" id="rec-card">
-        <div class="rec-head">
-            <span class="rec-label">Heute</span>
-            <span class="rec-reason" id="rec-reason"></span>
-        </div>
-        <div class="rec-body">
-            <div class="rec-icon" id="rec-icon">⏳</div>
-            <div class="rec-title" id="rec-title">Lädt…</div>
-        </div>
-        <button class="rec-btn wait" id="rec-btn" onclick="logRecommended()" disabled>Loggen</button>
-        <div class="rec-logged" id="rec-logged"></div>
-    </div>
-
-    <!-- Nächste 3 Tage -->
-    <div class="category-group static">
-        <div class="category-header">
-            <div class="category-title"><div class="category-icon">🧭</div><span>Nächste 3 Tage</span></div>
-        </div>
-        <div class="category-content" id="next3-list"></div>
-    </div>
-
-    <!-- Manuell loggen -->
-    <div class="category-group" id="manual-group">
-        <div class="category-header" onclick="document.getElementById('manual-group').classList.toggle('open')">
-            <div class="category-title"><div class="category-icon">＋</div><span>Manuell loggen</span></div>
+    <div class="category-group" id="grp-today">
+        <div class="category-header" onclick="toggleGroup('today')">
+            <div class="category-title"><div class="category-icon">🎯</div><span>Heute</span></div>
+            <div class="category-meta" id="today-meta"></div>
             <div class="arrow">▼</div>
         </div>
-        <div class="category-content" id="manual-content"></div>
+        <div class="category-content" id="today-body"></div>
+    </div>
+
+    <!-- Letzte 7 Tage -->
+    <div class="category-group" id="grp-last7">
+        <div class="category-header" onclick="toggleGroup('last7')">
+            <div class="category-title"><div class="category-icon">📅</div><span>Letzte 7 Tage</span></div>
+            <div class="arrow">▼</div>
+        </div>
+        <div class="category-content list" id="last7-list"></div>
     </div>
 </main>
 
@@ -417,7 +409,10 @@
         hist: {},        // { "YYYY-MM-DD": [workouts] }
         loaded: false,
         plan: null,
-        busy: false
+        busy: false,
+        error: false,
+        manualOpen: false,
+        open: { next3: false, today: true, last7: false }
     };
 
     let cloudSyncTimeout = null;
@@ -448,6 +443,51 @@
     function dayLabel(str) {
         const d = parseDate(str);
         return `${WEEKDAYS[d.getDay()]} ${String(d.getDate()).padStart(2, "0")}.${String(d.getMonth() + 1).padStart(2, "0")}.`;
+    }
+
+
+    function normDate(v) {
+        if (v == null) return null;
+        if (v instanceof Date) return fmtDate(v);
+        const s = String(v).trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+        let m = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+        if (m) return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+        m = s.match(/^(\d{4})-(\d{2})-(\d{2}) /);
+        if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+        const d = new Date(s);
+        return isNaN(d) ? null : fmtDate(d);
+    }
+
+    function normWorkouts(v) {
+        if (Array.isArray(v)) return v.map(x => String(x).trim()).filter(Boolean);
+        if (typeof v === "string") return v.split(/[,;\n|]+/).map(x => x.trim()).filter(Boolean);
+        return [];
+    }
+
+    function loadOpen() {
+        try {
+            const o = JSON.parse(localStorage.getItem("sport_open") || "null");
+            if (o) Object.assign(state.open, o);
+        } catch (e) {}
+    }
+
+    function applyOpen() {
+        Object.keys(state.open).forEach(k => {
+            const el = document.getElementById("grp-" + k);
+            if (el) el.classList.toggle("open", !!state.open[k]);
+        });
+    }
+
+    function toggleGroup(key) {
+        state.open[key] = !state.open[key];
+        try { localStorage.setItem("sport_open", JSON.stringify(state.open)); } catch (e) {}
+        applyOpen();
+    }
+
+    function toggleManual() {
+        state.manualOpen = !state.manualOpen;
+        renderToday();
     }
 
     function iconFor(items) { return ICONS[items[0]] || "🏃"; }
@@ -625,38 +665,59 @@
     }
 
     function renderToday() {
-        const card = document.getElementById("rec-card");
-        const btn = document.getElementById("rec-btn");
-        const logged = document.getElementById("rec-logged");
+        const body = document.getElementById("today-body");
+        const meta = document.getElementById("today-meta");
 
         if (!state.loaded) {
-            card.className = "rec-card";
-            document.getElementById("rec-icon").textContent = "⏳";
-            document.getElementById("rec-title").textContent = "Lädt…";
-            document.getElementById("rec-reason").textContent = "";
-            btn.className = "rec-btn wait";
-            btn.disabled = true;
-            btn.textContent = "Loggen";
-            logged.innerHTML = "";
+            meta.textContent = "";
+            body.innerHTML = `<div class="rec-inner">
+                <div class="rec-body"><div class="rec-icon" style="background:var(--border-light)">${state.error ? "⚠️" : "⏳"}</div>
+                <div class="rec-title">${state.error ? "Keine Verbindung" : "Lädt…"}</div></div>
+                <button class="rec-btn wait" disabled>Loggen</button>
+            </div>`;
             return;
         }
 
         const rec = state.plan.today;
         const todayLogged = state.hist[todayStr()] || [];
         const allDone = rec.items.every(w => todayLogged.includes(w));
+        meta.textContent = allDone ? "✓" : "";
 
-        card.className = "rec-card m-" + rec.mode;
-        document.getElementById("rec-icon").textContent = iconFor(rec.items);
-        document.getElementById("rec-title").textContent = rec.items.join(" + ");
-        document.getElementById("rec-reason").textContent = rec.reason;
+        let html = `<div class="rec-inner m-${rec.mode}">
+            <div class="rec-reason">${esc(rec.reason)}</div>
+            <div class="rec-body">
+                <div class="rec-icon">${iconFor(rec.items)}</div>
+                <div class="rec-title">${esc(rec.items.join(" + "))}</div>
+            </div>
+            <button class="rec-btn ${allDone ? "done" : ""}" id="rec-btn" ${allDone || state.busy ? "disabled" : ""}>${allDone ? "✓ Geloggt" : "Loggen"}</button>
+        </div>`;
 
-        btn.disabled = allDone || state.busy;
-        btn.className = "rec-btn" + (allDone ? " done" : "");
-        btn.textContent = allDone ? "✓ Geloggt" : "Loggen";
+        if (todayLogged.length) {
+            html += `<div class="sub-label">Heute getan</div>
+                <div class="done-list">${todayLogged.map(w => `<span class="tag">${ICONS[w] || ""} ${esc(w)}</span>`).join("")}</div>`;
+        }
 
-        logged.innerHTML = todayLogged
-            .filter(w => !rec.items.includes(w))
-            .map(w => `<span class="tag">${esc(w)}</span>`).join("");
+        html += `<div class="manual-trigger" id="manual-trigger">Manuell loggen ${state.manualOpen ? "▲" : "▼"}</div>
+            <div class="manual-wrap ${state.manualOpen ? "open" : ""}">`;
+        MANUAL_GROUPS.forEach(group => {
+            html += `<div class="sub-label">${esc(group.label)}</div>`;
+            group.items.forEach(name => {
+                const done = todayLogged.includes(name);
+                html += `<div class="bucket-card ${done ? "done" : ""}" data-workout="${esc(name)}">
+                    <div class="status-circle"></div>
+                    <div class="location-name">${esc(name)}</div>
+                </div>`;
+            });
+        });
+        html += `</div>`;
+
+        body.innerHTML = html;
+        const btn = document.getElementById("rec-btn");
+        if (btn) btn.addEventListener("click", logRecommended);
+        document.getElementById("manual-trigger").addEventListener("click", toggleManual);
+        body.querySelectorAll(".bucket-card").forEach(card => {
+            card.addEventListener("click", () => logWorkout(card.getAttribute("data-workout")));
+        });
     }
 
     function renderNext3() {
@@ -675,33 +736,12 @@
         }).join("");
     }
 
-    function renderManual() {
-        const el = document.getElementById("manual-content");
-        const todayLogged = state.hist[todayStr()] || [];
-        let html = "";
-        MANUAL_GROUPS.forEach(group => {
-            html += `<div class="sub-label">${esc(group.label)}</div>`;
-            group.items.forEach(name => {
-                const done = todayLogged.includes(name);
-                html += `<div class="bucket-card ${done ? "done" : ""}" data-workout="${esc(name)}">
-                    <div class="status-circle"></div>
-                    <div class="location-name">${esc(name)}</div>
-                </div>`;
-            });
-        });
-        el.innerHTML = html;
-        el.querySelectorAll(".bucket-card").forEach(card => {
-            card.addEventListener("click", () => logWorkout(card.getAttribute("data-workout")));
-        });
-    }
-
     function renderAll() {
         if (state.loaded) state.plan = computePlan();
         renderFlags();
-        renderLast7();
-        renderToday();
         renderNext3();
-        renderManual();
+        renderToday();
+        renderLast7();
     }
 
     /* ---------- Cloud ---------- */
@@ -711,17 +751,25 @@
         try {
             const res = await fetch(API_URL);
             const json = await res.json();
-            if (json.status !== "success") throw new Error(json.message || "Fehler");
+            if (!Array.isArray(json) && json.status && json.status !== "success") {
+                throw new Error(json.message || "Fehler");
+            }
+            const rows = Array.isArray(json) ? json : (json.data || []);
             const hist = {};
-            (json.data || []).forEach(r => {
-                const key = String(r.date);
-                hist[key] = (hist[key] || []).concat(r.workouts || []);
+            rows.forEach(r => {
+                const key = normDate(r.date ?? r.datum ?? r.Datum ?? r.Date);
+                if (!key) return;
+                const w = normWorkouts(r.workouts ?? r.workout ?? r.Workouts ?? r.Workout ?? r.einheiten);
+                hist[key] = (hist[key] || []).concat(w);
             });
+            if (rows.length && !Object.keys(hist).length) console.warn("Einträge nicht lesbar:", rows[0]);
             state.hist = hist;
             state.loaded = true;
+            state.error = false;
             setCloud("synced");
         } catch (err) {
             console.error(err);
+            state.error = true;
             setCloud("error");
         }
         renderAll();
@@ -778,6 +826,8 @@
 
     window.onload = () => {
         loadFlags();
+        loadOpen();
+        applyOpen();
         renderAll();
         requestAnimationFrame(() => document.body.classList.add("loaded"));
         loadData();
