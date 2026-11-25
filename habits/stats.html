@@ -1,0 +1,1745 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#f0f2f5">
+    <link rel="icon" type="image/svg+xml" href="logo.svg">
+    <link rel="apple-touch-icon" href="logo.png">
+    <link rel="manifest" href="manifest.json">
+    <title>Routinen</title>
+    <style>
+        :root {
+            --accent: #e67e22;
+            --accent-soft: rgba(230, 126, 34, 0.1);
+            --success: #27ae60;
+            --success-soft: rgba(39, 174, 96, 0.1);
+            --warning: #f1c40f;
+            --warning-soft: rgba(241, 196, 15, 0.1);
+            --orange-risk: #e67e22;
+            --orange-risk-soft: rgba(230, 126, 34, 0.15);
+            --danger: #e74c3c;
+            --danger-soft: rgba(231, 76, 60, 0.3);
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --apple-switch-bg: #e3e3e6;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: #2d3f55;
+                --border-light: #253347;
+                --apple-switch-bg: #1c1c1e;
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 40px;
+            opacity: 0;
+            transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body.loaded {
+            opacity: 1;
+        }
+
+        /* Header */
+        .finance-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--bg);
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-top {
+            width: 100%;
+            min-height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .header-left,
+        .header-right {
+            display: flex;
+            align-items: center;
+            z-index: 2;
+            position: relative;
+        }
+
+        .finance-header-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .header-action-btn {
+            min-height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 0 10px;
+            border-radius: 9px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            box-shadow: var(--shadow);
+            text-decoration: none;
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 700;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        .back-container {
+            width: 32px;
+            min-width: 32px;
+            padding: 0;
+        }
+
+        .back-btn {
+            width: auto;
+            height: auto;
+            padding: 0;
+            border: 0;
+            border-radius: 0;
+            background: transparent;
+            box-shadow: none;
+            font-size: 0.95rem;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .stats-header-btn {
+            min-width: 76px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.72rem;
+        }
+
+        .cloud-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--text-secondary);
+            transition: all .3s cubic-bezier(.16,1,.3,1);
+            flex: 0 0 10px;
+        }
+
+        .cloud-status-dot.synced {
+            background-color: var(--success);
+            box-shadow: 0 0 6px var(--success);
+        }
+
+        .cloud-status-dot.loading {
+            background-color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .cloud-status-dot.error {
+            background-color: var(--danger);
+            box-shadow: 0 0 8px var(--danger);
+            animation: pulse-danger 1.5s infinite;
+        }
+
+        @keyframes pulse-danger {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.25); opacity: .7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .cloud-error-banner {
+            display: none;
+            background: var(--danger-soft);
+            border: 1px solid var(--danger);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 0 16px;
+        }
+
+        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+        .view-section { display: none; flex-direction: column; gap: 12px; width: 100%; }
+        .view-section.active { display: flex; }
+
+        .section-block {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 14px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px;
+        }
+        
+        .switch-header { display: flex; background: var(--bg); border-radius: 10px; padding: 2px; border: 1px solid var(--border); width: 100%; }
+        .switch-tab { flex: 1; text-align: center; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); padding: 7px 4px; border-radius: 8px; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+        .switch-tab.active { background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow); }
+
+        .whoop-card {
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .whoop-metrics-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+        }
+        .whoop-metric-box {
+            background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
+            padding: 10px 12px; display: flex; flex-direction: column; gap: 4px;
+        }
+        .whoop-metric-label {
+            font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary);
+        }
+        .whoop-metric-value {
+            font-size: 1.25rem; font-weight: 800; line-height: 1;
+        }
+        .whoop-metric-sub {
+            font-size: 0.7rem; font-weight: 600; color: var(--text-secondary);
+        }
+        .whoop-delta-badge {
+            display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 8px;
+            font-size: 0.72rem; font-weight: 800; width: fit-content;
+        }
+        .whoop-delta-badge.up { background: var(--success-soft); color: var(--success); }
+        .whoop-delta-badge.down { background: var(--danger-soft); color: var(--danger); }
+        .whoop-delta-badge.neutral { background: var(--border-light); color: var(--text-secondary); }
+
+        .matrix-grid { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+        .matrix-row { display: flex; align-items: center; width: 100%; height: 28px; }
+        
+        .matrix-label { 
+            flex: 1; font-size: 0.85rem; font-weight: 700; display: flex; align-items: center; 
+            gap: 6px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+        }
+        
+        .matrix-cells { 
+            display: flex; gap: 6px; flex-shrink: 0; align-items: center; justify-content: flex-end; width: 204px; 
+        }
+        
+        .matrix-cell { width: 24px; height: 24px; border-radius: 6px; background: var(--border-light); border: 1px solid var(--border); transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); flex-shrink: 0; }
+        .matrix-cell.grun { background: var(--success); border-color: var(--success); }
+        .matrix-cell.gelb { background: var(--warning); border-color: var(--warning); }
+        .matrix-cell.orange { background: var(--orange-risk); border-color: var(--orange-risk); }
+        .matrix-cell.rot { background: var(--danger); border-color: var(--danger); }
+        .matrix-cell.ja { background: var(--success); border-color: var(--success); }
+        .matrix-cell.nein { background: var(--danger-soft); border-color: var(--danger); opacity: 0.3; }
+        
+        .days-header { display: flex; width: 100%; margin-bottom: 2px; height: 16px; align-items: center; }
+        .days-header-spacer { flex: 1; }
+        .days-header-labels { display: flex; gap: 6px; flex-shrink: 0; justify-content: flex-end; width: 204px; }
+        .day-label { font-size: 0.6rem; font-weight: 700; color: var(--text-secondary); text-align: center; width: 24px; text-transform: uppercase; flex-shrink: 0; }
+
+        .perf-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-light); height: 32px; }
+        .perf-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .perf-info { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0; }
+        .perf-icon { font-size: 0.95rem; flex-shrink: 0; }
+        .perf-name { font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .perf-bar-wrapper { display: flex; align-items: center; gap: 8px; width: 204px; flex-shrink: 0; }
+        .perf-bar-bg { flex: 1; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
+        .perf-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; }
+        .perf-pct { font-size: 0.75rem; font-weight: 700; width: 32px; text-align: right; }
+
+        .trend-container { display: flex; flex-direction: column; gap: 8px; }
+        .trend-row { display: flex; align-items: center; justify-content: space-between; padding: 2px 0; }
+        .trend-month-label { font-size: 0.88rem; font-weight: 700; }
+        .trend-badge { font-size: 0.7rem; font-weight: 700; padding: 3px 6px; border-radius: 6px; }
+        .trend-badge.up { background: var(--success-soft); color: var(--success); }
+        .trend-badge.neutral { background: var(--border-light); color: var(--text-secondary); }
+
+        .insight-card { background: var(--bg); border-radius: 10px; border: 1px solid var(--border); padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
+        .insight-title { font-size: 0.82rem; font-weight: 700; }
+        .insight-desc { font-size: 0.72rem; color: var(--text-secondary); line-height: 1.3; }
+        
+        .switch-content { display: none; }
+        .switch-content.active { display: flex; flex-direction: column; }
+
+        @media (max-width: 395px) {
+            .matrix-label, .perf-name { font-size: 0.78rem; }
+            .matrix-cells, .days-header-labels, .perf-bar-wrapper { width: 168px; gap: 4px; }
+            .matrix-cell, .day-label { width: 20px; height: 20px; font-size: 0.55rem; }
+            .day-label { height: 20px; line-height: 20px; }
+        }
+        @media (max-width: 420px) {
+            .finance-header-title { font-size: 0.95rem; }
+            .finance-header { padding-left: 14px; padding-right: 14px; }
+        }
+
+        /* ===== Neu: Block-Köpfe ===== */
+        .block-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+        .block-title { font-size: 0.95rem; font-weight: 800; letter-spacing: -0.01em; }
+        .block-sub { font-size: 0.66rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; text-align: right; }
+
+        /* ===== Neu: Momentum (Ringe) ===== */
+        .momentum-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .momentum-panel {
+            background: var(--bg); border: 1px solid var(--border); border-radius: 14px;
+            padding: 12px 8px; display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0;
+        }
+        .momentum-title { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); }
+        .ring-wrap { position: relative; width: 100%; max-width: 150px; aspect-ratio: 1 / 1; }
+        .ring-wrap svg { width: 100%; height: 100%; display: block; transform: rotate(-90deg); }
+        .ring-track { fill: none; stroke: var(--border); }
+        .ring-fill { fill: none; stroke-linecap: round; transition: stroke-dashoffset 1s cubic-bezier(0.16, 1, 0.3, 1); }
+        .ring-fill.main { stroke: var(--accent); }
+        .ring-fill.base { stroke: var(--text-secondary); opacity: 0.6; }
+        .ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
+        .ring-value { font-size: 1.35rem; font-weight: 800; line-height: 1; }
+        .ring-caption { font-size: 0.58rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); }
+        .momentum-status { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-align: center; line-height: 1.25; min-height: 2.5em; padding: 0 4px; }
+        .momentum-facts { display: flex; gap: 16px; justify-content: center; }
+        .momentum-fact { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .momentum-fact b { font-size: 0.85rem; font-weight: 800; }
+        .momentum-fact span { font-size: 0.6rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+        .legend-row { display: flex; flex-wrap: wrap; gap: 6px 14px; justify-content: center; font-size: 0.68rem; font-weight: 700; color: var(--text-secondary); }
+        .legend-item { display: inline-flex; align-items: center; gap: 5px; }
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+        /* ===== Neu: klickbare Matrix ===== */
+        .matrix-label { cursor: pointer; }
+        .matrix-label:active { opacity: 0.6; }
+        .matrix-chevron { font-size: 1rem; font-weight: 700; color: var(--text-secondary); opacity: 0.6; flex-shrink: 0; line-height: 1; }
+        .matrix-cell { cursor: pointer; }
+        .matrix-cell:active { transform: scale(0.85); }
+
+        /* ===== Neu: Verlauf-Diagramm ===== */
+        #trend-chart-container { width: 100%; }
+        #trend-chart-container svg { display: block; }
+        .chart-hit { cursor: pointer; }
+        .chart-info { font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-align: center; line-height: 1.3; min-height: 1.3em; }
+
+        /* ===== Neu: Weitere Stats (Toggle) ===== */
+        .more-stats-container { margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 16px; }
+        .more-stats-trigger {
+            font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);
+            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer;
+            padding: 8px; display: flex; align-items: center; justify-content: center; gap: 4px; user-select: none;
+            background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow);
+        }
+        .more-stats-hidden-wrapper { display: none; flex-direction: column; gap: 12px; margin-top: 12px; }
+        .more-stats-container.expanded .more-stats-hidden-wrapper { display: flex; }
+
+        /* ===== Neu: Toast ===== */
+        .toast-notification {
+            position: fixed; top: calc(env(safe-area-inset-top) + 70px); left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: var(--success); color: white; padding: 10px 20px; border-radius: 12px;
+            font-size: 0.85rem; font-weight: 700; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            opacity: 0; z-index: 1000; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); pointer-events: none;
+        }
+        .toast-notification.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        /* ===== Neu: Sheets (Maske / Routine-Details) ===== */
+        body.sheet-open { overflow: hidden; }
+        .sheet-overlay {
+            display: none; position: fixed; inset: 0; z-index: 300;
+            background: rgba(0, 0, 0, 0.4); align-items: flex-end; justify-content: center;
+        }
+        .sheet-overlay.open { display: flex; }
+        .sheet {
+            width: 100%; max-width: 600px; max-height: 88vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+            background: var(--surface); border-radius: 24px 24px 0 0; border: 1px solid var(--border);
+            padding: 16px 16px calc(20px + env(safe-area-inset-bottom));
+            display: flex; flex-direction: column; gap: 14px;
+            box-shadow: 0 -4px 24px rgba(0,0,0,0.18);
+            animation: sheet-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes sheet-up { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .sheet-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .sheet-title { display: flex; align-items: center; gap: 10px; font-size: 1.05rem; font-weight: 800; letter-spacing: -0.01em; min-width: 0; }
+        .sheet-title-icon { width: 32px; height: 32px; border-radius: 9px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; font-size: 1.05rem; flex-shrink: 0; }
+        .sheet-close {
+            width: 32px; height: 32px; border-radius: 9px; border: 1px solid var(--border);
+            background: var(--bg); color: var(--text-primary); font-size: 0.9rem; font-weight: 700;
+            cursor: pointer; flex-shrink: 0; font-family: inherit;
+        }
+        .sheet-sub { font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); }
+        .sheet-hint { font-size: 0.72rem; font-weight: 600; color: var(--text-secondary); line-height: 1.35; }
+        .sheet-section-title { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); }
+        .override-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .override-btn {
+            border: 2px solid var(--border); background: var(--bg); color: var(--text-primary);
+            border-radius: 14px; padding: 18px 8px; font-size: 0.95rem; font-weight: 800;
+            cursor: pointer; font-family: inherit; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .override-btn:active { transform: scale(0.97); }
+        .override-btn.ja.selected { background: var(--success); border-color: var(--success); color: #fff; }
+        .override-btn.nein.selected { background: var(--danger); border-color: var(--danger); color: #fff; }
+        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .detail-bar-row { display: flex; flex-direction: column; gap: 6px; }
+        .detail-bar-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+        .detail-bar-head b { font-size: 1.25rem; font-weight: 800; }
+        .detail-bar-head span { font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); }
+        .detail-bar-row .perf-bar-bg { height: 8px; border-radius: 4px; }
+        .detail-bar-row .perf-bar-fill { border-radius: 4px; }
+        .wd-chart { display: flex; gap: 6px; align-items: stretch; height: 110px; }
+        .wd-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+        .wd-pct { font-size: 0.62rem; font-weight: 700; color: var(--text-secondary); line-height: 1; }
+        .wd-bar-track { position: relative; width: 100%; flex: 1; background: var(--border-light); border-radius: 6px; overflow: hidden; min-height: 0; }
+        .wd-bar-fill { position: absolute; left: 0; right: 0; bottom: 0; background: var(--accent); border-radius: 6px; }
+        .wd-col.best .wd-bar-fill { background: var(--success); }
+        .wd-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); line-height: 1; }
+        .strip-grid { display: grid; grid-template-columns: repeat(15, 1fr); gap: 4px; }
+        .strip-cell { aspect-ratio: 1 / 1; border-radius: 5px; background: var(--border-light); border: 1px solid var(--border); }
+        .strip-cell.grun { background: var(--success); border-color: var(--success); }
+        .strip-cell.gelb { background: var(--warning); border-color: var(--warning); }
+        .strip-cell.orange { background: var(--orange-risk); border-color: var(--orange-risk); }
+        .strip-cell.rot { background: var(--danger); border-color: var(--danger); }
+        .strip-legend { display: flex; justify-content: space-between; font-size: 0.62rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+
+        @media (min-width: 601px) {
+            .sheet-overlay { align-items: center; }
+            .sheet { width: min(520px, calc(100% - 32px)); border-radius: 24px; }
+        }
+    </style>
+    <script src="habits_input.js"></script>
+</head>
+<body>
+
+<header class="finance-header">
+    <div class="header-top">
+        <div class="header-left">
+            <a href="../index.html" class="header-action-btn back-container" aria-label="Zurück zur Übersicht">
+                <span class="back-btn">&larr;</span>
+            </a>
+        </div>
+        <div class="finance-header-title">
+            <span>Routinen</span>
+            <div class="cloud-status-dot" id="cloud-status-dot" title="Cloud-Status" aria-label="Cloud-Status"></div>
+        </div>
+        <div class="header-right">
+            <a class="header-action-btn stats-header-btn" href="index.html" aria-label="Zum Tracker">Tracker <span>→</span></a>
+        </div>
+    </div>
+</header>
+
+<div class="cloud-error-banner" id="cloud-error-box">Sync-Fehler: Keine Verbindung zur Cloud möglich. Redirekt...</div>
+
+<main>
+    <div id="view-stats" class="view-section active">
+        <!-- MOMENTUM (neu) -->
+        <div class="section-block">
+            <div class="block-head">
+                <span class="block-title">Momentum</span>
+                <span class="block-sub">14 Tage vs. 90-Tage Baseline</span>
+            </div>
+            <div class="momentum-grid" id="momentum-container"></div>
+            <div class="legend-row">
+                <span class="legend-item"><span class="legend-dot" style="background: var(--accent);"></span>Außen: 14-Tage Momentum</span>
+                <span class="legend-item"><span class="legend-dot" style="background: var(--text-secondary); opacity: 0.6;"></span>Innen: 90-Tage Baseline</span>
+            </div>
+        </div>
+
+        <!-- ROUTINEN (7-Tage Matrix, Hauptpunkt) -->
+        <div class="section-block">
+            <div class="block-head">
+                <span class="block-title">Routinen</span>
+                <span class="block-sub">Tippen zum Bearbeiten</span>
+            </div>
+            <div class="matrix-grid">
+                <div class="days-header">
+                    <div class="days-header-spacer"></div>
+                    <div class="days-header-labels" id="matrix-days"></div>
+                </div>
+                <div id="matrix-rows-container" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            </div>
+        </div>
+
+        <!-- VERLAUF (Wochen + Monate) -->
+        <div class="section-block">
+            <div class="block-head">
+                <span class="block-title">Verlauf</span>
+                <span class="block-sub">Erfüllung in %</span>
+            </div>
+            <div id="trend-chart-container"></div>
+            <div class="legend-row">
+                <span class="legend-item"><span class="legend-dot" style="background: var(--accent);"></span>Letzte 6 Wochen</span>
+                <span class="legend-item"><span class="legend-dot" style="background: #3b82f6;"></span>Letzte 6 Monate</span>
+            </div>
+            <div class="chart-info" id="trend-chart-info">Tippe auf einen Punkt für Details. Der letzte Punkt ist die laufende Woche bzw. der laufende Monat.</div>
+        </div>
+
+        <!-- WEITERE STATS (ausgeblendete Bereiche, unverändert) -->
+        <div class="more-stats-container" id="more-stats-box">
+            <div class="more-stats-trigger" id="more-stats-trigger" onclick="toggleMoreStats()">Weitere Stats ▼</div>
+            <div class="more-stats-hidden-wrapper">
+            <div class="section-block">
+                <div class="switch-header">
+                    <div class="switch-tab active" onclick="switchBlock('whoop', 'all')">Gesamt Momentum</div>
+                    <div class="switch-tab" onclick="switchBlock('whoop', 'tdr')">2-Day Rule Focus</div>
+                </div>
+                <div id="content-whoop-all" class="switch-content active">
+                    <div class="whoop-card" id="whoop-container-all"></div>
+                </div>
+                <div id="content-whoop-tdr" class="switch-content">
+                    <div class="whoop-card" id="whoop-container-tdr"></div>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="switch-header">
+                    <div class="switch-tab active" onclick="switchBlock('mid', 'domino')">Kausalitäten</div>
+                    <div class="switch-tab" onclick="switchBlock('mid', 'cluster')">Synergien</div>
+                </div>
+                <div id="content-domino" class="switch-content active">
+                    <div style="display: flex; flex-direction: column; gap: 8px;" id="correlation-container"></div>
+                </div>
+                <div id="content-cluster" class="switch-content">
+                    <div style="display: flex; flex-direction: column; gap: 8px;" id="cluster-container"></div>
+                </div>
+            </div>
+
+            <div class="section-block">
+                <div class="switch-header">
+                    <div class="switch-tab active" onclick="switchBlock('bottom', 'month')">Monatsvergleich</div>
+                    <div class="switch-tab" onclick="switchBlock('bottom', 'week')">Wochenvergleich</div>
+                </div>
+                <div id="content-month" class="switch-content active">
+                    <div class="trend-container" id="month-trend-container"></div>
+                </div>
+                <div id="content-week" class="switch-content">
+                    <div class="trend-container" id="week-trend-container"></div>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div class="toast-notification" id="toast-notice">Gespeichert</div>
+
+<!-- Maske: Tag überschreiben -->
+<div class="sheet-overlay" id="sheet-override" onclick="if (event.target === this) closeSheets()">
+    <div class="sheet">
+        <div class="sheet-header">
+            <div class="sheet-title"><div class="sheet-title-icon" id="override-icon">🎯</div><span id="override-title">Routine</span></div>
+            <button class="sheet-close" onclick="closeSheets()" aria-label="Schließen">✕</button>
+        </div>
+        <div class="sheet-sub" id="override-sub"></div>
+        <div class="override-options">
+            <button class="override-btn ja" id="override-btn-ja" onclick="applyOverride('ja')">✓ Erledigt</button>
+            <button class="override-btn nein" id="override-btn-nein" onclick="applyOverride('nein')">✕ Nicht erledigt</button>
+        </div>
+        <div class="sheet-hint" id="override-hint"></div>
+    </div>
+</div>
+
+<!-- Fenster: Routine-Stats -->
+<div class="sheet-overlay" id="sheet-detail" onclick="if (event.target === this) closeSheets()">
+    <div class="sheet" id="detail-sheet-body"></div>
+</div>
+
+
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbhl1k_pgXinca2FA2hxqzMJzW--7Hfo54XHtVm_vfrxndA-GFF57UsQ2ILn6drZnu2w/exec";
+    
+    const TARGET_RATIO = 0.8;
+    const habitState = {};
+    let globalHistoryArray = [];
+    let currentGlobalMode = "home";
+    let cloudSyncTimeout = null;
+
+    const routineNamesOrdered = ["Schlafroutine", "Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine"];
+
+    const routineIcons = {
+        "Schlafroutine": "🛌",
+        "Morgenroutine": "☀️",
+        "Sportroutine": "🏃‍♂️",
+        "Gesundheitsroutine": "🥗",
+        "Fokusroutine": "🧠",
+        "Abendroutine": "🌙",
+        "TwoDayRule": "⚡"
+    };
+
+    function updateCloudStatus(status) {
+        const dot = document.getElementById('cloud-status-dot');
+        if (!dot) return;
+        
+        if (cloudSyncTimeout && status !== "Cloud synced") {
+            clearTimeout(cloudSyncTimeout);
+            cloudSyncTimeout = null;
+        }
+
+        dot.className = 'cloud-status-dot';
+
+        if (status === "Cloud Fehler") {
+            dot.classList.add('error');
+            document.getElementById('cloud-error-box').style.display = 'block';
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else if (status === "Cloud synced") {
+            dot.classList.add('synced');
+            cloudSyncTimeout = setTimeout(() => {
+                dot.className = 'cloud-status-dot';
+                cloudSyncTimeout = null;
+            }, 3000);
+        } else if (status === "Cloud lädt") {
+            dot.classList.add('loading');
+        }
+    }
+
+    function switchBlock(position, type) {
+        if (!event || !event.target) return;
+        const header = event.target.parentElement;
+        const tabs = header.querySelectorAll('.switch-tab');
+        tabs.forEach(tab => tab.classList.remove('active'));
+        event.target.classList.add('active');
+
+        if (position === 'whoop') {
+            document.getElementById('content-whoop-all').classList.remove('active');
+            document.getElementById('content-whoop-tdr').classList.remove('active');
+            document.getElementById('content-whoop-' + type).classList.add('active');
+        } else if (position === 'mid') {
+            document.getElementById('content-domino').classList.remove('active');
+            document.getElementById('content-cluster').classList.remove('active');
+            document.getElementById('content-' + type).classList.add('active');
+        } else if (position === 'bottom') {
+            document.getElementById('content-month').classList.remove('active');
+            document.getElementById('content-week').classList.remove('active');
+            document.getElementById('content-' + type).classList.add('active');
+        }
+    }
+
+    // Schlafroutine-Tag wechselt um 12:00 Uhr Ortszeit statt um Mitternacht
+    function getSleepDayKey() {
+        const d = new Date();
+        d.setHours(d.getHours() - 12);
+        return d.toDateString();
+    }
+
+    function checkMidnightReset() {
+        const todayStr = new Date().toDateString();
+        const sleepDayStr = getSleepDayKey();
+        const sleepPrefix = `${routineNamesOrdered.indexOf("Schlafroutine")}-`;
+        const savedDate = localStorage.getItem('routine_date');
+        const savedSleepDate = localStorage.getItem('routine_sleep_date');
+
+        const resetOthers = !!(savedDate && savedDate !== todayStr);
+        const resetSleep = savedSleepDate ? (savedSleepDate !== sleepDayStr) : resetOthers;
+
+        if (resetOthers || resetSleep) {
+            const states = getSavedStates();
+            Object.keys(states).forEach(id => {
+                const isSleep = id.startsWith(sleepPrefix);
+                if ((isSleep && resetSleep) || (!isSleep && resetOthers)) {
+                    delete states[id];
+                }
+            });
+            localStorage.setItem('routine_storage', JSON.stringify(states));
+        }
+
+        localStorage.setItem('routine_date', todayStr);
+        localStorage.setItem('routine_sleep_date', sleepDayStr);
+    }
+
+    function getSavedStates() {
+        const saved = localStorage.getItem('routine_storage');
+        return saved ? JSON.parse(saved) : {};
+    }
+
+    function formatDateToString(date) {
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const yyyy = date.getFullYear();
+        return `${dd}.${mm}.${yyyy}`;
+    }
+
+    function parseMonthYear(dateStr) {
+        const parts = dateStr.split('.');
+        if (parts.length !== 3) return "Unbekannt";
+        const dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+        return dateObj.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+    }
+
+    function getWeekNumber(dateStr) {
+        const parts = dateStr.split('.');
+        if (parts.length !== 3) return null;
+        const target = new Date(parts[2], parts[1] - 1, parts[0]);
+        const dayNr = (target.getDay() + 6) % 7;
+        target.setDate(target.getDate() - dayNr + 3);
+        const firstThursday = target.valueOf();
+        target.setMonth(0, 1);
+        if (target.getDay() !== 4) {
+            target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
+        }
+        return 1 + Math.ceil((firstThursday - target) / 604800000);
+    }
+
+    function isRoutineApproved(routineName) {
+        const state = habitState[routineName];
+        if (!state) return false;
+        if (state.total === 0) return false;
+        return (state.done / state.total) >= TARGET_RATIO;
+    }
+
+    function calculateAmpelColor(targetDateStr, historyArray, routineName) {
+        const [d, m, y] = targetDateStr.split('.').map(Number);
+        const dateObj = new Date(y, m - 1, d);
+
+        const isDone = (dateStr) => {
+            if (dateStr === formatDateToString(new Date()) && routineName !== "TwoDayRule") {
+                if (isRoutineApproved(routineName)) return true;
+            }
+            const item = historyArray.find(h => h.datum === dateStr);
+            return !!(item && item.routinen && item.routinen[routineName] && item.routinen[routineName].toLowerCase() === "ja");
+        };
+
+        const isDoneTarget = isDone(targetDateStr);
+
+        const prevDate = new Date(dateObj);
+        prevDate.setDate(prevDate.getDate() - 1);
+        const prevDateStr = formatDateToString(prevDate);
+        const isDonePrev = isDone(prevDateStr);
+
+        if (isDoneTarget) {
+            return 'grun';
+        }
+
+        if (isDonePrev) {
+            return 'gelb';
+        }
+
+        const isToday = (targetDateStr === formatDateToString(new Date()));
+        if (isToday) {
+            return 'orange';
+        }
+
+        return 'rot';
+    }
+
+    // Lokalen Tages-Stand aus dem Tracker (localStorage) rekonstruieren,
+    // damit die Heute-Werte identisch zur bisherigen Stats-Ansicht sind.
+    function buildLocalHabitState() {
+        const savedStates = getSavedStates();
+        currentGlobalMode = localStorage.getItem('routine_global_mode') || 'home';
+
+        routineNamesOrdered.forEach((routineName, groupIdx) => {
+            const config = (typeof ROUTINE_CONFIG !== 'undefined') ? ROUTINE_CONFIG[routineName] : null;
+            if (!config) return;
+
+            const allHabitsCombined = [];
+            [config.home || [], config.sally || [], config.reise || [], config.krank || []].forEach(list => {
+                list.forEach(habit => {
+                    if (!allHabitsCombined.includes(habit)) {
+                        allHabitsCombined.push(habit);
+                    }
+                });
+            });
+
+            const activeList = config[currentGlobalMode] || [];
+            let total = 0;
+            let done = 0;
+            allHabitsCombined.forEach((habit, habitIdx) => {
+                if (activeList.includes(habit)) {
+                    total++;
+                    if (savedStates[`${groupIdx}-${habitIdx}`]) done++;
+                }
+            });
+            habitState[routineName] = { total: total, done: done };
+        });
+    }
+
+    // Heutigen Eintrag mit lokalem Stand abgleichen (wie bisher im Tracker, nur ohne Cloud-Schreibzugriff)
+    function mergeLocalTodayState() {
+        const today = new Date();
+        const yesterday = new Date(); yesterday.setDate(today.getDate() - 1);
+
+        const todayStr = formatDateToString(today);
+        const yesterdayStr = formatDateToString(yesterday);
+
+        let todayData = null;
+        let yesterdayData = null;
+
+        if (Array.isArray(globalHistoryArray) && globalHistoryArray.length > 0) {
+            todayData = globalHistoryArray.find(item => item.datum === todayStr);
+            yesterdayData = globalHistoryArray.find(item => item.datum === yesterdayStr);
+        }
+
+        if (!todayData && Array.isArray(globalHistoryArray)) {
+            todayData = { datum: todayStr, routinen: {} };
+            globalHistoryArray.push(todayData);
+        }
+
+        routineNamesOrdered.forEach(r => {
+            if (todayData && todayData.routinen) {
+                const cloudState = (todayData.routinen[r] || "").toLowerCase();
+                todayData.routinen[r] = (cloudState === "ja" || isRoutineApproved(r)) ? "ja" : "nein";
+            }
+        });
+
+        let shouldTdrBeJa = true;
+        routineNamesOrdered.forEach(r => {
+            let approvedHeute = false;
+            if (todayData && todayData.routinen && todayData.routinen[r]) {
+                if (todayData.routinen[r].toLowerCase() === "ja") approvedHeute = true;
+            }
+            let approvedGestern = false;
+            if (yesterdayData && yesterdayData.routinen && yesterdayData.routinen[r]) {
+                if (yesterdayData.routinen[r].toLowerCase() === "ja") approvedGestern = true;
+            }
+            if (!approvedHeute && !approvedGestern) {
+                shouldTdrBeJa = false;
+            }
+        });
+
+        habitState["TwoDayRule"] = { total: 0, done: 0, isApproved: shouldTdrBeJa };
+
+        if (todayData && todayData.routinen) {
+            const currentCloudTdr = (todayData.routinen["TwoDayRule"] || "").toLowerCase();
+            todayData.routinen["TwoDayRule"] = (currentCloudTdr === "ja" || shouldTdrBeJa) ? "ja" : "nein";
+        }
+    }
+
+    function fetchHistoryStatus() {
+        updateCloudStatus("Cloud lädt");
+        return fetch(GOOGLE_SCRIPT_URL, { method: "GET" })
+            .then(res => res.json())
+            .then(historyArray => {
+                document.getElementById('cloud-error-box').style.display = 'none';
+                if (!Array.isArray(historyArray)) return;
+                globalHistoryArray = historyArray;
+
+                buildLocalHabitState();
+                mergeLocalTodayState();
+                renderDashboard(globalHistoryArray);
+                updateCloudStatus("Cloud synced");
+            })
+            .catch(err => {
+                updateCloudStatus("Cloud Fehler");
+                console.error(err);
+            });
+    }
+
+    function initApp() {
+        checkMidnightReset();
+        buildLocalHabitState();
+        setupInteractions();
+
+        requestAnimationFrame(() => {
+            document.body.classList.add('loaded');
+        });
+
+        fetchHistoryStatus();
+    }
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") {
+            checkMidnightReset();
+            fetchHistoryStatus();
+        }
+    });
+
+    function computeWhoopBenchmark(historyArray, targetRoutines) {
+        const today = new Date();
+        const dateMap = {};
+
+        historyArray.forEach(row => {
+            if (row.datum) {
+                dateMap[row.datum] = row;
+            }
+        });
+
+        function getSliceData(daysCount) {
+            let totalPossibleChecks = 0;
+            let rawSuccessfulChecks = 0;
+            let totalWeightedScore = 0;
+
+            targetRoutines.forEach(routine => {
+                let currentChain = 0;
+
+                for (let i = daysCount - 1; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(today.getDate() - i);
+                    const dStr = formatDateToString(d);
+                    const dayData = dateMap[dStr];
+
+                    totalPossibleChecks++;
+
+                    let isJa = false;
+                    if (dayData && dayData.routinen && dayData.routinen[routine]) {
+                        if (dayData.routinen[routine].toLowerCase() === "ja") {
+                            isJa = true;
+                        }
+                    }
+
+                    if (isJa) {
+                        rawSuccessfulChecks++;
+                        currentChain++;
+                        
+                        const relativeChainRatio = Math.min(1.0, currentChain / daysCount);
+                        const chainBonusMultiplier = 1.0 + (0.25 * relativeChainRatio);
+                        totalWeightedScore += chainBonusMultiplier;
+                    } else {
+                        currentChain = 0;
+                    }
+                }
+            });
+
+            const rawPct = totalPossibleChecks > 0 ? (rawSuccessfulChecks / totalPossibleChecks) * 100 : 0;
+            const weightedPct = totalPossibleChecks > 0 ? Math.min(100, (totalWeightedScore / totalPossibleChecks) * 100) : 0;
+
+            return {
+                rawPct: Math.round(rawPct),
+                weightedPct: Math.round(weightedPct * 10) / 10,
+                daysCount: daysCount
+            };
+        }
+
+        const stats14 = getSliceData(14);
+        const stats90 = getSliceData(90);
+
+        const delta = Math.round((stats14.weightedPct - stats90.weightedPct) * 10) / 10;
+
+        return {
+            stats14,
+            stats90,
+            delta
+        };
+    }
+
+    function renderWhoopSection(historyArray) {
+        const whoopAll = computeWhoopBenchmark(historyArray, routineNamesOrdered);
+        const whoopTdr = computeWhoopBenchmark(historyArray, ["TwoDayRule"]);
+
+        function buildWhoopHtml(data, titleLabel) {
+            let badgeClass = "neutral";
+            let deltaSymbol = "►";
+            if (data.delta > 0) { badgeClass = "up"; deltaSymbol = "▲ +"; }
+            else if (data.delta < 0) { badgeClass = "down"; deltaSymbol = "▼ "; }
+
+            let statusText = "Stabil auf Baseline-Niveau";
+            if (data.delta >= 3.0) statusText = "Hohes Momentum — Ketten-Stabilität stark";
+            else if (data.delta <= -3.0) statusText = "Achtung — Ketten-Integrität schwindet";
+
+            return `
+                <div class="whoop-metrics-grid">
+                    <div class="whoop-metric-box">
+                        <span class="whoop-metric-label">14-Tage Momentum</span>
+                        <span class="whoop-metric-value" style="color: var(--accent);">${data.stats14.weightedPct}%</span>
+                        <span class="whoop-metric-sub">Raw: ${data.stats14.rawPct}% Erfüllung</span>
+                    </div>
+                    <div class="whoop-metric-box">
+                        <span class="whoop-metric-label">90-Tage Baseline</span>
+                        <span class="whoop-metric-value">${data.stats90.weightedPct}%</span>
+                        <span class="whoop-metric-sub">Raw: ${data.stats90.rawPct}% Erfüllung</span>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
+                    <span class="whoop-delta-badge ${badgeClass}">${deltaSymbol}${data.delta}% vs. 3M Baseline</span>
+                    <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-align: right;">${statusText}</span>
+                </div>
+            `;
+        }
+
+        document.getElementById('whoop-container-all').innerHTML = buildWhoopHtml(whoopAll, "Alle Routinen");
+        document.getElementById('whoop-container-tdr').innerHTML = buildWhoopHtml(whoopTdr, "2-Day Rule Focus");
+    }
+
+    function renderDashboard(historyArray) {
+        renderWhoopSection(historyArray);
+        renderMomentum(historyArray);
+
+        const allKeysWithTdr = ["Schlafroutine", "Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "TwoDayRule"];
+        
+        const totalMatrixDays = 7;
+        const matrixDates = [];
+        const daysHeader = document.getElementById('matrix-days');
+        daysHeader.innerHTML = '';
+
+        for (let i = 0; i < totalMatrixDays; i++) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            matrixDates.push(formatDateToString(d));
+            const dayName = d.toLocaleDateString('de-DE', { weekday: 'short' }).charAt(0);
+            daysHeader.innerHTML += `<div class="day-label">${dayName}</div>`;
+        }
+
+        let totalChecks = 0;
+        let successfulChecks = 0;
+        const routineSuccessCounts = {};
+        allKeysWithTdr.forEach(k => routineSuccessCounts[k] = 0);
+
+        const monthlyData = {};
+        const weeklyData = {};
+
+        historyArray.forEach(row => {
+            if (!row.datum) return;
+            
+            const monthKey = parseMonthYear(row.datum);
+            if (!monthlyData[monthKey]) monthlyData[monthKey] = { total: 0, success: 0 };
+
+            const weekNum = getWeekNumber(row.datum);
+            const year = row.datum.split('.')[2];
+            const weekKey = weekNum ? `KW ${String(weekNum).padStart(2, '0')} / ${year}` : "Unbekannt";
+            if (weekKey !== "Unbekannt" && !weeklyData[weekKey]) weeklyData[weekKey] = { total: 0, success: 0 };
+
+            allKeysWithTdr.forEach(routine => {
+                if (row.routinen && row.routinen[routine]) {
+                    const status = row.routinen[routine].toLowerCase();
+                    totalChecks++;
+                    monthlyData[monthKey].total++;
+                    if (weekKey !== "Unbekannt") weeklyData[weekKey].total++;
+                    
+                    if (status === "ja") {
+                        successfulChecks++;
+                        routineSuccessCounts[routine]++;
+                        monthlyData[monthKey].success++;
+                        if (weekKey !== "Unbekannt") weeklyData[weekKey].success++;
+                    }
+                }
+            });
+        });
+
+        const trendContainer = document.getElementById('month-trend-container');
+        trendContainer.innerHTML = '';
+        const sortedMonths = Object.keys(monthlyData).reverse();
+
+        if (sortedMonths.length === 0) {
+            trendContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary);">Keine Monatsdaten verfügbar.</div>`;
+        } else {
+            sortedMonths.forEach((month, idx) => {
+                const data = monthlyData[month];
+                const pct = data.total > 0 ? Math.round((data.success / data.total) * 100) : 0;
+                let badgeHtml = `<span class="trend-badge neutral">${pct}% Erfüllung</span>`;
+                if (idx < sortedMonths.length - 1) {
+                    const prevMonth = sortedMonths[idx + 1];
+                    const prevData = monthlyData[prevMonth];
+                    const prevPct = prevData.total > 0 ? Math.round((prevData.success / prevData.total) * 100) : 0;
+                    const diff = pct - prevPct;
+                    if (diff > 0) badgeHtml = `<span class="trend-badge up">▲ +${diff}% vs. Vormonat (${pct}%)</span>`;
+                    else if (diff < 0) badgeHtml = `<span class="trend-badge" style="background: rgba(231, 76, 60, 0.1); color: var(--danger);">▼ ${diff}% vs. Vormonat (${pct}%)</span>`;
+                }
+                trendContainer.innerHTML += `<div class="trend-row"><span class="trend-month-label">${month}</span>${badgeHtml}</div>`;
+            });
+        }
+
+        const weekTrendContainer = document.getElementById('week-trend-container');
+        weekTrendContainer.innerHTML = '';
+        const sortedWeeks = Object.keys(weeklyData).sort().reverse();
+        const limitedWeeks = sortedWeeks.slice(0, 4);
+
+        if (limitedWeeks.length === 0) {
+            weekTrendContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary);">Keine Wochendaten verfügbar.</div>`;
+        } else {
+            limitedWeeks.forEach((week, idx) => {
+                const data = weeklyData[week];
+                const pct = data.total > 0 ? Math.round((data.success / data.total) * 100) : 0;
+                let badgeHtml = `<span class="trend-badge neutral">${pct}% Erfüllung</span>`;
+                if (idx < limitedWeeks.length - 1) {
+                    const prevWeek = limitedWeeks[idx + 1];
+                    const prevData = weeklyData[prevWeek];
+                    const prevPct = prevData.total > 0 ? Math.round((prevData.success / prevData.total) * 100) : 0;
+                    const diff = pct - prevPct;
+                    if (diff > 0) badgeHtml = `<span class="trend-badge up">▲ +${diff}% vs. Vorwoche (${pct}%)</span>`;
+                    else if (diff < 0) badgeHtml = `<span class="trend-badge" style="background: rgba(231, 76, 60, 0.1); color: var(--danger);">▼ ${diff}% vs. Vorwoche (${pct}%)</span>`;
+                }
+                weekTrendContainer.innerHTML += `<div class="trend-row"><span class="trend-month-label">${week}</span>${badgeHtml}</div>`;
+            });
+        }
+
+        const correlationContainer = document.getElementById('correlation-container');
+        correlationContainer.innerHTML = '';
+        const insights = [];
+        
+        routineNamesOrdered.forEach(triggerRoutine => {
+            routineNamesOrdered.forEach(targetRoutine => {
+                if (triggerRoutine === targetRoutine) return;
+                
+                let isAllowedPath = false;
+                let isTimeShifted = false;
+
+                if (triggerRoutine === "Morgenroutine") {
+                    isAllowedPath = true;
+                    isTimeShifted = false;
+                } else if (["Schlafroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(triggerRoutine) && ["Schlafroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(targetRoutine)) {
+                    isAllowedPath = true;
+                    isTimeShifted = false;
+                }
+                
+                if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(triggerRoutine) && targetRoutine !== "Morgenroutine" && targetRoutine !== "Schlafroutine") {
+                    if (["Sportroutine", "Gesundheitsroutine", "Fokusroutine"].includes(targetRoutine)) {
+                        isAllowedPath = true;
+                        isTimeShifted = true;
+                    }
+                }
+
+                if (triggerRoutine === "Abendroutine") {
+                    if (targetRoutine === "Schlafroutine") {
+                        isAllowedPath = true;
+                        isTimeShifted = false; 
+                    } else {
+                        isAllowedPath = true;
+                        isTimeShifted = true; 
+                    }
+                }
+
+                if (!isAllowedPath) return;
+
+                let triggerJaCount = 0;
+                let targetAlsoJaCount = 0;
+
+                for (let i = 1; i < historyArray.length; i++) {
+                    const currentRow = historyArray[i]; 
+                    const nextDayRow = historyArray[i - 1]; 
+                    
+                    if (isTimeShifted) {
+                        if (currentRow.routinen && currentRow.routinen[triggerRoutine] && nextDayRow.routinen && nextDayRow.routinen[targetRoutine]) {
+                            if (currentRow.routinen[triggerRoutine].toLowerCase() === 'ja') {
+                                triggerJaCount++;
+                                if (nextDayRow.routinen[targetRoutine].toLowerCase() === 'ja') targetAlsoJaCount++;
+                            }
+                        }
+                    } else {
+                        if (currentRow.routinen && currentRow.routinen[triggerRoutine] && currentRow.routinen[targetRoutine]) {
+                            if (currentRow.routinen[triggerRoutine].toLowerCase() === 'ja') {
+                                triggerJaCount++;
+                                if (currentRow.routinen[targetRoutine].toLowerCase() === 'ja') targetAlsoJaCount++;
+                            }
+                        }
+                    }
+                }
+
+                if (triggerJaCount >= 2) {
+                    const probability = Math.round((targetAlsoJaCount / triggerJaCount) * 100);
+                    if (probability >= 70) {
+                        let contextDesc = isTimeShifted ? "am Folgetag" : "am selben Tag";
+                        if (triggerRoutine === "Abendroutine" && targetRoutine === "Schlafroutine") {
+                            contextDesc = "in der Nacht";
+                        }
+                        insights.push({ 
+                            trigger: triggerRoutine, 
+                            target: targetRoutine, 
+                            prob: probability, 
+                            context: contextDesc
+                        });
+                    }
+                }
+            });
+        });
+
+        if (insights.length === 0) {
+            correlationContainer.innerHTML = `<div class="insight-card"><div class="insight-title">⏳ Datenbasis wird aufgebaut</div><div class="insight-desc">Sobald valide Kausalitäten entstehen, siehst du hier deinen mächtigsten Hebel.</div></div>`;
+        } else {
+            insights.sort((a, b) => b.prob - a.prob);
+            insights.slice(0, 3).forEach(ins => {
+                const triggerIcon = routineIcons[ins.trigger] || "🎯";
+                const targetIcon = routineIcons[ins.target] || "🎯";
+                correlationContainer.innerHTML += `<div class="insight-card"><div class="insight-title">${triggerIcon} ${ins.trigger} &rarr; ${targetIcon} ${ins.target}</div><div class="insight-desc">Sichert deine <strong>${ins.target}</strong> ${ins.context} mit einer Wahrscheinlichkeit von <strong>${ins.prob}%</strong>.</div></div>`;
+            });
+        }
+
+        const clusterContainer = document.getElementById('cluster-container');
+        clusterContainer.innerHTML = '';
+        const clusters = [];
+
+        for (let i = 0; i < routineNamesOrdered.length; i++) {
+            for (let j = i + 1; j < routineNamesOrdered.length; j++) {
+                const r1 = routineNamesOrdered[i]; const r2 = routineNamesOrdered[j];
+                let commonDays = 0; let totalActiveDays = historyArray.length;
+
+                historyArray.forEach(row => {
+                    if (row.routinen && row.routinen[r1] && row.routinen[r2]) {
+                        if (row.routinen[r1].toLowerCase() === 'ja' && row.routinen[r2].toLowerCase() === 'ja') commonDays++;
+                    }
+                });
+
+                if (commonDays >= 2) {
+                    const pairProb = Math.round((commonDays / totalActiveDays) * 100);
+                    clusters.push({ routine1: r1, routine2: r2, strength: pairProb, count: commonDays });
+                }
+            }
+        }
+
+        if (clusters.length === 0) {
+            clusterContainer.innerHTML = `<div class="insight-card"><div class="insight-title">⏳ Berechne Synergien...</div><div class="insight-desc">Hier erscheinen Kombinationen, die du besonders oft zusammen meisterst.</div></div>`;
+        } else {
+            clusters.sort((a, b) => b.strength - a.strength);
+            clusters.slice(0, 3).forEach(c => {
+                const icon1 = routineIcons[c.routine1] || "🎯"; const icon2 = routineIcons[c.routine2] || "🎯";
+                clusterContainer.innerHTML += `<div class="insight-card"><div class="insight-title">${icon1} ${c.routine1} + ${icon2} ${c.routine2}</div><div class="insight-desc">Dieses Routine-Paket tritt in <strong>${c.strength}%</strong> aller aufgezeichneten Tage als geschlossene Einheit auf.</div></div>`;
+            });
+        }
+
+        const rowsContainer = document.getElementById('matrix-rows-container');
+        rowsContainer.innerHTML = '';
+        allKeysWithTdr.forEach(routine => {
+            let cellsHtml = '';
+            matrixDates.forEach(dateStr => {
+                if (routine === "TwoDayRule") {
+                    const item = historyArray.find(h => h.datum === dateStr);
+                    const isTdrJa = item && item.routinen && item.routinen["TwoDayRule"] && item.routinen["TwoDayRule"].toLowerCase() === "ja";
+                    const matrixColor = isTdrJa ? "grun" : "rot";
+                    cellsHtml += `<div class="matrix-cell ${matrixColor}" data-routine="${routine}" data-date="${dateStr}"></div>`;
+                } else {
+                    const color = calculateAmpelColor(dateStr, historyArray, routine);
+                    cellsHtml += `<div class="matrix-cell ${color}" data-routine="${routine}" data-date="${dateStr}"></div>`;
+                }
+            });
+            const icon = routineIcons[routine] || "🎯";
+            rowsContainer.innerHTML += `<div class="matrix-row"><div class="matrix-label" data-routine="${routine}"><span class="perf-icon">${icon}</span><span class="perf-name">${routine}</span><span class="matrix-chevron">›</span></div><div class="matrix-cells">${cellsHtml}</div></div>`;
+        });
+
+        renderTrendChart(historyArray);
+    }
+
+    // ===================== Weitere Stats (Toggle) =====================
+    function toggleMoreStats() {
+        const box = document.getElementById('more-stats-box');
+        const trigger = document.getElementById('more-stats-trigger');
+        box.classList.toggle('expanded');
+        trigger.textContent = box.classList.contains('expanded') ? "Weitere Stats ▲" : "Weitere Stats ▼";
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById('toast-notice');
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => { toast.classList.remove('show'); }, 2000);
+    }
+
+    // ===================== Momentum (neu, gleiche Logik) =====================
+    function ringHtml(radius, stroke, pct, cls) {
+        const c = 2 * Math.PI * radius;
+        const safe = Math.max(0, Math.min(100, pct));
+        return `<circle class="ring-track" cx="66" cy="66" r="${radius}" stroke-width="${stroke}"></circle>` +
+               `<circle class="ring-fill ${cls}" cx="66" cy="66" r="${radius}" stroke-width="${stroke}" stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${c.toFixed(2)}" data-target="${(c * (1 - safe / 100)).toFixed(2)}"></circle>`;
+    }
+
+    function buildMomentumPanel(data, title, icon) {
+        let badgeClass = "neutral";
+        let deltaSymbol = "►";
+        if (data.delta > 0) { badgeClass = "up"; deltaSymbol = "▲ +"; }
+        else if (data.delta < 0) { badgeClass = "down"; deltaSymbol = "▼ "; }
+
+        let statusText = "Stabil auf Baseline-Niveau";
+        if (data.delta >= 3.0) statusText = "Hohes Momentum — Ketten-Stabilität stark";
+        else if (data.delta <= -3.0) statusText = "Achtung — Ketten-Integrität schwindet";
+
+        return `
+            <div class="momentum-panel">
+                <div class="momentum-title">${icon} ${title}</div>
+                <div class="ring-wrap">
+                    <svg viewBox="0 0 132 132" aria-hidden="true">${ringHtml(58, 10, data.stats14.weightedPct, 'main')}${ringHtml(43, 8, data.stats90.weightedPct, 'base')}</svg>
+                    <div class="ring-center">
+                        <span class="ring-value">${data.stats14.weightedPct}%</span>
+                        <span class="ring-caption">14 Tage</span>
+                    </div>
+                </div>
+                <span class="whoop-delta-badge ${badgeClass}">${deltaSymbol}${data.delta}% <span style="font-weight: 700; opacity: 0.8;">vs. 3M</span></span>
+                <div class="momentum-status">${statusText}</div>
+                <div class="momentum-facts">
+                    <div class="momentum-fact"><b>${data.stats14.rawPct}%</b><span>Raw 14T</span></div>
+                    <div class="momentum-fact"><b>${data.stats90.weightedPct}%</b><span>Baseline 90T</span></div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderMomentum(historyArray) {
+        const container = document.getElementById('momentum-container');
+        if (!container) return;
+        const all = computeWhoopBenchmark(historyArray, routineNamesOrdered);
+        const tdr = computeWhoopBenchmark(historyArray, ["TwoDayRule"]);
+        container.innerHTML = buildMomentumPanel(all, "Alle Routinen", "🎯") + buildMomentumPanel(tdr, "2-Day Rule", "⚡");
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                container.querySelectorAll('.ring-fill').forEach(el => {
+                    el.style.strokeDashoffset = el.getAttribute('data-target');
+                });
+            });
+        });
+    }
+
+    // ===================== Verlauf-Diagramm (6 Wochen + 6 Monate) =====================
+    let trendSeries = null;
+    let trendResizeTimeout = null;
+
+    function getIsoWeek(date) {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return { year: d.getUTCFullYear(), week: Math.ceil((((d - yearStart) / 86400000) + 1) / 7) };
+    }
+
+    function computeTrendSeries(historyArray) {
+        const keys = [...routineNamesOrdered, "TwoDayRule"];
+        const weekAgg = {};
+        const monthAgg = {};
+
+        historyArray.forEach(row => {
+            if (!row.datum) return;
+            const parts = row.datum.split('.').map(Number);
+            if (parts.length !== 3 || parts.some(isNaN)) return;
+            const date = new Date(parts[2], parts[1] - 1, parts[0]);
+            const iso = getIsoWeek(date);
+            const wk = `${iso.year}-${iso.week}`;
+            const mk = `${parts[2]}-${parts[1] - 1}`;
+            if (!weekAgg[wk]) weekAgg[wk] = { total: 0, success: 0 };
+            if (!monthAgg[mk]) monthAgg[mk] = { total: 0, success: 0 };
+
+            keys.forEach(k => {
+                if (row.routinen && row.routinen[k]) {
+                    weekAgg[wk].total++;
+                    monthAgg[mk].total++;
+                    if (String(row.routinen[k]).toLowerCase() === "ja") {
+                        weekAgg[wk].success++;
+                        monthAgg[mk].success++;
+                    }
+                }
+            });
+        });
+
+        const pct = a => (a && a.total > 0) ? Math.round((a.success / a.total) * 100) : null;
+        const today = new Date();
+        const weeks = [];
+        const months = [];
+
+        for (let k = 5; k >= 0; k--) {
+            const wd = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7 * k);
+            const iso = getIsoWeek(wd);
+            weeks.push({
+                label: `KW ${iso.week}`,
+                full: `KW ${iso.week} / ${iso.year}`,
+                value: pct(weekAgg[`${iso.year}-${iso.week}`])
+            });
+
+            const md = new Date(today.getFullYear(), today.getMonth() - k, 1);
+            months.push({
+                label: md.toLocaleDateString('de-DE', { month: 'short' }).replace('.', ''),
+                full: md.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' }),
+                value: pct(monthAgg[`${md.getFullYear()}-${md.getMonth()}`])
+            });
+        }
+
+        return { weeks: weeks, months: months };
+    }
+
+    function renderTrendChart(historyArray) {
+        trendSeries = computeTrendSeries(historyArray);
+        drawTrendChart();
+    }
+
+    function drawTrendChart() {
+        const container = document.getElementById('trend-chart-container');
+        if (!container || !trendSeries) return;
+
+        const hasData = trendSeries.weeks.concat(trendSeries.months).some(p => p.value !== null);
+        if (!hasData) {
+            container.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary);">Keine Verlaufsdaten verfügbar.</div>`;
+            return;
+        }
+
+        const W = Math.max(260, container.clientWidth || 300);
+        const H = 270;
+        const m = { l: 40, r: 14, t: 20, b: 58 };
+        const pw = W - m.l - m.r;
+        const ph = H - m.t - m.b;
+        const n = 6;
+        const xAt = i => m.l + pw * (i + 0.5) / n;
+        const yAt = v => m.t + ph * (1 - v / 100);
+
+        const seriesDefs = [
+            { key: 'weeks', name: 'Woche', color: 'var(--accent)', data: trendSeries.weeks, labelY: H - 34, width: 3 },
+            { key: 'months', name: 'Monat', color: '#3b82f6', data: trendSeries.months, labelY: H - 14, width: 3 }
+        ];
+
+        let svg = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Verlauf der Erfüllung der letzten 6 Wochen und 6 Monate">`;
+
+        [0, 25, 50, 75, 100].forEach(v => {
+            const y = yAt(v);
+            svg += `<line x1="${m.l}" x2="${W - m.r}" y1="${y}" y2="${y}" style="stroke: var(--border);" stroke-width="1" ${v === 0 ? '' : 'stroke-dasharray="3 4"'}></line>`;
+            svg += `<text x="${m.l - 8}" y="${y + 4}" text-anchor="end" font-size="10" font-weight="700" style="fill: var(--text-secondary);">${v}%</text>`;
+        });
+
+        seriesDefs.forEach(s => {
+            let path = '';
+            let open = false;
+            s.data.forEach((p, i) => {
+                if (p.value === null) { open = false; return; }
+                path += `${open ? 'L' : 'M'}${xAt(i).toFixed(1)} ${yAt(p.value).toFixed(1)} `;
+                open = true;
+            });
+            if (path) {
+                svg += `<path d="${path.trim()}" fill="none" stroke-width="${s.width}" stroke-linecap="round" stroke-linejoin="round" style="stroke: ${s.color};"></path>`;
+            }
+        });
+
+        seriesDefs.forEach(s => {
+            s.data.forEach((p, i) => {
+                if (p.value === null) return;
+                const isLast = i === n - 1;
+                svg += `<circle cx="${xAt(i).toFixed(1)}" cy="${yAt(p.value).toFixed(1)}" r="${isLast ? 6 : 4.5}" stroke-width="2" style="fill: ${isLast ? 'var(--surface)' : s.color}; stroke: ${isLast ? s.color : 'var(--surface)'};"></circle>`;
+            });
+        });
+
+        const lastW = trendSeries.weeks[n - 1].value;
+        const lastM = trendSeries.months[n - 1].value;
+        seriesDefs.forEach(s => {
+            const p = s.data[n - 1];
+            if (p.value === null) return;
+            let above = true;
+            if (lastW !== null && lastM !== null && lastW !== lastM) {
+                above = (s.key === 'weeks') ? lastW > lastM : lastM > lastW;
+            } else if (lastW !== null && lastM !== null) {
+                above = (s.key === 'weeks');
+            }
+            const ty = above ? yAt(p.value) - 12 : yAt(p.value) + 20;
+            svg += `<text x="${xAt(n - 1).toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle" font-size="11" font-weight="800" style="fill: ${s.color};">${p.value}%</text>`;
+        });
+
+        seriesDefs.forEach(s => {
+            s.data.forEach((p, i) => {
+                svg += `<text x="${xAt(i).toFixed(1)}" y="${s.labelY}" text-anchor="middle" font-size="11" font-weight="700" style="fill: ${s.color};">${p.label}</text>`;
+            });
+        });
+
+        seriesDefs.forEach(s => {
+            s.data.forEach((p, i) => {
+                if (p.value === null) return;
+                svg += `<circle class="chart-hit" data-series="${s.key}" data-i="${i}" cx="${xAt(i).toFixed(1)}" cy="${yAt(p.value).toFixed(1)}" r="16" fill="transparent"></circle>`;
+            });
+        });
+
+        svg += `</svg>`;
+        container.innerHTML = svg;
+
+        container.querySelectorAll('.chart-hit').forEach(el => {
+            el.addEventListener('click', () => {
+                showTrendInfo(el.getAttribute('data-series'), parseInt(el.getAttribute('data-i'), 10));
+            });
+        });
+    }
+
+    function showTrendInfo(seriesKey, i) {
+        const info = document.getElementById('trend-chart-info');
+        if (!info || !trendSeries) return;
+        const data = trendSeries[seriesKey];
+        const p = data[i];
+        if (!p || p.value === null) return;
+        const name = seriesKey === 'weeks' ? 'Woche' : 'Monat';
+        let diffText = '';
+        for (let j = i - 1; j >= 0; j--) {
+            if (data[j].value !== null) {
+                const diff = p.value - data[j].value;
+                diffText = diff > 0 ? ` · ▲ +${diff}% zur Vorperiode` : (diff < 0 ? ` · ▼ ${diff}% zur Vorperiode` : ` · ► unverändert zur Vorperiode`);
+                break;
+            }
+        }
+        const running = (i === data.length - 1) ? ' (läuft noch)' : '';
+        info.textContent = `${name} ${p.full}${running}: ${p.value}%${diffText}`;
+    }
+
+    // ===================== Sheets: Überschreiben + Routine-Details =====================
+    let overrideContext = null;
+
+    function formatLongDate(dateStr) {
+        const [d, mo, y] = dateStr.split('.').map(Number);
+        return new Date(y, mo - 1, d).toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+
+    function getStatusOn(routine, dateStr, historyArray) {
+        const item = historyArray.find(h => h.datum === dateStr);
+        return !!(item && item.routinen && item.routinen[routine] && String(item.routinen[routine]).toLowerCase() === "ja");
+    }
+
+    function getCellColor(routine, dateStr, historyArray) {
+        if (routine === "TwoDayRule") {
+            return getStatusOn(routine, dateStr, historyArray) ? "grun" : "rot";
+        }
+        return calculateAmpelColor(dateStr, historyArray, routine);
+    }
+
+    function openSheet(id) {
+        document.getElementById(id).classList.add('open');
+        document.body.classList.add('sheet-open');
+    }
+
+    function closeSheets() {
+        document.getElementById('sheet-override').classList.remove('open');
+        document.getElementById('sheet-detail').classList.remove('open');
+        document.body.classList.remove('sheet-open');
+        overrideContext = null;
+    }
+
+    function openOverride(routine, dateStr) {
+        if (!routine || !dateStr) return;
+        overrideContext = { routine: routine, dateStr: dateStr };
+        const isJa = getStatusOn(routine, dateStr, globalHistoryArray);
+
+        document.getElementById('override-icon').textContent = routineIcons[routine] || "🎯";
+        document.getElementById('override-title').textContent = routine;
+        document.getElementById('override-sub').textContent = formatLongDate(dateStr);
+        document.getElementById('override-btn-ja').classList.toggle('selected', isJa);
+        document.getElementById('override-btn-nein').classList.toggle('selected', !isJa);
+
+        const hint = document.getElementById('override-hint');
+        if (dateStr === formatDateToString(new Date())) {
+            hint.textContent = "Heute wird zusätzlich dein lokaler Tracker-Stand berücksichtigt.";
+        } else {
+            hint.textContent = "Der gewählte Status überschreibt den bisherigen Eintrag für diesen Tag.";
+        }
+        openSheet('sheet-override');
+    }
+
+    function applyOverride(status) {
+        if (!overrideContext) return;
+        const routine = overrideContext.routine;
+        const dateStr = overrideContext.dateStr;
+
+        let row = globalHistoryArray.find(h => h.datum === dateStr);
+        if (!row) {
+            row = { datum: dateStr, routinen: {} };
+            globalHistoryArray.push(row);
+        }
+        if (!row.routinen) row.routinen = {};
+        row.routinen[routine] = status;
+
+        closeSheets();
+        renderDashboard(globalHistoryArray);
+        saveOverrideToCloud(routine, dateStr, status);
+    }
+
+    function saveOverrideToCloud(routine, dateStr, status) {
+        updateCloudStatus("Cloud lädt");
+        const formBody = new URLSearchParams();
+        formBody.append('override_datum', dateStr);
+        formBody.append('override_routine', routine);
+        formBody.append('override_status', status);
+
+        fetch(GOOGLE_SCRIPT_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formBody.toString()
+        })
+        .then(() => {
+            document.getElementById('cloud-error-box').style.display = 'none';
+            updateCloudStatus("Cloud synced");
+            showToast("Gespeichert");
+            setTimeout(fetchHistoryStatus, 1500);
+        })
+        .catch(err => {
+            updateCloudStatus("Cloud Fehler");
+            console.error(err);
+        });
+    }
+
+    function computeRoutineStats(routine, historyArray) {
+        const jaSet = new Set();
+        const weekday = Array.from({ length: 7 }, () => ({ total: 0, ja: 0, pct: null }));
+        let success = 0;
+
+        historyArray.forEach(row => {
+            if (!row.datum) return;
+            const parts = row.datum.split('.').map(Number);
+            if (parts.length !== 3 || parts.some(isNaN)) return;
+            const dt = new Date(parts[2], parts[1] - 1, parts[0]);
+            const wd = (dt.getDay() + 6) % 7;
+            const isJa = !!(row.routinen && row.routinen[routine] && String(row.routinen[routine]).toLowerCase() === "ja");
+            weekday[wd].total++;
+            if (isJa) {
+                success++;
+                weekday[wd].ja++;
+                jaSet.add(row.datum);
+            }
+        });
+
+        weekday.forEach(w => { w.pct = w.total > 0 ? Math.round((w.ja / w.total) * 100) : null; });
+
+        const total = historyArray.length;
+        const pct = total > 0 ? Math.round((success / total) * 100) : 0;
+
+        const slicePct = (days) => {
+            let ja = 0;
+            for (let i = 0; i < days; i++) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                if (jaSet.has(formatDateToString(d))) ja++;
+            }
+            return Math.round((ja / days) * 100);
+        };
+
+        let current = 0;
+        const cd = new Date();
+        if (!jaSet.has(formatDateToString(cd))) cd.setDate(cd.getDate() - 1);
+        while (jaSet.has(formatDateToString(cd))) {
+            current++;
+            cd.setDate(cd.getDate() - 1);
+        }
+
+        let best = 0;
+        if (jaSet.size > 0) {
+            let minDate = null;
+            jaSet.forEach(ds => {
+                const [d, mo, y] = ds.split('.').map(Number);
+                const dt = new Date(y, mo - 1, d);
+                if (!minDate || dt < minDate) minDate = dt;
+            });
+            const it = new Date(minDate);
+            const end = new Date();
+            it.setHours(0, 0, 0, 0);
+            end.setHours(0, 0, 0, 0);
+            let temp = 0;
+            while (it <= end) {
+                if (jaSet.has(formatDateToString(it))) {
+                    temp++;
+                    if (temp > best) best = temp;
+                } else {
+                    temp = 0;
+                }
+                it.setDate(it.getDate() + 1);
+            }
+        }
+        best = Math.max(best, current);
+
+        return {
+            total: total,
+            success: success,
+            pct: pct,
+            pct7: slicePct(7),
+            pct30: slicePct(30),
+            current: current,
+            best: best,
+            weekday: weekday
+        };
+    }
+
+    function openRoutineDetail(routine) {
+        if (!routine) return;
+        const s = computeRoutineStats(routine, globalHistoryArray);
+        const icon = routineIcons[routine] || "🎯";
+        const wdShort = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+        const wdLong = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+
+        let bestIdx = -1, bestVal = -1, worstIdx = -1, worstVal = 101;
+        s.weekday.forEach((w, i) => {
+            if (w.pct === null || w.total < 2) return;
+            if (w.pct > bestVal) { bestVal = w.pct; bestIdx = i; }
+            if (w.pct < worstVal) { worstVal = w.pct; worstIdx = i; }
+        });
+
+        let wdHint = "Noch zu wenig Daten für eine Wochentags-Auswertung.";
+        if (bestIdx >= 0 && worstIdx >= 0 && bestIdx !== worstIdx) {
+            wdHint = `Stärkster Tag: ${wdLong[bestIdx]} (${bestVal}%) · Schwächster Tag: ${wdLong[worstIdx]} (${worstVal}%)`;
+        } else if (bestIdx >= 0) {
+            wdHint = `Stärkster Tag: ${wdLong[bestIdx]} (${bestVal}%)`;
+        }
+
+        const wdHtml = s.weekday.map((w, i) => `
+            <div class="wd-col ${i === bestIdx ? 'best' : ''}">
+                <span class="wd-pct">${w.pct === null ? '–' : w.pct + '%'}</span>
+                <div class="wd-bar-track"><div class="wd-bar-fill" style="height: ${w.pct || 0}%;"></div></div>
+                <span class="wd-label">${wdShort[i]}</span>
+            </div>
+        `).join('');
+
+        let stripHtml = '';
+        for (let i = 29; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const dStr = formatDateToString(d);
+            stripHtml += `<div class="strip-cell ${getCellColor(routine, dStr, globalHistoryArray)}" title="${dStr}"></div>`;
+        }
+
+        document.getElementById('detail-sheet-body').innerHTML = `
+            <div class="sheet-header">
+                <div class="sheet-title"><div class="sheet-title-icon">${icon}</div><span>${routine}</span></div>
+                <button class="sheet-close" onclick="closeSheets()" aria-label="Schließen">✕</button>
+            </div>
+
+            <div class="detail-bar-row">
+                <div class="detail-bar-head"><b>${s.pct}%</b><span>Erfüllung gesamt · ${s.success} von ${s.total} Tagen</span></div>
+                <div class="perf-bar-bg"><div class="perf-bar-fill" style="width: ${s.pct}%"></div></div>
+            </div>
+
+            <div class="detail-grid">
+                <div class="whoop-metric-box"><span class="whoop-metric-label">7 Tage</span><span class="whoop-metric-value">${s.pct7}%</span></div>
+                <div class="whoop-metric-box"><span class="whoop-metric-label">30 Tage</span><span class="whoop-metric-value">${s.pct30}%</span></div>
+                <div class="whoop-metric-box"><span class="whoop-metric-label">Aktuelle Serie</span><span class="whoop-metric-value" style="color: var(--accent);">${s.current} <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);">Tage</span></span></div>
+                <div class="whoop-metric-box"><span class="whoop-metric-label">Beste Serie</span><span class="whoop-metric-value">${s.best} <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);">Tage</span></span></div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div class="sheet-section-title">Wochentage</div>
+                <div class="wd-chart">${wdHtml}</div>
+                <div class="sheet-hint">${wdHint}</div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div class="sheet-section-title">Letzte 30 Tage</div>
+                <div class="strip-grid">${stripHtml}</div>
+                <div class="strip-legend"><span>vor 30 Tagen</span><span>Heute</span></div>
+            </div>
+        `;
+        openSheet('sheet-detail');
+    }
+
+    function setupInteractions() {
+        const rowsContainer = document.getElementById('matrix-rows-container');
+        rowsContainer.addEventListener('click', (e) => {
+            const cell = e.target.closest('.matrix-cell');
+            if (cell) {
+                openOverride(cell.getAttribute('data-routine'), cell.getAttribute('data-date'));
+                return;
+            }
+            const label = e.target.closest('.matrix-label');
+            if (label) {
+                openRoutineDetail(label.getAttribute('data-routine'));
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeSheets();
+        });
+
+        window.addEventListener('resize', () => {
+            clearTimeout(trendResizeTimeout);
+            trendResizeTimeout = setTimeout(drawTrendChart, 150);
+        });
+    }
+
+    window.onload = initApp;
+</script>
+</body>
+</html>
