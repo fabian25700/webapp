@@ -216,12 +216,6 @@
         .switch-tab { flex: 1; text-align: center; font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); padding: 7px 4px; border-radius: 8px; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
         .switch-tab.active { background: var(--surface); color: var(--text-primary); box-shadow: var(--shadow); }
 
-        .whoop-card {
-            display: flex; flex-direction: column; gap: 10px;
-        }
-        .whoop-metrics-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
-        }
         .whoop-metric-box {
             background: var(--bg); border: 1px solid var(--border); border-radius: 12px;
             padding: 10px 12px; display: flex; flex-direction: column; gap: 4px;
@@ -231,9 +225,6 @@
         }
         .whoop-metric-value {
             font-size: 1.25rem; font-weight: 800; line-height: 1;
-        }
-        .whoop-metric-sub {
-            font-size: 0.7rem; font-weight: 600; color: var(--text-secondary);
         }
         .whoop-delta-badge {
             display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 8px;
@@ -279,12 +270,6 @@
         .perf-bar-fill { height: 100%; background: var(--accent); border-radius: 3px; }
         .perf-pct { font-size: 0.75rem; font-weight: 700; width: 32px; text-align: right; }
 
-        .trend-container { display: flex; flex-direction: column; gap: 8px; }
-        .trend-row { display: flex; align-items: center; justify-content: space-between; padding: 2px 0; }
-        .trend-month-label { font-size: 0.88rem; font-weight: 700; }
-        .trend-badge { font-size: 0.7rem; font-weight: 700; padding: 3px 6px; border-radius: 6px; }
-        .trend-badge.up { background: var(--success-soft); color: var(--success); }
-        .trend-badge.neutral { background: var(--border-light); color: var(--text-secondary); }
 
         .insight-card { background: var(--bg); border-radius: 10px; border: 1px solid var(--border); padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; }
         .insight-title { font-size: 0.82rem; font-weight: 700; }
@@ -498,23 +483,10 @@
             <div class="chart-info" id="trend-chart-info">Tippe auf einen Punkt für Details. Der letzte Punkt ist die laufende Woche bzw. der laufende Monat.</div>
         </div>
 
-        <!-- WEITERE STATS (ausgeblendete Bereiche, unverändert) -->
+        <!-- WEITERE STATS (Kausalitäten / Synergien) -->
         <div class="more-stats-container" id="more-stats-box">
             <div class="more-stats-trigger" id="more-stats-trigger" onclick="toggleMoreStats()">Weitere Stats ▼</div>
             <div class="more-stats-hidden-wrapper">
-            <div class="section-block">
-                <div class="switch-header">
-                    <div class="switch-tab active" onclick="switchBlock('whoop', 'all')">Gesamt Momentum</div>
-                    <div class="switch-tab" onclick="switchBlock('whoop', 'tdr')">2-Day Rule Focus</div>
-                </div>
-                <div id="content-whoop-all" class="switch-content active">
-                    <div class="whoop-card" id="whoop-container-all"></div>
-                </div>
-                <div id="content-whoop-tdr" class="switch-content">
-                    <div class="whoop-card" id="whoop-container-tdr"></div>
-                </div>
-            </div>
-
             <div class="section-block">
                 <div class="switch-header">
                     <div class="switch-tab active" onclick="switchBlock('mid', 'domino')">Kausalitäten</div>
@@ -528,18 +500,6 @@
                 </div>
             </div>
 
-            <div class="section-block">
-                <div class="switch-header">
-                    <div class="switch-tab active" onclick="switchBlock('bottom', 'month')">Monatsvergleich</div>
-                    <div class="switch-tab" onclick="switchBlock('bottom', 'week')">Wochenvergleich</div>
-                </div>
-                <div id="content-month" class="switch-content active">
-                    <div class="trend-container" id="month-trend-container"></div>
-                </div>
-                <div id="content-week" class="switch-content">
-                    <div class="trend-container" id="week-trend-container"></div>
-                </div>
-            </div>
             </div>
         </div>
     </div>
@@ -570,7 +530,7 @@
 
 
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzw1NpWIed4aIsSvvcvAqdulpkZTSnWxFAcbssW_R_CcMNsa6hohTwMkNyfhL66GsNBdg/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwbhl1k_pgXinca2FA2hxqzMJzW--7Hfo54XHtVm_vfrxndA-GFF57UsQ2ILn6drZnu2w/exec";
     
     const TARGET_RATIO = 0.8;
     const habitState = {};
@@ -625,17 +585,9 @@
         tabs.forEach(tab => tab.classList.remove('active'));
         event.target.classList.add('active');
 
-        if (position === 'whoop') {
-            document.getElementById('content-whoop-all').classList.remove('active');
-            document.getElementById('content-whoop-tdr').classList.remove('active');
-            document.getElementById('content-whoop-' + type).classList.add('active');
-        } else if (position === 'mid') {
+        if (position === 'mid') {
             document.getElementById('content-domino').classList.remove('active');
             document.getElementById('content-cluster').classList.remove('active');
-            document.getElementById('content-' + type).classList.add('active');
-        } else if (position === 'bottom') {
-            document.getElementById('content-month').classList.remove('active');
-            document.getElementById('content-week').classList.remove('active');
             document.getElementById('content-' + type).classList.add('active');
         }
     }
@@ -682,27 +634,6 @@
         const mm = String(date.getMonth() + 1).padStart(2, '0');
         const yyyy = date.getFullYear();
         return `${dd}.${mm}.${yyyy}`;
-    }
-
-    function parseMonthYear(dateStr) {
-        const parts = dateStr.split('.');
-        if (parts.length !== 3) return "Unbekannt";
-        const dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
-        return dateObj.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
-    }
-
-    function getWeekNumber(dateStr) {
-        const parts = dateStr.split('.');
-        if (parts.length !== 3) return null;
-        const target = new Date(parts[2], parts[1] - 1, parts[0]);
-        const dayNr = (target.getDay() + 6) % 7;
-        target.setDate(target.getDate() - dayNr + 3);
-        const firstThursday = target.valueOf();
-        target.setMonth(0, 1);
-        if (target.getDay() !== 4) {
-            target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
-        }
-        return 1 + Math.ceil((firstThursday - target) / 604800000);
     }
 
     function isRoutineApproved(routineName) {
@@ -937,46 +868,7 @@
         };
     }
 
-    function renderWhoopSection(historyArray) {
-        const whoopAll = computeWhoopBenchmark(historyArray, routineNamesOrdered);
-        const whoopTdr = computeWhoopBenchmark(historyArray, ["TwoDayRule"]);
-
-        function buildWhoopHtml(data, titleLabel) {
-            let badgeClass = "neutral";
-            let deltaSymbol = "►";
-            if (data.delta > 0) { badgeClass = "up"; deltaSymbol = "▲ +"; }
-            else if (data.delta < 0) { badgeClass = "down"; deltaSymbol = "▼ "; }
-
-            let statusText = "Stabil auf Baseline-Niveau";
-            if (data.delta >= 3.0) statusText = "Hohes Momentum — Ketten-Stabilität stark";
-            else if (data.delta <= -3.0) statusText = "Achtung — Ketten-Integrität schwindet";
-
-            return `
-                <div class="whoop-metrics-grid">
-                    <div class="whoop-metric-box">
-                        <span class="whoop-metric-label">14-Tage Momentum</span>
-                        <span class="whoop-metric-value" style="color: var(--accent);">${data.stats14.weightedPct}%</span>
-                        <span class="whoop-metric-sub">Raw: ${data.stats14.rawPct}% Erfüllung</span>
-                    </div>
-                    <div class="whoop-metric-box">
-                        <span class="whoop-metric-label">90-Tage Baseline</span>
-                        <span class="whoop-metric-value">${data.stats90.weightedPct}%</span>
-                        <span class="whoop-metric-sub">Raw: ${data.stats90.rawPct}% Erfüllung</span>
-                    </div>
-                </div>
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
-                    <span class="whoop-delta-badge ${badgeClass}">${deltaSymbol}${data.delta}% vs. 3M Baseline</span>
-                    <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-align: right;">${statusText}</span>
-                </div>
-            `;
-        }
-
-        document.getElementById('whoop-container-all').innerHTML = buildWhoopHtml(whoopAll, "Alle Routinen");
-        document.getElementById('whoop-container-tdr').innerHTML = buildWhoopHtml(whoopTdr, "2-Day Rule Focus");
-    }
-
     function renderDashboard(historyArray) {
-        renderWhoopSection(historyArray);
         renderMomentum(historyArray);
 
         const allKeysWithTdr = ["Schlafroutine", "Morgenroutine", "Sportroutine", "Gesundheitsroutine", "Fokusroutine", "Abendroutine", "TwoDayRule"];
@@ -992,89 +884,6 @@
             matrixDates.push(formatDateToString(d));
             const dayName = d.toLocaleDateString('de-DE', { weekday: 'short' }).charAt(0);
             daysHeader.innerHTML += `<div class="day-label">${dayName}</div>`;
-        }
-
-        let totalChecks = 0;
-        let successfulChecks = 0;
-        const routineSuccessCounts = {};
-        allKeysWithTdr.forEach(k => routineSuccessCounts[k] = 0);
-
-        const monthlyData = {};
-        const weeklyData = {};
-
-        historyArray.forEach(row => {
-            if (!row.datum) return;
-            
-            const monthKey = parseMonthYear(row.datum);
-            if (!monthlyData[monthKey]) monthlyData[monthKey] = { total: 0, success: 0 };
-
-            const weekNum = getWeekNumber(row.datum);
-            const year = row.datum.split('.')[2];
-            const weekKey = weekNum ? `KW ${String(weekNum).padStart(2, '0')} / ${year}` : "Unbekannt";
-            if (weekKey !== "Unbekannt" && !weeklyData[weekKey]) weeklyData[weekKey] = { total: 0, success: 0 };
-
-            allKeysWithTdr.forEach(routine => {
-                if (row.routinen && row.routinen[routine]) {
-                    const status = row.routinen[routine].toLowerCase();
-                    totalChecks++;
-                    monthlyData[monthKey].total++;
-                    if (weekKey !== "Unbekannt") weeklyData[weekKey].total++;
-                    
-                    if (status === "ja") {
-                        successfulChecks++;
-                        routineSuccessCounts[routine]++;
-                        monthlyData[monthKey].success++;
-                        if (weekKey !== "Unbekannt") weeklyData[weekKey].success++;
-                    }
-                }
-            });
-        });
-
-        const trendContainer = document.getElementById('month-trend-container');
-        trendContainer.innerHTML = '';
-        const sortedMonths = Object.keys(monthlyData).reverse();
-
-        if (sortedMonths.length === 0) {
-            trendContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary);">Keine Monatsdaten verfügbar.</div>`;
-        } else {
-            sortedMonths.forEach((month, idx) => {
-                const data = monthlyData[month];
-                const pct = data.total > 0 ? Math.round((data.success / data.total) * 100) : 0;
-                let badgeHtml = `<span class="trend-badge neutral">${pct}% Erfüllung</span>`;
-                if (idx < sortedMonths.length - 1) {
-                    const prevMonth = sortedMonths[idx + 1];
-                    const prevData = monthlyData[prevMonth];
-                    const prevPct = prevData.total > 0 ? Math.round((prevData.success / prevData.total) * 100) : 0;
-                    const diff = pct - prevPct;
-                    if (diff > 0) badgeHtml = `<span class="trend-badge up">▲ +${diff}% vs. Vormonat (${pct}%)</span>`;
-                    else if (diff < 0) badgeHtml = `<span class="trend-badge" style="background: rgba(231, 76, 60, 0.1); color: var(--danger);">▼ ${diff}% vs. Vormonat (${pct}%)</span>`;
-                }
-                trendContainer.innerHTML += `<div class="trend-row"><span class="trend-month-label">${month}</span>${badgeHtml}</div>`;
-            });
-        }
-
-        const weekTrendContainer = document.getElementById('week-trend-container');
-        weekTrendContainer.innerHTML = '';
-        const sortedWeeks = Object.keys(weeklyData).sort().reverse();
-        const limitedWeeks = sortedWeeks.slice(0, 4);
-
-        if (limitedWeeks.length === 0) {
-            weekTrendContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-secondary);">Keine Wochendaten verfügbar.</div>`;
-        } else {
-            limitedWeeks.forEach((week, idx) => {
-                const data = weeklyData[week];
-                const pct = data.total > 0 ? Math.round((data.success / data.total) * 100) : 0;
-                let badgeHtml = `<span class="trend-badge neutral">${pct}% Erfüllung</span>`;
-                if (idx < limitedWeeks.length - 1) {
-                    const prevWeek = limitedWeeks[idx + 1];
-                    const prevData = weeklyData[prevWeek];
-                    const prevPct = prevData.total > 0 ? Math.round((prevData.success / prevData.total) * 100) : 0;
-                    const diff = pct - prevPct;
-                    if (diff > 0) badgeHtml = `<span class="trend-badge up">▲ +${diff}% vs. Vorwoche (${pct}%)</span>`;
-                    else if (diff < 0) badgeHtml = `<span class="trend-badge" style="background: rgba(231, 76, 60, 0.1); color: var(--danger);">▼ ${diff}% vs. Vorwoche (${pct}%)</span>`;
-                }
-                weekTrendContainer.innerHTML += `<div class="trend-row"><span class="trend-month-label">${week}</span>${badgeHtml}</div>`;
-            });
         }
 
         const correlationContainer = document.getElementById('correlation-container');
