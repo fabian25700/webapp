@@ -287,6 +287,11 @@
         .manual-wrap { display: none; flex-direction: column; gap: 8px; }
         .manual-wrap.open { display: flex; }
 
+        .rec-sub { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-top: 4px; }
+        .opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .opt-grid .bucket-card { padding: 12px 14px; gap: 10px; }
+        .opt-grid .location-name { font-size: 0.85rem; }
+
         /* Manuell loggen */
         .sub-label { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin: 8px 0 0; }
         .sub-label:first-child { margin-top: 0; }
@@ -572,7 +577,7 @@
 
         // 1. Krank
         if (flags.red) {
-            return { mode: "red", items: ["Krank-Mittagsschlaf"], reason: "Krank" };
+            return { mode: "red", items: ["Krank-Mittagsschlaf"], reason: "" };
         }
 
         // 2. Wettkampf in den letzten Tagen
@@ -582,17 +587,17 @@
         }
         if (compDaysAgo !== null && compDaysAgo <= 5) {
             if (compDaysAgo === 1) {
-                return { mode: "deload", items: ["Spaziergang"], reason: "Wettkampf gestern" };
+                return { mode: "deload", items: ["Spaziergang"], reason: "" };
             }
             if (compDaysAgo === 2 || compDaysAgo === 3) {
-                return { mode: "deload", items: ["Yoga-Workout", "Spaziergang"], reason: `Wettkampf vor ${compDaysAgo} Tagen` };
+                return { mode: "deload", items: ["Yoga-Workout", "Spaziergang"], reason: "" };
             }
-            return { mode: "deload", items: [pickLeastRecentWeakness(last7)], reason: `Wettkampf vor ${compDaysAgo} Tagen` };
+            return { mode: "deload", items: [pickLeastRecentWeakness(last7)], reason: "" };
         }
 
         // 3. Reise
         if (flags.travel) {
-            return { mode: "travel", items: ["Spaziergang"], reason: "Reise" };
+            return { mode: "travel", items: ["Spaziergang"], reason: "oder Homeworkout / Schwäche" };
         }
 
         // 4. Große Einheiten
@@ -615,15 +620,13 @@
 
         if (lastBigCategory === "RUN") {
             const next = lastStrengthType === "Ganzkörper Calisthenics" ? "Ganzkörper Homeworkout" : "Ganzkörper Calisthenics";
-            return { mode: "normal", items: [next], reason: "Nach Lauf" };
+            return { mode: "normal", items: [next], reason: "+ 1 Schwäche", weak: true };
         }
 
-        const base = lastBigCategory === "STRENGTH" ? "Nach Kraft" : "Start";
-        const counts = `${enduranceCount7d}× Ausdauer, ${intervalCount7d}× Intervall`;
         if (intervalCount7d === 0 && enduranceCount7d >= 1) {
-            return { mode: "normal", items: ["Intervalllauf"], reason: `${base} · ${counts}` };
+            return { mode: "normal", items: ["Intervalllauf"], reason: "+ 1 Schwäche", weak: true };
         }
-        return { mode: "normal", items: ["Ausdauerlauf"], reason: `${base} · ${counts}` };
+        return { mode: "normal", items: ["Ausdauerlauf"], reason: "+ 1 Schwäche", weak: true };
     }
 
     function computePlan() {
@@ -664,6 +667,8 @@
         el.innerHTML = html;
     }
 
+    function weakShort(w) { return w.replace(/-Workout$/, ""); }
+
     function renderToday() {
         const body = document.getElementById("today-body");
         const meta = document.getElementById("today-meta");
@@ -672,7 +677,7 @@
             meta.textContent = "";
             body.innerHTML = `<div class="rec-inner">
                 <div class="rec-body"><div class="rec-icon" style="background:var(--border-light)">${state.error ? "⚠️" : "⏳"}</div>
-                <div class="rec-title">${state.error ? "Keine Verbindung" : "Lädt…"}</div></div>
+                <div><div class="rec-title">${state.error ? "Keine Verbindung" : "Lädt…"}</div></div></div>
                 <button class="rec-btn wait" disabled>Loggen</button>
             </div>`;
             return;
@@ -681,16 +686,39 @@
         const rec = state.plan.today;
         const todayLogged = state.hist[todayStr()] || [];
         const allDone = rec.items.every(w => todayLogged.includes(w));
-        meta.textContent = allDone ? "✓" : "";
+        const weakDone = WEAKNESS_WORKOUTS.some(w => todayLogged.includes(w));
+
+        if (rec.weak) {
+            const n = (allDone ? 1 : 0) + (weakDone ? 1 : 0);
+            meta.textContent = n === 2 ? "✓" : `${n}/2`;
+            meta.style.color = n === 2 ? "var(--success)" : "var(--text-secondary)";
+        } else {
+            meta.textContent = allDone ? "✓" : "";
+            meta.style.color = "var(--success)";
+        }
 
         let html = `<div class="rec-inner m-${rec.mode}">
-            <div class="rec-reason">${esc(rec.reason)}</div>
             <div class="rec-body">
                 <div class="rec-icon">${iconFor(rec.items)}</div>
-                <div class="rec-title">${esc(rec.items.join(" + "))}</div>
+                <div>
+                    <div class="rec-title">${esc(rec.items.join(" + "))}</div>
+                    ${rec.reason ? `<div class="rec-sub">${esc(rec.reason)}</div>` : ""}
+                </div>
             </div>
             <button class="rec-btn ${allDone ? "done" : ""}" id="rec-btn" ${allDone || state.busy ? "disabled" : ""}>${allDone ? "✓ Geloggt" : "Loggen"}</button>
         </div>`;
+
+        if (rec.weak) {
+            html += `<div class="sub-label">Schwäche</div><div class="opt-grid">`;
+            WEAKNESS_WORKOUTS.forEach(name => {
+                const done = todayLogged.includes(name);
+                html += `<div class="bucket-card ${done ? "done" : ""}" data-workout="${esc(name)}">
+                    <div class="status-circle"></div>
+                    <div class="location-name">${esc(weakShort(name))}</div>
+                </div>`;
+            });
+            html += `</div>`;
+        }
 
         if (todayLogged.length) {
             html += `<div class="sub-label">Heute getan</div>
@@ -730,7 +758,7 @@
                 <div class="row-day">${label}</div>
                 <div class="row-main">
                     <div class="row-title">${ICONS[n.rec.items[0]] || ""} ${esc(n.rec.items.join(" + "))}</div>
-                    <div class="row-sub">${esc(n.rec.reason)}</div>
+                    ${n.rec.reason ? `<div class="row-sub">${esc(n.rec.reason)}</div>` : ""}
                 </div>
             </div>`;
         }).join("");
