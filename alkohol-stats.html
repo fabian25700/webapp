@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Alkohol Stats</title>
+    <style>
+        :root {
+            --accent: #e67e22;
+            --accent-soft: rgba(230, 126, 34, 0.1);
+            --success: #27ae60;
+            --success-soft: rgba(39, 174, 96, 0.1);
+            --danger: #e74c3c;
+            --danger-soft: rgba(231, 76, 60, 0.3);
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.06);
+            --apple-switch-bg: #e3e3e6;
+            --overlay-bg: rgba(15, 23, 42, 0.4);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0f172a;
+                --surface: #1e293b;
+                --text-primary: #f1f5f9;
+                --text-secondary: #94a3b8;
+                --border: #2d3f55;
+                --border-light: #253347;
+                --apple-switch-bg: #1c1c1e;
+                --overlay-bg: rgba(0, 0, 0, 0.6);
+            }
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+
+        /* Header (identisch zur Tracker-Seite) */
+        header {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--bg);
+            padding: calc(env(safe-area-inset-top) + 16px) 20px 14px;
+            border-bottom: 1px solid var(--border-light);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        }
+        .header-top { width: 100%; min-height: 32px; display: flex; align-items: center; justify-content: space-between; position: relative; }
+        .header-left, .header-right { display: flex; align-items: center; z-index: 2; position: relative; }
+        .header-title {
+            position: absolute; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; justify-content: center; gap: 9px;
+            color: var(--text-primary); font-size: 1rem; font-weight: 800;
+            letter-spacing: -.02em; white-space: nowrap; pointer-events: none;
+        }
+        .header-action-btn {
+            min-height: 32px; display: inline-flex; align-items: center; justify-content: center;
+            gap: 7px; padding: 0 10px; border-radius: 9px; background: var(--surface);
+            border: 1px solid var(--border); color: var(--text-primary); box-shadow: var(--shadow);
+            text-decoration: none; font-family: inherit; font-size: .82rem; font-weight: 700;
+            line-height: 1; white-space: nowrap;
+        }
+        .back-container { width: 32px; min-width: 32px; padding: 0; }
+        .back-btn { font-size: .95rem; color: inherit; line-height: 1; }
+        .stats-header-btn { min-width: 76px; text-transform: uppercase; letter-spacing: .05em; font-size: .72rem; }
+        .cloud-status-dot { width: 10px; height: 10px; border-radius: 50%; flex: 0 0 10px; background: var(--text-secondary); transition: all .3s; }
+        .cloud-status-dot.synced { background: var(--success); box-shadow: 0 0 6px var(--success); }
+        .cloud-status-dot.loading { background: var(--accent); transform: scale(1.1); }
+        .cloud-status-dot.error { background: var(--danger); box-shadow: 0 0 8px var(--danger); animation: pulse-danger 1.5s infinite; }
+        @keyframes pulse-danger { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.25); opacity: .7; } 100% { transform: scale(1); opacity: 1; } }
+
+        .cloud-error-banner {
+            display: none; background: var(--danger-soft); border: 1px solid var(--danger);
+            color: var(--text-primary); padding: 8px 12px; border-radius: 10px; font-size: 0.75rem;
+            font-weight: 700; text-align: center; margin: 12px 16px 0;
+        }
+
+        main { padding: 16px; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+        /* Segmented Controls */
+        .segmented-control { display: flex; background: var(--apple-switch-bg); padding: 2px; border-radius: 9px; width: 100%; }
+        .segmented-btn {
+            flex: 1; padding: 8px 0; font-size: 0.82rem; font-weight: 700; border: none; background: transparent;
+            color: var(--text-secondary); border-radius: 7px; cursor: pointer; font-family: inherit;
+            transition: all 0.2s;
+        }
+        .segmented-btn.active { background: var(--surface); color: var(--text-primary); box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.12), 0px 3px 1px rgba(0, 0, 0, 0.04); }
+
+        /* Filter */
+        .filter-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+            padding: 16px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 12px;
+        }
+        .filter-label { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-bottom: -6px; }
+        .filter-row-inputs { display: flex; gap: 10px; width: 100%; }
+        .filter-select {
+            flex: 1; height: 38px; border-radius: 9px; border: 1px solid var(--border);
+            background: var(--bg); color: var(--text-primary); padding: 0 10px; font-size: 16px;
+            font-weight: 600; font-family: inherit; outline: none; cursor: pointer;
+        }
+        .filter-select:focus { border-color: var(--accent); }
+
+        /* Cards */
+        .card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+            padding: 20px; box-shadow: var(--shadow); display: flex; flex-direction: column;
+        }
+        .card-title {
+            font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;
+            color: var(--text-secondary); margin-bottom: 14px; display: flex; align-items: center;
+            justify-content: space-between; gap: 10px;
+        }
+        .card-title-left { display: flex; align-items: center; gap: 10px; }
+        .card-icon {
+            width: 28px; height: 28px; background: var(--accent-soft); color: var(--accent);
+            border-radius: 8px; display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; flex-shrink: 0;
+        }
+        .card-hint { font-size: 0.68rem; font-weight: 700; text-transform: none; letter-spacing: 0; color: var(--text-secondary); opacity: 0.85; }
+
+        /* Dashboard */
+        .dashboard-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 1px solid var(--border-light);
+        }
+        .dashboard-row:last-of-type { border-bottom: none; }
+        .dashboard-row > span:first-child { font-size: 0.92rem; font-weight: 600; color: var(--text-secondary); }
+        .dashboard-row > span:last-child { font-size: 1.05rem; font-weight: 700; display: flex; align-items: baseline; gap: 6px; }
+        .delta { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); }
+
+        .free-wrap { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+        .free-labels { display: flex; justify-content: space-between; font-size: 0.68rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; }
+        .free-track { width: 100%; height: 12px; background: var(--border-light); border-radius: 6px; overflow: hidden; display: flex; }
+        .free-fill { height: 100%; transition: width 0.5s cubic-bezier(0.1, 0.8, 0.3, 1); }
+        .free-fill.ok { background: var(--success); }
+        .free-fill.drink { background: var(--accent); }
+        .dash-footnote { margin-top: 14px; font-size: 0.68rem; line-height: 1.4; font-weight: 600; color: var(--text-secondary); }
+
+        /* Spalten-Diagramme */
+        .tl-chart { display: flex; align-items: stretch; justify-content: space-between; height: 150px; gap: 3px; margin-top: 22px; }
+        .tl-chart.dense { gap: 2px; }
+        .tl-col { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; position: relative; cursor: pointer; }
+        .tl-bar-area { flex: 1; width: 100%; position: relative; border-bottom: 1px solid var(--border); }
+        .tl-bar {
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 22px; background: var(--accent);
+            border-radius: 4px 4px 0 0; transition: height 0.4s ease;
+        }
+        .tl-bar.zero { height: 2px !important; opacity: 0.25; border-radius: 1px; }
+        .tl-bar.dim { opacity: 0.5; }
+        .tl-val { position: absolute; left: 50%; transform: translateX(-50%); font-size: 0.6rem; font-weight: 800; color: var(--text-secondary); white-space: nowrap; margin-bottom: 3px; }
+        .tl-label { font-size: 0.6rem; font-weight: 700; color: var(--text-secondary); margin-top: 4px; height: 12px; white-space: nowrap; text-align: center; }
+        .tl-label.now { color: var(--accent); }
+        .tl-label.future { opacity: 0.4; }
+        .tl-tip {
+            position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); margin-bottom: 6px;
+            background: var(--text-primary); color: var(--surface); padding: 5px 9px; border-radius: 7px;
+            font-size: 0.65rem; font-weight: 700; line-height: 1.35; white-space: nowrap; z-index: 20;
+            display: none; box-shadow: var(--shadow); pointer-events: none;
+        }
+        .tl-col.tip-left .tl-tip { left: 0; transform: none; }
+        .tl-col.tip-right .tl-tip { left: auto; right: 0; transform: none; }
+        .tl-col.show .tl-tip { display: block; }
+        @media (hover: hover) { .tl-col:hover .tl-tip { display: block; } }
+
+        /* Balken-Listen */
+        .bar-visual-wrapper { display: flex; flex-direction: column; gap: 4px; margin-top: 12px; }
+        .bar-visual-wrapper:first-child { margin-top: 0; }
+        .bar-visual-row { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; gap: 8px; }
+        .bar-visual-row > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .bar-visual-row small { font-size: 0.68rem; opacity: 0.8; }
+        .bar-visual-track { width: 100%; height: 22px; background: var(--border-light); border-radius: 6px; overflow: hidden; position: relative; }
+        .bar-visual-fill { height: 100%; width: 0%; background: var(--accent); transition: width 0.6s cubic-bezier(0.1, 0.8, 0.3, 1); }
+        .bar-visual-text { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; font-weight: 800; color: var(--text-primary); }
+        .bar-visual-wrapper:active .bar-visual-track { filter: brightness(0.96); }
+
+        /* Events */
+        .event-row {
+            display: flex; align-items: center; gap: 12px; padding: 10px 0;
+            border-bottom: 1px solid var(--border-light); cursor: pointer;
+        }
+        .event-row:last-of-type { border-bottom: none; }
+        .event-row:active { opacity: 0.7; }
+        .event-icon { width: 34px; height: 34px; border-radius: 10px; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; font-size: 1.05rem; flex-shrink: 0; }
+        .event-main { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+        .event-name { font-size: 0.9rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .event-meta { font-size: 0.7rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; }
+        .event-side { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
+        .event-side b { font-size: 0.9rem; font-weight: 800; }
+        .event-side small { font-size: 0.68rem; font-weight: 700; color: var(--text-secondary); }
+
+        .more-btn {
+            margin-top: 12px; width: 100%; height: 38px; border-radius: 10px; background: var(--bg);
+            color: var(--text-secondary); border: 1px solid var(--border); font-weight: 700; font-size: 0.75rem;
+            text-transform: uppercase; letter-spacing: 0.05em; cursor: pointer; font-family: inherit;
+        }
+        .more-btn:active { background: var(--border-light); }
+
+        .status-text-loader { text-align: center; color: var(--text-secondary); font-size: 0.85rem; font-weight: 600; padding: 20px 0; }
+
+        /* Modal / Wiki */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--overlay-bg); z-index: 1000; display: none;
+            align-items: center; justify-content: center; padding: 16px;
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-card {
+            background: var(--surface); border: 1px solid var(--border); width: 100%; max-width: 450px;
+            border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); padding: 20px;
+            display: flex; flex-direction: column; gap: 16px; animation: modalSlidUp 0.25s ease-out;
+            max-height: 85vh; overflow-y: auto;
+        }
+        @keyframes modalSlidUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-title { font-size: 1rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+        .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+        .cancel-btn {
+            width: 100%; height: 40px; border-radius: 10px; background: transparent; color: var(--text-secondary);
+            border: 1px solid var(--border); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; cursor: pointer;
+        }
+        .wiki-header { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .wiki-badge { width: 36px; height: 36px; border-radius: 10px; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+        .wiki-title-container { display: flex; flex-direction: column; min-width: 0; }
+        .wiki-subtitle { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: var(--text-secondary); letter-spacing: 0.05em; }
+        .wiki-stats-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+        .wiki-section-label { font-size: 0.68rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); margin-top: 6px; }
+        .wiki-stat-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--bg); padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 0.82rem; }
+        .wiki-stat-label { font-weight: 600; color: var(--text-secondary); }
+        .wiki-stat-value { font-weight: 800; color: var(--text-primary); text-align: right; }
+
+        @media (max-width: 420px) {
+            .card { padding: 16px; }
+            .segmented-btn { font-size: 0.76rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Wiki Details Modal -->
+<div class="modal-overlay" id="wiki-detail-modal" onclick="if(event.target === this) closeWikiModal()">
+    <div class="modal-card">
+        <div class="wiki-header">
+            <div class="wiki-badge" id="wiki-modal-icon">📖</div>
+            <div class="wiki-title-container">
+                <span class="wiki-subtitle" id="wiki-modal-subtitle">Wiki Detail</span>
+                <span class="modal-title" id="wiki-modal-title">Eintrag</span>
+            </div>
+        </div>
+
+        <div class="wiki-stats-list" id="wiki-modal-body"></div>
+
+        <div class="modal-actions" style="grid-template-columns: 1fr;">
+            <button class="cancel-btn" onclick="closeWikiModal()">Schließen</button>
+        </div>
+    </div>
+</div>
+
+<header>
+    <div class="header-top">
+        <div class="header-left">
+            <a href="alkohol.html" class="header-action-btn back-container" aria-label="Zurück zum Tracker">
+                <span class="back-btn">&larr;</span>
+            </a>
+        </div>
+        <div class="header-title">
+            <span>Alkohol</span>
+            <div class="cloud-status-dot" id="cloud-status-dot" title="Cloud-Status" aria-label="Cloud-Status"></div>
+        </div>
+        <div class="header-right">
+            <a class="header-action-btn stats-header-btn" href="alkohol.html" aria-label="Zum Tracker">Tracker <span>&rarr;</span></a>
+        </div>
+    </div>
+</header>
+
+<div class="cloud-error-banner" id="cloud-error-box">Sync-Fehler: Verbindung zur Cloud fehlgeschlagen.</div>
+
+<main>
+    <!-- Filter -->
+    <div class="filter-card">
+        <div class="segmented-control">
+            <button id="view-mode-month" class="segmented-btn active" onclick="setViewMode('month')">Monat</button>
+            <button id="view-mode-year" class="segmented-btn" onclick="setViewMode('year')">Jahr</button>
+            <button id="view-mode-all" class="segmented-btn" onclick="setViewMode('all')">Gesamt</button>
+        </div>
+        <div class="filter-row-inputs" id="filter-row">
+            <select id="filter-year" class="filter-select" onchange="renderStats()"></select>
+            <select id="filter-month" class="filter-select" onchange="renderStats()">
+                <option value="1">Januar</option>
+                <option value="2">Februar</option>
+                <option value="3">März</option>
+                <option value="4">April</option>
+                <option value="5">Mai</option>
+                <option value="6">Juni</option>
+                <option value="7">Juli</option>
+                <option value="8">August</option>
+                <option value="9">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Dezember</option>
+            </select>
+        </div>
+        <div class="filter-label">Auswertung nach</div>
+        <div class="segmented-control">
+            <button id="metric-count" class="segmented-btn active" onclick="setMetric('count')">Getränke</button>
+            <button id="metric-vol" class="segmented-btn" onclick="setMetric('vol')">Liter</button>
+            <button id="metric-alc" class="segmented-btn" onclick="setMetric('alc')">Alkohol ≈</button>
+        </div>
+    </div>
+
+    <!-- Übersicht -->
+    <div class="card">
+        <div class="card-title">
+            <div class="card-title-left"><div class="card-icon">📊</div><span>Übersicht</span></div>
+            <span class="card-hint" id="period-label"></span>
+        </div>
+        <div id="dashboard-body"><p class="status-text-loader">Lade Auswertungen...</p></div>
+    </div>
+
+    <!-- Verlauf -->
+    <div class="card">
+        <div class="card-title">
+            <div class="card-title-left"><div class="card-icon">📈</div><span>Verlauf</span></div>
+            <span class="card-hint" id="trend-hint"></span>
+        </div>
+        <div id="trend-chart"><p class="status-text-loader">Lade Auswertungen...</p></div>
+    </div>
+
+    <!-- Wochentage -->
+    <div class="card">
+        <div class="card-title">
+            <div class="card-title-left"><div class="card-icon">📅</div><span>Wochentage</span></div>
+        </div>
+        <div id="weekday-chart"><p class="status-text-loader">Lade Auswertungen...</p></div>
+    </div>
+
+    <!-- Getränke-Kategorien -->
+    <div class="card">
+        <div class="card-title">
+            <div class="card-title-left"><div class="card-icon">🍻</div><span>Getränke-Kategorien</span></div>
+        </div>
+        <div id="drink-category-container"><p class="status-text-loader">Lade Auswertungen...</p></div>
+    </div>
+
+    <!-- Ranking -->
+    <div class="card">
+        <div class="card-title">
+            <div class="card-title-left"><div class="card-icon">🏆</div><span>Getränke-Ranking</span></div>
+        </div>
+        <div id="ranking-container"><p class="status-text-loader">Lade Auswertungen...</p></div>
+    </div>
+
+    <!-- Anlass-Kategorien -->
+    <div class="card">
+        <div class="card-title">
+            <div class="card-title-left"><div class="card-icon">📍</div><span>Anlass-Kategorien</span></div>
+        </div>
+        <div id="event-category-container"><p class="status-text-loader">Lade Auswertungen...</p></div>
+    </div>
+
+    <!-- Events -->
+    <div class="card">
+        <div class="card-title">
+            <div class="card-title-left"><div class="card-icon">🎟️</div><span>Events</span></div>
+            <span class="card-hint" id="events-hint"></span>
+        </div>
+        <div id="events-container"><p class="status-text-loader">Lade Auswertungen...</p></div>
+    </div>
+
+    <!-- Highlights -->
+    <div class="card">
+        <div class="card-title">
+            <div class="card-title-left"><div class="card-icon">✨</div><span>Highlights</span></div>
+        </div>
+        <div id="highlights-container"><p class="status-text-loader">Lade Auswertungen...</p></div>
+    </div>
+</main>
+
+<script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyswriq1vR_F9f-2LQX0nnFB8jNcj2waVbQjw6TS_SU7cz1Ex6mrdxG5Tm9FheNy8OWfw/exec";
+
+    const categoryIcons = { "Bier": "🍺", "Wein": "🍷", "Spirituose": "🥃", "Mixgetränk": "🍹" };
+    const eventIcons = { "Fußball": "⚽", "Kegeln": "🎳", "Restaurant": "🍽️", "Party": "🎉", "Feier": "🥳", "Konzert": "🎸", "Bar": "🍸" };
+
+    /* Annahmen für die Reinalkohol-Schätzung (Vol.-% je Getränke-Kategorie) – hier anpassbar */
+    const ABV = { "Bier": 0.05, "Wein": 0.12, "Spirituose": 0.40, "Mixgetränk": 0.10 };
+    const ABV_DEFAULT = 0.05;
+    const ALC_DENSITY = 0.789; /* g Alkohol pro ml */
+
+    const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+    const MONTHS_SHORT = ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'];
+    const WEEKDAYS_SHORT = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+    const WEEKDAYS_LONG = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag', 'Sonntag'];
+
+    let globalHistory = [];
+    let dataLoaded = false;
+    let cloudSyncTimeout = null;
+
+    let viewMode = 'month';      /* month | year | all */
+    let metric = 'count';        /* count | vol | alc */
+    const expandState = { drinks: false, events: false };
+
+    let allRows = [];
+    let periodRows = [];
+    let currentPeriod = null;
+
+    /* ---------- Helfer ---------- */
+    const pad = n => String(n).padStart(2, '0');
+    const toNum = v => parseFloat(String(v).replace(',', '.'));
+    const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const fmtNum = (v, dec) => v.toLocaleString('de-DE', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    const fmtVol = v => `${fmtNum(v, v >= 10 ? 1 : 2)} L`;
+    const fmtAlc = v => `${fmtNum(Math.round(v), 0)} g`;
+    const fmtCount = v => `${Math.round(v)}x`;
+    const fmtDateObj = dt => `${pad(dt.getDate())}.${pad(dt.getMonth() + 1)}.${dt.getFullYear()}`;
+    const dayKeyOf = dt => `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
+    const startOfDay = dt => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+    const daysBetween = (a, b) => Math.round((b - a) / 86400000);
+
+    function fmtMetric(v, m) {
+        m = m || metric;
+        if (m === 'count') return fmtCount(v);
+        if (m === 'vol') return fmtVol(v);
+        return fmtAlc(v);
+    }
+    function metricOf(o, m) {
+        m = m || metric;
+        if (m === 'count') return o.count;
+        if (m === 'vol') return o.vol;
+        return o.alc;
+    }
+    function fmtDelta(diff, m) {
+        if (Math.abs(diff) < 0.005) return '±0';
+        const sign = diff > 0 ? '+' : '−';
+        const abs = Math.abs(diff);
+        if (m === 'count' || m === 'days' || m === 'events') return `${sign}${Math.round(abs)}`;
+        if (m === 'vol') return `${sign}${fmtVol(abs)}`;
+        return `${sign}${fmtAlc(abs)}`;
+    }
+
+    /* ---------- Cloud-Status ---------- */
+    function updateCloudStatus(status) {
+        const dot = document.getElementById('cloud-status-dot');
+        if (!dot) return;
+        if (cloudSyncTimeout && status !== "Cloud synced") { clearTimeout(cloudSyncTimeout); cloudSyncTimeout = null; }
+        dot.className = 'cloud-status-dot';
+        if (status === "Cloud Fehler") {
+            dot.classList.add('error');
+            dot.title = 'Cloud-Fehler';
+            dot.setAttribute('aria-label', 'Cloud-Fehler');
+        } else if (status === "Cloud synced") {
+            dot.classList.add('synced');
+            dot.title = 'Cloud synchronisiert';
+            dot.setAttribute('aria-label', 'Cloud synchronisiert');
+            cloudSyncTimeout = setTimeout(() => {
+                dot.className = 'cloud-status-dot';
+                dot.title = 'Cloud Live';
+                dot.setAttribute('aria-label', 'Cloud Live');
+                cloudSyncTimeout = null;
+            }, 3000);
+        } else if (status === "Cloud lädt") {
+            dot.classList.add('loading');
+            dot.title = 'Cloud lädt';
+            dot.setAttribute('aria-label', 'Cloud lädt');
+        } else {
+            dot.title = 'Cloud Live';
+            dot.setAttribute('aria-label', 'Cloud Live');
+        }
+    }
+
+    /* ---------- Daten laden ---------- */
+    function parseDatum(v) {
+        if (!v) return null;
+        const str = String(v).trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+            const p = str.split('-');
+            return { y: +p[0], m: +p[1], d: +p[2] };
+        }
+        if (str.includes('T')) {
+            const parsed = new Date(str);
+            if (!isNaN(parsed.getTime())) return { y: parsed.getFullYear(), m: parsed.getMonth() + 1, d: parsed.getDate() };
+        }
+        const match = str.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})/);
+        if (match) {
+            let y = match[3];
+            if (y.length === 2) y = "20" + y;
+            return { y: +y, m: +match[2], d: +match[1] };
+        }
+        return null;
+    }
+
+    function buildRows() {
+        const out = [];
+        globalHistory.forEach((item, idx) => {
+            if (!item || !item.name || String(item.name).trim() === "") return;
+            const dt = parseDatum(item.datum);
+            if (!dt) return;
+            const vol = toNum(item.groesse);
+            if (isNaN(vol)) return;
+            const cat = item.kategorie && String(item.kategorie).trim() !== "" ? String(item.kategorie).trim() : "Sonstige";
+            const abv = ABV[cat] !== undefined ? ABV[cat] : ABV_DEFAULT;
+            const date = new Date(dt.y, dt.m - 1, dt.d);
+            out.push({
+                idx,
+                name: String(item.name).trim(),
+                cat,
+                vol,
+                alc: vol * 1000 * abv * ALC_DENSITY,
+                anlass: item.anlass_name ? String(item.anlass_name).trim() : "",
+                anlassKat: item.anlass_kategorie ? String(item.anlass_kategorie).trim() : "",
+                y: dt.y, m: dt.m, d: dt.d,
+                date,
+                dayKey: dayKeyOf(date)
+            });
+        });
+        return out;
+    }
+
+    function fetchData() {
+        updateCloudStatus("Cloud lädt");
+        fetch(GOOGLE_SCRIPT_URL)
+            .then(res => { if (!res.ok) throw new Error('Network error'); return res.json(); })
+            .then(data => {
+                document.getElementById('cloud-error-box').style.display = 'none';
+                globalHistory = (data && !data.error && data.history) ? data.history : [];
+                dataLoaded = true;
+                populateYears();
+                renderStats();
+                updateCloudStatus("Cloud Live");
+            })
+            .catch(err => {
+                document.getElementById('cloud-error-box').style.display = 'block';
+                updateCloudStatus("Cloud Fehler");
+                console.error(err);
+                if (!dataLoaded) {
+                    ['dashboard-body', 'trend-chart', 'weekday-chart', 'drink-category-container', 'ranking-container', 'event-category-container', 'events-container', 'highlights-container'].forEach(id => {
+                        document.getElementById(id).innerHTML = '<p class="status-text-loader" style="color:var(--danger)">Verbindung fehlgeschlagen. Prüfe dein Google Script.</p>';
+                    });
+                }
+            });
+    }
+
+    /* ---------- Filter ---------- */
+    function populateYears() {
+        const rows = buildRows();
+        const nowYear = new Date().getFullYear();
+        const years = new Set([nowYear]);
+        rows.forEach(r => years.add(r.y));
+        const sorted = [...years].sort((a, b) => b - a);
+        const sel = document.getElementById('filter-year');
+        const prev = sel.value;
+        sel.innerHTML = sorted.map(y => `<option value="${y}">${y}</option>`).join('');
+        if (prev && sorted.includes(+prev)) sel.value = prev;
+        else sel.value = String(nowYear);
+    }
+
+    function setViewMode(mode) {
+        viewMode = mode;
+        ['month', 'year', 'all'].forEach(m => document.getElementById('view-mode-' + m).classList.toggle('active', m === mode));
+        document.getElementById('filter-row').style.display = mode === 'all' ? 'none' : 'flex';
+        document.getElementById('filter-month').style.display = mode === 'month' ? 'block' : 'none';
+        renderStats();
+    }
+
+    function setMetric(m) {
+        metric = m;
+        ['count', 'vol', 'alc'].forEach(k => document.getElementById('metric-' + k).classList.toggle('active', k === m));
+        renderStats();
+    }
+
+    function getPeriod(rows) {
+        const now = new Date();
+        const today = startOfDay(now);
+        const yearSel = +document.getElementById('filter-year').value || now.getFullYear();
+        const monthSel = +document.getElementById('filter-month').value || (now.getMonth() + 1);
+        let start, end, label, prev = null;
+
+        if (viewMode === 'month') {
+            start = new Date(yearSel, monthSel - 1, 1);
+            end = new Date(yearSel, monthSel, 0);
+            label = `${MONTHS[monthSel - 1]} ${yearSel}`;
+            prev = { start: new Date(yearSel, monthSel - 2, 1), end: new Date(yearSel, monthSel - 1, 0), label: 'Vormonat' };
+        } else if (viewMode === 'year') {
+            start = new Date(yearSel, 0, 1);
+            end = new Date(yearSel, 11, 31);
+            label = String(yearSel);
+            prev = { start: new Date(yearSel - 1, 0, 1), end: new Date(yearSel - 1, 11, 31), label: 'Vorjahr' };
+        } else {
+            let first = today;
+            rows.forEach(r => { if (r.date < first) first = r.date; });
+            start = first;
+            end = today;
+            label = 'Gesamt';
+        }
+
+        const lastDay = end < today ? end : today;
+        const days = lastDay < start ? 0 : daysBetween(start, lastDay) + 1;
+
+        if (prev) {
+            /* Vergleich mit gleich vielen Tagen im Vorzeitraum, damit angebrochene Zeiträume fair verglichen werden */
+            const adjEnd = new Date(prev.start.getFullYear(), prev.start.getMonth(), prev.start.getDate() + Math.max(days, 1) - 1);
+            prev.end = adjEnd < prev.end ? adjEnd : prev.end;
+        }
+
+        return { start, end, lastDay, days, label, prev, today };
+    }
+
+    function inRange(rows, start, end) {
+        return rows.filter(r => r.date >= start && r.date <= end);
+    }
+
+    /* ---------- Aggregation ---------- */
+    function aggregate(rows) {
+        let count = 0, vol = 0, alc = 0;
+        const drinkDays = new Set();
+        const events = new Set();
+        rows.forEach(r => {
+            count++; vol += r.vol; alc += r.alc;
+            drinkDays.add(r.dayKey);
+            if (r.anlass) events.add(r.anlass + '|' + r.dayKey);
+        });
+        return { count, vol, alc, drinkDays, events };
+    }
+
+    function groupBy(rows, keyFn) {
+        const map = new Map();
+        rows.forEach(r => {
+            const k = keyFn(r);
+            if (k === null || k === undefined || k === '') return;
+            let g = map.get(k);
+            if (!g) { g = { key: k, count: 0, vol: 0, alc: 0, rows: [] }; map.set(k, g); }
+            g.count++; g.vol += r.vol; g.alc += r.alc; g.rows.push(r);
+        });
+        return [...map.values()];
+    }
+
+    function topKey(rows, keyFn) {
+        const groups = groupBy(rows, keyFn).sort((a, b) => b.count - a.count);
+        return groups.length ? groups[0].key : null;
+    }
+
+    /* ---------- Rendering ---------- */
+    function renderStats() {
+        allRows = buildRows();
+        currentPeriod = getPeriod(allRows);
+        const p = currentPeriod;
+        periodRows = inRange(allRows, p.start, p.end);
+        const prevRows = p.prev ? inRange(allRows, p.prev.start, p.prev.end) : null;
+
+        document.getElementById('period-label').textContent = p.label;
+
+        renderDashboard(prevRows);
+        renderTrend();
+        renderWeekdays();
+        renderDrinkCategories();
+        renderRanking();
+        renderEventCategories();
+        renderEvents();
+        renderHighlights();
+    }
+
+    function renderDashboard(prevRows) {
+        const p = currentPeriod;
+        const cur = aggregate(periodRows);
+        const prv = prevRows ? aggregate(prevRows) : null;
+        const drinkDays = cur.drinkDays.size;
+        const freeDays = Math.max(0, p.days - drinkDays);
+        const freePct = p.days > 0 ? Math.round((freeDays / p.days) * 100) : 0;
+        const drinkPct = p.days > 0 ? 100 - freePct : 0;
+        const avgPerDay = drinkDays > 0 ? cur.count / drinkDays : 0;
+
+        const row = (label, valueText, delta) => `
+            <div class="dashboard-row">
+                <span>${label}</span>
+                <span>${valueText}${delta ? `<small class="delta">${delta}</small>` : ''}</span>
+            </div>`;
+
+        const d = (curV, prvV, m) => prv ? fmtDelta(curV - prvV, m) : '';
+
+        const abvInfo = Object.keys(ABV).map(k => `${k} ${Math.round(ABV[k] * 100)} %`).join(', ');
+
+        let html = '';
+        html += row('Getränke', String(cur.count), d(cur.count, prv && prv.count, 'count'));
+        html += row('Volumen', fmtVol(cur.vol), d(cur.vol, prv && prv.vol, 'vol'));
+        html += row('Reinalkohol ≈', fmtAlc(cur.alc), d(cur.alc, prv && prv.alc, 'alc'));
+        html += row('Trinktage', String(drinkDays), d(drinkDays, prv && prv.drinkDays.size, 'days'));
+        html += row('Ø pro Trinktag', drinkDays > 0 ? `${fmtNum(avgPerDay, 1)} Drinks` : '–', '');
+        html += row('Anlässe', String(cur.events.size), d(cur.events.size, prv && prv.events.size, 'events'));
+
+        html += `
+            <div class="free-wrap">
+                <div class="free-labels"><span>Trinkfrei</span><span>Getrunken</span></div>
+                <div class="free-track">
+                    <div class="free-fill ok" style="width:${freePct}%"></div>
+                    <div class="free-fill drink" style="width:${drinkPct}%"></div>
+                </div>
+                <div class="free-labels"><span>${freeDays} Tage (${freePct}%)</span><span>${drinkDays} Tage (${drinkPct}%)</span></div>
+            </div>`;
+
+        html += `<div class="dash-footnote">${prv ? `Kleine Werte neben den Zahlen: Veränderung zum ${p.prev.label} (gleiche Anzahl Tage). ` : ''}Reinalkohol ist geschätzt aus der Kategorie (${abvInfo}).</div>`;
+
+        document.getElementById('dashboard-body').innerHTML = html;
+    }
+
+    /* Spalten-Diagramm (Verlauf + Wochentage) */
+    function renderColumns(el, cols, opts) {
+        opts = opts || {};
+        el.innerHTML = '';
+        const max = Math.max(0, ...cols.map(c => c.val));
+        if (max <= 0) {
+            el.innerHTML = '<p class="status-text-loader">Keine Daten im Zeitraum.</p>';
+            return;
+        }
+        const chart = document.createElement('div');
+        chart.className = 'tl-chart' + (cols.length > 20 ? ' dense' : '');
+        const n = cols.length;
+
+        cols.forEach((c, i) => {
+            const col = document.createElement('div');
+            let cls = 'tl-col';
+            if (n > 8 && i < 3) cls += ' tip-left';
+            if (n > 8 && i >= n - 3) cls += ' tip-right';
+            col.className = cls;
+
+            const pct = c.val > 0 ? Math.max((c.val / max) * 100, 4) : 0;
+            const barCls = 'tl-bar' + (c.val <= 0 ? ' zero' : '') + (opts.dimNonPeak && c.val > 0 && !c.peak ? ' dim' : '');
+            const valLabel = opts.valueLabels && c.val > 0 ? `<div class="tl-val" style="bottom:${pct}%">${fmtMetric(c.val)}</div>` : '';
+
+            col.innerHTML = `
+                <div class="tl-tip">${c.tip}</div>
+                <div class="tl-bar-area">
+                    ${valLabel}
+                    <div class="${barCls}" style="height:${pct}%"></div>
+                </div>
+                <div class="tl-label${c.now ? ' now' : ''}${c.future ? ' future' : ''}">${c.show ? esc(c.label) : ''}</div>
+            `;
+            col.onclick = (e) => {
+                e.stopPropagation();
+                const was = col.classList.contains('show');
+                document.querySelectorAll('.tl-col.show').forEach(x => x.classList.remove('show'));
+                if (!was) col.classList.add('show');
+            };
+            chart.appendChild(col);
+        });
+        el.appendChild(chart);
+    }
+
+    function tipHtml(title, agg) {
+        return `<b>${esc(title)}</b><br>${fmtCount(agg.count)} · ${fmtVol(agg.vol)} · ${fmtAlc(agg.alc)}`;
+    }
+
+    function renderTrend() {
+        const p = currentPeriod;
+        const today = p.today;
+        const buckets = [];
+        let keyFn;
+        let hint = '';
+
+        if (viewMode === 'month') {
+            const y = p.start.getFullYear(), m = p.start.getMonth();
+            const dim = p.end.getDate();
+            for (let d = 1; d <= dim; d++) {
+                const dt = new Date(y, m, d);
+                buckets.push({
+                    key: dayKeyOf(dt), label: String(d), show: (d === 1 || d % 5 === 0),
+                    tip: `${WEEKDAYS_SHORT[(dt.getDay() + 6) % 7]}, ${d}. ${MONTHS[m]}`,
+                    now: dt.getTime() === today.getTime(), future: dt > today
+                });
+            }
+            keyFn = r => r.dayKey;
+            hint = 'pro Tag';
+        } else if (viewMode === 'year') {
+            const y = p.start.getFullYear();
+            for (let i = 0; i < 12; i++) {
+                buckets.push({
+                    key: `${y}-${i + 1}`, label: MONTHS_SHORT[i], show: true,
+                    tip: `${MONTHS[i]} ${y}`,
+                    now: today.getFullYear() === y && today.getMonth() === i,
+                    future: new Date(y, i, 1) > today
+                });
+            }
+            keyFn = r => `${r.y}-${r.m}`;
+            hint = 'pro Monat';
+        } else {
+            const sy = p.start.getFullYear(), sm = p.start.getMonth();
+            const ty = today.getFullYear(), tm = today.getMonth();
+            const monthCount = (ty - sy) * 12 + (tm - sm) + 1;
+            if (monthCount <= 18) {
+                for (let i = 0; i < monthCount; i++) {
+                    const dt = new Date(sy, sm + i, 1);
+                    buckets.push({
+                        key: `${dt.getFullYear()}-${dt.getMonth() + 1}`,
+                        label: `${pad(dt.getMonth() + 1)}/${String(dt.getFullYear()).slice(2)}`,
+                        show: true, tip: `${MONTHS[dt.getMonth()]} ${dt.getFullYear()}`,
+                        now: i === monthCount - 1, future: false
+                    });
+                }
+                keyFn = r => `${r.y}-${r.m}`;
+                hint = 'pro Monat';
+            } else {
+                for (let y = sy; y <= ty; y++) {
+                    buckets.push({ key: String(y), label: String(y), show: true, tip: String(y), now: y === ty, future: false });
+                }
+                keyFn = r => String(r.y);
+                hint = 'pro Jahr';
+            }
+        }
+
+        const map = {};
+        buckets.forEach(b => { b.count = 0; b.vol = 0; b.alc = 0; map[b.key] = b; });
+        periodRows.forEach(r => {
+            const b = map[keyFn(r)];
+            if (b) { b.count++; b.vol += r.vol; b.alc += r.alc; }
+        });
+
+        /* Beschriftungen ausdünnen, wenn zu viele Spalten */
+        if (buckets.length > 8 && viewMode !== 'month') {
+            const step = Math.ceil(buckets.length / 7);
+            buckets.forEach((b, i) => { b.show = (i % step === 0) || i === buckets.length - 1; });
+        }
+
+        const cols = buckets.map(b => ({
+            label: b.label, show: b.show, now: b.now, future: b.future,
+            tip: tipHtml(b.tip, b), val: metricOf(b)
+        }));
+
+        document.getElementById('trend-hint').textContent = hint;
+        renderColumns(document.getElementById('trend-chart'), cols, {});
+    }
+
+    function renderWeekdays() {
+        const p = currentPeriod;
+        const sums = WEEKDAYS_SHORT.map(() => ({ count: 0, vol: 0, alc: 0 }));
+        const occ = WEEKDAYS_SHORT.map(() => 0);
+
+        for (let t = new Date(p.start); t <= p.lastDay; t.setDate(t.getDate() + 1)) {
+            occ[(t.getDay() + 6) % 7]++;
+        }
+        periodRows.forEach(r => {
+            const w = (r.date.getDay() + 6) % 7;
+            sums[w].count++; sums[w].vol += r.vol; sums[w].alc += r.alc;
+        });
+
+        const vals = sums.map(s => metricOf(s));
+        const peakVal = Math.max(0, ...vals);
+
+        const cols = WEEKDAYS_SHORT.map((wd, i) => {
+            const avg = occ[i] > 0 ? vals[i] / occ[i] : 0;
+            const avgTxt = metric === 'count' ? `${fmtNum(avg, 1)} Drinks` : fmtMetric(avg);
+            return {
+                label: wd, show: true, now: false, future: false,
+                tip: `${tipHtml(WEEKDAYS_LONG[i], sums[i])}<br>Ø ${avgTxt} pro ${WEEKDAYS_LONG[i]}`,
+                val: vals[i], peak: vals[i] > 0 && vals[i] === peakVal
+            };
+        });
+
+        renderColumns(document.getElementById('weekday-chart'), cols, { valueLabels: true, dimNonPeak: true });
+    }
+
+    /* Balkenliste (Kategorien, Ranking, Anlass-Kategorien) */
+    function renderBarList(containerId, groups, opt) {
+        const el = document.getElementById(containerId);
+        el.innerHTML = '';
+        if (groups.length === 0) {
+            el.innerHTML = `<p class="status-text-loader">${opt.empty}</p>`;
+            return;
+        }
+        const sorted = groups.slice().sort((a, b) => (metricOf(b) - metricOf(a)) || (b.count - a.count));
+        const total = sorted.reduce((s, g) => s + metricOf(g), 0);
+        const max = metricOf(sorted[0]);
+        const limit = opt.limit && !opt.expanded ? opt.limit : sorted.length;
+
+        sorted.slice(0, limit).forEach(g => {
+            const v = metricOf(g);
+            const row = document.createElement('div');
+            row.className = 'bar-visual-wrapper';
+            row.style.cursor = 'pointer';
+            row.innerHTML = `
+                <div class="bar-visual-row">
+                    <span>${opt.icon(g)} ${esc(opt.label(g))}${opt.sub ? ` <small>${esc(opt.sub(g))}</small>` : ''}</span>
+                    <span>${total > 0 ? Math.round((v / total) * 100) : 0}%</span>
+                </div>
+                <div class="bar-visual-track">
+                    <div class="bar-visual-fill" style="width:${max > 0 ? (v / max) * 100 : 0}%"></div>
+                    <div class="bar-visual-text">${fmtMetric(v)}</div>
+                </div>`;
+            row.onclick = () => opt.onClick(g);
+            el.appendChild(row);
+        });
+
+        if (opt.limit && sorted.length > opt.limit) {
+            const btn = document.createElement('button');
+            btn.className = 'more-btn';
+            btn.textContent = opt.expanded ? 'Weniger anzeigen' : `Alle ${sorted.length} anzeigen`;
+            btn.onclick = opt.toggle;
+            el.appendChild(btn);
+        }
+    }
+
+    function renderDrinkCategories() {
+        const groups = groupBy(periodRows, r => r.cat);
+        renderBarList('drink-category-container', groups, {
+            empty: 'Keine Getränke im Zeitraum.',
+            icon: g => categoryIcons[g.key] || '🥤',
+            label: g => g.key,
+            onClick: g => showDrinkCatWiki(g)
+        });
+    }
+
+    function renderRanking() {
+        const groups = groupBy(periodRows, r => `${r.name}|${r.vol}`);
+        renderBarList('ranking-container', groups, {
+            empty: 'Keine Getränke im Zeitraum.',
+            limit: 5,
+            expanded: expandState.drinks,
+            toggle: () => { expandState.drinks = !expandState.drinks; renderRanking(); },
+            icon: g => categoryIcons[g.rows[0].cat] || '🥤',
+            label: g => g.rows[0].name,
+            sub: g => `${g.rows[0].vol.toFixed(2)} L`,
+            onClick: g => showDrinkWiki(g)
+        });
+    }
+
+    function renderEventCategories() {
+        const groups = groupBy(periodRows, r => r.anlassKat);
+        renderBarList('event-category-container', groups, {
+            empty: 'Keine Anlass-Daten im Zeitraum.',
+            icon: g => eventIcons[g.key] || '📍',
+            label: g => g.key,
+            onClick: g => showEventCatWiki(g)
+        });
+    }
+
+    function renderEvents() {
+        const el = document.getElementById('events-container');
+        el.innerHTML = '';
+        const rev = periodRows.slice().sort((a, b) => b.idx - a.idx);
+        const events = groupBy(rev, r => `${r.anlass || 'Ohne Anlass'}|${r.dayKey}`);
+        document.getElementById('events-hint').textContent = events.length ? `${events.length} im Zeitraum` : '';
+
+        if (events.length === 0) {
+            el.innerHTML = '<p class="status-text-loader">Keine Events im Zeitraum.</p>';
+            return;
+        }
+
+        const limit = expandState.events ? events.length : 5;
+        events.slice(0, limit).forEach(g => {
+            const first = g.rows[0];
+            const name = first.anlass || 'Ohne Anlass';
+            const icon = first.anlass ? (eventIcons[first.anlassKat] || '🎉') : '📅';
+            const primary = fmtMetric(metricOf(g));
+            const secondary = metric === 'count' ? fmtVol(g.vol) : fmtCount(g.count);
+            const row = document.createElement('div');
+            row.className = 'event-row';
+            row.innerHTML = `
+                <div class="event-icon">${icon}</div>
+                <div class="event-main">
+                    <span class="event-name">${esc(name)}</span>
+                    <span class="event-meta">${fmtDateObj(first.date)}${first.anlassKat ? ' · ' + esc(first.anlassKat) : ''}</span>
+                </div>
+                <div class="event-side"><b>${primary}</b><small>${secondary}</small></div>`;
+            row.onclick = () => showEventWiki(g);
+            el.appendChild(row);
+        });
+
+        if (events.length > 5) {
+            const btn = document.createElement('button');
+            btn.className = 'more-btn';
+            btn.textContent = expandState.events ? 'Weniger anzeigen' : `Alle ${events.length} Events anzeigen`;
+            btn.onclick = () => { expandState.events = !expandState.events; renderEvents(); };
+            el.appendChild(btn);
+        }
+    }
+
+    function renderHighlights() {
+        const p = currentPeriod;
+        const el = document.getElementById('highlights-container');
+        const row = (label, value) => `<div class="dashboard-row"><span>${label}</span><span>${value}</span></div>`;
+
+        /* Aktuell trinkfrei (über alle Daten, unabhängig vom Filter) */
+        let sinceText = '–';
+        if (allRows.length > 0) {
+            let last = allRows[0].date;
+            allRows.forEach(r => { if (r.date > last) last = r.date; });
+            const diff = daysBetween(last, p.today);
+            sinceText = diff <= 0 ? 'Heute getrunken' : (diff === 1 ? '1 Tag' : `${diff} Tage`);
+        }
+
+        /* Längste Pause im Zeitraum */
+        let pause = 0;
+        if (periodRows.length > 0 && p.days > 0) {
+            const set = new Set(periodRows.map(r => r.dayKey));
+            let cur = 0;
+            for (let t = new Date(p.start); t <= p.lastDay; t.setDate(t.getDate() + 1)) {
+                if (set.has(dayKeyOf(t))) cur = 0;
+                else { cur++; if (cur > pause) pause = cur; }
+            }
+        }
+
+        /* Intensivster Tag + größtes Event */
+        const dayGroups = groupBy(periodRows, r => r.dayKey).sort((a, b) => (metricOf(b) - metricOf(a)) || (b.count - a.count));
+        const eventGroups = groupBy(periodRows, r => r.anlass ? `${r.anlass}|${r.dayKey}` : '').sort((a, b) => (metricOf(b) - metricOf(a)) || (b.count - a.count));
+
+        const topDay = dayGroups[0];
+        const topEvent = eventGroups[0];
+
+        let html = '';
+        html += row('Aktuell trinkfrei seit', sinceText);
+        html += row('Längste Pause im Zeitraum', pause > 0 ? (pause === 1 ? '1 Tag' : `${pause} Tage`) : '–');
+        html += row('Intensivster Tag', topDay ? `${fmtDateObj(topDay.rows[0].date)} · ${fmtMetric(metricOf(topDay))}` : '–');
+        html += row('Größtes Event', topEvent ? `${esc(topEvent.rows[0].anlass)} · ${fmtMetric(metricOf(topEvent))}` : '–');
+        el.innerHTML = html;
+    }
+
+    /* ---------- Wiki-Modals ---------- */
+    function openWikiModal(title, subtitle, icon, statsArray) {
+        document.getElementById('wiki-modal-title').textContent = title;
+        document.getElementById('wiki-modal-subtitle').textContent = subtitle;
+        document.getElementById('wiki-modal-icon').textContent = icon;
+
+        const body = document.getElementById('wiki-modal-body');
+        body.innerHTML = '';
+        statsArray.forEach(stat => {
+            if (stat.section) {
+                body.innerHTML += `<div class="wiki-section-label">${esc(stat.section)}</div>`;
+                return;
+            }
+            body.innerHTML += `
+                <div class="wiki-stat-row">
+                    <span class="wiki-stat-label">${esc(stat.label)}</span>
+                    <span class="wiki-stat-value">${esc(stat.value)}</span>
+                </div>`;
+        });
+        document.getElementById('wiki-detail-modal').classList.add('active');
+    }
+
+    function closeWikiModal() {
+        document.getElementById('wiki-detail-modal').classList.remove('active');
+    }
+
+    function lastDateOf(rows) {
+        let last = rows[0].date;
+        rows.forEach(r => { if (r.date > last) last = r.date; });
+        return fmtDateObj(last);
+    }
+
+    function showDrinkWiki(g) {
+        const first = g.rows[0];
+        const topAnlass = topKey(g.rows, r => r.anlass) || 'Keiner';
+        const topAnlassKat = topKey(g.rows, r => r.anlassKat) || 'Keine';
+        openWikiModal(`${first.name} (${first.vol.toFixed(2)} L)`, `Getränk · ${currentPeriod.label}`, categoryIcons[first.cat] || '🍺', [
+            { label: 'Anzahl konsumiert', value: fmtCount(g.count) },
+            { label: 'Gesamtvolumen', value: fmtVol(g.vol) },
+            { label: 'Reinalkohol ≈', value: fmtAlc(g.alc) },
+            { label: 'Kategorie', value: first.cat },
+            { label: 'Zuletzt getrunken', value: lastDateOf(g.rows) },
+            { label: 'Top-Anlass', value: topAnlass },
+            { label: 'Top-Anlass-Kategorie', value: topAnlassKat }
+        ]);
+    }
+
+    function showDrinkCatWiki(g) {
+        const total = periodRows.length;
+        const share = total > 0 ? Math.round((g.count / total) * 100) : 0;
+        const topDrink = topKey(g.rows, r => r.name) || 'Keines';
+        const days = new Set(g.rows.map(r => r.dayKey)).size;
+        openWikiModal(`Kategorie: ${g.key}`, `Getränke-Kategorie · ${currentPeriod.label}`, categoryIcons[g.key] || '🥤', [
+            { label: 'Anzahl Getränke', value: fmtCount(g.count) },
+            { label: 'Gesamtvolumen', value: fmtVol(g.vol) },
+            { label: 'Reinalkohol ≈', value: fmtAlc(g.alc) },
+            { label: 'Anteil an allen Drinks', value: `${share}%` },
+            { label: 'Tage mit dieser Kategorie', value: String(days) },
+            { label: 'Meistgetrunken', value: topDrink }
+        ]);
+    }
+
+    function showEventCatWiki(g) {
+        const events = new Set();
+        g.rows.forEach(r => { if (r.anlass) events.add(r.anlass + '|' + r.dayKey); });
+        const topDrink = topKey(g.rows, r => r.name) || 'Keines';
+        openWikiModal(`Anlass: ${g.key}`, `Anlass-Kategorie · ${currentPeriod.label}`, eventIcons[g.key] || '📍', [
+            { label: 'Verknüpfte Events', value: `${events.size} Events` },
+            { label: 'Konsumierte Drinks', value: fmtCount(g.count) },
+            { label: 'Gesamtvolumen', value: fmtVol(g.vol) },
+            { label: 'Reinalkohol ≈', value: fmtAlc(g.alc) },
+            { label: 'Favorit bei Anlass', value: topDrink }
+        ]);
+    }
+
+    function showEventWiki(g) {
+        const first = g.rows[0];
+        const name = first.anlass || 'Ohne Anlass';
+        const drinkGroups = groupBy(g.rows, r => `${r.name}|${r.vol}`).sort((a, b) => b.count - a.count);
+        const stats = [
+            { label: 'Datum', value: fmtDateObj(first.date) },
+            { label: 'Gesamtgetränke', value: fmtCount(g.count) },
+            { label: 'Gesamtvolumen', value: fmtVol(g.vol) },
+            { label: 'Reinalkohol ≈', value: fmtAlc(g.alc) },
+            { label: 'Getränke-Vielfalt', value: `${drinkGroups.length} Sorten` }
+        ];
+        if (first.anlassKat) stats.splice(1, 0, { label: 'Anlass-Kategorie', value: first.anlassKat });
+        stats.push({ section: 'Getränke' });
+        drinkGroups.forEach(dg => {
+            stats.push({ label: `${dg.rows[0].name} (${dg.rows[0].vol.toFixed(2)} L)`, value: fmtCount(dg.count) });
+        });
+        openWikiModal(name, `Event · ${fmtDateObj(first.date)}`, first.anlass ? (eventIcons[first.anlassKat] || '🎉') : '📅', stats);
+    }
+
+    /* ---------- Init ---------- */
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.tl-col.show').forEach(x => x.classList.remove('show'));
+    });
+
+    window.addEventListener('pageshow', (e) => { if (e.persisted) fetchData(); });
+
+    (function init() {
+        const now = new Date();
+        const yearSel = document.getElementById('filter-year');
+        yearSel.innerHTML = `<option value="${now.getFullYear()}">${now.getFullYear()}</option>`;
+        document.getElementById('filter-month').value = String(now.getMonth() + 1);
+        fetchData();
+    })();
+</script>
+</body>
+</html>
