@@ -44,8 +44,8 @@ const ROUTINE_CONFIG = {
             "Küche putzen",
             "Stoisches Kapitel",
             "Whoop checken",
-            "Ziele + ToDo’s des Tages anschauen",
-            "Mails checken"
+            "Mails checken",
+            "Ziele + ToDo’s des Tages anschauen"
         ],
         sally: [
             "Schlafplatz machen",
@@ -53,8 +53,8 @@ const ROUTINE_CONFIG = {
             "duschen / Gesicht waschen",
             "Stoisches Kapitel",
             "Whoop checken",
-            "Ziele + ToDo’s des Tages anschauen",
-            "Mails checken"
+            "Mails checken",
+            "Ziele + ToDo’s des Tages anschauen"
         ],
         reise: [
             "Schlafplatz machen",
@@ -64,8 +64,8 @@ const ROUTINE_CONFIG = {
             "duschen / Gesicht waschen",
             "Stoisches Kapitel",
             "Whoop checken",
-            "Ziele + ToDo’s des Tages anschauen",
-            "Mails checken"
+            "Mails checken",
+            "Ziele + ToDo’s des Tages anschauen"
         ],
         krank: [
             "Wasser trinken",
@@ -74,23 +74,23 @@ const ROUTINE_CONFIG = {
             "duschen / Gesicht waschen",
             "Stoisches Kapitel",
             "Whoop checken",
-            "Mails checken"
+            "Mails checken",
+            "Ziele + ToDo’s des Tages anschauen"
         ]
     },
     "Sportroutine": {
         icon: "🏃‍♂️",
         home: [
-            "Sporteinheit (wie in Notizen)",
-            "Hüfte / Arsch - Workout"
+            "Sporteinheit, siehe Hub"
         ],
         sally: [
-            "Sporteinheit (wie in Notizen)"
+            "Sporteinheit, siehe Hub"
         ],
         reise: [
-            "9.000 Schritte gemacht o. Sporteinheit"
+            "Sporteinheit, siehe Hub"
         ],
         krank: [
-            "Nap o. 8h+ Schlaf"
+            "recovery, siehe Hub"
         ]
     },
     "Gesundheitsroutine": {
